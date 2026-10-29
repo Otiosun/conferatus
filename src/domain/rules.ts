@@ -1,4 +1,4 @@
-import type { Member, OptionResult, GovernanceChange } from './types.js';
+import type { Member, OptionResult, GovernanceChange, Ballot } from './types.js';
 
 export function totalVotes(options: OptionResult[]): number {
   return options.reduce((sum, option) => sum + option.votes, 0);
@@ -6,6 +6,9 @@ export function totalVotes(options: OptionResult[]): number {
 export function resultPercentage(votes: number, total: number): number {
   if (!Number.isFinite(votes) || !Number.isFinite(total) || total <= 0) return 0;
   return Math.max(0, Math.min(100, Math.round((votes / total) * 100)));
+}
+export function canRecordVote(ballot: Ballot): boolean {
+  return ballot.status === 'aberta';
 }
 /** Preview-only member association editor. Historical activity is deliberately untouched. */
 export function updateSectionAssignment(member: Member, sectionId: string, assigned: boolean): {
@@ -18,13 +21,21 @@ export function updateSectionAssignment(member: Member, sectionId: string, assig
   return {
     member: updated,
     change: {
-      kind: assigned ? 'vinculo' : 'rebaixamento',
+      kind: assigned ? 'vinculo' : 'desvinculo',
       memberId: member.id,
       sectionId,
       previousSectionIds: before,
       nextSectionIds: after,
+      previousRole: member.role,
+      nextRole: updated.role,
     },
   };
+}
+/** Rebaixamento de função preserva atividades e indicadores anteriores. */
+export function demoteToCommonMember(member: Member, commonSectionId = 'membros'): {member: Member; change: GovernanceChange} {
+ const before = [...member.sectionIds];
+ const updated: Member = {...member, role:'membro', sectionIds:[commonSectionId]};
+ return {member:updated,change:{kind:'rebaixamento',memberId:member.id,sectionId:commonSectionId,previousSectionIds:before,nextSectionIds:[commonSectionId],previousRole:member.role,nextRole:'membro'}};
 }
 export function escapeHTML(value: string): string {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -51,6 +62,7 @@ export function restoreDemoMembers(members: Member[], validSectionIds: string[],
         (id: unknown): id is string => typeof id === 'string' && allowedSections.has(id)
       ))];
     }
+    if (entry.role === 'diretor' || entry.role === 'membro') member.role = entry.role;
     if (typeof entry.acdmId === 'string') {
       const candidate = entry.acdmId.toUpperCase();
       if (/^[A-Z0-9_-]{3,40}$/.test(candidate) &&

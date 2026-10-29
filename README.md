@@ -73,3 +73,12 @@ Usar o repositório com os arquivos desta pasta na **raiz** do GitHub. No Cloudf
 - **Variáveis:** nenhuma para a demonstração atual
 
 O comando gera `publish/index.html`, `publish/preview.png` e o restante dos arquivos estáticos. Sem autenticação nem dados reais.
+
+
+## v0.9.0 — Revisão da Parte 1
+
+- Rebaixamento demonstrativo de cargo para membro comum, preservando histórico e permitindo Desfazer.
+- Votação de exemplo aberta; votações encerradas não recebem voto.
+- 16 registros inteiramente fictícios, seguindo a estrutura de campos útil do JSON fornecido.
+- Mensagens de interface mais diretas e dados demonstrativos sem informações pessoais.
+- Continua sem backend, autenticação ou registros reais.
