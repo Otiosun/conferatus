@@ -12,6 +12,7 @@ const [members, sections] = await Promise.all([memberProvider.listMembers(), mem
 let currentMember = members[0]?.id ?? 'm01';
 let profileTab: Tab = 'votos';
 let overviewTab: Tab = 'votos';
+let overviewExpanded = false;
 let menuOpen = false;
 let expandedSection = '';
 let editingMemberId: string | null = null;
@@ -34,7 +35,7 @@ function resetDemoState() {
   }
   demoVoteId=null; demoExpanded=false; editingMemberId=null; editError=''; lastChange=null;
   rolePreview='diretor'; demoToolsOpen=false; expandedSection=''; expandedActivity='';
-  profileTab='votos'; overviewTab='votos'; searchExpanded=false; directoryExpanded=false; filter='';
+  profileTab='votos'; overviewTab='votos'; overviewExpanded=false; searchExpanded=false; directoryExpanded=false; filter='';
   try { sessionStorage.removeItem(demoMembersKey); sessionStorage.removeItem('conferatus:demo-vote'); } catch {}
 }
 
@@ -197,13 +198,20 @@ function profilePage() {
  ${relevant.length?relevant.map(activityItem).join(''):'<p class="status-line">Nenhum registro encontrado.</p>'}</section>`;
 }
 function overviewPage() {
- const votes=activities.filter(a=>a.type==='voto'); const proposals=activities.filter(a=>a.type==='proposicao');
+ const votes=activities.filter(a=>a.type==='voto');
+ const proposals=activities.filter(a=>a.type==='proposicao');
  const accepted=proposals.filter(a=>a.approved).length;
- return `${header(undefined,undefined,false)}<div class="overview-stats">
-  <span class="stat-chip">${accepted} Aprovadas</span><span class="stat-chip secondary">${proposals.length-accepted} Arquivadas</span>
-  <span class="stat-chip">${votes.reduce((n,a)=>n+a.votes,0)} Votos</span><span class="stat-chip secondary">${votes.length} Registros</span>
-  </div><div class="tabs" role="group" aria-label="Histórico institucional" style="margin:6px 24px 0"> <button class="tab" data-overview-tab="votos" aria-pressed="${overviewTab==='votos'}">Histórico de votações</button><button class="tab" data-overview-tab="proposicoes" aria-pressed="${overviewTab==='proposicoes'}">Proposições</button></div>
-  <section class="section-body">${activities.filter(a=>a.type===(overviewTab==='votos'?'voto':'proposicao')).map(activityItem).join('')}</section>`;
+ const relevant=overviewTab==='votos'?votes:proposals;
+ const visible=overviewExpanded?relevant:relevant.slice(0,6);
+ const remaining=relevant.length-visible.length;
+ return `${header(undefined,undefined,false)}<div class="overview-stats" aria-label="Indicadores institucionais">
+  <span class="stat-chip">${accepted} Aprovados</span><span class="stat-chip">${proposals.length-accepted} Arquivados</span>
+  <span class="stat-figure">${votes.reduce((n,a)=>n+a.votes,0)} Votos</span>
+  <span class="stat-figure">${proposals.length} PDR</span><span class="stat-figure">${String(accepted).padStart(2,'0')} PR</span>
+  </div><div class="tabs overview-tabs" role="group" aria-label="Histórico institucional"><button class="tab" data-overview-tab="votos" aria-pressed="${overviewTab==='votos'}">Histórico de votações</button><button class="tab" data-overview-tab="proposicoes" aria-pressed="${overviewTab==='proposicoes'}">Proposições</button></div>
+  <section class="section-body overview-content">${visible.length?visible.map(activityItem).join(''):'<p class="status-line">Nenhum registro encontrado.</p>'}
+   ${remaining>0?`<button class="overview-more" type="button" data-action="show-more-history">Ver mais ${remaining} ${overviewTab==='votos'?'votações':'proposições'}</button>`:''}
+  </section>`;
 }
 function governancePage() {
  const active=sections.find(s=>s.id===expandedSection);
@@ -304,6 +312,7 @@ document.addEventListener('click',(event)=>{
   editingMemberId=null;lastChange=null;notice='Alterações administrativas restauradas.';rolePreview='diretor';demoToolsOpen=false;try{sessionStorage.removeItem(demoMembersKey);}catch{}render();return;
  }
  if(actionEl?.dataset.action==='show-more-members'){directoryExpanded=true;render();return;}
+ if(actionEl?.dataset.action==='show-more-history'){overviewExpanded=true;render();return;}
  if(actionEl?.dataset.action==='search'){searchExpanded=!searchExpanded;if(!searchExpanded)filter='';render();if(searchExpanded)document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
  if(actionEl?.dataset.action==='clear-search'){filter='';render();document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
  if(actionEl?.dataset.action==='toggle-demo'){demoExpanded=!demoExpanded;render();return;}
@@ -311,7 +320,7 @@ document.addEventListener('click',(event)=>{
  if (actionEl?.dataset.action==='menu') {menuOpen=!menuOpen; render(); (menuOpen?document.querySelector<HTMLButtonElement>('.menu-item'):document.querySelector<HTMLButtonElement>('.footer-nav'))?.focus(); return;}
  if (routeEl?.dataset.route) {navigate(routeEl.dataset.route as Route);return;}
  if (memberEl?.dataset.member) {currentMember=memberEl.dataset.member;profileTab='votos';navigate('profile', currentMember);return;}
- if (tabEl) {if (tabEl.dataset.overviewTab) overviewTab=tabEl.dataset.overviewTab as Tab; else profileTab=tabEl.dataset.tab as Tab; if(routeFromHash()==='members'){currentMember=members[0]?.id??'m01';navigate('profile', currentMember);}else{render();}return;}
+ if (tabEl) {if (tabEl.dataset.overviewTab){overviewTab=tabEl.dataset.overviewTab as Tab;overviewExpanded=false;expandedActivity='';} else profileTab=tabEl.dataset.tab as Tab; if(routeFromHash()==='members'){currentMember=members[0]?.id??'m01';navigate('profile', currentMember);}else{render();}return;}
  if (sectionEl?.dataset.section) {expandedSection=expandedSection===sectionEl.dataset.section?'':sectionEl.dataset.section;editingMemberId=null;editError='';notice='';lastChange=null;demoToolsOpen=false;render();return;}
  if (editEl?.dataset.edit) {editingMemberId=editingMemberId===editEl.dataset.edit?null:editEl.dataset.edit;editError='';render();if(editingMemberId)document.querySelector<HTMLInputElement>('#member-acdm-id')?.focus();return;}
  if (demoteEl?.dataset.demote) {
