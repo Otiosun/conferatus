@@ -15,27 +15,18 @@ export const members: Member[] = [
   {id:'m05',acdmId:'DEMO-0005',name:'Sara Monteiro',subtitle:'Equipe institucional',totalVotes:77,proposals:20,approved:10,collaborations:40,sectionIds:['coordenacao'],role:'membro'},
   {id:'m06',acdmId:'DEMO-0006',name:'Daniel Freitas',subtitle:'Equipe institucional',totalVotes:148,proposals:37,approved:25,collaborations:21,sectionIds:['representantes'],role:'membro'},
   {id:'m07',acdmId:'DEMO-0007',name:'Mila Torres',subtitle:'Equipe institucional',totalVotes:89,proposals:16,approved:9,collaborations:27,sectionIds:['desenvolvimento'],role:'membro'},
-  {id:'m08',acdmId:'DEMO-0008',name:'Rafael Vieira',subtitle:'Comitê de integridade',totalVotes:34,proposals:5,approved:2,collaborations:11,sectionIds:['integridade'],role:'diretor'},
-  {id:'m09',acdmId:'DEMO-0009',name:'Olívia Campos',subtitle:'Conselho de representantes',totalVotes:41,proposals:6,approved:3,collaborations:13,sectionIds:['representantes'],role:'membro'},
-  {id:'m10',acdmId:'DEMO-0010',name:'Pedro Nogueira',subtitle:'Desenvolvimento institucional',totalVotes:48,proposals:7,approved:4,collaborations:15,sectionIds:['desenvolvimento'],role:'diretor'},
-  {id:'m11',acdmId:'DEMO-0011',name:'Vitor Almeida',subtitle:'Participação institucional',totalVotes:55,proposals:8,approved:5,collaborations:17,sectionIds:['desenvolvimento'],role:'membro'},
-  {id:'m12',acdmId:'DEMO-0012',name:'Marina Duarte',subtitle:'Membro institucional',totalVotes:62,proposals:9,approved:6,collaborations:19,sectionIds:['membros'],role:'membro'},
-  {id:'m13',acdmId:'DEMO-0013',name:'Thiago Reis',subtitle:'Membro institucional',totalVotes:69,proposals:10,approved:7,collaborations:21,sectionIds:['membros'],role:'membro'},
-  {id:'m14',acdmId:'DEMO-0014',name:'Júlia Barreto',subtitle:'Membro institucional',totalVotes:76,proposals:11,approved:8,collaborations:23,sectionIds:['membros'],role:'membro'},
-  {id:'m15',acdmId:'DEMO-0015',name:'Lucas Melo',subtitle:'Membro institucional',totalVotes:83,proposals:12,approved:9,collaborations:25,sectionIds:['membros'],role:'membro'},
-  {id:'m16',acdmId:'DEMO-0016',name:'Ana Ferreira',subtitle:'Membro institucional',totalVotes:90,proposals:13,approved:10,collaborations:27,sectionIds:['membros'],role:'membro'},
 ];
 export const ballots: Ballot[] = [
-  {id:'b1',title:'Revisão do calendário de reuniões',section:'Comitê de Integridade Institucional Academy',description:'Escolha do modelo de calendário para os próximos encontros.',status:'aberta',options:[{id:'o1',label:'Calendário mensal',votes:80},{id:'o2',label:'Calendário quinzenal',votes:20}]},
+  {id:'b1',title:'Votação de objetos',section:'Comitê de Integridade Institucional Academy',description:'Descrição da votação e dos objetos. Conteúdo ilustrativo da prévia, aguardando o texto final da Academy.',status:'encerrada',options:[{id:'o1',label:'Objeto 01',votes:80},{id:'o2',label:'Objeto 02',votes:20}]},
 ];
-const proposalSummary = 'Organização das datas de reunião, com antecedência para convocação e registro das decisões.';
+const proposalSummary = 'Proposta ilustrativa de revisão do calendário de encontros, com etapas mais claras para a discussão e o acompanhamento das decisões.';
 export const activities: Activity[] = [
-  {id:'a1',memberId:'m01',type:'voto',title:'Revisão do calendário de reuniões',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:true,votes:56,percentage:74},
-  {id:'a2',memberId:'m01',type:'voto',title:'Revisão do calendário de reuniões',section:'Seção: Conjunto Literário Institucional Academy',code:'SCC-003 · 20/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:false,votes:58,percentage:32},
-  {id:'a3',memberId:'m01',type:'voto',title:'Revisão do calendário de reuniões',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:true,votes:58,percentage:57},
-  {id:'a4',memberId:'m01',type:'proposicao',title:'Atualização do calendário institucional',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:proposalSummary,approved:true,votes:56,percentage:74},
-  {id:'a5',memberId:'m01',type:'proposicao',title:'Atualização do calendário institucional',section:'Seção: Conselho Academy',code:'SCC-003 · 20/10/26',summary:'Definição de prazos para contribuições e registro das decisões nas atas.',approved:false,votes:44,percentage:37},
-  {id:'a6',memberId:'m01',type:'proposicao',title:'Atualização do calendário institucional',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Organização de um procedimento interno para revisar documentos e acompanhar respostas a propostas recebidas.',approved:true,votes:58,percentage:74},
+  {id:'a1',memberId:'m01',type:'voto',title:'Título da votação',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:'Social: Equipe Institucional Exemplo',approved:true,votes:56,percentage:74},
+  {id:'a2',memberId:'m01',type:'voto',title:'Título da votação',section:'Seção: Conjunto Literário Institucional Academy',code:'SCC-003 · 20/10/26',summary:'Social: Equipe Institucional Exemplo',approved:false,votes:58,percentage:32},
+  {id:'a3',memberId:'m01',type:'voto',title:'Título da votação',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Social: Equipe Institucional Exemplo',approved:true,votes:58,percentage:57},
+  {id:'a4',memberId:'m01',type:'proposicao',title:'Título da proposição',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:proposalSummary,approved:true,votes:56,percentage:74},
+  {id:'a5',memberId:'m01',type:'proposicao',title:'Título da proposição',section:'Seção: Conselho Academy',code:'SCC-003 · 20/10/26',summary:'Ajuste fictício nas orientações de participação, com registro público das deliberações e prazo para contribuições.',approved:false,votes:44,percentage:37},
+  {id:'a6',memberId:'m01',type:'proposicao',title:'Título da proposição',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Organização de um procedimento interno para revisar documentos e acompanhar respostas a propostas recebidas.',approved:true,votes:58,percentage:74},
 ];
 
 // Small synthetic records for each profile; ensures the preview never opens on an empty demonstration.
@@ -52,20 +43,11 @@ const samples = [
  ['m06','Ciclo de propostas', 'proposicao', true, 46, 79],
  ['m07','Consulta de atividades', 'voto', true, 61, 91],
  ['m07','Proposta de colaboração', 'proposicao', false, 14, 27],
- ['m08','Consulta de calendário','voto',true,16,53],
- ['m09','Consulta de calendário','voto',true,19,54],
- ['m10','Consulta de calendário','voto',true,22,55],
- ['m11','Consulta de calendário','voto',true,25,56],
- ['m12','Consulta de calendário','voto',true,28,57],
- ['m13','Consulta de calendário','voto',true,31,58],
- ['m14','Consulta de calendário','voto',true,34,59],
- ['m15','Consulta de calendário','voto',true,37,60],
- ['m16','Consulta de calendário','voto',true,40,61],
 ] as const;
 for (const [memberId, title, type, approved, votes, percentage] of samples) {
  activities.push({
   id:`a-${memberId}-${type}`, memberId, type, title, section:'Seção: Cúpula Institucional Academy',
-  code:'SIM-2026 · DEMO', summary:type==='voto'?'Participação registrada nesta consulta.':proposalSummary,
+  code:'SIM-2026 · DEMO', summary:type==='voto'?'Consulta ilustrativa, sem dados institucionais reais.':proposalSummary,
   approved, votes, percentage,
  });
 }
@@ -73,8 +55,8 @@ for (const [memberId, title, type, approved, votes, percentage] of samples) {
 // A few extra records make the visual walkthrough useful on different member profiles.
 // They remain independent of any actual institutional activity.
 const extraProposals = [
-  ['Revisão de calendário', 'Organização das datas de reunião e do período de análise das propostas.'],
-  ['Acompanhamento de propostas', 'Registro das propostas recebidas, alterações aprovadas e decisões finais.'],
+  ['Revisão de calendário', 'Consulta simulada para adequar o calendário de reuniões às etapas previstas pela equipe.'],
+  ['Acompanhamento de propostas', 'Modelo ilustrativo de registro das alterações propostas e das decisões tomadas em cada reunião.'],
 ] as const;
 for (const member of members) {
   for (const [index, item] of extraProposals.entries()) {

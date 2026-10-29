@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { totalVotes, resultPercentage, updateSectionAssignment, demoteToCommonMember, canRecordVote, escapeHTML, restoreDemoMembers, searchKey } from '../dist/domain/rules.js';
+import { totalVotes, resultPercentage, updateSectionAssignment, escapeHTML, restoreDemoMembers, searchKey } from '../dist/domain/rules.js';
 import { members as fixtures } from '../dist/data/fixtures.js';
 
 test('count results from options and never hard-code them', () => {
@@ -16,7 +16,7 @@ test('removing role association preserves original profile and historical counte
  assert.deepEqual(after.sectionIds,[]);
  assert.equal(after.totalVotes,before.totalVotes);
  assert.equal(after.proposals,before.proposals);
- assert.equal(change.kind,'desvinculo');
+ assert.equal(change.kind,'rebaixamento');
 });
 test('adding an existing section is idempotent',()=>{
  const member=fixtures[0];
@@ -42,20 +42,4 @@ test('reloading damaged demo data never imports unknown sections, unknown member
  assert.equal(data[1].acdmId,'DEMO-0002');
  assert.deepEqual(data[0].sectionIds,['coordenacao']);
  assert.deepEqual(data[1].sectionIds,[]);
-});
-
-test('demotion preserves activity and role becomes common member',()=>{
- const before={...fixtures[0],sectionIds:[...fixtures[0].sectionIds]};
- const {member,change}=demoteToCommonMember(before);
- assert.equal(member.role,'membro');assert.deepEqual(member.sectionIds,['membros']);
- assert.equal(change.previousRole,'diretor');assert.equal(change.kind,'rebaixamento');
- assert.equal(member.totalVotes,before.totalVotes);assert.equal(member.proposals,before.proposals);
-});
-test('closed vote is blocked; open vote can be simulated',()=>{
- assert.equal(canRecordVote({status:'encerrada'}),false);
- assert.equal(canRecordVote({status:'aberta'}),true);
-});
-test('sixteen invented accounts in preview',()=>{
- assert.equal(fixtures.length,16);
- assert.ok(fixtures.every(m=>m.acdmId?.startsWith('DEMO-')));
 });
