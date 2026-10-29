@@ -1,0 +1,364 @@
+import { activities, ballots } from './data/fixtures.js';
+import { FixtureMemberProvider } from './domain/providers.js';
+import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, restoreDemoMembers, searchKey } from './domain/rules.js';
+import type { Activity, Member } from './domain/types.js';
+
+type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance';
+type Tab = 'votos' | 'proposicoes';
+const root = document.querySelector<HTMLDivElement>('#root');
+if (!root) throw new Error('Root missing');
+const memberProvider = new FixtureMemberProvider();
+const [members, sections] = await Promise.all([memberProvider.listMembers(), memberProvider.listSections()]);
+let currentMember = members[0]?.id ?? 'm01';
+let profileTab: Tab = 'votos';
+let overviewTab: Tab = 'votos';
+let menuOpen = false;
+let expandedSection = '';
+let editingMemberId: string | null = null;
+let notice = '';
+let editError = '';
+let filter = '';
+let searchExpanded = false;
+let expandedActivity = '';
+let rolePreview: 'diretor' | 'membro' = 'diretor';
+let demoToolsOpen = false;
+let guideOpen = false;
+let lastChange: {memberId: string; acdmId: string | undefined; sectionIds: string[]} | null = null;
+const initialMembers = new Map(members.map(m=>[m.id,{name:m.name,acdmId:m.acdmId,sectionIds:[...m.sectionIds]}]));
+const demoMembersKey = 'conferatus:demo-members-v07';
+function resetDemoState() {
+  for (const member of members) {
+    const original = initialMembers.get(member.id);
+    if (original) { member.name=original.name; member.acdmId=original.acdmId; member.sectionIds=[...original.sectionIds]; }
+  }
+  demoVoteId=null; demoExpanded=false; editingMemberId=null; editError=''; lastChange=null;
+  rolePreview='diretor'; demoToolsOpen=false; expandedSection=''; expandedActivity='';
+  profileTab='votos'; overviewTab='votos'; searchExpanded=false; filter='';
+  try { sessionStorage.removeItem(demoMembersKey); sessionStorage.removeItem('conferatus:demo-vote'); } catch {}
+}
+
+function saveDemoMembers() {
+  try {
+    sessionStorage.setItem(demoMembersKey, JSON.stringify(members.map(m=>({id:m.id, acdmId:m.acdmId, sectionIds:m.sectionIds}))));
+  } catch { /* Preview still works with session storage disabled. */ }
+}
+function rememberChange(m: Member) {
+  lastChange={memberId:m.id,acdmId:m.acdmId,sectionIds:[...m.sectionIds]};
+}
+try {
+  restoreDemoMembers(members, sections.map(s => s.id), JSON.parse(sessionStorage.getItem(demoMembersKey) ?? 'null'));
+} catch { /* Ignore damaged or blocked session data. */ }
+let demoVoteId: string | null = null;
+let demoExpanded = false;
+try {
+  const saved = sessionStorage.getItem('conferatus:demo-vote');
+  if (ballots[0]?.options.some(option => option.id === saved)) demoVoteId = saved;
+} catch { /* Preview continues if storage is unavailable. */ }
+demoExpanded = demoVoteId!==null;
+const demoBallot = ballots[0];
+
+function routeFromHash(): Route {
+  const name = location.hash.replace(/^#\/?/, '').split('/')[0];
+  switch(name) {
+    case 'members': case 'profile': case 'overview': case 'governance': return name;
+    default: return 'ballot';
+  }
+}
+function navigate(route: Route, memberId?: string) {
+  menuOpen = false;
+  demoToolsOpen = false;
+  guideOpen = false;
+  notice = '';
+  editError = '';
+  lastChange = null;
+  const hash = `#/${route}${route==='profile' && memberId?`/${encodeURIComponent(memberId)}`:''}`;
+  if (location.hash === hash) render(); else location.hash = hash;
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+function crest() { return '<img src="./assets/crest.png" width="29" height="29" alt="Símbolo da Academy">'; }
+function footer() {
+  return `${menuOpen ? `<nav class="bottom-menu" aria-label="Navegação principal"><div class="menu-list">
+    <button class="menu-item" data-route="members" ${routeFromHash()==='members'?'aria-current="page"':''}><span class="menu-icon">♙</span>Membros e Serviços da Cúpula Cíntia</button>
+    <button class="menu-item" data-route="overview" ${routeFromHash()==='overview'?'aria-current="page"':''}><span class="menu-icon">▤</span>Histórico de Votações e Proposições</button>
+    <button class="menu-item" data-route="ballot" ${routeFromHash()==='ballot'?'aria-current="page"':''}><span class="menu-icon">◉</span>Visualizar votação</button>
+   <button class="menu-guide" type="button" data-action="guide">Como testar esta prévia <span aria-hidden="true">?</span></button>
+  </div></nav>` : ''}
+  <footer class="app-footer">${crest()}<span>CONFERATUS</span><small class="footer-demo">PRÉVIA DEMONSTRATIVA</small>
+   <button type="button" class="footer-nav" aria-expanded="${menuOpen}" aria-label="${menuOpen?'Fechar':'Abrir'} menu" data-action="menu">${menuOpen?'Fechar ×':'☰ Menu'}</button>
+  </footer>`;
+}
+function header(title?: string, subtitle?: string, tall=false) {
+  if (title) return `<header class="page-header">
+   <button type="button" class="panel-button" data-action="toggle-tools" aria-label="${demoToolsOpen?'Fechar':'Abrir'} ferramentas de demonstração" aria-expanded="${demoToolsOpen}" title="Ferramentas da demonstração"><img src="./assets/painel.png" alt=""></button>
+   <h1>${escapeHTML(title)}</h1>${subtitle?`<p>${escapeHTML(subtitle)}</p>`:''}
+   ${demoToolsOpen?`<aside class="demo-tools" aria-label="Ferramentas de demonstração">
+     <strong>Ferramentas da prévia</strong><p>Os dados são fictícios. O seletor abaixo apenas simula permissões.</p>
+     <label for="role-mode">Visualizar como</label><select id="role-mode" aria-label="Simular perfil"><option value="diretor" ${rolePreview==='diretor'?'selected':''}>Diretor (demo)</option><option value="membro" ${rolePreview==='membro'?'selected':''}>Membro comum (demo)</option></select>
+     ${expandedSection&&rolePreview==='diretor'?`<div class="tools-divider"><label for="add-member">Vincular à seção aberta</label><div class="tools-add"><select id="add-member"><option value="">Selecione um membro…</option>${members.filter(m=>!m.sectionIds.includes(expandedSection)).map(m=>`<option value="${m.id}">${escapeHTML(m.name)}</option>`).join('')}</select><button type="button" class="small-action" data-action="add-member">Vincular</button></div></div>`:''}
+     <button type="button" class="reset-tools" data-action="reset-admin">Reiniciar alterações administrativas</button>
+   </aside>`:''}
+  </header>`;
+  const panelShortcut = routeFromHash()==='overview' ? `<button class="panel-button" data-route="governance" aria-label="Abrir gerenciamento deliberativo" title="Gerenciamento deliberativo"><img src="./assets/painel.png" alt=""></button>` : '';
+  return `<header class="hero ${tall?'':'hero--flat'}" aria-label="Faixa azul do CONFERATUS">${panelShortcut}</header>`;
+}
+function metricRow(m: Member) {
+  return `<div class="metrics" aria-label="Estatísticas ilustrativas do membro">
+  <div class="metric-cell">${m.totalVotes}<small>Votos</small></div>
+  <div class="metric-cell">${m.proposals}<small>PDR</small></div>
+  <div class="metric-cell">${m.approved}<small>PR</small></div>
+  <div class="metric-cell">${m.collaborations}<small>Colab</small></div></div>`;
+}
+function tabBar(tab: Tab) {
+  const showSelected=routeFromHash()!=='members';
+  return `<div class="tabs" role="group" aria-label="Histórico do membro">
+   <button class="tab" type="button" aria-pressed="${showSelected && tab==='votos'}" data-tab="votos">Histórico de votações</button>
+   <button class="tab" type="button" aria-pressed="${showSelected && tab==='proposicoes'}" data-tab="proposicoes">Proposições</button>
+  </div>`;
+}
+function memberHeader(m:Member, tab:Tab, displayTabs=true) {
+ const identity=routeFromHash()==='members'
+  ? `<button type="button" class="profile-name-button" data-member="${m.id}" aria-label="Abrir perfil de ${escapeHTML(m.name)}">${escapeHTML(m.name)}</button>`
+  : `<strong>${escapeHTML(m.name)}</strong>`;
+ return `<div class="profile-head"><div class="profile-summary"><div class="avatar avatar--large" aria-hidden="true"></div>
+   ${metricRow(m)}</div><div class="profile-identity"><div>${identity} <small>2ª Representação</small></div>
+   <p>${escapeHTML(m.subtitle)} da Academy</p></div>${displayTabs?tabBar(tab):''}</div>`;
+}
+function ballotPage() {
+ const ballot=ballots[0]; if(!ballot) return '<p>Nenhuma votação ilustrativa disponível.</p>';
+ const demoOptions = ballot.options.map(o => ({...o, votes:o.votes + (demoVoteId===o.id?1:0)}));
+ const sum=totalVotes(demoOptions);
+ return `<div class="main-pad">${header(undefined,undefined,true)}<div class="results">
+ ${demoOptions.map(o=>`<div class="result-row ${demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${demoVoteId===o.id?'<small class="your-vote">Sua escolha (demo)</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
+ </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da Votação e dos Objetos</span><button class="demo-toggle" type="button" data-action="toggle-demo" aria-expanded="${demoExpanded}">${demoExpanded?'Fechar simulação':'Simular voto'}</button></div>
+ ${demoExpanded?`<div class="demo-ballot"><h2>Teste o resultado</h2><p>Votação fictícia encerrada. A escolha abaixo só altera os números desta demonstração.</p>
+ <div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
+ <p class="vote-feedback" role="status">${demoVoteId?'Escolha demonstrativa aplicada. A contagem e as porcentagens acima são locais.':'Selecione uma opção para simular a contagem.'}</p>
+ ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Reiniciar simulação</button>':''}</div>`:''}</section>`;
+}
+function matchingMembers() {
+ const candidates = searchExpanded && filter.trim() ? members : members.slice(1);
+ return candidates.filter(m => searchKey(`${m.name} ${m.acdmId ?? ''}`).includes(searchKey(filter)));
+}
+function memberResults(visible: Member[]) {
+ return visible.length
+  ? visible.map(m=>`<button type="button" class="member-item" data-member="${m.id}"><div class="avatar" aria-hidden="true"></div><span class="member-name">${escapeHTML(m.name)}</span>${metricRow(m)}</button>`).join('')
+  : '<p class="status-line">Nenhum membro encontrado.</p>';
+}
+// Update only the directory while typing: preserves caret, mobile keyboard and IME composition.
+function updateMemberSearch() {
+ const results=document.querySelector<HTMLElement>('#member-results');
+ const status=document.querySelector<HTMLElement>('#member-count');
+ const clear=document.querySelector<HTMLButtonElement>('[data-action="clear-search"]');
+ const visible=matchingMembers();
+ if(results) results.innerHTML=memberResults(visible);
+ if(status) status.textContent=`${visible.length} ${visible.length===1?'membro encontrado':'membros encontrados'}`;
+ if(clear) clear.hidden=filter==='';
+}
+function memberList() {
+ const lead = members[0]; if(!lead) return '';
+ const visible=matchingMembers();
+ return `${header(undefined,undefined,false)}${memberHeader(lead,'votos')}
+ <div class="member-list" aria-label="Diretório de membros">
+ <button type="button" class="search-trigger" data-action="search" aria-expanded="${searchExpanded}" aria-label="${searchExpanded?'Fechar busca de membros':'Buscar membros'}">${searchExpanded?'Fechar busca ×':'Buscar ⌕'}</button>
+ ${searchExpanded?`<div class="toolbar"><label for="search-members">Buscar membro</label><input id="search-members" type="search" placeholder="Nome ou ID fictício" value="${escapeHTML(filter)}" autocomplete="off" aria-controls="member-results"><button type="button" class="clear-search" data-action="clear-search" ${filter?'':'hidden'}>Limpar</button></div>`:''}
+ ${searchExpanded?`<p id="member-count" class="sr-only" role="status" aria-live="polite">${visible.length} ${visible.length===1?"membro encontrado":"membros encontrados"}</p>`:""}
+ <div id="member-results">${memberResults(visible)}</div>
+ </div>`;
+}
+function activityItem(a:Activity) {
+ const isVote=a.type==='voto';
+ const expanded=expandedActivity===a.id;
+ if (!isVote) return `<article class="activity activity-proposal ${expanded?'activity-proposal--expanded':''}">
+   <button type="button" class="proposal-trigger" data-activity="${a.id}" aria-expanded="${expanded}" aria-controls="proposal-${a.id}" aria-label="${expanded?'Recolher':'Ver detalhes de'} ${escapeHTML(a.title)}">
+     <span class="activity-head"><span class="activity-title">${escapeHTML(a.title)}</span><span class="activity-code">${escapeHTML(a.code)}</span></span>
+     <span class="proposal-preview">${escapeHTML(a.summary)}</span>
+   </button>
+   ${expanded?`<div class="proposal-expansion" id="proposal-${a.id}">
+      <div class="proposal-meta-row"><span class="proposal-tag">PDR</span><span class="proposal-outcome"><span class="proposal-flag" aria-hidden="true">⚑</span><span>${a.approved?'Proposição aprovada':'Proposição arquivada'}</span><span class="proposal-score">${a.votes} votos <strong>${a.percentage}%</strong></span></span></div>
+      <p>${escapeHTML(a.section)}</p><p>Registro ilustrativo · CONFERATUS</p>
+   </div>`:`<div id="proposal-${a.id}" hidden></div>`}
+  </article>`;
+ return `<article class="activity activity-vote"><div class="activity-head"><h2 class="activity-title">${escapeHTML(a.title)}</h2><span class="activity-code">${escapeHTML(a.code)}</span></div>
+   <p class="activity-text">${escapeHTML(a.section)}</p><p class="activity-text">${escapeHTML(a.summary)}</p>
+   <div class="activity-result"><span class="${a.approved?'':'no'}">⚑ OPÇÃO VOTADA</span><span>${a.votes} votos&nbsp;&nbsp; <strong>${a.percentage}%</strong></span></div></article>`;
+}
+function profilePage() {
+ const directId=location.hash.replace(/^#\/profile\/?/, '').split('/')[0];
+ const chosenId=directId || currentMember;
+ const member=members.find(m=>m.id===chosenId);
+ if(!member) return `${header(undefined,undefined,false)}<section class="missing-profile" role="status"><strong>Perfil não encontrado</strong><p>Este identificador não pertence aos perfis fictícios da demonstração.</p><button type="button" data-route="members">Voltar aos membros</button></section>`;
+ const relevant=activities.filter(a=>a.memberId===member.id && a.type===(profileTab==='votos'?'voto':'proposicao'));
+ return `${header(undefined,undefined,false)}${memberHeader(member,profileTab)}<section class="section-body">
+ ${relevant.length?relevant.map(activityItem).join(''):'<p class="status-line">Sem registros ilustrativos deste tipo.</p>'}</section>`;
+}
+function overviewPage() {
+ const votes=activities.filter(a=>a.type==='voto'); const proposals=activities.filter(a=>a.type==='proposicao');
+ const accepted=proposals.filter(a=>a.approved).length;
+ return `${header(undefined,undefined,false)}<div class="overview-stats">
+  <span class="stat-chip">${accepted} Aprovadas</span><span class="stat-chip secondary">${proposals.length-accepted} Arquivadas</span>
+  <span class="stat-chip">${votes.reduce((n,a)=>n+a.votes,0)} Votos</span><span class="stat-chip secondary">${votes.length} Registros</span>
+  </div><div class="tabs" role="group" aria-label="Histórico institucional" style="margin:6px 24px 0"> <button class="tab" data-overview-tab="votos" aria-pressed="${overviewTab==='votos'}">Histórico de votações</button><button class="tab" data-overview-tab="proposicoes" aria-pressed="${overviewTab==='proposicoes'}">Proposições</button></div>
+  <section class="section-body">${activities.filter(a=>a.type===(overviewTab==='votos'?'voto':'proposicao')).map(activityItem).join('')}</section>`;
+}
+function governancePage() {
+ const active=sections.find(s=>s.id===expandedSection);
+ return `${header('GERENCIAMENTO DELIBERATIVO','Gerencie as seções e deliberados da Cúpula Institucional Academy.')}
+ ${rolePreview==='membro'?'<p class="status-line" role="status">Acesso restrito na demonstração: somente diretores podem gerenciar seções.</p>':
+ `<div class="governance-list">${sections.map(s=>`<div><button type="button" class="section-toggle" data-section="${s.id}" aria-expanded="${expandedSection===s.id}"><span>${escapeHTML(s.name)}</span><span class="section-chevron" aria-hidden="true">${expandedSection===s.id?'▾':'▸'}</span></button>
+ ${expandedSection===s.id?`<div>${members.filter(m=>m.sectionIds.includes(s.id)).map(m=>`<div class="section-member"><div class="avatar" aria-hidden="true"></div><button class="section-member-name" type="button" data-edit="${m.id}" title="Editar ${escapeHTML(m.name)}">${escapeHTML(m.name)}</button><button class="icon-button icon-button--edit" type="button" data-edit="${m.id}" aria-label="Editar identificador de ${escapeHTML(m.name)}"><img src="./assets/editar.png" alt=""></button><button class="icon-button" type="button" data-demote="${m.id}" aria-label="Remover vínculo de ${escapeHTML(m.name)} com a seção"><img src="./assets/rebaixamento.png" alt=""></button></div>
+ ${editingMemberId===m.id?`<form class="edit-form" id="edit-member-form" novalidate><label for="member-acdm-id">ACDM ID</label><input id="member-acdm-id" name="acdmId" value="${escapeHTML(m.acdmId ?? '')}" placeholder="DEMO-0001" required minlength="3" maxlength="40" pattern="[A-Za-z0-9_-]+" autocomplete="off" ${editError?'aria-invalid="true" aria-describedby="edit-error"':''}><input type="hidden" name="memberId" value="${m.id}"><button type="submit" class="small-action">Salvar</button>${editError?`<p id="edit-error" class="edit-error" role="alert">${escapeHTML(editError)}</p>`:''}</form>`:''}`).join('')}
+ ${members.every(m=>!m.sectionIds.includes(s.id))?'<p class="section-empty">Nenhum membro vinculado nesta demonstração.</p>':''}</div>`:''}</div>`).join('')}</div>`}
+ ${notice?`<p class="status-line" role="status">${escapeHTML(notice)} ${lastChange?'<button type="button" class="undo-action" data-action="undo">Desfazer</button>':''}</p>`:''}`;
+}
+let lastRenderedHash = location.hash;
+function render() {
+ if (!root) return;
+ // A local edit must not unexpectedly jump the user to the top of a long page.
+ const previousScroll = window.scrollY;
+ const preserveScroll = location.hash === lastRenderedHash;
+ lastRenderedHash = location.hash;
+ // Keep keyboard focus on the same action after updating the preview DOM.
+ const active = document.activeElement;
+ const attributes = ['data-vote','data-tab','data-overview-tab','data-section','data-activity','data-action'];
+ const focusTarget = active instanceof HTMLElement
+   ? attributes.map(attr => [attr, active.getAttribute(attr)] as const).find(([,value]) => value!==null)
+   : undefined;
+ const route=routeFromHash();
+ const page=route==='ballot'?ballotPage():route==='members'?memberList():route==='profile'?profilePage():route==='overview'?overviewPage():governancePage();
+ root.innerHTML=`<div class="app-shell" aria-label="Prévia demonstrativa do CONFERATUS com dados fictícios"><a href="#main-content" class="skip-link">Ir para o conteúdo</a><main id="main-content" tabindex="-1">${page}</main>${footer()}
+ ${guideOpen?`<div class="guide-backdrop" data-action="close-guide" aria-hidden="true"></div><section class="guide-dialog" role="dialog" aria-modal="true" aria-labelledby="guide-title"><button type="button" class="guide-close" data-action="close-guide" aria-label="Fechar roteiro">×</button><span class="guide-eyebrow">PRÉVIA INTERATIVA</span><h2 id="guide-title">Como explorar</h2><p>Esta demonstração usa somente dados inventados. Escolha uma área para testar; nenhum voto nem cadastro institucional será alterado.</p><div class="guide-steps" aria-label="Atalhos para explorar a demonstração"><button type="button" class="guide-step" data-guide-route="ballot"><span>01</span><span><strong>Votação</strong><small>Simule uma escolha e veja as porcentagens mudarem.</small></span><span aria-hidden="true">›</span></button><button type="button" class="guide-step" data-guide-route="members"><span>02</span><span><strong>Membros</strong><small>Pesquise um perfil e abra seus históricos.</small></span><span aria-hidden="true">›</span></button><button type="button" class="guide-step" data-guide-route="governance"><span>03</span><span><strong>Gerenciamento</strong><small>Edite, remova e desfaça um vínculo de exemplo.</small></span><span aria-hidden="true">›</span></button></div><p>As alterações ficam somente nesta aba. Pode reiniciar a demonstração quando quiser.</p><div class="guide-bottom"><button type="button" class="guide-reset" data-action="reset-all">Reiniciar demonstração</button><button type="button" class="guide-ok" data-action="close-guide">Fechar guia</button></div></section>`:''}</div>`;
+ // A real modal: do not let keyboard navigation reach the underlying page.
+ if (guideOpen) {
+  root.querySelector<HTMLElement>('main')?.setAttribute('inert','');
+  root.querySelector<HTMLElement>('.app-footer')?.setAttribute('inert','');
+  root.querySelector<HTMLElement>('.bottom-menu')?.setAttribute('inert','');
+ }
+ if (!guideOpen && focusTarget) {
+  const [attr,value]=focusTarget;
+  [...root.querySelectorAll<HTMLElement>(`[${attr}]`)]
+   .find(element=>element.getAttribute(attr)===value)?.focus({preventScroll:true});
+ }
+ if (preserveScroll) window.scrollTo({top:previousScroll,behavior:'instant'});
+}
+function syncRouteState() {
+ const [route,id] = location.hash.replace(/^#\/?/, '').split('/');
+ if(route==='profile' && id && members.some(member=>member.id===id)) currentMember=id;
+}
+window.addEventListener('hashchange',()=>{menuOpen=false;demoToolsOpen=false;guideOpen=false;syncRouteState();render();});
+document.addEventListener('keydown', event => {
+ if(guideOpen && event.key==='Tab') {
+  const controls=[...document.querySelectorAll<HTMLButtonElement>('.guide-dialog button:not([disabled])')];
+  const first=controls[0], last=controls.at(-1);
+  if(first && last && event.shiftKey && document.activeElement===first){event.preventDefault();last.focus();return;}
+  if(first && last && !event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();return;}
+ }
+ if(event.key==='Escape') {
+  if(guideOpen){guideOpen=false;render();document.querySelector<HTMLButtonElement>('.footer-nav')?.focus();}
+  else if(demoToolsOpen){demoToolsOpen=false;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();}
+  else if(menuOpen){menuOpen=false;render();document.querySelector<HTMLButtonElement>('.footer-nav')?.focus();}
+  else if(editingMemberId){editingMemberId=null;render();document.querySelector<HTMLButtonElement>('[data-section][aria-expanded=true]')?.focus();}
+  else if(searchExpanded && routeFromHash()==='members'){
+   searchExpanded=false;filter='';render();document.querySelector<HTMLButtonElement>('[data-action=search]')?.focus();
+  }
+ }
+});
+document.addEventListener('click',(event)=>{
+ const target=event.target;
+ if (!(target instanceof Element)) return;
+ const skip=target.closest<HTMLAnchorElement>('.skip-link');
+ if(skip){event.preventDefault();document.querySelector<HTMLElement>('#main-content')?.focus({preventScroll:true});return;}
+ const actionEl=target.closest<HTMLElement>('[data-action]');
+ const routeEl=target.closest<HTMLElement>('[data-route]');
+ const memberEl=target.closest<HTMLElement>('[data-member]');
+ const tabEl=target.closest<HTMLElement>('[data-tab], [data-overview-tab]');
+ const sectionEl=target.closest<HTMLElement>('[data-section]');
+ const editEl=target.closest<HTMLElement>('[data-edit]');
+ const demoteEl=target.closest<HTMLElement>('[data-demote]');
+ const activityEl=target.closest<HTMLElement>('[data-activity]');
+ const voteEl=target.closest<HTMLElement>('[data-vote]');
+ if(voteEl?.dataset.vote && demoBallot?.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
+ const guideRoute=target.closest<HTMLElement>('[data-guide-route]')?.dataset.guideRoute;
+ if(guideRoute==='ballot'||guideRoute==='members'||guideRoute==='governance'){
+  if(guideRoute==='governance'){rolePreview='diretor';expandedSection='coordenacao';}
+  navigate(guideRoute);return;
+ }
+ if(actionEl?.dataset.action==='reset-all'){
+  resetDemoState(); guideOpen=false;
+  navigate('ballot');return;
+ }
+ if(actionEl?.dataset.action==='guide'){guideOpen=true;menuOpen=false;render();document.querySelector<HTMLButtonElement>('.guide-close')?.focus();return;}
+ if(actionEl?.dataset.action==='close-guide'){guideOpen=false;render();document.querySelector<HTMLButtonElement>('.footer-nav')?.focus();return;}
+ if(actionEl?.dataset.action==='undo'&&lastChange){
+  const member=members.find(m=>m.id===lastChange?.memberId);
+  if(member){member.acdmId=lastChange.acdmId;member.sectionIds=[...lastChange.sectionIds];saveDemoMembers();}
+  lastChange=null;notice='Última alteração desfeita (simulação).';render();return;
+ }
+ if(actionEl?.dataset.action==='toggle-tools'){demoToolsOpen=!demoToolsOpen;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();return;}
+ if(actionEl?.dataset.action==='reset-admin'){
+  for(const member of members){const original=initialMembers.get(member.id);if(original){member.name=original.name;member.acdmId=original.acdmId;member.sectionIds=[...original.sectionIds];}}
+  editingMemberId=null;lastChange=null;notice='Alterações administrativas restauradas.';rolePreview='diretor';demoToolsOpen=false;try{sessionStorage.removeItem(demoMembersKey);}catch{}render();return;
+ }
+ if(actionEl?.dataset.action==='search'){searchExpanded=!searchExpanded;if(!searchExpanded)filter='';render();if(searchExpanded)document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
+ if(actionEl?.dataset.action==='clear-search'){filter='';render();document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
+ if(actionEl?.dataset.action==='toggle-demo'){demoExpanded=!demoExpanded;render();return;}
+ if(actionEl?.dataset.action==='reset-vote'){demoVoteId=null;try{sessionStorage.removeItem('conferatus:demo-vote');}catch{}render();return;}
+ if (actionEl?.dataset.action==='menu') {menuOpen=!menuOpen; render(); (menuOpen?document.querySelector<HTMLButtonElement>('.menu-item'):document.querySelector<HTMLButtonElement>('.footer-nav'))?.focus(); return;}
+ if (routeEl?.dataset.route) {navigate(routeEl.dataset.route as Route);return;}
+ if (memberEl?.dataset.member) {currentMember=memberEl.dataset.member;profileTab='votos';navigate('profile', currentMember);return;}
+ if (tabEl) {if (tabEl.dataset.overviewTab) overviewTab=tabEl.dataset.overviewTab as Tab; else profileTab=tabEl.dataset.tab as Tab; if(routeFromHash()==='members'){currentMember=members[0]?.id??'m01';navigate('profile', currentMember);}else{render();}return;}
+ if (sectionEl?.dataset.section) {expandedSection=expandedSection===sectionEl.dataset.section?'':sectionEl.dataset.section;editingMemberId=null;editError='';notice='';lastChange=null;demoToolsOpen=false;render();return;}
+ if (editEl?.dataset.edit) {editingMemberId=editingMemberId===editEl.dataset.edit?null:editEl.dataset.edit;editError='';render();if(editingMemberId)document.querySelector<HTMLInputElement>('#member-acdm-id')?.focus();return;}
+ if (demoteEl?.dataset.demote) {
+  const m=members.find(x=>x.id===demoteEl.dataset.demote);
+  if (m&&expandedSection && m.sectionIds.includes(expandedSection)) {
+   rememberChange(m);
+   const result=updateSectionAssignment(m,expandedSection,false);
+   m.sectionIds=result.member.sectionIds;saveDemoMembers();
+   notice=`Vínculo removido de ${m.name}; os registros de atividades anteriores permanecem intactos (simulação).`;
+   editingMemberId=null;editError='';render();
+   document.querySelector<HTMLButtonElement>('[data-action=undo]')?.focus({preventScroll:true});
+  }
+  return;
+ }
+ if (activityEl?.dataset.activity) {expandedActivity=expandedActivity===activityEl.dataset.activity?'':activityEl.dataset.activity;render();return;}
+ if(actionEl?.dataset.action==='add-member'&&expandedSection) {
+  const select=document.querySelector<HTMLSelectElement>('#add-member');
+  const member=members.find(m=>m.id===select?.value);
+  if(member){rememberChange(member);member.sectionIds=updateSectionAssignment(member,expandedSection,true).member.sectionIds;saveDemoMembers();notice=`${member.name} vinculado à seção (simulação).`;demoToolsOpen=false;render();}
+ }
+});
+document.addEventListener('submit',(event)=>{
+ const form=event.target;
+ if(!(form instanceof HTMLFormElement)||form.getAttribute('id')!=='edit-member-form') return;
+ event.preventDefault();
+ const data=new FormData(form), member=members.find(m=>m.id===data.get('memberId'));
+ const acdmId=String(data.get('acdmId')??'').trim().toUpperCase();
+ if(!member) return;
+ if(!/^[A-Z0-9_-]{3,40}$/.test(acdmId)) {
+  editError='Use de 3 a 40 caracteres: letras, números, hífen ou sublinhado.';
+  notice='';render();
+  document.querySelector<HTMLInputElement>('#member-acdm-id')?.focus({preventScroll:true});
+  return;
+ }
+ if(members.some(m=>m.id!==member.id && m.acdmId===acdmId)){
+  editError='Este identificador já pertence a outro membro fictício. Escolha outro.';notice='';render();
+  const field=document.querySelector<HTMLInputElement>('#member-acdm-id');field?.focus({preventScroll:true});field?.select();return;
+ }
+ editError='';rememberChange(member);member.acdmId=acdmId;saveDemoMembers();
+ notice=`ACDM ID fictício de ${member.name} atualizado nesta sessão. Nenhum cadastro externo foi alterado.`;
+ editingMemberId=null;render();
+ document.querySelector<HTMLButtonElement>('[data-action=undo]')?.focus({preventScroll:true});
+});
+document.addEventListener('input',(event)=>{
+ const target=event.target;
+ if(target instanceof HTMLInputElement&&target.id==='search-members') {
+  filter=target.value;
+  updateMemberSearch();
+ }
+});
+document.addEventListener('change',(event)=>{
+ const target=event.target;
+ if(target instanceof HTMLSelectElement&&target.id==='role-mode'){rolePreview=target.value==='membro'?'membro':'diretor';render();}
+});
+syncRouteState();
+render();
