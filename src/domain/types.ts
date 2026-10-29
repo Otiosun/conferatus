@@ -44,9 +44,11 @@ export interface Activity {
   percentage: number;
 }
 export interface GovernanceChange {
-  kind: 'rebaixamento' | 'restauracao' | 'vinculo';
+  kind: 'rebaixamento' | 'desvinculo' | 'vinculo';
   memberId: MemberId;
   sectionId: SectionId;
   previousSectionIds: SectionId[];
   nextSectionIds: SectionId[];
+  previousRole: Role;
+  nextRole: Role;
 }
