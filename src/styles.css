@@ -442,3 +442,7 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
  .member-name {font-size:10px;}
  .description-panel {padding-left:9px;padding-right:9px;}
 }
+
+/* Navigation icons use a consistent stroke at every viewport. */
+.menu-item .menu-icon {display:inline-flex;align-items:center;justify-content:center;flex:0 0 17px;}
+.menu-item .menu-icon svg {width:17px;height:17px;display:block;}

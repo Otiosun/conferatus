@@ -79,8 +79,8 @@ function navigate(route: Route, memberId?: string) {
 function crest() { return '<img src="./assets/crest.png" width="29" height="29" alt="Símbolo da Academy">'; }
 function footer() {
   return `${menuOpen ? `<nav class="bottom-menu" aria-label="Navegação principal"><div class="menu-list">
-    <button class="menu-item" data-route="members" ${routeFromHash()==='members'?'aria-current="page"':''}><span class="menu-icon">♙</span>Membros e Serviços da Cúpula Cíntia</button>
-    <button class="menu-item" data-route="overview" ${routeFromHash()==='overview'?'aria-current="page"':''}><span class="menu-icon">▤</span>Histórico de Votações e Proposições</button>
+    <button class="menu-item" data-route="members" ${routeFromHash()==='members'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3.5 19v-2.2a5.5 5.5 0 0 1 11 0V19M17 8h4M17 12h4M17 16h4"/></svg></span>Membros e Serviços da Cúpula Cíntia</button>
+    <button class="menu-item" data-route="overview" ${routeFromHash()==='overview'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h2M12 9h5M7 13h2M12 13h5M7 17h2M12 17h5"/></svg></span>Histórico de Votações e Proposições</button>
   </div></nav>` : ''}
   <footer class="app-footer">${crest()}<button type="button" class="footer-home" data-route="ballot" aria-label="Voltar à votação">CONFERATUS</button><small class="footer-demo">DADOS FICTÍCIOS · PRÉVIA</small>
    <button type="button" class="footer-nav" aria-expanded="${menuOpen}" aria-label="${menuOpen?'Fechar':'Abrir'} menu" data-action="menu">${menuOpen?'Fechar ×':'☰ Menu'}</button>
@@ -162,7 +162,7 @@ function memberList() {
  return `${header(undefined,undefined,false)}${memberHeader(lead,'votos')}
  <div class="member-list" aria-label="Diretório de membros">
  <button type="button" class="search-trigger" data-action="search" aria-expanded="${searchExpanded}" aria-label="${searchExpanded?'Fechar busca de membros':'Buscar membros'}">${searchExpanded?'Fechar busca ×':'Buscar ⌕'}</button>
- ${searchExpanded?`<div class="toolbar"><label for="search-members">Buscar membro</label><input id="search-members" type="search" placeholder="Nome ou ID fictício" value="${escapeHTML(filter)}" autocomplete="off" aria-controls="member-results"><button type="button" class="clear-search" data-action="clear-search" ${filter?'':'hidden'}>Limpar</button></div>`:''}
+ ${searchExpanded?`<div class="toolbar"><label for="search-members">Buscar membro</label><input id="search-members" type="search" placeholder="Nome ou identificador" value="${escapeHTML(filter)}" autocomplete="off" aria-controls="member-results"><button type="button" class="clear-search" data-action="clear-search" ${filter?'':'hidden'}>Limpar</button></div>`:''}
  ${searchExpanded?`<p id="member-count" class="sr-only" role="status" aria-live="polite">${visible.length} ${visible.length===1?"membro encontrado":"membros encontrados"}</p>`:""}
  <div id="member-results">${memberResults(visible)}</div>
  ${!directoryExpanded && candidates.length>7?`<button class="member-more" type="button" data-action="show-more-members" ${searchExpanded&&filter.trim()?'hidden':''}>Mostrar mais ${candidates.length-7} membros</button>`:''}
