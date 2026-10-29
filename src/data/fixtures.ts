@@ -31,55 +31,31 @@ export const ballots: Ballot[] = [
 const proposalSummary = 'Organização das datas de reunião, com antecedência para convocação e registro das decisões.';
 export const activities: Activity[] = [
   {id:'a1',memberId:'m01',type:'voto',title:'Revisão do calendário de reuniões',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:true,votes:56,percentage:74},
-  {id:'a2',memberId:'m01',type:'voto',title:'Revisão do calendário de reuniões',section:'Seção: Conjunto Literário Institucional Academy',code:'SCC-003 · 20/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:false,votes:58,percentage:32},
-  {id:'a3',memberId:'m01',type:'voto',title:'Revisão do calendário de reuniões',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:true,votes:58,percentage:57},
-  {id:'a4',memberId:'m01',type:'proposicao',title:'Atualização do calendário institucional',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:proposalSummary,approved:true,votes:56,percentage:74},
-  {id:'a5',memberId:'m01',type:'proposicao',title:'Atualização do calendário institucional',section:'Seção: Conselho Academy',code:'SCC-003 · 20/10/26',summary:'Definição de prazos para contribuições e registro das decisões nas atas.',approved:false,votes:44,percentage:37},
-  {id:'a6',memberId:'m01',type:'proposicao',title:'Atualização do calendário institucional',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Organização de um procedimento interno para revisar documentos e acompanhar respostas a propostas recebidas.',approved:true,votes:58,percentage:74},
+  {id:'a2',memberId:'m01',type:'voto',title:'Representação nas reuniões conjuntas',section:'Seção: Conjunto Literário Institucional Academy',code:'SCC-003 · 20/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:false,votes:58,percentage:32},
+  {id:'a3',memberId:'m01',type:'voto',title:'Prioridades do próximo encontro',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:true,votes:58,percentage:57},
+  {id:'a4',memberId:'m01',type:'proposicao',title:'Calendário institucional de reuniões',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:proposalSummary,approved:true,votes:56,percentage:74},
+  {id:'a5',memberId:'m01',type:'proposicao',title:'Prazo para envio de contribuições',section:'Seção: Conselho Academy',code:'SCC-003 · 20/10/26',summary:'Definição de prazos para contribuições e registro das decisões nas atas.',approved:false,votes:44,percentage:37},
+  {id:'a6',memberId:'m01',type:'proposicao',title:'Registro das decisões em ata',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Organização de um procedimento interno para revisar documentos e acompanhar respostas a propostas recebidas.',approved:true,votes:58,percentage:74},
 ];
 
-// Small synthetic records for each profile; ensures the preview never opens on an empty demonstration.
-const samples = [
- ['m02','Revisão do regimento', 'voto', true, 38, 69],
- ['m02','Proposta de calendário', 'proposicao', true, 23, 62],
- ['m03','Consulta de representatividade', 'voto', false, 19, 32],
- ['m03','Ajustes no regimento', 'proposicao', true, 33, 71],
- ['m04','Consulta de prioridades', 'voto', true, 55, 84],
- ['m04','Revisão de procedimentos', 'proposicao', false, 17, 29],
- ['m05','Consulta de comunicação', 'voto', true, 41, 73],
- ['m05','Plano de reuniões', 'proposicao', true, 30, 64],
- ['m06','Pauta de representação', 'voto', false, 22, 38],
- ['m06','Ciclo de propostas', 'proposicao', true, 46, 79],
- ['m07','Consulta de atividades', 'voto', true, 61, 91],
- ['m07','Proposta de colaboração', 'proposicao', false, 14, 27],
- ['m08','Consulta de calendário','voto',true,16,53],
- ['m09','Consulta de calendário','voto',true,19,54],
- ['m10','Consulta de calendário','voto',true,22,55],
- ['m11','Consulta de calendário','voto',true,25,56],
- ['m12','Consulta de calendário','voto',true,28,57],
- ['m13','Consulta de calendário','voto',true,31,58],
- ['m14','Consulta de calendário','voto',true,34,59],
- ['m15','Consulta de calendário','voto',true,37,60],
- ['m16','Consulta de calendário','voto',true,40,61],
-] as const;
-for (const [memberId, title, type, approved, votes, percentage] of samples) {
- activities.push({
-  id:`a-${memberId}-${type}`, memberId, type, title, section:'Seção: Cúpula Institucional Academy',
-  code:'SIM-2026 · DEMO', summary:type==='voto'?'Participação registrada nesta consulta.':proposalSummary,
-  approved, votes, percentage,
- });
+// Participações e propostas fictícias distintas para cada perfil.
+const participationSamples = [["m02","Revisão do regimento","voto",true,38,69,"Consulta sobre a redação de artigos do regimento."],["m02","Período de apresentação das pautas","proposicao",true,23,62,"Recebimento antecipado de pautas para exame do conselho."],["m03","Representação nas sessões abertas","voto",false,19,32,"Escolha do formato de representação em sessões públicas."],["m03","Procedimento de análise do regimento","proposicao",true,33,71,"Etapas para receber e revisar sugestões de alteração."],["m04","Ordem das pautas extraordinárias","voto",true,55,84,"Prioridade das matérias convocadas fora do calendário."],["m04","Encaminhamento de pareceres","proposicao",false,17,29,"Definição do prazo de envio dos pareceres à coordenação."],["m05","Canais oficiais de comunicação","voto",true,41,73,"Consulta sobre os meios usados para divulgar deliberações."],["m05","Agenda de reuniões conjuntas","proposicao",true,30,64,"Calendário para encontros entre diferentes seções."],["m06","Representação em comissões temporárias","voto",false,22,38,"Consulta sobre indicação de representantes temporários."],["m06","Ciclo de apreciação das propostas","proposicao",true,46,79,"Etapas de recebimento, discussão e encaminhamento."],["m07","Planejamento dos encontros de equipe","voto",true,61,91,"Escolha da organização dos próximos encontros internos."],["m07","Canal de sugestões dos membros","proposicao",false,14,27,"Criação de um canal para sugestões acompanhadas por seção."],["m08","Prazos para resposta às solicitações","voto",true,37,73,"Consulta sobre os prazos de retorno aos participantes."],["m09","Distribuição das pautas do conselho","voto",true,24,61,"Ordem de apresentação dos temas em reunião."],["m10","Disponibilização das atas","voto",false,19,35,"Forma de consulta aos documentos de reuniões anteriores."],["m11","Abertura do período de propostas","voto",true,31,65,"Escolha da data de abertura de novas contribuições."],["m12","Encontros entre novos membros","voto",true,17,58,"Consulta sobre a frequência dos encontros de integração."],["m13","Organização das pautas recebidas","voto",false,12,40,"Método de agrupamento dos assuntos por tema."],["m14","Reuniões de acompanhamento","voto",true,26,68,"Frequência das reuniões de acompanhamento de propostas."],["m15","Consulta de encaminhamentos","voto",true,29,62,"Escolha da ordem de apresentação dos encaminhamentos."],["m16","Critérios de revisão dos documentos","voto",false,14,38,"Consulta sobre o procedimento de revisão interna."]] as const;
+for (const [index, item] of participationSamples.entries()) {
+  const [memberId,title,type,approved,votes,percentage,summary]=item;
+  const member=members.find(m=>m.id===memberId);
+  const section=sections.find(s=>s.id===member?.sectionIds[0]);
+  activities.push({ id:`sample-${index+1}`,memberId,type,title,section:`Seção: ${section?.name ?? 'Academy'}`,code:`SIM-${String(index+1).padStart(3,'0')} · 2026`,summary,approved,votes,percentage });
 }
-
-// A few extra records make the visual walkthrough useful on different member profiles.
-// They remain independent of any actual institutional activity.
-const extraProposals = [
-  ['Revisão de calendário', 'Organização das datas de reunião e do período de análise das propostas.'],
-  ['Acompanhamento de propostas', 'Registro das propostas recebidas, alterações aprovadas e decisões finais.'],
-] as const;
-for (const member of members) {
-  for (const [index, item] of extraProposals.entries()) {
-    activities.push({id:`extra-${member.id}-${index}`,memberId:member.id,type:'proposicao',title:item[0],
-      section:'Seção: Cúpula Institucional Academy',code:`DEMO-00${index+1} · 2026`,summary:item[1],
-      approved:index===0,votes:index===0?41:23,percentage:index===0?72:39});
+const memberProposals = [[["Acompanhamento das pautas pendentes","Identificação das pautas que aguardam encaminhamento."],["Comunicação após cada reunião","Envio do resumo das decisões aos participantes."]],[["Canal de dúvidas sobre o regimento","Registro de dúvidas para resposta nos encontros."],["Registro da presença em reuniões","Organização da lista de participantes por sessão."]],[["Revisão periódica de procedimentos","Avaliação dos procedimentos utilizados pelo comitê."],["Publicação de orientações internas","Organização das orientações que precisam ser consultadas."]],[["Recebimento de pareceres escritos","Prazo para reunir pareceres antes da próxima sessão."],["Ordem de análise de solicitações","Critério de organização das solicitações recebidas."]],[["Resumo mensal de deliberações","Preparação de um resumo das decisões tomadas no mês."],["Calendário de comunicados","Distribuição das datas para envio dos comunicados."]],[["Rodízio de representantes","Organização de uma escala entre os representantes."],["Pauta conjunta com a coordenação","Definição das matérias examinadas em reunião conjunta."]],[["Organização da documentação técnica","Estrutura de pastas para documentos de trabalho."],["Registro das etapas de desenvolvimento","Acompanhamento das etapas em andamento."]],[["Análise de solicitações de revisão","Critérios para encaminhar pedidos ao comitê."],["Guia de procedimentos internos","Reunião das orientações mais consultadas."]],[["Agenda de representantes suplentes","Organização da disponibilidade dos suplentes."],["Relatório das reuniões do conselho","Registro dos temas examinados pelo conselho."]],[["Calendário de entregas internas","Definição de datas para os trabalhos da diretoria."],["Registro de solicitações técnicas","Acompanhamento das demandas recebidas."]],[["Organização de arquivos de trabalho","Classificação dos arquivos compartilhados pela equipe."],["Revisão das descrições de tarefas","Atualização de tarefas com descrições incompletas."]],[["Recepção de novos participantes","Orientações iniciais para membros recém-integrados."],["Disponibilização de documentos básicos","Acesso aos documentos utilizados na participação."]],[["Reunião de dúvidas frequentes","Seleção das dúvidas para um encontro de orientação."],["Formulário de sugestões","Proposta de um formato para receber sugestões."]],[["Compartilhamento das pautas futuras","Envio antecipado das pautas para consulta."],["Registro de contribuições recebidas","Organização das sugestões por assunto."]],[["Divulgação de decisões encerradas","Consulta às decisões que já tiveram encaminhamento."],["Organização do arquivo de reuniões","Separação das atas por período e seção."]],[["Encontros de apresentação da Academy","Programação de encontros para novos participantes."],["Resumo dos procedimentos de participação","Material breve com orientações para integrantes."]]] as const;
+for (const [memberIndex, member] of members.entries()) {
+  const choices=memberProposals[memberIndex];
+  const section=sections.find(s=>s.id===member.sectionIds[0]);
+  if (!choices) continue;
+  for (const [index,[title,summary]] of choices.entries()) {
+    const approved=(memberIndex+index)%3!==1;
+    activities.push({ id:`proposal-${member.id}-${index+1}`,memberId:member.id,type:'proposicao',title,
+      section:`Seção: ${section?.name ?? 'Academy'}`,code:`SIM-P${String(memberIndex*2+index+1).padStart(3,'0')} · 2026`,
+      summary,approved,votes:approved?32+(memberIndex%5)*4:15+(memberIndex%4)*3,
+      percentage:approved?63+(memberIndex%4)*6:29+(memberIndex%4)*4 });
   }
 }

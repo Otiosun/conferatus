@@ -59,3 +59,22 @@ test('sixteen invented accounts in preview',()=>{
  assert.equal(fixtures.length,16);
  assert.ok(fixtures.every(m=>m.acdmId?.startsWith('DEMO-')));
 });
+
+test('demonstration gives each profile distinct proposals', async () => {
+ const {activities, sections}=await import('../dist/data/fixtures.js');
+ assert.equal(new Set(activities.map(a=>a.id)).size,activities.length);
+ const validSections=new Set(sections.map(s=>`Seção: ${s.name}`));
+ for(const member of fixtures){
+  const relevant=activities.filter(a=>a.memberId===member.id);
+  const proposals=relevant.filter(a=>a.type==='proposicao');
+  assert.ok(proposals.length>=2);
+  assert.equal(new Set(proposals.map(a=>a.title)).size,proposals.length);
+  assert.ok(relevant.every(a=>a.title.length>10 && a.summary.length>=30));
+ }
+ assert.ok(activities.filter(a=>a.id.startsWith('sample-')).every(a=>validSections.has(a.section)));
+});
+test('sample proposal titles are not duplicated across members', async () => {
+ const {activities}=await import('../dist/data/fixtures.js');
+ const proposals=activities.filter(a=>a.type==='proposicao');
+ assert.ok(new Set(proposals.map(a=>a.title)).size>=proposals.length-1);
+});

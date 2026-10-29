@@ -86,3 +86,7 @@ O comando gera `publish/index.html`, `publish/preview.png` e o restante dos arqu
 ## Atualização v0.9.3
 
 Histórico institucional com cinco indicadores proporcionais à referência, seis itens iniciais e expansão explícita; seção administrativa e estados de proposições refinados. Registros continuam sintéticos e as regras permanecem demonstrativas.
+
+## v0.9.4
+
+Os históricos de demonstração foram diversificados por perfil, com descrições curtas e registros inteiramente fictícios. Foram acrescentados testes para detectar títulos duplicados. A autenticação e os votos reais continuam fora do escopo da prévia.
