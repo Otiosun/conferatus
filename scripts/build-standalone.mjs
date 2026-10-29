@@ -16,7 +16,7 @@ for (const name of ['crest', 'editar', 'rebaixamento', 'painel']) {
   js = js.replaceAll(`./assets/${name}.png`,`data:image/png;base64,${asset.toString('base64')}`);
 }
 const css = await readFile(path.join(cwd,'src','styles.css'),'utf8');
-const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#515dc7"><meta name="description" content="Votações, membros e histórico institucional da Academy."><meta name="robots" content="noindex,nofollow,noarchive"><title>CONFERATUS</title><style>${css}</style></head><body><div id="root"></div><script>(async()=>{\n${js}\n})().catch(error=>{console.error('Falha ao iniciar prévia:',error);document.querySelector('#root').textContent='Não foi possível iniciar a prévia.'});</script></body></html>`;
+const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#515dc7"><meta name="robots" content="noindex,nofollow,noarchive"><title>CONFERATUS</title><style>${css}</style></head><body><div id="root"></div><script>(async()=>{\n${js}\n})().catch(error=>{console.error('Falha ao iniciar prévia:',error);document.querySelector('#root').textContent='Não foi possível iniciar a prévia.'});</script></body></html>`;
 const outfile = path.join(cwd,'dist','CONFERATUS_demo_offline.html');
 await writeFile(outfile,html);
 console.log(`Preview offline gerado (${(Buffer.byteLength(html)/1024).toFixed(0)} KB).`);
