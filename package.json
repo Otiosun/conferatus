@@ -5,9 +5,9 @@
   "type": "module",
   "description": "CONFERATUS — prévia interativa offline e local, com dados sintéticos",
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/prepare-dist.mjs && node scripts/build-standalone.mjs && node scripts/package-preview.mjs",
+    "build": "tsc -p tsconfig.json && node scripts/prepare-dist.mjs && node scripts/build-standalone.mjs && node scripts/package-preview.mjs && node --test tests/*.test.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build && node --test tests/*.test.mjs",
+    "test": "npm run build",
     "serve": "node scripts/serve.mjs"
   },
   "engines": {
