@@ -12,8 +12,9 @@ test('static publish is self-contained and explicitly illustrative', async () =>
  assert.match(html,/<script>/);
  assert.doesNotMatch(html,/<script[^>]+src=/i);
  assert.doesNotMatch(html,/file:\/\/|localhost:/);
- const artwork=await stat(new URL('publish/preview.png',root));
- assert.ok(artwork.size>5000);
+ assert.match(html, /<title>CONFERATUS<\/title>/);
+ assert.doesNotMatch(html, /<meta[^>]+(?:og:|twitter:|name="description")/i);
+ await assert.rejects(stat(new URL('publish/preview.png',root)), {code:'ENOENT'});
 });
 test('offline preview is present and does not load external libraries', async () => {
  const html=await readFile(new URL('dist/CONFERATUS_demo_offline.html',root),'utf8');

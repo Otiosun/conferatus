@@ -1,11 +1,11 @@
 {
   "name": "conferatus",
   "private": true,
-  "version": "0.9.7",
+  "version": "0.9.8",
   "type": "module",
   "description": "CONFERATUS — prévia interativa offline e local, com dados sintéticos",
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/generate-preview.mjs && node scripts/prepare-dist.mjs && node scripts/build-standalone.mjs && node scripts/package-preview.mjs && node --test tests/*.test.mjs",
+    "build": "tsc -p tsconfig.json && node scripts/prepare-dist.mjs && node scripts/build-standalone.mjs && node scripts/package-preview.mjs && node --test tests/*.test.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build",
     "serve": "node scripts/serve.mjs"
@@ -15,7 +15,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "typescript": "~5.8.3",
-    "sharp": "~0.34.1"
+    "typescript": "~5.8.3"
   }
 }
