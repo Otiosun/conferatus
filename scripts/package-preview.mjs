@@ -6,7 +6,7 @@ const target = path.join(root, 'publish');
 await mkdir(target,{recursive:true});
 let html = await readFile(path.join(root,'dist','CONFERATUS_demo_offline.html'),'utf8');
 const origin = (process.env.PUBLIC_URL || 'https://conferatus.pages.dev').trim().replace(/\/$/,'');
-const meta = `<meta property="og:type" content="website"><meta property="og:title" content="CONFERATUS · Demonstração"><meta property="og:description" content="Explore o protótipo de votações, membros e administração. Dados inteiramente fictícios."><meta name="twitter:card" content="summary_large_image">${origin?`<meta property="og:url" content="${origin.replaceAll('&','&amp;').replaceAll('"','&quot;')}"><meta property="og:image" content="${origin.replaceAll('&','&amp;').replaceAll('"','&quot;')}/preview.png"><meta name="twitter:image" content="${origin.replaceAll('&','&amp;').replaceAll('"','&quot;')}/preview.png">`:''}`;
+const meta = `<meta property="og:type" content="website"><meta property="og:title" content="CONFERATUS"><meta property="og:description" content="Votações, membros e histórico institucional da Academy."><meta name="twitter:card" content="summary_large_image">${origin?`<meta property="og:url" content="${origin.replaceAll('&','&amp;').replaceAll('"','&quot;')}"><meta property="og:image" content="${origin.replaceAll('&','&amp;').replaceAll('"','&quot;')}/preview.png?v=097"><meta name="twitter:image" content="${origin.replaceAll('&','&amp;').replaceAll('"','&quot;')}/preview.png?v=097">`:''}`;
 html = html.replace('<title>',`${meta}<title>`);
 await writeFile(path.join(target,'index.html'),html);
 await writeFile(path.join(target,'robots.txt'),'User-agent: *\nAllow: /\n');

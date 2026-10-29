@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<rect width="1200" height="630" fill="#f5f6fb"/>
+<rect width="1200" height="14" fill="#505dc7"/>
+<rect x="63" y="68" width="1074" height="493" rx="18" fill="#fff" stroke="#e1e4f1" stroke-width="2"/>
+<path d="M 76,68 h -13 v 493 h 13 z" fill="#505dc7"/>
+<text x="117" y="148" font-family="Arial,DejaVu Sans,sans-serif" font-weight="600" font-size="22" fill="#505dc7">ACADEMY</text>
+<path d="M 117,175 H 1080" stroke="#e2e5f2" stroke-width="2"/>
+<text x="106" y="280" font-family="Arial,DejaVu Sans,sans-serif" font-weight="700" font-size="92" fill="#505dc7">CONFERATUS</text>
+<text x="117" y="374" font-family="Arial,DejaVu Sans,sans-serif" font-weight="700" font-size="42" fill="#1e2648">Votações e deliberações</text>
+<text x="117" y="421" font-family="Arial,DejaVu Sans,sans-serif" font-weight="400" font-size="24" fill="#66708c">Membros  ·  Proposições  ·  Histórico</text>
+<path d="M 117,481 H 1080" stroke="#e2e5f2" stroke-width="2"/>
+<rect x="117" y="514" width="17" height="18" rx="4" fill="#505dc7"/>
+<text x="154" y="529" font-family="Arial,DejaVu Sans,sans-serif" font-weight="500" font-size="22" fill="#66708c">Cúpula Institucional Academy</text>
+</svg>
