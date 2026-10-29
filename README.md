@@ -82,3 +82,7 @@ O comando gera `publish/index.html`, `publish/preview.png` e o restante dos arqu
 - 16 registros inteiramente fictícios, seguindo a estrutura de campos útil do JSON fornecido.
 - Mensagens de interface mais diretas e dados demonstrativos sem informações pessoais.
 - Continua sem backend, autenticação ou registros reais.
+
+## Atualização v0.9.3
+
+Histórico institucional com cinco indicadores proporcionais à referência, seis itens iniciais e expansão explícita; seção administrativa e estados de proposições refinados. Registros continuam sintéticos e as regras permanecem demonstrativas.
