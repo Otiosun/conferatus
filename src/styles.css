@@ -354,3 +354,42 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .app-shell :is(button, input, select, a):focus-visible { outline:2px solid #2b3c9c; outline-offset:2px; box-shadow:0 0 0 1px #fff; }
 
 .ballot-description{max-width:580px;line-height:1.55;color:#31343e;margin:13px 0 18px;}
+
+/* v0.9.2 — proportions based on the supplied 740px visual references.
+   Compact screens retain the established mobile layout. */
+.main-pad {padding-top:36px;}
+.main-pad .hairline {margin-bottom:3px;}
+.app-footer .footer-nav {top:10px;right:10px;background:transparent;border:0;box-shadow:none;color:#fff;border-radius:4px;min-height:40px;padding:8px 10px;}
+.app-footer .footer-nav:hover {background:#4450b5;}
+.member-more {display:block;width:100%;padding:14px 20px;border:0;border-top:1px solid #d7daea;background:#f1f2fa;color:#4d59b7;text-align:center;font-size:12px;font-weight:600;min-height:44px;}
+.member-more:hover {background:#e6e9f8;}
+.member-more[hidden] {display:none;}
+.member-list {padding-bottom:48px;}
+@media (min-width:541px) {
+  .hero--flat {height:208px;min-height:208px;}
+  .profile-head {background:#f4f4f4;}
+  .profile-summary {height:112px;min-height:112px;}
+  .profile-summary>.avatar--large {left:16px;top:-33px;width:125px;height:125px;}
+  .profile-summary>.metrics {margin-left:168px;width:calc(100% - 168px);padding-top:24px;font-size:16px;}
+  .profile-summary>.metrics small {font-size:13px;}
+  .profile-identity {padding-left:16px;}
+  .profile-identity strong,.profile-name-button {font-size:25px;}
+  .profile-identity small {font-size:14px;}
+  .profile-identity p {font-size:17px;margin-top:9px;}
+  .profile-head .tabs {margin-top:10px;}
+  .profile-head .tab {min-height:60px;font-size:15px;}
+  .member-list {padding-top:51px;}
+  .member-list::before {top:25px;left:24px;right:24px;}
+  .search-trigger {top:12px;}
+  .member-item {min-height:79px;grid-template-columns:62px minmax(110px,1fr) auto;padding:7px 24px;gap:18px;}
+  .member-item .avatar {height:60px;width:60px;}
+  .member-name {font-size:17px;font-weight:600;}
+  .member-item .metrics {font-size:12px;gap:11px;}
+  .member-item .metric-cell small {font-size:11px;}
+  .member-more {font-size:14px;}
+}
+@media (max-width:540px) {
+  .main-pad {padding-top:16px;}
+  .main-pad .hairline {margin-bottom:0;}
+  .app-footer .footer-nav {top:0;right:5px;}
+}

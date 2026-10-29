@@ -19,6 +19,7 @@ let notice = '';
 let editError = '';
 let filter = '';
 let searchExpanded = false;
+let directoryExpanded = false;
 let expandedActivity = '';
 let rolePreview: 'diretor' | 'membro' = 'diretor';
 let demoToolsOpen = false;
@@ -33,7 +34,7 @@ function resetDemoState() {
   }
   demoVoteId=null; demoExpanded=false; editingMemberId=null; editError=''; lastChange=null;
   rolePreview='diretor'; demoToolsOpen=false; expandedSection=''; expandedActivity='';
-  profileTab='votos'; overviewTab='votos'; searchExpanded=false; filter='';
+  profileTab='votos'; overviewTab='votos'; searchExpanded=false; directoryExpanded=false; filter='';
   try { sessionStorage.removeItem(demoMembersKey); sessionStorage.removeItem('conferatus:demo-vote'); } catch {}
 }
 
@@ -151,18 +152,22 @@ function updateMemberSearch() {
  const clear=document.querySelector<HTMLButtonElement>('[data-action="clear-search"]');
  const visible=matchingMembers();
  if(results) results.innerHTML=memberResults(visible);
+ const more=document.querySelector<HTMLButtonElement>('[data-action=show-more-members]');
+ if(more) more.hidden=filter.trim().length>0;
  if(status) status.textContent=`${visible.length} ${visible.length===1?'membro encontrado':'membros encontrados'}`;
  if(clear) clear.hidden=filter==='';
 }
 function memberList() {
  const lead = members[0]; if(!lead) return '';
- const visible=matchingMembers();
+ const candidates=matchingMembers();
+ const visible=(directoryExpanded || (searchExpanded && filter.trim()))?candidates:candidates.slice(0,7);
  return `${header(undefined,undefined,false)}${memberHeader(lead,'votos')}
  <div class="member-list" aria-label="Diretório de membros">
  <button type="button" class="search-trigger" data-action="search" aria-expanded="${searchExpanded}" aria-label="${searchExpanded?'Fechar busca de membros':'Buscar membros'}">${searchExpanded?'Fechar busca ×':'Buscar ⌕'}</button>
  ${searchExpanded?`<div class="toolbar"><label for="search-members">Buscar membro</label><input id="search-members" type="search" placeholder="Nome ou ID fictício" value="${escapeHTML(filter)}" autocomplete="off" aria-controls="member-results"><button type="button" class="clear-search" data-action="clear-search" ${filter?'':'hidden'}>Limpar</button></div>`:''}
  ${searchExpanded?`<p id="member-count" class="sr-only" role="status" aria-live="polite">${visible.length} ${visible.length===1?"membro encontrado":"membros encontrados"}</p>`:""}
  <div id="member-results">${memberResults(visible)}</div>
+ ${!directoryExpanded && candidates.length>7?`<button class="member-more" type="button" data-action="show-more-members" ${searchExpanded&&filter.trim()?'hidden':''}>Mostrar mais ${candidates.length-7} membros</button>`:''}
  </div>`;
 }
 function activityItem(a:Activity) {
@@ -298,6 +303,7 @@ document.addEventListener('click',(event)=>{
   for(const member of members){const original=initialMembers.get(member.id);if(original){member.name=original.name;member.acdmId=original.acdmId;member.sectionIds=[...original.sectionIds];}}
   editingMemberId=null;lastChange=null;notice='Alterações administrativas restauradas.';rolePreview='diretor';demoToolsOpen=false;try{sessionStorage.removeItem(demoMembersKey);}catch{}render();return;
  }
+ if(actionEl?.dataset.action==='show-more-members'){directoryExpanded=true;render();return;}
  if(actionEl?.dataset.action==='search'){searchExpanded=!searchExpanded;if(!searchExpanded)filter='';render();if(searchExpanded)document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
  if(actionEl?.dataset.action==='clear-search'){filter='';render();document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
  if(actionEl?.dataset.action==='toggle-demo'){demoExpanded=!demoExpanded;render();return;}
