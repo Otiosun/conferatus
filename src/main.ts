@@ -24,7 +24,7 @@ let directoryExpanded = false;
 let expandedActivity = '';
 let rolePreview: 'diretor' | 'membro' = 'diretor';
 let demoToolsOpen = false;
-let guideOpen = false;
+const advancedPreview = new URLSearchParams(location.search).get('demo') === '1';
 let lastChange: {memberId: string; acdmId: string | undefined; sectionIds: string[]; role: Member['role']} | null = null;
 const initialMembers = new Map(members.map(m=>[m.id,{name:m.name,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role}]));
 const demoMembersKey = 'conferatus:demo-members-v07';
@@ -69,7 +69,6 @@ function routeFromHash(): Route {
 function navigate(route: Route, memberId?: string) {
   menuOpen = false;
   demoToolsOpen = false;
-  guideOpen = false;
   notice = '';
   editError = '';
   lastChange = null;
@@ -82,18 +81,16 @@ function footer() {
   return `${menuOpen ? `<nav class="bottom-menu" aria-label="Navegação principal"><div class="menu-list">
     <button class="menu-item" data-route="members" ${routeFromHash()==='members'?'aria-current="page"':''}><span class="menu-icon">♙</span>Membros e Serviços da Cúpula Cíntia</button>
     <button class="menu-item" data-route="overview" ${routeFromHash()==='overview'?'aria-current="page"':''}><span class="menu-icon">▤</span>Histórico de Votações e Proposições</button>
-    <button class="menu-item" data-route="ballot" ${routeFromHash()==='ballot'?'aria-current="page"':''}><span class="menu-icon">◉</span>Visualizar votação</button>
-   <button class="menu-guide" type="button" data-action="guide">Explorar o CONFERATUS <span aria-hidden="true">?</span></button>
   </div></nav>` : ''}
-  <footer class="app-footer">${crest()}<span>CONFERATUS</span><small class="footer-demo">DADOS FICTÍCIOS · PRÉVIA</small>
+  <footer class="app-footer">${crest()}<button type="button" class="footer-home" data-route="ballot" aria-label="Voltar à votação">CONFERATUS</button><small class="footer-demo">DADOS FICTÍCIOS · PRÉVIA</small>
    <button type="button" class="footer-nav" aria-expanded="${menuOpen}" aria-label="${menuOpen?'Fechar':'Abrir'} menu" data-action="menu">${menuOpen?'Fechar ×':'☰ Menu'}</button>
   </footer>`;
 }
 function header(title?: string, subtitle?: string, tall=false) {
   if (title) return `<header class="page-header">
-   <button type="button" class="panel-button" data-action="toggle-tools" aria-label="${demoToolsOpen?'Fechar':'Abrir'} ferramentas de demonstração" aria-expanded="${demoToolsOpen}" title="Ferramentas da demonstração"><img src="./assets/painel.png" alt=""></button>
+   ${advancedPreview?`<button type="button" class="panel-button" data-action="toggle-tools" aria-label="Opções de teste" aria-expanded="${demoToolsOpen}"><img src="./assets/painel.png" alt=""></button>`:`<img class="panel-mark" src="./assets/painel.png" alt="">`}
    <h1>${escapeHTML(title)}</h1>${subtitle?`<p>${escapeHTML(subtitle)}</p>`:''}
-   ${demoToolsOpen?`<aside class="demo-tools" aria-label="Ferramentas de demonstração">
+   ${advancedPreview && demoToolsOpen?`<aside class="demo-tools" aria-label="Ferramentas de demonstração">
      <strong>Opções de visualização</strong><p>Selecione um perfil para visualizar as permissões.</p>
      <label for="role-mode">Visualizar como</label><select id="role-mode" aria-label="Simular perfil"><option value="diretor" ${rolePreview==='diretor'?'selected':''}>Diretor</option><option value="membro" ${rolePreview==='membro'?'selected':''}>Membro comum</option></select>
      ${expandedSection&&rolePreview==='diretor'?`<div class="tools-divider"><label for="add-member">Vincular à seção aberta</label><div class="tools-add"><select id="add-member"><option value="">Selecione um membro…</option>${members.filter(m=>!m.sectionIds.includes(expandedSection)).map(m=>`<option value="${m.id}">${escapeHTML(m.name)}</option>`).join('')}</select><button type="button" class="small-action" data-action="add-member">Vincular</button></div></div>`:''}
@@ -239,14 +236,8 @@ function render() {
  const route=routeFromHash();
  const page=route==='ballot'?ballotPage():route==='members'?memberList():route==='profile'?profilePage():route==='overview'?overviewPage():governancePage();
  root.innerHTML=`<div class="app-shell" aria-label="CONFERATUS — dados fictícios"><a href="#main-content" class="skip-link">Ir para o conteúdo</a><main id="main-content" tabindex="-1">${page}</main>${footer()}
- ${guideOpen?`<div class="guide-backdrop" data-action="close-guide" aria-hidden="true"></div><section class="guide-dialog" role="dialog" aria-modal="true" aria-labelledby="guide-title"><button type="button" class="guide-close" data-action="close-guide" aria-label="Fechar roteiro">×</button><span class="guide-eyebrow">PRÉVIA INTERATIVA</span><h2 id="guide-title">Conheça o CONFERATUS</h2><p>Navegue pelas votações, consulte os perfis e conheça o gerenciamento. Os dados desta apresentação são fictícios.</p><div class="guide-steps" aria-label="Atalhos para explorar a demonstração"><button type="button" class="guide-step" data-guide-route="ballot"><span>01</span><span><strong>Votação</strong><small>Escolha uma opção e acompanhe os resultados.</small></span><span aria-hidden="true">›</span></button><button type="button" class="guide-step" data-guide-route="members"><span>02</span><span><strong>Membros</strong><small>Pesquise um perfil e abra seus históricos.</small></span><span aria-hidden="true">›</span></button><button type="button" class="guide-step" data-guide-route="governance"><span>03</span><span><strong>Gerenciamento</strong><small>Edite um cadastro e teste o rebaixamento.</small></span><span aria-hidden="true">›</span></button></div><p>As alterações desta demonstração podem ser desfeitas.</p><div class="guide-bottom"><button type="button" class="guide-reset" data-action="reset-all">Reiniciar demonstração</button><button type="button" class="guide-ok" data-action="close-guide">Fechar guia</button></div></section>`:''}</div>`;
- // A real modal: do not let keyboard navigation reach the underlying page.
- if (guideOpen) {
-  root.querySelector<HTMLElement>('main')?.setAttribute('inert','');
-  root.querySelector<HTMLElement>('.app-footer')?.setAttribute('inert','');
-  root.querySelector<HTMLElement>('.bottom-menu')?.setAttribute('inert','');
- }
- if (!guideOpen && focusTarget) {
+</div>`;
+ if (focusTarget) {
   const [attr,value]=focusTarget;
   [...root.querySelectorAll<HTMLElement>(`[${attr}]`)]
    .find(element=>element.getAttribute(attr)===value)?.focus({preventScroll:true});
@@ -257,17 +248,10 @@ function syncRouteState() {
  const [route,id] = location.hash.replace(/^#\/?/, '').split('/');
  if(route==='profile' && id && members.some(member=>member.id===id)) currentMember=id;
 }
-window.addEventListener('hashchange',()=>{menuOpen=false;demoToolsOpen=false;guideOpen=false;syncRouteState();render();});
+window.addEventListener('hashchange',()=>{menuOpen=false;demoToolsOpen=false;syncRouteState();render();});
 document.addEventListener('keydown', event => {
- if(guideOpen && event.key==='Tab') {
-  const controls=[...document.querySelectorAll<HTMLButtonElement>('.guide-dialog button:not([disabled])')];
-  const first=controls[0], last=controls.at(-1);
-  if(first && last && event.shiftKey && document.activeElement===first){event.preventDefault();last.focus();return;}
-  if(first && last && !event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();return;}
- }
  if(event.key==='Escape') {
-  if(guideOpen){guideOpen=false;render();document.querySelector<HTMLButtonElement>('.footer-nav')?.focus();}
-  else if(demoToolsOpen){demoToolsOpen=false;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();}
+  if(demoToolsOpen){demoToolsOpen=false;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();}
   else if(menuOpen){menuOpen=false;render();document.querySelector<HTMLButtonElement>('.footer-nav')?.focus();}
   else if(editingMemberId){editingMemberId=null;render();document.querySelector<HTMLButtonElement>('[data-section][aria-expanded=true]')?.focus();}
   else if(searchExpanded && routeFromHash()==='members'){
@@ -290,24 +274,13 @@ document.addEventListener('click',(event)=>{
  const activityEl=target.closest<HTMLElement>('[data-activity]');
  const voteEl=target.closest<HTMLElement>('[data-vote]');
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
- const guideRoute=target.closest<HTMLElement>('[data-guide-route]')?.dataset.guideRoute;
- if(guideRoute==='ballot'||guideRoute==='members'||guideRoute==='governance'){
-  if(guideRoute==='governance'){rolePreview='diretor';expandedSection='coordenacao';}
-  navigate(guideRoute);return;
- }
- if(actionEl?.dataset.action==='reset-all'){
-  resetDemoState(); guideOpen=false;
-  navigate('ballot');return;
- }
- if(actionEl?.dataset.action==='guide'){guideOpen=true;menuOpen=false;render();document.querySelector<HTMLButtonElement>('.guide-close')?.focus();return;}
- if(actionEl?.dataset.action==='close-guide'){guideOpen=false;render();document.querySelector<HTMLButtonElement>('.footer-nav')?.focus();return;}
  if(actionEl?.dataset.action==='undo'&&lastChange){
   const member=members.find(m=>m.id===lastChange?.memberId);
   if(member){member.acdmId=lastChange.acdmId;member.sectionIds=[...lastChange.sectionIds];member.role=lastChange.role;saveDemoMembers();}
   lastChange=null;notice='Alteração desfeita.';render();return;
  }
- if(actionEl?.dataset.action==='toggle-tools'){demoToolsOpen=!demoToolsOpen;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();return;}
- if(actionEl?.dataset.action==='reset-admin'){
+ if(advancedPreview && actionEl?.dataset.action==='toggle-tools'){demoToolsOpen=!demoToolsOpen;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();return;}
+ if(advancedPreview && actionEl?.dataset.action==='reset-admin'){
   for(const member of members){const original=initialMembers.get(member.id);if(original){member.name=original.name;member.acdmId=original.acdmId;member.sectionIds=[...original.sectionIds];}}
   editingMemberId=null;lastChange=null;notice='Alterações administrativas restauradas.';rolePreview='diretor';demoToolsOpen=false;try{sessionStorage.removeItem(demoMembersKey);}catch{}render();return;
  }
@@ -336,7 +309,7 @@ document.addEventListener('click',(event)=>{
   return;
  }
  if (activityEl?.dataset.activity) {expandedActivity=expandedActivity===activityEl.dataset.activity?'':activityEl.dataset.activity;render();return;}
- if(actionEl?.dataset.action==='add-member'&&expandedSection) {
+ if(advancedPreview && actionEl?.dataset.action==='add-member'&&expandedSection) {
   const select=document.querySelector<HTMLSelectElement>('#add-member');
   const member=members.find(m=>m.id===select?.value);
   if(member){rememberChange(member);member.sectionIds=updateSectionAssignment(member,expandedSection,true).member.sectionIds;saveDemoMembers();notice=`${member.name} adicionado à seção.`;demoToolsOpen=false;render();}
@@ -373,7 +346,7 @@ document.addEventListener('input',(event)=>{
 });
 document.addEventListener('change',(event)=>{
  const target=event.target;
- if(target instanceof HTMLSelectElement&&target.id==='role-mode'){rolePreview=target.value==='membro'?'membro':'diretor';render();}
+ if(advancedPreview && target instanceof HTMLSelectElement&&target.id==='role-mode'){rolePreview=target.value==='membro'?'membro':'diretor';render();}
 });
 syncRouteState();
 render();

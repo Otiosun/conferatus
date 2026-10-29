@@ -90,3 +90,7 @@ Histórico institucional com cinco indicadores proporcionais à referência, sei
 ## v0.9.4
 
 Os históricos de demonstração foram diversificados por perfil, com descrições curtas e registros inteiramente fictícios. Foram acrescentados testes para detectar títulos duplicados. A autenticação e os votos reais continuam fora do escopo da prévia.
+
+## Atualização v0.9.5
+
+Menu com as duas entradas dos modelos originais; guia de exploração removido; título do rodapé retorna à votação. Controles técnicos de simulação disponíveis apenas com `?demo=1`. Responsividade conferida em 280, 320, 360, 375, 390, 430, 540, 740 e 1280 px. Auditoria: `docs/AUDITORIA_FUNCIONAL_V095.md`.

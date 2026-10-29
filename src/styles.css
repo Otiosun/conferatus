@@ -1,6 +1,6 @@
 :root { font-family: Arial, Helvetica, sans-serif; background:#f4f4f4; color:#303139; font-synthesis:none; text-rendering: optimizeLegibility; }
 * { box-sizing:border-box; }
-body { margin:0; min-width:320px; }
+body { margin:0; min-width:0; }
 button, input { font: inherit; }
 button { cursor:pointer; }
 button:focus-visible, input:focus-visible, a:focus-visible { outline:3px solid #f6a93e; outline-offset:2px; }
@@ -278,19 +278,8 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .activity-proposal .proposal-trigger:hover {background:#e8ebf8;}
 .activity-proposal .proposal-trigger:focus-visible{position:relative;z-index:1;}
 
-/* v0.6 — unobtrusive demo walkthrough and reversible edits. */
-.menu-guide {display:flex;align-items:center;justify-content:space-between;width:100%;padding:11px 8px 3px;border:0;background:transparent;color:#eef0ff;text-align:left;font-size:11px;text-decoration:underline;text-underline-offset:3px;}
-.menu-guide span {font-weight:800;display:grid;place-items:center;border-radius:50%;height:19px;width:19px;border:1px solid #d5daff;text-decoration:none;}
+/* Reversible actions on administration changes. */
 .undo-action {border:0;background:transparent;font-weight:700;color:#3543a6;text-decoration:underline;text-underline-offset:2px;padding:4px 6px;white-space:nowrap;}
-.guide-backdrop {position:fixed;inset:0;background:rgba(24,28,67,.53);z-index:39;}
-.guide-dialog {position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:40;width:min(420px,calc(100vw - 32px));max-height:calc(100dvh - 38px);overflow-y:auto;border-radius:12px;padding:25px 23px;background:#fff;color:#2c3043;box-shadow:0 22px 66px #1518394f;font-size:13px;line-height:1.5;}
-.guide-eyebrow {font-size:10px;letter-spacing:.12em;color:#515dc7;font-weight:700;}
-.guide-dialog h2{margin:5px 0 10px;font-size:22px;font-weight:600;}
-.guide-dialog p {color:#646b81;font-size:12px;}
-.guide-dialog ol{padding-left:20px;margin:18px 0;}
-.guide-dialog li{padding-left:3px;margin-bottom:10px;}
-.guide-close {position:absolute;right:12px;top:8px;border:0;background:transparent;color:#5c6479;font-size:27px;line-height:1;padding:3px 8px;}
-.guide-ok {width:100%;margin-top:8px;background:#515dc7;border:0;color:#fff;border-radius:6px;min-height:40px;font-size:13px;font-weight:700;}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;scroll-behavior:auto!important;transition-duration:.01ms!important;}}
 
 /* v0.7 — mobile polish, touch targets and safe-area handling; visual identity unchanged. */
@@ -298,7 +287,6 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
   .app-footer {padding-bottom:env(safe-area-inset-bottom,0px);height:calc(40px + env(safe-area-inset-bottom,0px));}
   .footer-nav {min-width:70px;min-height:40px;}
   .menu-item {min-height:44px;}
-  .menu-guide {min-height:44px;}
   .result-row {gap:6px;}
   .result-label {min-width:0;overflow-wrap:anywhere;}
   .result-count,.result-percentage {flex:0 0 auto;}
@@ -314,23 +302,9 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
   .result-percentage{font-size:11px;}
 }
 
-/* v0.8 — guided preview shortcuts, shown only inside the optional walkthrough. */
-.guide-steps { display:grid; gap:8px; margin:18px 0; }
-.guide-step { display:grid; grid-template-columns:29px minmax(0,1fr) 12px; gap:10px; align-items:center; width:100%; padding:11px 10px; border:1px solid #dee2f2; border-radius:7px; color:#30364f; text-align:left; background:#f7f8fc; }
-.guide-step:hover { background:#edf0fc; border-color:#b7c1e8; }
-.guide-step>span:first-child { font-size:11px; color:#515dc7; font-weight:800; }
-.guide-step>span:last-child { font-size:19px; color:#515dc7; text-align:right; }
-.guide-step strong { display:block; font-size:12px; }
-.guide-step small { display:block; color:#656f87; font-size:11px; font-weight:400; margin-top:3px; line-height:1.4; }
-.guide-bottom { display:flex; align-items:center; gap:10px; margin-top:10px; }
-.guide-bottom .guide-ok { flex:1; margin-top:0; }
-.guide-reset { min-height:40px; padding:6px 10px; background:transparent; color:#4855b2; border:1px solid #b6c0e6; border-radius:6px; font-size:11px; }
-.guide-reset:hover { background:#edf0fc; }
-@media(max-width:360px){ .guide-dialog {padding:20px 15px;} .guide-bottom {flex-direction:column;} .guide-bottom>* {width:100%;} }
 
 /* v0.8.2 — visible keyboard focus that respects the original visual system. */
 :where(button, input, select):focus-visible {outline:2px solid #263b96;outline-offset:3px;}
-.guide-dialog :where(button):focus-visible {outline-color:#354bb0;outline-offset:2px;}
 
 /* v0.8.3 — recover gracefully from stale or incorrect example profile links. */
 .missing-profile{margin:26px 18px;padding:22px 18px;border:1px solid #d6dcf2;border-radius:8px;background:#f7f8fc;color:#29314f;}
@@ -429,4 +403,42 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
  .overview-tabs .tab {min-height:36px;font-size:10px;}
  .overview-content {padding-top:12px;}
  .overview-more {font-size:12px;min-height:44px;}
+}
+
+/* v0.9.5 — compact navigation and screens, without a showcase tutorial. */
+.footer-home {background:transparent;color:inherit;border:0;cursor:pointer;font:700 18px Georgia,serif;letter-spacing:.035em;padding:2px 8px;line-height:1.2;}
+.footer-home:hover {text-decoration:underline;text-underline-offset:3px;}
+.app-footer > img {pointer-events:none;}
+.panel-mark {position:absolute;top:15px;right:15px;width:31px;height:31px;object-fit:contain;pointer-events:none;}
+.bottom-menu {padding-bottom:16px;}
+@media(max-width:540px){
+ .footer-home {font-size:13px;min-height:28px;padding:3px 8px;}
+ .panel-mark {width:31px;height:31px;top:6px;right:9px;}
+ .bottom-menu {padding:14px 12px 12px;border-radius:11px 11px 0 0;}
+ .menu-item {font-size:12px;overflow-wrap:anywhere;}
+ .description-heading {align-items:flex-start;}
+ .result-row, .result-row .result-label {min-width:0;}
+}
+@media(max-width:360px){
+ .member-item {grid-template-columns:28px minmax(70px,1fr) auto;gap:5px;padding-left:9px;padding-right:9px;}
+ .member-item .metrics {grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 8px;font-size:10px;min-width:96px;}
+ .member-item .metrics .metric-cell {justify-content:flex-start;}
+ .profile-summary>.metrics {grid-template-columns:repeat(4,minmax(0,1fr));font-size:8px;}
+ .profile-summary>.metrics small {font-size:7px;}
+ .overview-stats {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:10px 11px 6px;overflow:visible;}
+ .overview-stats .stat-chip {grid-column:span 3;justify-content:center;min-width:0;font-size:11px;padding:6px 4px;white-space:normal;text-align:center;}
+ .overview-stats .stat-figure {grid-column:span 2;min-width:0;padding:4px 0;text-align:center;font-size:12px;white-space:normal;}
+ .result-row {padding:4px 7px;gap:4px;}
+ .result-count,.result-percentage {font-size:9px;}
+ .result-label {font-size:10px;}
+ .proposal-trigger .activity-head {flex-wrap:wrap;row-gap:2px;}
+ .proposal-meta-row {grid-template-columns:1fr;}
+}
+@media(max-width:300px){
+ .profile-summary>.avatar--large {width:53px;height:53px;top:-26px;}
+ .profile-summary>.metrics {margin-left:67px;width:calc(100% - 67px);font-size:8px;}
+ .member-item .metrics {min-width:78px;gap:1px 3px;font-size:9px;}
+ .member-item .metric-cell small {font-size:7px;}
+ .member-name {font-size:10px;}
+ .description-panel {padding-left:9px;padding-right:9px;}
 }
