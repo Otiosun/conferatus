@@ -446,3 +446,9 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 /* Navigation icons use a consistent stroke at every viewport. */
 .menu-item .menu-icon {display:inline-flex;align-items:center;justify-content:center;flex:0 0 17px;}
 .menu-item .menu-icon svg {width:17px;height:17px;display:block;}
+
+/* Institutional sections and compact mobile gesture. */
+.section-capacity {display:block;font-size:11px;font-weight:400;opacity:.8;margin-top:3px;}
+.governance-group-heading {margin:15px 18px 7px;font-size:13px;font-weight:600;color:#5965a7;}
+.footer-home {touch-action:pan-y;}
+@media(max-width:540px){.section-capacity{font-size:10px;}}

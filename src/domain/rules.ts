@@ -1,4 +1,4 @@
-import type { Member, OptionResult, GovernanceChange, Ballot } from './types.js';
+import type { Member, OptionResult, GovernanceChange, Ballot, Section } from './types.js';
 
 export function totalVotes(options: OptionResult[]): number {
   return options.reduce((sum, option) => sum + option.votes, 0);
@@ -34,7 +34,7 @@ export function updateSectionAssignment(member: Member, sectionId: string, assig
 /** Rebaixamento de função preserva atividades e indicadores anteriores. */
 export function demoteToCommonMember(member: Member, commonSectionId = 'membros'): {member: Member; change: GovernanceChange} {
  const before = [...member.sectionIds];
- const updated: Member = {...member, role:'membro', sectionIds:[commonSectionId]};
+ const updated: Member = {...member, role:'membro', sectionIds:[commonSectionId], hadDeliberativeHistory:member.hadDeliberativeHistory === true || member.sectionIds.some(id=>id!==commonSectionId)};
  return {member:updated,change:{kind:'rebaixamento',memberId:member.id,sectionId:commonSectionId,previousSectionIds:before,nextSectionIds:[commonSectionId],previousRole:member.role,nextRole:'membro'}};
 }
 export function escapeHTML(value: string): string {
@@ -63,6 +63,8 @@ export function restoreDemoMembers(members: Member[], validSectionIds: string[],
       ))];
     }
     if (entry.role === 'diretor' || entry.role === 'membro') member.role = entry.role;
+    if (entry.hadDeliberativeHistory === true) member.hadDeliberativeHistory = true;
+    if (entry.hadDeliberativeHistory === false) member.hadDeliberativeHistory = false;
     if (typeof entry.acdmId === 'string') {
       const candidate = entry.acdmId.toUpperCase();
       if (/^[A-Z0-9_-]{3,40}$/.test(candidate) &&
@@ -73,4 +75,14 @@ export function restoreDemoMembers(members: Member[], validSectionIds: string[],
       }
     }
   }
+}
+
+/** Voting eligibility and administrative role are independent. */
+export function isDeliberativeMember(member: Member, sections: Section[]): boolean {
+ const eligible = new Set(sections.filter(s=>s.category==='deliberativa').map(s=>s.id));
+ return member.sectionIds.some(id=>eligible.has(id));
+}
+/** Existing votes remain available after a deliberative member's demotion. */
+export function hasPersonalVoteHistory(member: Member, sections: Section[]): boolean {
+ return member.hadDeliberativeHistory===true || isDeliberativeMember(member,sections);
 }

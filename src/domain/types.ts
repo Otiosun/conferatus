@@ -13,10 +13,13 @@ export interface Member {
   collaborations: number;
   sectionIds: SectionId[];
   role: Role;
+  hadDeliberativeHistory?: boolean;
 }
 export interface Section {
   id: SectionId;
   name: string;
+  category: 'deliberativa' | 'comum';
+  places?: number;
 }
 export interface OptionResult {
   id: string;
@@ -51,4 +54,12 @@ export interface GovernanceChange {
   nextSectionIds: SectionId[];
   previousRole: Role;
   nextRole: Role;
+}
+
+/** Future authenticated voting record, not yet persisted by this preview. */
+export interface PersonalVoteRecord {
+ ballotId: string;
+ memberId: MemberId;
+ optionId: string;
+ recordedAt: string;
 }

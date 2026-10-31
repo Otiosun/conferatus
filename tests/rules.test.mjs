@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { totalVotes, resultPercentage, updateSectionAssignment, demoteToCommonMember, canRecordVote, escapeHTML, restoreDemoMembers, searchKey } from '../dist/domain/rules.js';
+import { totalVotes, resultPercentage, updateSectionAssignment, demoteToCommonMember, canRecordVote, escapeHTML, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory } from '../dist/domain/rules.js';
 import { members as fixtures } from '../dist/data/fixtures.js';
 
 test('count results from options and never hard-code them', () => {
@@ -77,4 +77,32 @@ test('sample proposal titles are not duplicated across members', async () => {
  const {activities}=await import('../dist/data/fixtures.js');
  const proposals=activities.filter(a=>a.type==='proposicao');
  assert.ok(new Set(proposals.map(a=>a.title)).size>=proposals.length-1);
+});
+
+test('official CINSTIA sections, with ordinary members separated',async()=>{
+ const {sections}=await import('../dist/data/fixtures.js');
+ const ds=sections.filter(s=>s.category==='deliberativa');
+ assert.deepEqual(ds.map(s=>s.name),['Diretoria','Coordenação','Conselho de Integridade','Representantes Devos']);
+ assert.deepEqual(ds.map(s=>s.places),[4,8,12,24]);
+ assert.equal(sections.filter(s=>s.category==='comum').length,1);
+});
+test('administrative role does not determine deliberative voting eligibility',async()=>{
+ const {sections}=await import('../dist/data/fixtures.js');
+ assert.equal(isDeliberativeMember({...fixtures[0],role:'membro',sectionIds:['coordenacao']},sections),true);
+ assert.equal(isDeliberativeMember({...fixtures[0],role:'diretor',sectionIds:['membros']},sections),false);
+});
+test('demoted deliberatives keep old personal votes; common members do not',async()=>{
+ const {sections,activities}=await import('../dist/data/fixtures.js');
+ const demoted=demoteToCommonMember(fixtures[0]).member;
+ assert.equal(isDeliberativeMember(demoted,sections),false);
+ assert.equal(hasPersonalVoteHistory(demoted,sections),true);
+ assert.equal(hasPersonalVoteHistory(fixtures[11],sections),false);
+ assert.equal(activities.some(a=>a.memberId==='m12'&&a.type==='voto'),false);
+});
+test('restored session retains prior deliberative status',async()=>{
+ const {sections}=await import('../dist/data/fixtures.js');
+ const before={...fixtures[0],sectionIds:[...fixtures[0].sectionIds]};
+ const after=demoteToCommonMember(before).member;
+ restoreDemoMembers([before],sections.map(s=>s.id),[{id:before.id,sectionIds:after.sectionIds,role:after.role,hadDeliberativeHistory:after.hadDeliberativeHistory}]);
+ assert.equal(hasPersonalVoteHistory(before,sections),true);
 });

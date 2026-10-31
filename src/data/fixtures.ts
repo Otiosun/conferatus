@@ -1,11 +1,11 @@
 import type { Activity, Ballot, Member, Section } from '../domain/types.js';
 /** 100% synthetic content. No personal records from the WhatsApp export. */
 export const sections: Section[] = [
-  {id:'integridade',name:'Comitê de Integridade Institucional Academy'},
-  {id:'representantes',name:'Conselho de Coligado de Representantes'},
-  {id:'desenvolvimento',name:'Diretoria de Desenvolvimentos Institucional Academy'},
-  {id:'coordenacao',name:'Coordenação Institucional Academy'},
-  {id:'membros',name:'Membros Institucionais Academy'},
+ {id:'diretoria',name:'Diretoria',category:'deliberativa',places:4},
+ {id:'coordenacao',name:'Coordenação',category:'deliberativa',places:8},
+ {id:'integridade',name:'Conselho de Integridade',category:'deliberativa',places:12},
+ {id:'representantes',name:'Representantes Devos',category:'deliberativa',places:24},
+ {id:'membros',name:'Membros da Academy',category:'comum'},
 ];
 export const members: Member[] = [
   {id:'m01',acdmId:'DEMO-0001',name:'Helena Avelar',subtitle:'Conselharia de Integridade',totalVotes:80,proposals:12,approved:6,collaborations:35,sectionIds:['coordenacao'],role:'diretor'},
@@ -14,11 +14,11 @@ export const members: Member[] = [
   {id:'m04',acdmId:'DEMO-0004',name:'Bruno Leal',subtitle:'Equipe institucional',totalVotes:84,proposals:10,approved:6,collaborations:16,sectionIds:['coordenacao','integridade'],role:'membro'},
   {id:'m05',acdmId:'DEMO-0005',name:'Sara Monteiro',subtitle:'Equipe institucional',totalVotes:77,proposals:20,approved:10,collaborations:40,sectionIds:['coordenacao'],role:'membro'},
   {id:'m06',acdmId:'DEMO-0006',name:'Daniel Freitas',subtitle:'Equipe institucional',totalVotes:148,proposals:37,approved:25,collaborations:21,sectionIds:['representantes'],role:'membro'},
-  {id:'m07',acdmId:'DEMO-0007',name:'Mila Torres',subtitle:'Equipe institucional',totalVotes:89,proposals:16,approved:9,collaborations:27,sectionIds:['desenvolvimento'],role:'membro'},
+  {id:'m07',acdmId:'DEMO-0007',name:'Mila Torres',subtitle:'Equipe institucional',totalVotes:89,proposals:16,approved:9,collaborations:27,sectionIds:['diretoria'],role:'membro'},
   {id:'m08',acdmId:'DEMO-0008',name:'Rafael Vieira',subtitle:'Comitê de integridade',totalVotes:34,proposals:5,approved:2,collaborations:11,sectionIds:['integridade'],role:'diretor'},
   {id:'m09',acdmId:'DEMO-0009',name:'Olívia Campos',subtitle:'Conselho de representantes',totalVotes:41,proposals:6,approved:3,collaborations:13,sectionIds:['representantes'],role:'membro'},
-  {id:'m10',acdmId:'DEMO-0010',name:'Pedro Nogueira',subtitle:'Desenvolvimento institucional',totalVotes:48,proposals:7,approved:4,collaborations:15,sectionIds:['desenvolvimento'],role:'diretor'},
-  {id:'m11',acdmId:'DEMO-0011',name:'Vitor Almeida',subtitle:'Participação institucional',totalVotes:55,proposals:8,approved:5,collaborations:17,sectionIds:['desenvolvimento'],role:'membro'},
+  {id:'m10',acdmId:'DEMO-0010',name:'Pedro Nogueira',subtitle:'Desenvolvimento institucional',totalVotes:48,proposals:7,approved:4,collaborations:15,sectionIds:['diretoria'],role:'diretor'},
+  {id:'m11',acdmId:'DEMO-0011',name:'Vitor Almeida',subtitle:'Participação institucional',totalVotes:55,proposals:8,approved:5,collaborations:17,sectionIds:['diretoria'],role:'membro'},
   {id:'m12',acdmId:'DEMO-0012',name:'Marina Duarte',subtitle:'Membro institucional',totalVotes:62,proposals:9,approved:6,collaborations:19,sectionIds:['membros'],role:'membro'},
   {id:'m13',acdmId:'DEMO-0013',name:'Thiago Reis',subtitle:'Membro institucional',totalVotes:69,proposals:10,approved:7,collaborations:21,sectionIds:['membros'],role:'membro'},
   {id:'m14',acdmId:'DEMO-0014',name:'Júlia Barreto',subtitle:'Membro institucional',totalVotes:76,proposals:11,approved:8,collaborations:23,sectionIds:['membros'],role:'membro'},
@@ -26,7 +26,7 @@ export const members: Member[] = [
   {id:'m16',acdmId:'DEMO-0016',name:'Ana Ferreira',subtitle:'Membro institucional',totalVotes:90,proposals:13,approved:10,collaborations:27,sectionIds:['membros'],role:'membro'},
 ];
 export const ballots: Ballot[] = [
-  {id:'b1',title:'Revisão do calendário de reuniões',section:'Comitê de Integridade Institucional Academy',description:'Escolha do modelo de calendário para os próximos encontros.',status:'aberta',options:[{id:'o1',label:'Calendário mensal',votes:80},{id:'o2',label:'Calendário quinzenal',votes:20}]},
+  {id:'b1',title:'Revisão do calendário de reuniões',section:'Conselho de Integridade',description:'Escolha do modelo de calendário para os próximos encontros.',status:'aberta',options:[{id:'o1',label:'Calendário mensal',votes:80},{id:'o2',label:'Calendário quinzenal',votes:20}]},
 ];
 const proposalSummary = 'Organização das datas de reunião, com antecedência para convocação e registro das decisões.';
 export const activities: Activity[] = [
@@ -43,6 +43,8 @@ const participationSamples = [["m02","Revisão do regimento","voto",true,38,69,"
 for (const [index, item] of participationSamples.entries()) {
   const [memberId,title,type,approved,votes,percentage,summary]=item;
   const member=members.find(m=>m.id===memberId);
+  // Ordinary Academy members have no personal vote record in the planned system.
+  if(type==='voto' && member?.sectionIds.every(id=>id==='membros')) continue;
   const section=sections.find(s=>s.id===member?.sectionIds[0]);
   activities.push({ id:`sample-${index+1}`,memberId,type,title,section:`Seção: ${section?.name ?? 'Academy'}`,code:`SIM-${String(index+1).padStart(3,'0')} · 2026`,summary,approved,votes,percentage });
 }
