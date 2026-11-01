@@ -41,6 +41,7 @@ Status verificado: `main` publicou a v0.10.0 (`8f50177`, Cloudflare aprovado); p
 - [x] Corrigir nova redação independente e salvar/retomar rascunho incompleto na prévia local (v0.10.1; testes em 320/390/740/1280 px).
 - [x] Mostrar andamento de conclusão de Socii (0/2 → 1/2 → 2/2) na prévia, sem representar convites como reais.
 - [ ] Consolidar a colaboração Socii e seus estados de conclusão.
+- [x] Aproximar o editor de proposições do modelo de redação minimalista, preservando título editável, rascunho e botões (v0.10.5; comparação visual local).
 - [ ] Conferir as novas telas com as seis imagens e o vídeo da Megalos.
 **Estado:** protótipo v0.10.0 publicado em `main`; fluxos testados localmente em quatro larguras de tela. Integração e regras de negócio definitivas pendentes.
 **Dependências:** regras detalhadas de Socii e atribuição de responsabilidades.
