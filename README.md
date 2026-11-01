@@ -30,7 +30,7 @@ npm run serve
 - `publish/index.html`: artefato estático usado pela Cloudflare Pages.
 - `?demo=1`: ferramentas de simulação adicionais para desenvolvimento; não correspondem a permissões reais da Academy.
 
-Testes adicionais de navegação ficam em `tests/browser_*.py` e requerem Playwright Python + Chromium. Os scripts mais recentes cobrem CINSTIA, rascunhos, calendário, perfis e Socii. Testes antigos podem refletir estados anteriores do menu; consultar o checkpoint mais recente.
+Testes adicionais de navegação ficam em `tests/browser_*.py` e requerem Playwright Python + Chromium. Para executar a jornada de fumaça **atualizada e ativa** depois do build: `python tests/browser_smoke.py` (320, 390, 740 e 1280 px). Ela percorre votação **fictícia**, menu/teclado, perfis, histórico, permissões **simuladas**, calendário e editor; não verifica autenticação Academy, servidor ou persistência compartilhada. A matriz completa de navegadores e os limites de ambiente constam da checklist e do checkpoint mais recente. A publicação Cloudflare usa apenas `npm run build` e **não** executa automaticamente as suítes Python Playwright.
 
 ## Deploy
 
