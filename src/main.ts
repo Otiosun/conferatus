@@ -238,8 +238,16 @@ type Draft = {id:string;title:string;body:string;sectionId:string;type:ProposalT
 type Deliberation = {id:string;title:string;objective:string;proposalId:string;sectionId:string;start:string;end:string;type:string;status:'programada'|'cancelada'};
 const draftKey='conferatus:proposals-v010';
 const deliberationKey='conferatus:deliberations-v010';
-function readSessionArray<T>(key:string):T[]{
- try {const value=JSON.parse(sessionStorage.getItem(key)??'[]');return Array.isArray(value)?value:[];}catch{return [];}
+// Keep the original bytes of a legacy entry that cannot be interpreted as an array.
+// A later save must never silently destroy an unreadable previous session.
+function readSessionRecords(key:string):{records:unknown[];unreadableRaw:string|null}{
+ let raw:string|null=null;
+ try{
+  raw=sessionStorage.getItem(key);
+  if(raw===null)return {records:[],unreadableRaw:null};
+  const parsed:unknown=JSON.parse(raw);
+  return Array.isArray(parsed)?{records:parsed,unreadableRaw:null}:{records:[],unreadableRaw:raw};
+ }catch{return {records:[],unreadableRaw:raw};}
 }
 // Session storage is untrusted input, including incomplete records from older previews.
 // Keep good records usable instead of letting a single malformed entry break a whole view.
@@ -253,7 +261,9 @@ function isSavedDraft(value:unknown):value is Draft{
    if(!p||typeof p!=='object'||Array.isArray(p))return false;
    const partner=p as Record<string,unknown>;
    return typeof partner.id==='string'&&!!partner.id&&typeof partner.complete==='boolean';
-  });
+  })&&
+  // A legacy or damaged record must not claim completion without every signoff.
+  !(d.status==='concluida'&&(!d.authorComplete||(d.partners as {complete:boolean}[]).some(p=>!p.complete)));
 }
 function isSavedSchedule(value:unknown):value is Deliberation{
  if(!value||typeof value!=='object'||Array.isArray(value))return false;
@@ -265,11 +275,15 @@ function isSavedSchedule(value:unknown):value is Deliberation{
   Date.parse(item.start)<Date.parse(item.end)&&
   ['PDR','PR','Ofício'].includes(String(item.type))&&['programada','cancelada'].includes(String(item.status));
 }
-const savedDrafts=readSessionArray<unknown>(draftKey);
-const savedSchedule=readSessionArray<unknown>(deliberationKey);
+const draftRestore=readSessionRecords(draftKey);
+const scheduleRestore=readSessionRecords(deliberationKey);
+const savedDrafts=draftRestore.records;
+const savedSchedule=scheduleRestore.records;
 const drafts:Draft[]=savedDrafts.filter(isSavedDraft);
 const schedule:Deliberation[]=savedSchedule.filter(isSavedSchedule);
-const ignoredSavedRecords=savedDrafts.length>drafts.length||savedSchedule.length>schedule.length;
+const unreadableRecordsBackup={drafts:draftRestore.unreadableRaw,schedule:scheduleRestore.unreadableRaw};
+const ignoredSavedRecords=savedDrafts.length>drafts.length||savedSchedule.length>schedule.length||
+ draftRestore.unreadableRaw!==null||scheduleRestore.unreadableRaw!==null;
 const ignoredRecordsBackup={drafts:savedDrafts.filter(d=>!isSavedDraft(d)),schedule:savedSchedule.filter(d=>!isSavedSchedule(d))};
 function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos desta prévia local não foram carregados.</p>':'';}
 const blankDraft=()=>({title:'',body:''});
@@ -306,7 +320,11 @@ function calendarGrid(items:Deliberation[]){
 function saveWorkflows():boolean{
  try{
   // Preserve rejected entries separately before overwriting the working session state.
-  if(ignoredSavedRecords&&!sessionStorage.getItem('conferatus:invalid-session-backup-v0114'))
+  if((unreadableRecordsBackup.drafts!==null||unreadableRecordsBackup.schedule!==null)&&
+     !sessionStorage.getItem('conferatus:unreadable-session-backup-v0115'))
+   sessionStorage.setItem('conferatus:unreadable-session-backup-v0115',JSON.stringify(unreadableRecordsBackup));
+  if((ignoredRecordsBackup.drafts.length||ignoredRecordsBackup.schedule.length)&&
+     !sessionStorage.getItem('conferatus:invalid-session-backup-v0114'))
    sessionStorage.setItem('conferatus:invalid-session-backup-v0114',JSON.stringify(ignoredRecordsBackup));
   sessionStorage.setItem(draftKey,JSON.stringify(drafts));sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));return true;
  }catch{return false;}
