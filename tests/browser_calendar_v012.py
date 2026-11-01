@@ -28,6 +28,18 @@ with sync_playwright() as p:
         assert page.locator('.calendar-item').count() == 1
         page.locator('[data-action=open-schedule]').click()
         assert page.locator('#schedule-deliberation-form button[type=submit]').is_disabled()
+        form = page.locator('#schedule-deliberation-form')
+        form.locator('[name="title"]').fill('Programação em elaboração')
+        form.locator('[name="objective"]').fill('Descrição ainda não enviada no protótipo.')
+        form.locator('[name="start"]').fill('2026-11-26T09:00')
+        form.locator('[name="end"]').fill('2026-11-26T10:00')
+        page.locator('[data-calendar-day="2026-11-22"]').click()
+        page.locator('[data-action="calendar-next"]').click()
+        page.locator('[data-action="calendar-prev"]').click()
+        assert form.locator('[name="title"]').input_value() == 'Programação em elaboração'
+        assert form.locator('[name="objective"]').input_value() == 'Descrição ainda não enviada no protótipo.'
+        assert form.locator('[name="start"]').input_value() == '2026-11-26T09:00'
+        assert form.locator('[name="end"]').input_value() == '2026-11-26T10:00'
         assert not errors, (width, errors)
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), width
         page.close()
