@@ -21,3 +21,10 @@ A interface utiliza dados exclusivamente demonstrativos. Calendário, rascunho, 
 
 ## Publicação
 Toda alteração deverá passar por compilação, testes e revisão de preview antes de promoção a produção.
+
+## Ajuste de experiência v0.10.1 — redação
+- Ação **Redigir proposição** inicia sempre um documento em branco, sem reutilizar a edição anterior.
+- **Salvar rascunho** permite guardar uma redação incompleta sem tratá-la como concluída; o item reaparece na lista para continuação.
+- A redação só segue para revisão quando os campos atendem aos critérios mínimos da prévia.
+- O armazenamento continua limitado à sessão do navegador; nada é enviado a outros participantes.
+- Teste de regressão: `tests/browser_drafts_v011.py` (320, 390, 740 e 1280 px).
