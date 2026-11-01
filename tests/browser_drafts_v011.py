@@ -17,7 +17,7 @@ with sync_playwright() as p:
         page.locator('#draft-title').fill('Primeiro documento')
         page.locator('#draft-body').fill('Texto provisório.')
         page.get_by_role('button', name='Salvar rascunho').click()
-        page.get_by_text('Rascunho salvo neste navegador.').wait_for()
+        page.get_by_text('Rascunho mantido somente enquanto a página estiver aberta.').wait_for()
         page.locator('[data-action="new-proposal"]').click()
         assert page.locator('#draft-title').input_value() == ''
         assert page.locator('#draft-body').input_value() == ''
