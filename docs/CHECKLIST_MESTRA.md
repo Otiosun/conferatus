@@ -2,17 +2,17 @@
 
 Atualização de referência: 01/11/2026
 Responsável pelo acompanhamento: desenvolvimento CONFERATUS
-Status verificado: `main` no commit `bfe6f27` (v0.9.8, Cloudflare aprovado); `preview/v0.9.9-cinstia` possui build remoto com falha; v0.10.0 testada localmente e ainda não integrada ao `main`.
+Status verificado: `main` publicou a v0.9.9 (`3150cd2`, Cloudflare aprovado); a branch antiga `preview/v0.9.9-cinstia` falhou, mas a branch reconciliada `preview/v0.9.9-reconciled` passou (`0bb4435`). A v0.10.0 continua validada localmente, sem publicação.
 
 > Fonte oficial para retomar o trabalho. Nenhuma tarefa é concluída apenas por existir uma tela ou um commit. Não mudar o nome do produto sem confirmar a grafia com a Megalos.
 
 ## 01 — Estabilização e consolidação
-- [ ] Investigar e corrigir o build remoto da v0.9.9.
+- [x] Investigar e corrigir o build remoto da v0.9.9. Preview aprovado (`0bb4435`), produção aprovada (`3150cd2`).
 - [ ] Comparar e reconciliar o código local da v0.10.0 com o repositório.
 - [ ] Validar as quatro seções oficiais da CINSTIA e a separação entre deliberativos e membros comuns.
 - [ ] Validar o gesto de arrastar CONFERATUS para abrir o menu, mantendo alternativa acessível.
 - [ ] Confirmar com a Megalos a grafia oficial: CONFERATUS ou CONFFRATUS.
-**Estado:** em andamento; produção permanece na v0.9.8 até aprovação de uma nova versão.
+**Estado:** primeira tarefa concluída; v0.9.9 foi publicada. Consolidação da v0.10.0 ainda pendente.
 
 ## 02 — Votação e registro
 - [ ] Consolidar o modelo de votação e seus estados.
