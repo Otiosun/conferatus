@@ -37,3 +37,16 @@ Toda alteração deverá passar por compilação, testes e revisão de preview a
 - Erros no intervalo de datas não apagam os campos preenchidos.
 - As alterações continuam locais à sessão: os modelos não representam uma agenda compartilhada.
 - Browser regression: `tests/browser_calendar_v012.py`. Verificação de integração adicional no pacote local.
+
+## Ciclo da proposição na prévia
+
+| Situação | O que o usuário consegue fazer |
+| --- | --- |
+| Nova redação | Iniciar documento em branco e salvar parcialmente. |
+| Em redação | Reabrir o documento e continuar a edição. |
+| Revisão | Conferir o texto, a seção e o tipo antes de confirmar a parte da autoria. |
+| Aguardando Socii | A autoria concluiu, mas pelo menos um participante ainda está pendente. |
+| Concluída | Todas as partes necessárias foram confirmadas na simulação; o documento fica disponível para consulta e agendamento. |
+| Programação | Uma deliberação de demonstração associa uma proposição concluída, seção, datas, título e descrição objetiva. |
+
+**Nunca confundir estados locais com procedimentos institucionais definitivos.** A confirmação externa do Socii é simulada exclusivamente com `?demo=1`. O calendário não inicia nem registra uma votação compartilhada; apenas representa sua programação. Os perfis históricos vêm de fixtures fictícias, e as novas proposições da sessão aparecem separadamente.
