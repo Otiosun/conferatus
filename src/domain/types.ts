@@ -9,6 +9,7 @@ export interface Member {
   subtitle: string;
   totalVotes: number;
   proposals: number;
+  officialLetters?: number;
   approved: number;
   collaborations: number;
   sectionIds: SectionId[];
