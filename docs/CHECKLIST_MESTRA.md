@@ -2,7 +2,7 @@
 
 Atualização de referência: 01/11/2026
 Responsável pelo acompanhamento: desenvolvimento CONFERATUS
-Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alterações de produção. Último preview testado e aprovado remotamente antes desta rodada: `preview/v0.10.17-visual-audit` (`b5e296f`, Cloudflare `completed/success`). A v0.10.18 reativa o smoke legado e audita testes, **sem alterar o produto ou concluir etapas institucionais**. A Etapa 04 continua ativa (17/22 subitens), com cinco critérios centrais pendentes; votação, Academy e Socii continuam exclusivamente demonstrativos.
+Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alterações de produção. Último preview testado e aprovado remotamente antes desta rodada: `preview/v0.10.17-visual-audit` (`b5e296f`, Cloudflare `completed/success`). A v0.10.18 reativou o smoke legado. A v0.10.19 corrige a herança indevida de confirmação do Socii quando a seção ou o tipo é alterado na revisão, **sem concluir etapas institucionais**. A Etapa 04 continua ativa (17/22 subitens), com cinco critérios centrais pendentes; votação, Academy e Socii continuam exclusivamente demonstrativos.
 
 > Fonte oficial para retomar o trabalho. Nenhuma tarefa é concluída apenas por existir uma tela ou um commit. Não mudar o nome do produto sem confirmar a grafia com a Megalos.
 
@@ -46,7 +46,7 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [x] Corrigir nova redação independente e salvar/retomar rascunho incompleto na prévia local (v0.10.1; testes em 320/390/740/1280 px).
 - [x] Mostrar andamento de conclusão de Socii (0/2 → 1/2 → 2/2) na prévia, sem representar convites como reais.
 - [ ] Consolidar a colaboração Socii e seus estados de conclusão.
-- [x] Corrigir integridade de versões na prévia: alteração de título/texto reinicia confirmações anteriores de autoria e Socii sem remover participantes; texto idêntico preserva progresso; distinguir pendência de autoria/Socii (v0.10.13, teste de falha antes/depois).
+- [x] Corrigir integridade de versões na prévia: mudança de título/texto reinicia confirmações de autoria e Socii (v0.10.13); alteração da seção responsável ou do tipo na revisão invalida confirmações anteriores do Socii (v0.10.19). Dados idênticos preservam aprovações, participantes não são removidos e pendências de autoria/Socii continuam distintas. Falhas reproduzidas antes das correções e testes em quatro larguras.
 - [x] Aproximar o editor Socii do modelo `1001930224.jpg` com faixa de participantes vinculados, identificação de prévia local e progresso 0/2–2/2, sem tempo fictício ou colaboração remota (v0.10.12; quatro larguras e regressões).
 - [x] Aproximar o editor de proposições do modelo de redação minimalista, preservando título editável, rascunho e botões (v0.10.5; comparação visual local).
 - [x] Realizar comparação documental de cada uma das seis imagens e amostragem do vídeo da Megalos, registrando diferenças, decisões não autorizadas e critérios de aceite (auditoria v0.10.17; **não equivale a validação visual final**).
@@ -189,3 +189,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - **Limite de evidência:** o smoke examina documentos offline com `about:blank?demo=1`, não valida login Academy, persistência compartilhada ou HTTP real. Cloudflare não executa Playwright automaticamente. `npm run build` não equivale a lint; não há script lint configurado.
 - **Contagem canônica SEM ALTERAÇÃO:** etapas 01=4/5, 02=0/4, 03=1/5, **04=17/22** (ativa), 05=0/4 e 06=0/5. Modernização de teste não encerra nenhum desses critérios gerais. Aceite visual e funcional da Megalos ainda pendente. Ver `docs/CHECKPOINT_V028_2026-11-01.md`.
 - **Próximo avanço:** decidir com Megalos divergências visual/funcionais registradas em `docs/AUDITORIA_VISUAL_V0117_2026-11-01.md`; não presumir ajustes de design nem criar lógica definitiva sem requisitos.
+
+## Integridade da revisão Socii — preview v0.10.19 (01/11/2026)
+- **Prioridade da Etapa 04, dentro do item já existente de integridade de versões:** reproduzido em 320 px que uma participante confirmava 1/2, a autoria mudava seção E tipo na folha de revisão e o sistema concluía 2/2 sem reapresentar a nova classificação à participante.
+- **Correção mínima em `src/main.ts`:** verificar se `sectionId` ou `type` mudou na confirmação da autoria; somente nesses casos invalidar `partners[].complete`, manter os participantes e exigir novo aceite individual. A autoria confirma a classificação atual na mesma ação e a página informa claramente a invalidação. Quando ambos são idênticos, preservar a confirmação anterior.
+- **Teste novo:** `tests/browser_review_metadata_integrity_v0119.py`, reproduzindo inicialmente a falha e, depois da correção, verificando quatro variantes (só seção, só tipo, ambas, sem mudança) em 320/390/740/1280 px, estados 1/2 e 2/2, pendência Socii, mensagem, ausência de erros JS e overflow.
+- **Regressão efetivamente executada:** `npm run build` com 18/18 testes Node; 19/19 suítes Playwright `tests/browser_*.py` aprovadas. Código e teste foram comparados com seus Git blob SHA antes da publicação. O teste mantém navegação de HTML estático e `sessionStorage` local, sem alegar colaboração real.
+- **Contagem NÃO ALTERADA:** 01=4/5, 02=0/4, 03=1/5, **04=17/22** (ativa), 05=0/4, 06=0/5. A ampliação de cobertura da integridade reforça um item já marcado; não conclui as cinco tarefas centrais abertas da etapa 4.
+- **Pendências institucionais:** regra definitiva de versionamento e autorizações requer aceite Megalos; vínculo real de assinaturas, segurança concorrente, armazenamento compartilhado e integração Academy não foram implementados. Ver `docs/CHECKPOINT_V029_2026-11-01.md`.
