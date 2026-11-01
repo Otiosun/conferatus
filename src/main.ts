@@ -334,7 +334,7 @@ function render() {
  lastRenderedHash = location.hash;
  // Keep keyboard focus on the same action after updating the preview DOM.
  const active = document.activeElement;
- const attributes = ['data-vote','data-tab','data-overview-tab','data-section','data-activity','data-action'];
+ const attributes = ['data-vote','data-tab','data-overview-tab','data-section','data-activity','data-action','data-calendar-day'];
  const focusTarget = active instanceof HTMLElement
    ? attributes.map(attr => [attr, active.getAttribute(attr)] as const).find(([,value]) => value!==null)
    : undefined;
