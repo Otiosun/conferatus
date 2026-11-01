@@ -200,7 +200,7 @@ function profilePage() {
  const activeTab: Tab = personalVotingHistory ? profileTab : 'proposicoes';
  const relevant=activities.filter(a=>a.memberId===member.id && a.type===(activeTab==='votos'?'voto':'proposicao'));
  const local=member.id===members[0]?.id && activeTab==='proposicoes'
-  ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${d.status==='concluida'?'Concluída':d.status==='revisao'?'Aguardando Socii':'Em redação'} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button></article>`).join('') : '';
+  ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button></article>`).join('') : '';
  return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
  ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}<h2 class="session-proposals-heading">Histórico demonstrativo</h2>`:''}
  ${relevant.length?relevant.map(activityItem).join(''):'<p class="status-line">Nenhum registro encontrado.</p>'}</section>`;
@@ -280,12 +280,13 @@ function saveWorkflows():boolean{
 }
 function selectOptions(selected:string,items:{id:string;name:string}[]){return items.map(x=>`<option value="${escapeHTML(x.id)}" ${selected===x.id?'selected':''}>${escapeHTML(x.name)}</option>`).join('');}
 function draftReady(d:Draft){return d.authorComplete&&d.partners.every(p=>p.complete);}
+function draftStatusLabel(d:Draft){return d.status==='concluida'?'Concluída':d.status==='revisao'?(d.authorComplete?'Aguardando Socii':'Aguardando autoria'):'Em redação';}
 function friendlyStamp(date:string){const parsed=new Date(date);return Number.isNaN(parsed.getTime())?'Data não definida':parsed.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});}
 function proposalsPage(){
  const author=members[0];
  const examples=activities.filter(a=>a.type==='proposicao' && a.memberId===author?.id).slice(0,4);
  return `${header(undefined,undefined,false)}<div class="workflow-profile">${author?memberHeader(author,'proposicoes',false):''}<div class="tabs workflow-tabs" role="group" aria-label="Histórico do membro"><button class="tab" type="button" data-route="profile" aria-label="Consultar histórico de votação">Histórico de votações</button><span class="tab" aria-current="page">Proposições e Socii</span></div></div>
-  <div class="workflow-layout workflow-proposals-layout">${drafts.length?'<h2 class="workflow-record-heading">Proposições desta sessão</h2>':''}${drafts.length?drafts.map(d=>`<article class="workflow-record"><button data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${d.status==='concluida'?'Concluída':d.status==='revisao'?'Aguardando Socii':'Em redação'} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${d.partners.length?`<p class="workflow-partners"><strong>Concluíram ${Number(d.authorComplete)+d.partners.filter(p=>p.complete).length} de ${d.partners.length+1}</strong><span>Autoria: ${d.authorComplete?'concluída':'pendente'} · Socii: ${d.partners.map(p=>`${escapeHTML(members.find(m=>m.id===p.id)?.name??'Membro')} (${p.complete?'concluiu':'pendente'})`).join(', ')}</span></p>`:''}${advancedPreview&&d.partners.some(p=>!p.complete)?d.partners.filter(p=>!p.complete).map(p=>`<button class="workflow-demo-confirm" data-confirm-partner="${escapeHTML(d.id)}:${escapeHTML(p.id)}">Simular conclusão de ${escapeHTML(members.find(m=>m.id===p.id)?.name??'participante')}</button>`).join(''):''}</article>`).join(''):''}
+  <div class="workflow-layout workflow-proposals-layout">${drafts.length?'<h2 class="workflow-record-heading">Proposições desta sessão</h2>':''}${drafts.length?drafts.map(d=>`<article class="workflow-record"><button data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${d.partners.length?`<p class="workflow-partners"><strong>Concluíram ${Number(d.authorComplete)+d.partners.filter(p=>p.complete).length} de ${d.partners.length+1}</strong><span>Autoria: ${d.authorComplete?'concluída':'pendente'} · Socii: ${d.partners.map(p=>`${escapeHTML(members.find(m=>m.id===p.id)?.name??'Membro')} (${p.complete?'concluiu':'pendente'})`).join(', ')}</span></p>`:''}${advancedPreview&&d.partners.some(p=>!p.complete)?d.partners.filter(p=>!p.complete).map(p=>`<button class="workflow-demo-confirm" data-confirm-partner="${escapeHTML(d.id)}:${escapeHTML(p.id)}">Simular conclusão de ${escapeHTML(members.find(m=>m.id===p.id)?.name??'participante')}</button>`).join(''):''}</article>`).join(''):''}
  ${examples.length?'<h2 class="workflow-record-heading">Histórico demonstrativo</h2>':''}${examples.map(activityItem).join('')}
  </div><div class="workflow-actions"><button type="button" class="workflow-outline" data-action="invite-socii">Convidar para Socii</button>${inviteOpen?`<form id="invite-socii-form" class="workflow-inline"><label>Proposição<select name="draftId" required>${drafts.filter(d=>d.status!=='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label><label>Participante<select name="memberId" required>${selectOptions('',members.slice(1))}</select></label><button class="workflow-primary" ${!drafts.some(d=>d.status!=='concluida')?'disabled':''}>Adicionar participante</button></form>`:''}
  <button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>
@@ -521,11 +522,25 @@ document.addEventListener('submit',(event)=>{
   }
   draftForm={title,body};
   let d=drafts.find(x=>x.id===currentDraftId);
+  let confirmationsReset=false;
   if(!d||d.status==='concluida'){
    d={id:`draft-${Date.now().toString(36)}`,title,body,sectionId:'integridade',type:'PDR',authorComplete:false,partners:[],status:'redacao'};drafts.unshift(d);currentDraftId=d.id;
-  }else{d.title=title;d.body=body;}
+  }else{
+   // A confirmation of an earlier text cannot approve a changed version.
+   if(d.title!==title||d.body!==body){
+    confirmationsReset=d.authorComplete||d.partners.some(p=>p.complete);
+    d.authorComplete=false;
+    d.partners.forEach(p=>{p.complete=false;});
+    d.status='redacao';
+   }
+   d.title=title;d.body=body;
+  }
   const stored=saveWorkflows();
-  if(saveOnly){workflowNotice=stored?'Rascunho salvo nesta sessão.':'Rascunho mantido somente enquanto a página estiver aberta.';navigate('proposals');}
+  if(saveOnly){
+   workflowNotice=stored?'Rascunho salvo nesta sessão.':'Rascunho mantido somente enquanto a página estiver aberta.';
+   if(confirmationsReset)workflowNotice+=' O texto mudou; confirmações anteriores foram reiniciadas nesta prévia.';
+   navigate('proposals');
+  }
   else navigate('review');
   return;
  }
