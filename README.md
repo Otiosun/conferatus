@@ -1,96 +1,56 @@
-# CONFERATUS — demonstração v0.8.12
+# CONFERATUS — prévia institucional
 
-Prévia clicável da Parte 1 enviada pela Megalos. **Todos os dados são sintéticos.** Não há autenticação, banco de dados ou votação real. O cadastro institucional não é acessado nem alterado.
+Aplicação em desenvolvimento a partir dos modelos da Megalos para a Academy. **A grafia oficial ainda precisa ser confirmada** (CONFERATUS/CONFFRATUS); não renomear o código ou o domínio sem essa confirmação.
 
-## Testar agora (sem instalação)
+Prévia pública: **https://conferatus.pages.dev**.
 
-Abra `dist/CONFERATUS_demo_offline.html` num navegador moderno. Se o visualizador de arquivos bloquear HTML/JavaScript, use um servidor estático ou publique a pasta `publish/`.
+## O que existe
 
-## Publicar para compartilhar uma URL
+- Diretório e perfis de membros fictícios, seções deliberativas CINSTIA, histórico demonstrativo e ações administrativas simuladas.
+- Fluxo demonstrativo de votação e registros, sem integração institucional.
+- Elaboração de proposições, salvamento de rascunhos na sessão quando disponível e confirmação de redação.
+- Socii com participantes de demonstração e progresso de conclusão; não envia convites reais.
+- Calendário mensal, seleção de dias, agendamento demonstrativo e acesso à proposição associada.
 
-**Mais simples:** envie o conteúdo da pasta `publish/` para um serviço de hospedagem de sites estáticos (Cloudflare Pages/Netlify Drop). Ela contém `index.html` (100% autossuficiente), `preview.png`, `robots.txt` e `_headers`. Não precisa instalar dependências ou ativar backend.
-
-Se preferir um build com assets separados, também existe a pasta `dist/`; o app agora usa caminhos relativos. Um host como GitHub Pages funcionará em subcaminho, desde que sirva a pasta `dist/` e suporte navegação com `#`.
-
-Para gerar um cartão de compartilhamento com `og:image` absoluto depois de escolher o endereço público, execute: `PUBLIC_URL=https://endereco-real.example npm run build` e publique `publish/` novamente. Sem `PUBLIC_URL`, o cartão terá título e descrição, mas **não** terá a imagem anunciada nas tags Open Graph. Nunca substitua por um domínio inventado.
-
-**Importante:** o link do arquivo HTML anexado numa conversa não é a mesma coisa que um website. A URL compartilhável só passa a existir depois da hospedagem efetiva.
+**Não é um sistema de votação real:** não há autenticação Academy, banco de dados compartilhado, cadastro institucional nem colaboração entre contas. Os dados de exemplo são sintéticos. As alterações ficam apenas no navegador e podem desaparecer ao encerrar a sessão. O ACDM ID na interface não comprova identidade.
 
 ## Desenvolver
 
-- Node 20+ e TypeScript 5.8.
-- `npm install` para instalar a dependência de desenvolvimento.
-- `npm run build` para gerar `dist/` e `publish/`.
-- `npm test` para testar as regras.
-- `python tests/browser_v08.py`, `python tests/browser_microversions.py`, `python tests/browser_v088.py` e `python tests/browser_v0812.py` para os testes de interface (necessita Playwright Python e Chromium).
-- `npm run serve` para testar `dist/` em `http://127.0.0.1:5173` em ambiente sem restrições de navegador.
+Node 20+ e TypeScript. O frontend é intencionalmente simples: **HTML, CSS e TypeScript**, sem framework, bundler de terceiros ou dependências de execução.
 
-O protótipo utiliza **TypeScript puro**, CSS e HTML; não há React nem Vite instalados nesta versão de demonstração, por escolha deliberada de simplicidade. A camada de dados está isolada em `src/data` e `src/domain` para integração posterior.
+```bash
+npm install
+npm run build
+npm run serve
+```
 
-## Checkpoints
+- `npm run build`: compila TypeScript, monta a prévia independente e executa os testes Node.
+- `npm test`: executa o mesmo build com testes.
+- `dist/CONFERATUS_demo_offline.html`: arquivo independente para testar o protótipo. Alguns navegadores restringem JavaScript ou sessionStorage ao abrir arquivos locais.
+- `publish/index.html`: artefato estático usado pela Cloudflare Pages.
+- `?demo=1`: ferramentas de simulação adicionais para desenvolvimento; não correspondem a permissões reais da Academy.
 
-- Regras de produção: `AGENTS.md`.
-- Plano mestre: `docs/PLAN_MASTER.md`.
-- Registro de mudanças: `docs/checkpoints/C1_V08_2026-10-28.md`.
+Testes adicionais de navegação ficam em `tests/browser_*.py` e requerem Playwright Python + Chromium. Os scripts mais recentes cobrem CINSTIA, rascunhos, calendário, perfis e Socii. Testes antigos podem refletir estados anteriores do menu; consultar o checkpoint mais recente.
 
-Nenhuma alteração foi feita em sistema externo, repositório remoto ou conta de hospedagem.
+## Deploy
 
-## Apresentação v0.8
+GitHub privado, Cloudflare Pages conectado ao repositório:
 
-Abra **Menu → Como testar esta prévia** para ir diretamente a votação, perfis ou administração.
-O botão **Reiniciar demonstração** restaura os estados simulados.
+| Configuração | Valor |
+| --- | --- |
+| Framework | None |
+| Branch de produção | `main` |
+| Comando de build | `npm run build` |
+| Pasta de saída | `publish` |
+| Diretório-raiz | `/` |
 
-A hospedagem ainda não foi feita. Testes nesta sessão precisaram usar `set_content` e
-simulação de armazenamento de sessão porque a navegação HTTP/file é bloqueada neste ambiente.
+Não existem segredos de autenticação para a prévia estática. Testar primeiro na branch de preview; promover a `main` somente após build e regressões aprovados.
 
-## Subversões v0.8.x
+## Manutenção e próximas etapas
 
-- **0.8.1:** pesquisa normalizada (maiúsculas/acentos/IDs fictícios) e validação defensiva de dados de sessão.
-- **0.8.2:** retenção do foco em controles atualizados, modal acessível, tecla Esc e foco na edição.
-- **0.8.3:** recuperação de URLs inválidas de perfis com caminho de volta.
-- **0.8.4:** verificação automatizada dos arquivos de publicação e relatório de regressão.
+- **`docs/CHECKLIST_MESTRA.md`**: roteiro oficial, estado de cada etapa e pendências.
+- **`AGENTS.md`**: leis de código humano, preguiça inteligente, fidelidade ao material e entregas verificáveis.
+- **`docs/MODELOS_31_10_NOVAS_TELAS.md`**: descrição dos seis modelos novos e do vídeo de calendário/proposições/Socii.
+- **`docs/CHECKPOINT_V012_2026-11-01.md`**, **`docs/CHECKPOINT_V013_2026-11-01.md`** e **`docs/CHECKPOINT_V014_2026-11-01.md`**: registros recentes dos fluxos testados.
 
-Ver detalhes e limitações em `docs/checkpoints/C1_V084_SUBVERSOES.md`.
-
-- **0.8.5:** mantém a posição da página ao expandir proposições e atualizar estados locais.
-- **0.8.6:** botão de limpar busca com retorno do foco ao campo.
-- **0.8.7:** validação de ACDM ID duplicado diretamente no formulário, com mensagem acessível e foco no campo.
-- **0.8.8:** foco no botão Desfazer após edições, teste de regressão de scroll/erros e quatro larguras de tela.
-
-O histórico detalhado está em `docs/checkpoints/C1_V088_SUBVERSOES.md`.
-
-- **0.8.9–0.8.12:** busca com DOM estável no celular, validação explícita de identificadores, melhorias de acessibilidade e atalho para conteúdo principal. Ver `docs/checkpoints/C1_V0812_SUBVERSOES.md`.
-
-## Cloudflare Pages (integração GitHub)
-
-Usar o repositório com os arquivos desta pasta na **raiz** do GitHub. No Cloudflare Pages, selecionar o projeto via **Connect to Git**.
-
-- **Framework preset:** None (não é Vite; TypeScript puro)
-- **Production branch:** main
-- **Build command:** `npm run build`
-- **Build output directory:** `publish`
-- **Root directory:** `/` (raiz do repositório)
-- **Variáveis:** nenhuma para a demonstração atual
-
-O comando gera `publish/index.html`, `publish/preview.png` e o restante dos arquivos estáticos. Sem autenticação nem dados reais.
-
-
-## v0.9.0 — Revisão da Parte 1
-
-- Rebaixamento demonstrativo de cargo para membro comum, preservando histórico e permitindo Desfazer.
-- Votação de exemplo aberta; votações encerradas não recebem voto.
-- 16 registros inteiramente fictícios, seguindo a estrutura de campos útil do JSON fornecido.
-- Mensagens de interface mais diretas e dados demonstrativos sem informações pessoais.
-- Continua sem backend, autenticação ou registros reais.
-
-## Atualização v0.9.3
-
-Histórico institucional com cinco indicadores proporcionais à referência, seis itens iniciais e expansão explícita; seção administrativa e estados de proposições refinados. Registros continuam sintéticos e as regras permanecem demonstrativas.
-
-## v0.9.4
-
-Os históricos de demonstração foram diversificados por perfil, com descrições curtas e registros inteiramente fictícios. Foram acrescentados testes para detectar títulos duplicados. A autenticação e os votos reais continuam fora do escopo da prévia.
-
-## Atualização v0.9.5
-
-Menu com as duas entradas dos modelos originais; guia de exploração removido; título do rodapé retorna à votação. Controles técnicos de simulação disponíveis apenas com `?demo=1`. Responsividade conferida em 280, 320, 360, 375, 390, 430, 540, 740 e 1280 px. Auditoria: `docs/AUDITORIA_FUNCIONAL_V095.md`.
+O sistema de login já pertence à Academy. O responsável por ele poderá integrar a identidade e os acessos posteriormente. Não criar outro login independente sem decisão explícita. Regras institucionais de deliberação e registro permanecem sujeitas à definição da Megalos.
