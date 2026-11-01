@@ -1,5 +1,7 @@
 # CONFERATUS — Leis máximas de engenharia
 
+> **Retomada obrigatória (01/11/2026):** consultar `docs/CHECKLIST_MESTRA.md` antes de iniciar qualquer tarefa e atualizá-la após os testes. A implementação atualmente mantida usa TypeScript, HTML e CSS sem framework; as sugestões antigas de React/Vite abaixo são históricas e **não autorizam reescrita**. Priorizar código humano, natural e legível, preguiça inteligente, fidelidade ao material da Megalos, revisões pequenas e distinção explícita entre simulação e funcionamento integrado.
+
 Versão 1.0 — 28/10/2026. Este arquivo foi preparado para virar `AGENTS.md` na raiz do repositório. Leis válidas para humanos e agentes de IA. Uma exceção exige justificativa em `docs/decisions/` e aprovação explícita do responsável técnico.
 
 ## Constituição
