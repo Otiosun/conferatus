@@ -111,5 +111,5 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 ## Checkpoint de preview v0.10.8 (01/11/2026)
 - **Feito:** painel visual do formulário de agendamento aproximado do modelo azul da Megalos, apenas em `src/styles.css`, branch isolada `preview/v0.10.8-schedule-visual`.
 - **Testado localmente:** compilação TypeScript/build offline; 18/18 Node; `browser_schedule_visual_v018.py` em 320, 390, 740 e 1280 px; regressões de calendário, virada do dia, rascunhos, perfil, Socii e rotas aprovadas.
-- **Publicado:** nenhum merge, nenhuma promoção para `main`. Check remoto Cloudflare pendente de verificação na documentação inicial.
+- **Publicado:** build Cloudflare Pages de preview com `completed/success`. Nenhum merge e nenhuma promoção para `main`.
 - **Pendente:** fidelidade e aceite final da Megalos, regras institucionais, autenticação Academy, revisão física do preview e acompanhamento dos demais itens da Etapa 4. Ver `docs/CHECKPOINT_V018_2026-11-01.md`.
