@@ -38,6 +38,7 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 - [x] Aproximar linhas e detalhes expandidos da referência 1001930221.jpg, exibindo Socii apenas quando vinculado a proposição da sessão, sem inventar códigos de registro (v0.10.9; testes locais e preview).
 - [x] Ligar uma programação demonstrativa à proposição concluída e exibir a proposição vinculada.
 - [ ] Finalizar o agendamento: proposição, seção, datas, tipo, título e descrição objetiva (regras institucionais pendentes).
+- [x] Validar a integridade de registros de sessão e vínculos de programação: isolar entradas incompletas, preservar entradas válidas, arquivar localmente dados rejeitados antes da próxima gravação e identificar vínculos indisponíveis (prévia v0.10.14; regressões em quatro larguras).
 - [ ] Finalizar redação, revisão, confirmação e estados de proposições.
 - [x] Aproximar folha de revisão e confirmação de proposição dos modelos `1001930222.jpg` e `1001930223.jpg` (preview v0.10.10; opções e regras preservadas; aprovado em quatro larguras).
 - [x] Corrigir nova redação independente e salvar/retomar rascunho incompleto na prévia local (v0.10.1; testes em 320/390/740/1280 px).
@@ -148,3 +149,10 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 - **Testes:** compilação/bundle offline/18 de 18 Node, mais 13 suítes Playwright/Chromium, incluindo `browser_signature_integrity_v0113.py` em 320/390/740/1280 px; falha reproduzida antes do patch e corrigida depois. Check remoto Cloudflare Pages `completed/success` no commit `01d25c3` (preview).
 - **Isolamento:** branch `preview/v0.10.13-socii-reapproval`, sem merge/promoção para `main`. Capturas e estado do teste salvos no Drive Komekko. Consultar `docs/CHECKPOINT_V023_2026-11-01.md`.
 - **Pendente:** regra institucional de assinatura/versionamento da Academy ainda precisa de aprovação, Socii compartilhado não implementado; não tratar esta proteção demonstrativa como decisão institucional final.
+
+## Checkpoint de preview v0.10.14 (01/11/2026)
+- **Defeito comprovado:** dados incompletos em `sessionStorage` eram aceitos só por `id/title` e podiam impedir a renderização de todas as propostas ou programações; vínculo de uma programação a proposta inexistente exibia ação sem efeito.
+- **Corrigido:** validação estrutural de registros recuperados, aviso de entradas não carregadas, backup dessas entradas no navegador antes de sobrescrever os dados da sessão, preservação do calendário com aviso de vínculo ausente e funcionamento normal dos vínculos válidos.
+- **Testado:** TypeScript + bundle offline + 18/18 Node; 14/14 suítes Playwright, incluindo novo `browser_restore_integrity_v0114.py` em 320/390/740/1280 px. Código/teste publicados com hash exatamente igual aos arquivos locais aprovados. Check Cloudflare Pages `completed/success` em `6e6db37`.
+- **Isolado:** branch `preview/v0.10.14-session-integrity`; `main` não promovida, sem implementação de dados institucionais reais. Capturas e checkpoint no Drive Komekko. Ver `docs/CHECKPOINT_V024_2026-11-01.md`.
+- **Ainda aberto:** regras finais de versões e assinaturas Socii, permanência de dados e autenticação compartilhada, aprovações e permissões, calendário definitivo e validação visual/institucional da Megalos.
