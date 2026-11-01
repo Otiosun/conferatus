@@ -274,8 +274,9 @@ function calendarGrid(items:Deliberation[]){
  });
  return `<div class="calendar-hero"><div class="calendar-toolbar"><h1>CALENDÁRIO</h1><div class="calendar-month-nav"><button type="button" data-action="calendar-prev" aria-label="Mês anterior">‹</button><h2 aria-live="polite">${escapeHTML(monthLabel)}</h2><button type="button" data-action="calendar-next" aria-label="Próximo mês">›</button></div></div><div class="calendar-grid" aria-label="Dias do mês">${['D','S','T','Q','Q','S','S'].map(d=>`<span class="calendar-weekday">${d}</span>`).join('')}${'<span class="calendar-empty"></span>'.repeat(offset)}${days.join('')}</div><div class="calendar-foot"><span><i class="calendar-marker" aria-hidden="true"></i> Dia programado</span><button type="button" data-action="calendar-today">Hoje</button></div></div>`;
 }
-function saveWorkflows(){
- try{sessionStorage.setItem(draftKey,JSON.stringify(drafts));sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));}catch{}
+function saveWorkflows():boolean{
+ try{sessionStorage.setItem(draftKey,JSON.stringify(drafts));sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));return true;}
+ catch{return false;}
 }
 function selectOptions(selected:string,items:{id:string;name:string}[]){return items.map(x=>`<option value="${escapeHTML(x.id)}" ${selected===x.id?'selected':''}>${escapeHTML(x.name)}</option>`).join('');}
 function draftReady(d:Draft){return d.authorComplete&&d.partners.every(p=>p.complete);}
@@ -495,8 +496,8 @@ document.addEventListener('submit',(event)=>{
   if(!d||d.status==='concluida'){
    d={id:`draft-${Date.now().toString(36)}`,title,body,sectionId:'integridade',type:'PDR',authorComplete:false,partners:[],status:'redacao'};drafts.unshift(d);currentDraftId=d.id;
   }else{d.title=title;d.body=body;}
-  saveWorkflows();
-  if(saveOnly){workflowNotice='Rascunho salvo neste navegador.';navigate('proposals');}
+  const stored=saveWorkflows();
+  if(saveOnly){workflowNotice=stored?'Rascunho salvo nesta sessão.':'Rascunho mantido somente enquanto a página estiver aberta.';navigate('proposals');}
   else navigate('review');
   return;
  }
@@ -531,7 +532,7 @@ document.addEventListener('submit',(event)=>{
    return;
   }
   const item:Deliberation={id:`sched-${Date.now().toString(36)}`,title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),status:'programada'};
-  schedule.unshift(item);saveWorkflows();workflowNotice='Deliberação programada nesta demonstração.';scheduleFormOpen=false;expandedSchedule=item.id;
+  schedule.unshift(item);const stored=saveWorkflows();workflowNotice=stored?'Deliberação programada nesta demonstração.':'Programação mantida somente enquanto a página estiver aberta.';scheduleFormOpen=false;expandedSchedule=item.id;
   const date=new Date(`${start.slice(0,10)}T12:00:00`);calendarYear=date.getFullYear();calendarMonth=date.getMonth();selectedCalendarDay=start.slice(0,10);
   render();return;
  }
