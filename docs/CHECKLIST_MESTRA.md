@@ -33,10 +33,13 @@ Status verificado: `main` publicou a v0.10.0 (`8f50177`, Cloudflare aprovado); p
 - [ ] Finalizar a tela do calendário e a lista de programações.
 - [ ] Finalizar o agendamento: proposição, seção, datas, tipo, título e descrição objetiva.
 - [ ] Finalizar redação, revisão, confirmação e estados de proposições.
+- [x] Corrigir nova redação independente e salvar/retomar rascunho incompleto na prévia local (v0.10.1; testes em 320/390/740/1280 px).
 - [ ] Consolidar a colaboração Socii e seus estados de conclusão.
 - [ ] Conferir as novas telas com as seis imagens e o vídeo da Megalos.
 **Estado:** protótipo v0.10.0 publicado em `main`; fluxos testados localmente em quatro larguras de tela. Integração e regras de negócio definitivas pendentes.
 **Dependências:** regras detalhadas de Socii e atribuição de responsabilidades.
+
+**Progresso incremental:** ajuste de rascunhos pronto e testado localmente; publicação da v0.10.1 aguardando confirmação do build de preview.
 
 ## 05 — Integração posterior à Academy
 - [ ] Definir uma interface simples para receber a identidade institucional.
