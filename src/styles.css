@@ -665,3 +665,28 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .workflow-review-buttons button.workflow-outline {background:#ebedf3;color:#343849;border:1px solid #e2e5ec;}
 .workflow-review-buttons button.workflow-primary {background:#eff1f6;color:#343849;border:1px solid #e2e5ec;}
 @media(max-width:400px){.workflow-review-panel{padding:10px 12px 12px}.workflow-review-sheet{padding:30px 17px 18px}.workflow-review-buttons{gap:8px}.workflow-review-buttons button{font-size:12px;}}
+
+/* Profile and propositions share the Academy's original profile composition. */
+.workflow-profile{background:#fff;}
+.workflow-profile .profile-head{padding-bottom:0;}
+.workflow-profile .workflow-tabs{padding:16px 13px 20px;margin:0;gap:10px;}
+.workflow-profile .workflow-tabs .tab{display:flex;align-items:center;justify-content:center;text-align:center;min-width:0;min-height:44px;}
+.workflow-profile .workflow-tabs .tab[aria-current="page"]{background:#515dc7;color:#fff;}
+.workflow-proposals-layout{padding:12px 0 24px;min-height:35vh;}
+.workflow-record-heading{font-size:12px;font-weight:700;color:#5260b5;margin:17px 20px 8px;}
+.workflow-proposals-layout .workflow-record{padding:13px 20px;border-top:1px solid #dcdde5;}
+.workflow-proposals-layout .workflow-record strong{font-size:13px;text-transform:uppercase;line-height:1.4;}
+.workflow-proposals-layout .workflow-record small{font-size:10px;font-weight:400;}
+.workflow-proposals-layout .activity{margin:0;border-left:0;border-right:0;border-radius:0;}
+.workflow-proposals-layout .activity-proposal .activity-title{text-transform:uppercase;}
+.workflow-proposals-layout .workflow-partners{clear:both;}
+@media(max-width:400px){
+ .workflow-profile .workflow-tabs{padding-left:12px;padding-right:12px;}
+ .workflow-profile .workflow-tabs .tab{font-size:10px;}
+ .workflow-proposals-layout .workflow-record{padding-left:13px;padding-right:13px;}
+}
+
+.workflow-profile .profile-summary>.metrics{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;font-size:11px;}
+.workflow-profile .profile-summary>.metrics .metric-cell{gap:2px;flex-wrap:nowrap;}
+.workflow-profile .profile-summary>.metrics small{font-size:9px;}
+@media(max-width:360px){.workflow-profile .profile-summary>.metrics{font-size:9px;gap:1px}.workflow-profile .profile-summary>.metrics small{font-size:8px;}}
