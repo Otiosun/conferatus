@@ -21,6 +21,7 @@ with sync_playwright() as p:
         assert 'novembro de 2026' in page.locator('.calendar-month-nav h2').inner_text().lower()
         page.locator('[data-calendar-day="2026-11-22"]').click()
         assert page.locator('.calendar-item').count() == 1
+        assert page.evaluate('document.activeElement?.dataset.calendarDay') == '2026-11-22'
         page.locator('[data-calendar-day="2026-11-25"]').click()
         page.get_by_text('Nenhuma programação nesta data.').wait_for()
         page.locator('[data-action=calendar-all]').click()
