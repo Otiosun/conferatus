@@ -44,6 +44,7 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 - [x] Aproximar o editor de proposições do modelo de redação minimalista, preservando título editável, rascunho e botões (v0.10.5; comparação visual local).
 - [ ] Conferir as novas telas com as seis imagens e o vídeo da Megalos.
 - [x] Executar e validar em navegador a retenção de campos de agendamento durante a navegação do calendário (preview v0.10.6; Chromium em 320, 390, 740 e 1280 px; ainda não promovido a `main`).
+- [x] Manter o botão Hoje e a marcação do dia consistentes após a meia-noite (preview v0.10.7; Chromium com relógio controlado em 390 e 740 px).
 **Estado:** protótipo v0.10.0 publicado em `main`; fluxos testados localmente em quatro larguras de tela. Integração e regras de negócio definitivas pendentes.
 **Dependências:** regras detalhadas de Socii e atribuição de responsabilidades.
 
@@ -99,3 +100,9 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 - **Testado:** build remoto Cloudflare aprovado em `3423ba4`; build local e 18/18 testes Node aprovados; Playwright calendário, rascunhos, perfil, Socii e integração proposta-calendário aprovados em quatro larguras; menus em nove larguras.
 - **Publicado:** nenhuma alteração promovida à produção; a branch possui apenas a prévia de desenvolvimento.
 - **Pendente:** aceite visual pela Megalos e verificação física do deploy, regras definitivas, integração Academy e promoção deliberada para `main`. Ver `docs/CHECKPOINT_V016_2026-11-01.md`.
+
+## Checkpoint de preview v0.10.7 (01/11/2026)
+- **Feito:** correção da data atual dinâmica no calendário; branch isolada `preview/v0.10.7-calendar-current-day`, derivada da v0.10.6 validada.
+- **Testado:** falha reproduzida antes da correção; teste da meia-noite aprovado após alteração em 390/740 px; TypeScript/build local, 18/18 Node, seis testes anteriores de navegação/fluxos; Cloudflare Pages do commit de código e teste concluído com sucesso.
+- **Publicado:** somente prévia na branch; nenhuma promoção a `main` ou publicação institucional.
+- **Pendente:** fidelidade/aceite visual da Megalos, integração Academy, regras institucionais e revisão física do site. Ver `docs/CHECKPOINT_V017_2026-11-01.md`.
