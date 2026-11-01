@@ -309,6 +309,13 @@ function reviewPage(){
  <label>Tipo de proposição<select name="type" required>${['PDR','PR','Ofício'].map(t=>`<option value="${t}" ${t===d.type?'selected':''}>${t}</option>`).join('')}</select></label>
  <div class="workflow-review-buttons"><button type="button" class="workflow-outline" data-route="compose">Voltar</button><button class="workflow-primary" type="submit">Confirmar conclusão</button></div></form></div>`;
 }
+// Display only Socii participants already linked to this session's proposal.
+function calendarSociiLine(proposalId:string){
+ const draft=drafts.find(d=>d.id===proposalId);
+ const names=draft?.partners.map(p=>members.find(m=>m.id===p.id)?.name)
+  .filter((name):name is string=>Boolean(name))??[];
+ return names.length?`<span class="calendar-socii">Socii: ${names.map(escapeHTML).join(', ')}</span>`:'';
+}
 function calendarPage(){
  const sample=[{id:'sample-1',title:'Revisão do calendário de reuniões',sectionId:'integridade',objective:'Organizar o calendário de reuniões institucionais.',start:'2026-11-22T14:00',end:'2026-11-23T14:00',type:'PDR',proposalId:'',status:'programada' as const}];
  const all=[...sample,...schedule.filter(s=>s.status==='programada')]
@@ -325,8 +332,8 @@ function calendarPage(){
  <label>Tipo de deliberação<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
  <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
  ${workflowNotice?`<p role="status" class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
- <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}"><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span></button>
- ${expandedSchedule===item.id?`<div class="calendar-expanded"><div class="calendar-status">${escapeHTML(item.type)} <strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
+ <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}"><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
+ ${expandedSchedule===item.id?`<div class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -341,7 +348,7 @@ function render() {
  lastRenderedHash = location.hash;
  // Keep keyboard focus on the same action after updating the preview DOM.
  const active = document.activeElement;
- const attributes = ['data-vote','data-tab','data-overview-tab','data-section','data-activity','data-action','data-calendar-day'];
+ const attributes = ['data-vote','data-tab','data-overview-tab','data-section','data-activity','data-action','data-calendar-day','data-schedule'];
  const focusTarget = active instanceof HTMLElement
    ? attributes.map(attr => [attr, active.getAttribute(attr)] as const).find(([,value]) => value!==null)
    : undefined;
