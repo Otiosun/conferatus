@@ -40,6 +40,7 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 - [ ] Finalizar o agendamento: proposição, seção, datas, tipo, título e descrição objetiva (regras institucionais pendentes).
 - [x] Validar a integridade de registros de sessão e vínculos de programação: isolar entradas incompletas, preservar entradas válidas, arquivar localmente dados rejeitados antes da próxima gravação e identificar vínculos indisponíveis (prévia v0.10.14; regressões em quatro larguras).
 - [x] Recuperação de sessão reforçada: preservar texto JSON ilegível e objetos em formato errado antes de sobrescrever armazenamento local, rejeitar registros falsamente concluídos sem assinaturas e reconstruir registros válidos (v0.10.15, teste em quatro larguras).
+- [x] Impedir IDs duplicados em proposições, programações e participantes Socii restaurados. Preservar primeira ocorrência válida e versões rejeitadas em histórico de quarentena sem sobrescrever cópias antigas (prévia v0.10.16; teste de quatro larguras).
 - [ ] Finalizar redação, revisão, confirmação e estados de proposições.
 - [x] Aproximar folha de revisão e confirmação de proposição dos modelos `1001930222.jpg` e `1001930223.jpg` (preview v0.10.10; opções e regras preservadas; aprovado em quatro larguras).
 - [x] Corrigir nova redação independente e salvar/retomar rascunho incompleto na prévia local (v0.10.1; testes em 320/390/740/1280 px).
@@ -164,3 +165,10 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 - **Testado:** `npm run build` (18/18 testes Node), 15/15 suítes Playwright, incluindo `browser_session_recovery_v0115.py` em 320, 390, 740 e 1280 px. Retomada validada por reconstrução de documento com valores exatos serializados no armazenamento simulado; **não** testada como reload nativo do browser ou persistência multiusuário.
 - **Isolamento:** `preview/v0.10.15-session-recovery`; sem merge da `main`. Capturas de 390 e 740 px arquivadas no Komekko, ver `docs/CHECKPOINT_V025_2026-11-01.md`. Check remoto Cloudflare Pages `completed/success` em `c6ccf3d` (somente branch de prévia).
 - **Ainda pendente:** backup remoto seguro e autenticação existente Academy, regras institucionais finais da Megalos, coautoria Socii e aceite visual/funcional de todas as fases.
+
+## Checkpoint de preview v0.10.16 (01/11/2026)
+- **Defeito reproduzido:** registros distintos com mesmo ID eram aceitos no armazenamento local; seus botões/cancelamentos utilizavam `find` por ID e podiam direcionar ações ao registro incorreto. Socii permitia contar o mesmo participante duas vezes em dados recuperados.
+- **Corrigido:** manter a primeira ocorrência válida por ID, isolar entradas repetidas e participantes Socii duplicados, avisar o usuário e preservar entradas rejeitadas num histórico append-only de sessão `conferatus:quarantined-session-backups-v0116`, sem substituir o backup legado `v0114`.
+- **Testado:** TypeScript + bundle offline + 18/18 testes Node. **16/16 suítes Playwright ativas**, incluindo `browser_unique_records_v0116.py` em 320/390/740/1280 px (falha comprovada antes do patch). Cloudflare Pages `completed/success` no commit `323aa9a` do código e teste; hash dos dois arquivos coincide com o executado localmente.
+- **Limites:** não existe backend, login Academy integrado ou backup remoto; o histórico de quarentena está apenas em `sessionStorage`. Teste `browser_smoke.py` legado fora da matriz ativa precisa atualizar seletor de botão descontinuado; não contabilizá-lo como aprovado. Ver `docs/CHECKPOINT_V026_2026-11-01.md`.
+- **Isolamento:** branch `preview/v0.10.16-unique-records`. `main` intocada, aceite Megalos e regras institucionais continuam pendentes.
