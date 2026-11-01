@@ -30,8 +30,10 @@ Status verificado: `main` publicou a v0.10.0 (`8f50177`, Cloudflare aprovado); p
 **Estado:** parcialmente implementado em demonstração.
 
 ## 04 — Calendário, proposições e Socii
-- [ ] Finalizar a tela do calendário e a lista de programações.
-- [ ] Finalizar o agendamento: proposição, seção, datas, tipo, título e descrição objetiva.
+- [x] Construir calendário mensal interativo, dias programados e filtro de agenda (v0.10.2; verificação local).
+- [ ] Finalizar a tela do calendário e a lista de programações após revisão de fidelidade com a Megalos.
+- [x] Ligar uma programação demonstrativa à proposição concluída e exibir a proposição vinculada.
+- [ ] Finalizar o agendamento: proposição, seção, datas, tipo, título e descrição objetiva (regras institucionais pendentes).
 - [ ] Finalizar redação, revisão, confirmação e estados de proposições.
 - [x] Corrigir nova redação independente e salvar/retomar rascunho incompleto na prévia local (v0.10.1; testes em 320/390/740/1280 px).
 - [ ] Consolidar a colaboração Socii e seus estados de conclusão.
@@ -40,6 +42,8 @@ Status verificado: `main` publicou a v0.10.0 (`8f50177`, Cloudflare aprovado); p
 **Dependências:** regras detalhadas de Socii e atribuição de responsabilidades.
 
 **Progresso incremental:** ajuste de rascunhos pronto e testado localmente; publicação da v0.10.1 aguardando confirmação do build de preview.
+
+**Avanço v0.10.2:** compilação TypeScript, 18 testes Node e fluxos Playwright locais aprovados em 320/390/740/1280 px. Preview remoto em avaliação; sem alteração automática em produção.
 
 ## 05 — Integração posterior à Academy
 - [ ] Definir uma interface simples para receber a identidade institucional.
