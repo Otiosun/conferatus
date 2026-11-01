@@ -549,3 +549,10 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .workflow-finished strong{color:#4a56b6;}
 .workflow-finished p{font-size:13px;margin-bottom:18px;}
 .workflow-finished button{width:100%;}
+
+/* Local documents remain visibly separate from historical fixture records. */
+.session-proposals-heading{font-size:13px;font-weight:700;color:#5661ad;margin:15px 0 12px;}
+.session-proposal-link{width:100%;text-align:left;display:flex;flex-direction:column;gap:5px;border:0;background:transparent;padding:0;cursor:pointer;font:inherit;color:inherit;}
+.session-proposal-link strong{font-size:14px;}
+.session-proposal-link small{font-size:11px;color:#626bba;}
+.session-proposal-link span{font-size:12px;color:#555e6a;line-height:1.4;}
