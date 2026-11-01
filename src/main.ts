@@ -407,6 +407,7 @@ function calendarPage(){
   .sort((a,b)=>a.start.localeCompare(b.start));
  const visible=selectedCalendarDay?all.filter(item=>item.start.slice(0,10)<=selectedCalendarDay&&item.end.slice(0,10)>=selectedCalendarDay):all;
  return `<div class="workflow-layout">${savedRecordNotice()}${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}">${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
+ <p class="calendar-preview-disclosure" role="note">Esta prévia apenas programa uma deliberação; não inicia uma votação real.</p>
  ${scheduleFormOpen?`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
  ${!drafts.some(d=>d.status==='concluida')?'<p class="workflow-help">Para agendar, conclua uma proposição primeiro. <button type="button" data-route="proposals">Ir às proposições</button></p>':''}
  <label>Título da deliberação<input name="title" maxlength="140" required placeholder="Título da deliberação"></label>
