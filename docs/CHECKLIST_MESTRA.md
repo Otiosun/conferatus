@@ -26,8 +26,11 @@ Status verificado: `main` publicou a v0.10.0 (`8f50177`, Cloudflare aprovado); p
 - [ ] Consolidar históricos pessoais e institucionais com os dados da aplicação.
 - [ ] Preservar registros antigos após mudança de cargo ou rebaixamento.
 - [ ] Revisar os indicadores Votos, PDR, PR, Ofício e Socii conforme novos modelos.
+- [x] Exibir proposições locais no perfil do autor, separadas do histórico demonstrativo (v0.10.3; testado localmente).
 - [ ] Integrar as listas de proposições e deliberações aos respectivos perfis.
 **Estado:** parcialmente implementado em demonstração.
+
+**Ajuste v0.10.3:** o editor e o perfil do autor compartilham a lista de proposições da sessão. Mensagens de salvamento distinguem armazenamento efetivo de dados apenas em memória.
 
 ## 04 — Calendário, proposições e Socii
 - [x] Construir calendário mensal interativo, dias programados e filtro de agenda (v0.10.2; verificação local).
