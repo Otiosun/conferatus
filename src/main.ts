@@ -334,6 +334,9 @@ function render() {
  if (!root) return;
  // A local edit must not unexpectedly jump the user to the top of a long page.
  const previousScroll = window.scrollY;
+ // Preserve local scheduling inputs while browsing days and months.
+ const scheduleForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
+ const scheduleValues = scheduleForm ? new FormData(scheduleForm) : null;
  const preserveScroll = location.hash === lastRenderedHash;
  lastRenderedHash = location.hash;
  // Keep keyboard focus on the same action after updating the preview DOM.
@@ -346,6 +349,13 @@ function render() {
  const page=route==='ballot'?ballotPage():route==='members'?memberList():route==='profile'?profilePage():route==='overview'?overviewPage():route==='calendar'?calendarPage():route==='proposals'?proposalsPage():route==='compose'?composePage():route==='review'?reviewPage():governancePage();
  root.innerHTML=`<div class="app-shell" aria-label="CONFERATUS — dados fictícios"><a href="#main-content" class="skip-link">Ir para o conteúdo</a><main id="main-content" tabindex="-1">${page}</main>${footer()}
 </div>`;
+ if (scheduleValues) {
+  const nextForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
+  if (nextForm) for (const [name, value] of scheduleValues) {
+   const field = nextForm.elements.namedItem(name);
+   if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) field.value = String(value);
+  }
+ }
  if (focusTarget) {
   const [attr,value]=focusTarget;
   [...root.querySelectorAll<HTMLElement>(`[${attr}]`)]
