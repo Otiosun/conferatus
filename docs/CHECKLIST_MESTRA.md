@@ -2,7 +2,7 @@
 
 Atualização de referência: 01/11/2026
 Responsável pelo acompanhamento: desenvolvimento CONFERATUS
-Status verificado: `main` publicou a v0.10.0 (`8f50177`, Cloudflare aprovado); preview `preview/v0.10.0-workflows` aprovado (`fe4bbeb`). Os fluxos novos permanecem demonstrativos e a revisão final das telas continua pendente.
+Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado). O preview isolado `preview/v0.10.6-calendar-form-state` contém a correção de retenção do agendamento (Cloudflare aprovado em `3423ba4`; regressão Playwright adicionada, execução de navegador pendente). Todos os fluxos permanecem demonstrativos; a revisão final das telas continua pendente.
 
 > Fonte oficial para retomar o trabalho. Nenhuma tarefa é concluída apenas por existir uma tela ou um commit. Não mudar o nome do produto sem confirmar a grafia com a Megalos.
 
@@ -43,6 +43,7 @@ Status verificado: `main` publicou a v0.10.0 (`8f50177`, Cloudflare aprovado); p
 - [ ] Consolidar a colaboração Socii e seus estados de conclusão.
 - [x] Aproximar o editor de proposições do modelo de redação minimalista, preservando título editável, rascunho e botões (v0.10.5; comparação visual local).
 - [ ] Conferir as novas telas com as seis imagens e o vídeo da Megalos.
+- [ ] Executar e validar em navegador a retenção de campos de agendamento durante a navegação do calendário (correção e teste preparados em preview v0.10.6; ainda não promovidos a `main`).
 **Estado:** protótipo v0.10.0 publicado em `main`; fluxos testados localmente em quatro larguras de tela. Integração e regras de negócio definitivas pendentes.
 **Dependências:** regras detalhadas de Socii e atribuição de responsabilidades.
 
@@ -92,3 +93,9 @@ Status verificado: `main` publicou a v0.10.0 (`8f50177`, Cloudflare aprovado); p
 - **Testado:** compilação e 18 testes de lógica na v0.10.0 local; Chromium em 320, 390, 740 e 1280 px para proposição/agendamento; fluxo Socii pendente testado separadamente.
 - **Publicado:** preview `fe4bbeb` e produção `8f50177`, ambos com compilação Cloudflare aprovada.
 - **Pendente:** confirmação da grafia oficial, revisão visual integral das novas referências, regras finais de Socii e votação, integração com a Academy e validação física do domínio hospedado.
+
+## Checkpoint de preview v0.10.6 (01/11/2026)
+- **Feito:** correção mínima em `src/main.ts` para preservar campos de agendamento no calendário, branch isolada `preview/v0.10.6-calendar-form-state`.
+- **Testado:** build remoto Cloudflare aprovado em `3423ba4`; o novo teste de navegação em quatro larguras está no Git, mas a execução Playwright ainda está pendente.
+- **Publicado:** nenhuma alteração promovida à produção; a branch possui apenas a prévia de desenvolvimento.
+- **Pendente:** executar navegador e capturas visuais, revisão da Megalos, regras definitivas e integração Academy. Ver `docs/CHECKPOINT_V016_2026-11-01.md`.
