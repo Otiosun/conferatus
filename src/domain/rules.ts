@@ -1,4 +1,4 @@
-import type { Member, OptionResult, GovernanceChange, Ballot } from './types.js';
+import type { Member, OptionResult, GovernanceChange, Ballot, Section } from './types.js';
 
 export function totalVotes(options: OptionResult[]): number {
   return options.reduce((sum, option) => sum + option.votes, 0);
@@ -10,7 +10,8 @@ export function resultPercentage(votes: number, total: number): number {
 export function canRecordVote(ballot: Ballot): boolean {
   return ballot.status === 'aberta';
 }
-/** Preview-only member association editor. Historical activity is deliberately untouched. */
+
+/** Changes a section link only; this is not a role demotion. */
 export function updateSectionAssignment(member: Member, sectionId: string, assigned: boolean): {
   member: Member;
   change: GovernanceChange;
@@ -31,12 +32,24 @@ export function updateSectionAssignment(member: Member, sectionId: string, assig
     },
   };
 }
-/** Rebaixamento de função preserva atividades e indicadores anteriores. */
-export function demoteToCommonMember(member: Member, commonSectionId = 'membros'): {member: Member; change: GovernanceChange} {
- const before = [...member.sectionIds];
- const updated: Member = {...member, role:'membro', sectionIds:[commonSectionId]};
- return {member:updated,change:{kind:'rebaixamento',memberId:member.id,sectionId:commonSectionId,previousSectionIds:before,nextSectionIds:[commonSectionId],previousRole:member.role,nextRole:'membro'}};
+/** Move a member to the common member category, retaining all past activity. */
+export function demoteToCommonMember(member: Member, commonSectionId = 'membros'): {
+  member: Member;
+  change: GovernanceChange;
+} {
+  const before = [...member.sectionIds];
+  const updated: Member = { ...member, role: 'membro', sectionIds: [commonSectionId],
+  hadDeliberativeHistory: member.hadDeliberativeHistory === true || member.sectionIds.some(id => id !== commonSectionId) };
+  return {
+    member: updated,
+    change: {
+      kind: 'rebaixamento', memberId: member.id, sectionId: commonSectionId,
+      previousSectionIds: before, nextSectionIds: [commonSectionId],
+      previousRole: member.role, nextRole: updated.role,
+    },
+  };
 }
+
 export function escapeHTML(value: string): string {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
@@ -63,6 +76,8 @@ export function restoreDemoMembers(members: Member[], validSectionIds: string[],
       ))];
     }
     if (entry.role === 'diretor' || entry.role === 'membro') member.role = entry.role;
+    if (entry.hadDeliberativeHistory === true) member.hadDeliberativeHistory = true;
+    if (entry.hadDeliberativeHistory === false) member.hadDeliberativeHistory = false;
     if (typeof entry.acdmId === 'string') {
       const candidate = entry.acdmId.toUpperCase();
       if (/^[A-Z0-9_-]{3,40}$/.test(candidate) &&
@@ -73,4 +88,15 @@ export function restoreDemoMembers(members: Member[], validSectionIds: string[],
       }
     }
   }
+}
+
+/** Institutional voting membership is separate from administrative access. */
+export function isDeliberativeMember(member: Member, sections: Section[]): boolean {
+ const eligibleSections = new Set(sections.filter(section => section.category === 'deliberativa').map(section => section.id));
+ return member.sectionIds.some(sectionId => eligibleSections.has(sectionId));
+}
+
+/** Past deliberative votes remain visible after a member is demoted. */
+export function hasPersonalVoteHistory(member: Member, sections: Section[]): boolean {
+ return member.hadDeliberativeHistory === true || isDeliberativeMember(member, sections);
 }

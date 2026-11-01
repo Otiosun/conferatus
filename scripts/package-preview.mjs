@@ -1,15 +1,12 @@
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const target = path.join(root, 'publish');
-await mkdir(target, { recursive: true });
-
-// The site publishes as-is. No bespoke card, marketing description or social artwork.
-const html = await readFile(path.join(root, 'dist', 'CONFERATUS_demo_offline.html'), 'utf8');
-await writeFile(path.join(target, 'index.html'), html);
-await rm(path.join(target, 'preview.png'), { force: true });
-await writeFile(path.join(target, 'robots.txt'), 'User-agent: *\nAllow: /\n');
-await writeFile(path.join(target, '_headers'), '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Robots-Tag: noindex, nofollow, noarchive\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n');
+const target = path.join(root,'publish');
+await mkdir(target,{recursive:true});
+const html = await readFile(path.join(root,'dist','CONFERATUS_demo_offline.html'),'utf8');
+await writeFile(path.join(target,'index.html'),html);
+await rm(path.join(target,'preview.png'),{force:true});
+await writeFile(path.join(target,'robots.txt'),'User-agent: *\nAllow: /\n');
+await writeFile(path.join(target,'_headers'), '/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  X-Robots-Tag: noindex, nofollow, noarchive\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n');
 console.log('Static site ready');

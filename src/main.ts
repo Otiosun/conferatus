@@ -1,6 +1,6 @@
 import { activities, ballots } from './data/fixtures.js';
 import { FixtureMemberProvider } from './domain/providers.js';
-import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey } from './domain/rules.js';
+import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory } from './domain/rules.js';
 import type { Activity, Member } from './domain/types.js';
 
 type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance';
@@ -14,6 +14,8 @@ let profileTab: Tab = 'votos';
 let overviewTab: Tab = 'votos';
 let overviewExpanded = false;
 let menuOpen = false;
+let suppressFooterHomeClickUntil = 0;
+let footerSwipeStart: {x:number;y:number} | null = null;
 let expandedSection = '';
 let editingMemberId: string | null = null;
 let notice = '';
@@ -25,13 +27,13 @@ let expandedActivity = '';
 let rolePreview: 'diretor' | 'membro' = 'diretor';
 let demoToolsOpen = false;
 const advancedPreview = new URLSearchParams(location.search).get('demo') === '1';
-let lastChange: {memberId: string; acdmId: string | undefined; sectionIds: string[]; role: Member['role']} | null = null;
-const initialMembers = new Map(members.map(m=>[m.id,{name:m.name,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role}]));
+let lastChange: {memberId: string; acdmId: string | undefined; sectionIds: string[]; role: Member['role']; hadDeliberativeHistory?: boolean} | null = null;
+const initialMembers = new Map(members.map(m=>[m.id,{name:m.name,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory}]));
 const demoMembersKey = 'conferatus:demo-members-v07';
 function resetDemoState() {
   for (const member of members) {
     const original = initialMembers.get(member.id);
-    if (original) { member.name=original.name; member.acdmId=original.acdmId; member.sectionIds=[...original.sectionIds];member.role=original.role; }
+    if (original) { member.name=original.name; member.acdmId=original.acdmId; member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory; }
   }
   demoVoteId=null; demoExpanded=false; editingMemberId=null; editError=''; lastChange=null;
   rolePreview='diretor'; demoToolsOpen=false; expandedSection=''; expandedActivity='';
@@ -41,11 +43,11 @@ function resetDemoState() {
 
 function saveDemoMembers() {
   try {
-    sessionStorage.setItem(demoMembersKey, JSON.stringify(members.map(m=>({id:m.id, acdmId:m.acdmId, sectionIds:m.sectionIds,role:m.role}))));
+    sessionStorage.setItem(demoMembersKey, JSON.stringify(members.map(m=>({id:m.id, acdmId:m.acdmId, sectionIds:m.sectionIds,role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory}))));
   } catch { /* Preview still works with session storage disabled. */ }
 }
 function rememberChange(m: Member) {
-  lastChange={memberId:m.id,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role};
+  lastChange={memberId:m.id,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory};
 }
 try {
   restoreDemoMembers(members, sections.map(s => s.id), JSON.parse(sessionStorage.getItem(demoMembersKey) ?? 'null'));
@@ -101,16 +103,17 @@ function header(title?: string, subtitle?: string, tall=false) {
   return `<header class="hero ${tall?'':'hero--flat'}" aria-label="Faixa azul do CONFERATUS">${panelShortcut}</header>`;
 }
 function metricRow(m: Member) {
+  const personalVotes = hasPersonalVoteHistory(m, sections) ? String(m.totalVotes) : '—';
   return `<div class="metrics" aria-label="Indicadores de participação">
-  <div class="metric-cell">${m.totalVotes}<small>Votos</small></div>
+  <div class="metric-cell">${personalVotes}<small>Votos</small></div>
   <div class="metric-cell">${m.proposals}<small>PDR</small></div>
   <div class="metric-cell">${m.approved}<small>PR</small></div>
   <div class="metric-cell">${m.collaborations}<small>Colab</small></div></div>`;
 }
-function tabBar(tab: Tab) {
+function tabBar(tab: Tab, personalVotingHistory = true) {
   const showSelected=routeFromHash()!=='members';
   return `<div class="tabs" role="group" aria-label="Histórico do membro">
-   <button class="tab" type="button" aria-pressed="${showSelected && tab==='votos'}" data-tab="votos">Histórico de votações</button>
+   ${personalVotingHistory ? `<button class="tab" type="button" aria-pressed="${showSelected && tab==='votos'}" data-tab="votos">Histórico de votações</button>` : ''}
    <button class="tab" type="button" aria-pressed="${showSelected && tab==='proposicoes'}" data-tab="proposicoes">Proposições</button>
   </div>`;
 }
@@ -119,8 +122,8 @@ function memberHeader(m:Member, tab:Tab, displayTabs=true) {
   ? `<button type="button" class="profile-name-button" data-member="${m.id}" aria-label="Abrir perfil de ${escapeHTML(m.name)}">${escapeHTML(m.name)}</button>`
   : `<strong>${escapeHTML(m.name)}</strong>`;
  return `<div class="profile-head"><div class="profile-summary"><div class="avatar avatar--large" aria-hidden="true"></div>
-   ${metricRow(m)}</div><div class="profile-identity"><div>${identity} <small>${m.role==='diretor'?'Diretoria':'Membro comum'}</small></div>
-   <p>${escapeHTML(m.subtitle)}</p></div>${displayTabs?tabBar(tab):''}</div>`;
+   ${metricRow(m)}</div><div class="profile-identity"><div>${identity} <small>${m.role==='diretor'?'Diretoria':isDeliberativeMember(m, sections)?'Membro deliberativo':'Membro da Academy'}</small></div>
+   <p>${escapeHTML(m.subtitle)}</p></div>${displayTabs?tabBar(tab, hasPersonalVoteHistory(m, sections)):''}</div>`;
 }
 function ballotPage() {
  const ballot=ballots[0]; if(!ballot) return '<p>Nenhuma votação disponível.</p>';
@@ -130,9 +133,9 @@ function ballotPage() {
  ${demoOptions.map(o=>`<div class="result-row ${demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
  </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="toggle-demo" aria-expanded="${demoExpanded}">${demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':'Ver situação'}</button></div>
  <p class="ballot-description">${escapeHTML(ballot.description)}</p>${demoExpanded?`<div class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Votação aberta. Selecione uma opção.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
- <div class="vote-actions" ${canRecordVote(ballot)?'':'hidden style="display:none"'}>${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
- <p class="vote-feedback" ${canRecordVote(ballot)?'':'hidden style="display:none"'} role="status">${demoVoteId?'Escolha registrada.':'Selecione uma das opções.'}</p>
- ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}</div>`:''}</section>`;
+ ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
+ <p class="vote-feedback" role="status">${demoVoteId?'Escolha registrada.':'Selecione uma das opções.'}</p>
+ ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}</section>`;
 }
 function matchingMembers() {
  const candidates = searchExpanded && filter.trim() ? members : members.slice(1);
@@ -190,8 +193,10 @@ function profilePage() {
  const chosenId=directId || currentMember;
  const member=members.find(m=>m.id===chosenId);
  if(!member) return `${header(undefined,undefined,false)}<section class="missing-profile" role="status"><strong>Perfil não encontrado</strong><p>Não encontramos um membro com esse identificador.</p><button type="button" data-route="members">Voltar aos membros</button></section>`;
- const relevant=activities.filter(a=>a.memberId===member.id && a.type===(profileTab==='votos'?'voto':'proposicao'));
- return `${header(undefined,undefined,false)}${memberHeader(member,profileTab)}<section class="section-body">
+ const personalVotingHistory = hasPersonalVoteHistory(member, sections);
+ const activeTab: Tab = personalVotingHistory ? profileTab : 'proposicoes';
+ const relevant=activities.filter(a=>a.memberId===member.id && a.type===(activeTab==='votos'?'voto':'proposicao'));
+ return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
  ${relevant.length?relevant.map(activityItem).join(''):'<p class="status-line">Nenhum registro encontrado.</p>'}</section>`;
 }
 function overviewPage() {
@@ -214,7 +219,7 @@ function governancePage() {
  const active=sections.find(s=>s.id===expandedSection);
  return `${header('GERENCIAMENTO DELIBERATIVO','Gerencie as seções e deliberados da Cúpula Institucional Academy.')}
  ${rolePreview==='membro'?'<p class="status-line" role="status">O gerenciamento das seções é exclusivo da diretoria.</p>':
- `<div class="governance-list">${sections.map(s=>`<div><button type="button" class="section-toggle" data-section="${s.id}" aria-expanded="${expandedSection===s.id}"><span>${escapeHTML(s.name)}</span><span class="section-chevron" aria-hidden="true">${expandedSection===s.id?'▾':'▸'}</span></button>
+ `<div class="governance-list">${sections.map(s=>`${s.category==='comum'?'<h2 class="governance-group-heading">Membros da Academy</h2>':''}<div><button type="button" class="section-toggle" data-section="${s.id}" aria-expanded="${expandedSection===s.id}"><span>${escapeHTML(s.name)}${s.places ? `<small class="section-capacity">${s.places} integrantes previstos</small>` : ''}</span><span class="section-chevron" aria-hidden="true">${expandedSection===s.id?'▾':'▸'}</span></button>
  ${expandedSection===s.id?`<div>${members.filter(m=>m.sectionIds.includes(s.id)).map(m=>`<div class="section-member"><div class="avatar" aria-hidden="true"></div><button class="section-member-name" type="button" data-edit="${m.id}" title="Editar ${escapeHTML(m.name)}">${escapeHTML(m.name)}</button><button class="icon-button icon-button--edit" type="button" data-edit="${m.id}" aria-label="Editar identificador de ${escapeHTML(m.name)}"><img src="./assets/editar.png" alt=""></button>${s.id==='membros'?'':`<button class="icon-button" type="button" data-demote="${m.id}" aria-label="Rebaixar ${escapeHTML(m.name)} para membro comum"><img src="./assets/rebaixamento.png" alt=""></button>`}</div>
  ${editingMemberId===m.id?`<form class="edit-form" id="edit-member-form" novalidate><label for="member-acdm-id">ACDM ID</label><input id="member-acdm-id" name="acdmId" value="${escapeHTML(m.acdmId ?? '')}" placeholder="DEMO-0001" required minlength="3" maxlength="40" pattern="[A-Za-z0-9_-]+" autocomplete="off" ${editError?'aria-invalid="true" aria-describedby="edit-error"':''}><input type="hidden" name="memberId" value="${m.id}"><button type="submit" class="small-action">Salvar</button>${editError?`<p id="edit-error" class="edit-error" role="alert">${escapeHTML(editError)}</p>`:''}</form>`:''}`).join('')}
  ${members.every(m=>!m.sectionIds.includes(s.id))?'<p class="section-empty">Nenhum membro nesta seção.</p>':''}</div>`:''}</div>`).join('')}</div>`}
@@ -249,6 +254,28 @@ function syncRouteState() {
  if(route==='profile' && id && members.some(member=>member.id===id)) currentMember=id;
 }
 window.addEventListener('hashchange',()=>{menuOpen=false;demoToolsOpen=false;syncRouteState();render();});
+// Megalos' interaction: swipe the CONFERATUS name upwards to reveal navigation.
+// Keep the existing button as an accessible alternative.
+document.addEventListener('touchstart', event => {
+ const el = event.target;
+ if(!(el instanceof Element) || !el.closest('.footer-home') || event.touches.length !== 1) return;
+ const touch = event.touches[0];
+ if(!touch) return;
+ footerSwipeStart = {x:touch.clientX, y:touch.clientY};
+}, {passive:true});
+document.addEventListener('touchend', event => {
+ if(!footerSwipeStart) return;
+ const touch = event.changedTouches[0];
+ if(!touch) {footerSwipeStart=null;return;}
+ const dx = touch.clientX - footerSwipeStart.x;
+ const dy = touch.clientY - footerSwipeStart.y;
+ footerSwipeStart = null;
+ if(Math.abs(dy)<38 || Math.abs(dy)<Math.abs(dx)*1.3) return;
+ suppressFooterHomeClickUntil = Date.now() + 700;
+ menuOpen = dy < 0;
+ render();
+}, {passive:true});
+document.addEventListener('touchcancel', () => {footerSwipeStart=null;}, {passive:true});
 document.addEventListener('keydown', event => {
  if(event.key==='Escape') {
   if(demoToolsOpen){demoToolsOpen=false;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();}
@@ -276,13 +303,13 @@ document.addEventListener('click',(event)=>{
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
  if(actionEl?.dataset.action==='undo'&&lastChange){
   const member=members.find(m=>m.id===lastChange?.memberId);
-  if(member){member.acdmId=lastChange.acdmId;member.sectionIds=[...lastChange.sectionIds];member.role=lastChange.role;saveDemoMembers();}
+  if(member){member.acdmId=lastChange.acdmId;member.sectionIds=[...lastChange.sectionIds];member.role=lastChange.role;member.hadDeliberativeHistory=lastChange.hadDeliberativeHistory;saveDemoMembers();}
   lastChange=null;notice='Alteração desfeita.';render();return;
  }
  if(advancedPreview && actionEl?.dataset.action==='toggle-tools'){demoToolsOpen=!demoToolsOpen;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();return;}
  if(advancedPreview && actionEl?.dataset.action==='reset-admin'){
-  for(const member of members){const original=initialMembers.get(member.id);if(original){member.name=original.name;member.acdmId=original.acdmId;member.sectionIds=[...original.sectionIds];}}
-  editingMemberId=null;lastChange=null;notice='Alterações administrativas restauradas.';rolePreview='diretor';demoToolsOpen=false;try{sessionStorage.removeItem(demoMembersKey);}catch{}render();return;
+  for(const member of members){const original=initialMembers.get(member.id);if(original){member.name=original.name;member.acdmId=original.acdmId;member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory;}}
+  editingMemberId=null;lastChange=null;notice='Alterações restauradas.';rolePreview='diretor';demoToolsOpen=false;try{sessionStorage.removeItem(demoMembersKey);}catch{}render();return;
  }
  if(actionEl?.dataset.action==='show-more-members'){directoryExpanded=true;render();return;}
  if(actionEl?.dataset.action==='show-more-history'){overviewExpanded=true;render();return;}
@@ -291,6 +318,7 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='toggle-demo'){demoExpanded=!demoExpanded;render();return;}
  if(actionEl?.dataset.action==='reset-vote'){demoVoteId=null;try{sessionStorage.removeItem('conferatus:demo-vote');}catch{}render();return;}
  if (actionEl?.dataset.action==='menu') {menuOpen=!menuOpen; render(); (menuOpen?document.querySelector<HTMLButtonElement>('.menu-item'):document.querySelector<HTMLButtonElement>('.footer-nav'))?.focus(); return;}
+ if (routeEl?.classList.contains('footer-home') && Date.now() < suppressFooterHomeClickUntil) {return;}
  if (routeEl?.dataset.route) {navigate(routeEl.dataset.route as Route);return;}
  if (memberEl?.dataset.member) {currentMember=memberEl.dataset.member;profileTab='votos';navigate('profile', currentMember);return;}
  if (tabEl) {if (tabEl.dataset.overviewTab){overviewTab=tabEl.dataset.overviewTab as Tab;overviewExpanded=false;expandedActivity='';} else profileTab=tabEl.dataset.tab as Tab; if(routeFromHash()==='members'){currentMember=members[0]?.id??'m01';navigate('profile', currentMember);}else{render();}return;}
@@ -301,7 +329,10 @@ document.addEventListener('click',(event)=>{
   if (m&&expandedSection && expandedSection!=='membros' && m.sectionIds.includes(expandedSection)) {
    rememberChange(m);
    const result=demoteToCommonMember(m);
-   m.sectionIds=result.member.sectionIds;m.role=result.member.role;saveDemoMembers();
+   m.sectionIds=result.member.sectionIds;
+   m.role=result.member.role;
+   m.hadDeliberativeHistory=result.member.hadDeliberativeHistory;
+   saveDemoMembers();
    notice=`${m.name} passou a membro comum. O histórico foi preservado.`;
    editingMemberId=null;editError='';render();
    document.querySelector<HTMLButtonElement>('[data-action=undo]')?.focus({preventScroll:true});
