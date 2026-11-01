@@ -690,3 +690,24 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .workflow-profile .profile-summary>.metrics .metric-cell{gap:2px;flex-wrap:nowrap;}
 .workflow-profile .profile-summary>.metrics small{font-size:9px;}
 @media(max-width:360px){.workflow-profile .profile-summary>.metrics{font-size:9px;gap:1px}.workflow-profile .profile-summary>.metrics small{font-size:8px;}}
+
+/* Megalos reference 1001930224: Socii collaboration context above the writing canvas.
+   Names and counts are local proposal data; no invented elapsed-time or shared editing. */
+.workflow-socii-editor-bar{display:flex;align-items:center;gap:11px;min-height:57px;background:#19213c;color:#fff;padding:9px 18px;}
+.workflow-socii-avatars{display:flex;align-items:center;flex:0 0 63px;}
+.workflow-socii-avatars i{display:block;width:30px;height:30px;border:2px solid #c3c9df;border-radius:50%;background:#d5daea;}
+.workflow-socii-avatars i+i{margin-left:3px;}
+.workflow-socii-editor-status{min-width:0;display:flex;flex-direction:column;gap:3px;flex:1;}
+.workflow-socii-editor-status strong{font-size:12px;line-height:1.35;font-weight:500;overflow-wrap:anywhere;}
+.workflow-socii-editor-status small{font-size:10px;line-height:1.3;color:#d1d8f4;}
+.workflow-socii-editor-label{color:#f9f0cb;font-size:11px;font-weight:700;letter-spacing:.05em;flex-shrink:0;}
+.workflow-socii-editor-bar+.workflow-editor-head{padding:8px 20px 9px;}
+.workflow-socii-editor-bar+.workflow-editor-head h1{font-size:19px;}
+@media(max-width:400px){
+ .workflow-socii-editor-bar{padding:9px 12px;gap:8px;}
+ .workflow-socii-avatars{flex-basis:55px;}
+ .workflow-socii-avatars i{height:26px;width:26px;}
+ .workflow-socii-editor-status strong{font-size:11px;}
+ .workflow-socii-editor-status small{font-size:9px;}
+ .workflow-socii-editor-label{font-size:10px;}
+}
