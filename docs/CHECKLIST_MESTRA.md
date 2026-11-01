@@ -132,5 +132,5 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 ## Checkpoint de preview v0.10.11 (01/11/2026)
 - **Feito:** composição da tela Proposições e Socii aproximada do perfil original da Megalos (`1001930225.jpg`), com avatar, nome, função, cinco indicadores e abas; histórico demonstrativo filtrado pelo autor, registros expansíveis reutilizados e item ativo não inerte.
 - **Testado:** build TypeScript/offline com 18/18 Node; **11/11** scripts Playwright/Chromium, incluindo novo `browser_proposals_profile_v0111.py` em 320/390/740/1280 px e regressões anteriores. Blobs GitHub de código e CSS conferidos contra arquivos que passaram no build local.
-- **Publicado:** alterações apenas na branch `preview/v0.10.11-profile-proposals`; nenhum merge nem promoção da `main`. Confirmar check remoto antes de declarar sucesso do Cloudflare.
+- **Publicado:** build remoto Cloudflare Pages da branch de preview confirmado **completed/success** em `96c56de`; nenhum merge nem promoção da `main`.
 - **Pendente:** aprovação visual final da Megalos, as regras institucionais, Socii real, integração Academy e conclusão das seis etapas. Ver `docs/CHECKPOINT_V021_2026-11-01.md`.
