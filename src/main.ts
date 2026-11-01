@@ -69,6 +69,7 @@ function routeFromHash(): Route {
   }
 }
 function navigate(route: Route, memberId?: string) {
+  if(route!=='calendar') scheduleFormOpen=false;
   menuOpen = false;
   demoToolsOpen = false;
   notice = '';
@@ -228,6 +229,7 @@ function governancePage() {
  ${notice?`<p class="status-line" role="status">${escapeHTML(notice)} ${lastChange?'<button type="button" class="undo-action" data-action="undo">Desfazer</button>':''}</p>`:''}`;
 }
 
+// Only the preview data changes here. Authentication and shared records remain external.
 type ProposalType = 'PDR' | 'PR' | 'Ofício';
 type Draft = {id:string;title:string;body:string;sectionId:string;type:ProposalType;authorComplete:boolean;partners:{id:string;complete:boolean}[];status:'redacao'|'revisao'|'concluida'};
 type Deliberation = {id:string;title:string;objective:string;proposalId:string;sectionId:string;start:string;end:string;type:string;status:'programada'|'cancelada'};
@@ -245,6 +247,30 @@ let workflowNotice='';
 let scheduleFormOpen=false;
 let expandedSchedule='sample-1';
 let inviteOpen=false;
+// The calendar is a view over the local demo schedule, never a separate data store.
+const today=new Date();
+let calendarYear=today.getFullYear();
+let calendarMonth=today.getMonth();
+let selectedCalendarDay='';
+function isoDay(date:Date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
+function calendarShift(delta:number){
+ const target=new Date(calendarYear,calendarMonth+delta,1);
+ calendarYear=target.getFullYear();calendarMonth=target.getMonth();selectedCalendarDay='';
+}
+function calendarGrid(items:Deliberation[]){
+ const first=new Date(calendarYear,calendarMonth,1);
+ const offset=first.getDay();
+ const count=new Date(calendarYear,calendarMonth+1,0).getDate();
+ const monthLabel=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(first);
+ const days=Array.from({length:count},(_,n)=>{
+  const day=isoDay(new Date(calendarYear,calendarMonth,n+1));
+  const events=items.filter(item=>item.start.slice(0,10)<=day&&item.end.slice(0,10)>=day).length;
+  const selected=selectedCalendarDay===day;
+  const current=day===isoDay(today);
+  return `<button type="button" class="calendar-day${selected?' calendar-day--selected':''}${current?' calendar-day--today':''}" data-calendar-day="${day}" aria-pressed="${selected}" aria-label="${new Intl.DateTimeFormat('pt-BR',{dateStyle:'full'}).format(new Date(calendarYear,calendarMonth,n+1))}${events?`, ${events} programação${events===1?'':'ões'}`:''}"><span>${n+1}</span>${events?`<i aria-hidden="true" class="calendar-marker"></i>`:''}</button>`;
+ });
+ return `<div class="calendar-hero"><div class="calendar-toolbar"><h1>CALENDÁRIO</h1><div class="calendar-month-nav"><button type="button" data-action="calendar-prev" aria-label="Mês anterior">‹</button><h2 aria-live="polite">${escapeHTML(monthLabel)}</h2><button type="button" data-action="calendar-next" aria-label="Próximo mês">›</button></div></div><div class="calendar-grid" aria-label="Dias do mês">${['D','S','T','Q','Q','S','S'].map(d=>`<span class="calendar-weekday">${d}</span>`).join('')}${'<span class="calendar-empty"></span>'.repeat(offset)}${days.join('')}</div><div class="calendar-foot"><span><i class="calendar-marker" aria-hidden="true"></i> Dia programado</span><button type="button" data-action="calendar-today">Hoje</button></div></div>`;
+}
 function saveWorkflows(){
  try{sessionStorage.setItem(draftKey,JSON.stringify(drafts));sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));}catch{}
 }
@@ -271,6 +297,7 @@ function composePage(){
 }
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
+ if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p><button type="button" class="workflow-primary" data-route="proposals">Voltar às proposições</button></div></div>`;
  return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
  <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form"><p>Confira os dados e a redação antes de confirmar a conclusão.</p>
@@ -280,19 +307,22 @@ function reviewPage(){
 }
 function calendarPage(){
  const sample=[{id:'sample-1',title:'Revisão do calendário de reuniões',sectionId:'integridade',objective:'Organizar o calendário de reuniões institucionais.',start:'2026-11-22T14:00',end:'2026-11-23T14:00',type:'PDR',proposalId:'',status:'programada' as const}];
- const visible=[...sample,...schedule.filter(s=>s.status==='programada')];
- return `<div class="workflow-layout"><div class="calendar-hero">CALENDÁRIO</div><button class="workflow-open" type="button" data-action="open-schedule">${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
+ const all=[...sample,...schedule.filter(s=>s.status==='programada')]
+  .sort((a,b)=>a.start.localeCompare(b.start));
+ const visible=selectedCalendarDay?all.filter(item=>item.start.slice(0,10)<=selectedCalendarDay&&item.end.slice(0,10)>=selectedCalendarDay):all;
+ return `<div class="workflow-layout">${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}">${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
  ${scheduleFormOpen?`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
+ ${!drafts.some(d=>d.status==='concluida')?'<p class="workflow-help">Para agendar, conclua uma proposição primeiro. <button type="button" data-route="proposals">Ir às proposições</button></p>':''}
  <label>Título da deliberação<input name="title" maxlength="140" required placeholder="Título da deliberação"></label>
  <label>Descrição objetiva<textarea name="objective" required minlength="15" rows="3" placeholder="Descrição objetiva"></textarea></label>
- <label>Selecione a proposição<select name="proposalId" required><option value="">Selecione</option>${drafts.filter(d=>d.status==='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label>
+ <label>Selecione a proposição<select name="proposalId" required ${!drafts.some(d=>d.status==='concluida')?'disabled':''}><option value="">Selecione</option>${drafts.filter(d=>d.status==='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label>
  <label>Seção deliberativa<select name="sectionId" required>${selectOptions('integridade',sections.filter(s=>s.category==='deliberativa'))}</select></label>
  <div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
  <label>Tipo de deliberação<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
- <button class="workflow-primary" type="submit">Confirmar programação</button></form>`:''}
+ <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
  ${workflowNotice?`<p role="status" class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
- <div class="calendar-list">${visible.map(item=>`<article class="calendar-item"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}"><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span></button>
- ${expandedSchedule===item.id?`<div class="calendar-expanded"><div class="calendar-status">${escapeHTML(item.type)} <strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p><button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
+ <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}"><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span></button>
+ ${expandedSchedule===item.id?`<div class="calendar-expanded"><div class="calendar-status">${escapeHTML(item.type)} <strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -395,13 +425,24 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
  if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;workflowNotice='';render();return;}
+ if(actionEl?.dataset.action==='calendar-prev'){calendarShift(-1);render();return;}
+ if(actionEl?.dataset.action==='calendar-next'){calendarShift(1);render();return;}
+ if(actionEl?.dataset.action==='calendar-today'){calendarYear=today.getFullYear();calendarMonth=today.getMonth();selectedCalendarDay=isoDay(today);render();return;}
+ if(actionEl?.dataset.action==='calendar-all'){selectedCalendarDay='';render();return;}
+ const dayEl=target.closest<HTMLElement>('[data-calendar-day]');
+ if(dayEl?.dataset.calendarDay){selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();return;}
  const draftEl=target.closest<HTMLElement>('[data-draft]');
  if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;draftForm={title:d.title,body:d.body};navigate(d.status==='redacao'?'compose':'review');}return;}
  const scheduleEl=target.closest<HTMLElement>('[data-schedule]');
  if(scheduleEl?.dataset.schedule){expandedSchedule=expandedSchedule===scheduleEl.dataset.schedule?'':scheduleEl.dataset.schedule;render();return;}
+ const proposalEl=target.closest<HTMLElement>('[data-open-schedule-proposal]');
+ if(proposalEl?.dataset.openScheduleProposal){
+  const d=drafts.find(x=>x.id===proposalEl.dataset.openScheduleProposal);
+  if(d){currentDraftId=d.id;draftForm={title:d.title,body:d.body};navigate('review');}
+  return;
+ }
  const cancelEl=target.closest<HTMLElement>('[data-cancel-schedule]');
  if(cancelEl?.dataset.cancelSchedule){const item=schedule.find(x=>x.id===cancelEl.dataset.cancelSchedule);if(item){item.status='cancelada';saveWorkflows();workflowNotice='Programação cancelada.';render();}return;}
-
  if (routeEl?.dataset.route) {navigate(routeEl.dataset.route as Route);return;}
  if (memberEl?.dataset.member) {currentMember=memberEl.dataset.member;profileTab='votos';navigate('profile', currentMember);return;}
  if (tabEl) {if (tabEl.dataset.overviewTab){overviewTab=tabEl.dataset.overviewTab as Tab;overviewExpanded=false;expandedActivity='';} else profileTab=tabEl.dataset.tab as Tab; if(routeFromHash()==='members'){currentMember=members[0]?.id??'m01';navigate('profile', currentMember);}else{render();}return;}
@@ -472,15 +513,26 @@ document.addEventListener('submit',(event)=>{
   const title=String(data.get('title')??'').trim(),objective=String(data.get('objective')??'').trim();
   const start=String(data.get('start')??''),end=String(data.get('end')??'');
   if(!title||!objective||!start||!end||new Date(start).getTime()>=new Date(end).getTime()){
-   workflowNotice='O encerramento precisa ser posterior ao início.';render();return;
+   const message='Confira o título, a descrição e o período: o encerramento deve ser posterior ao início.';
+   const old=form.querySelector<HTMLElement>('.workflow-form-error');
+   if(old)old.textContent=message;
+   else form.insertAdjacentHTML('afterbegin',`<p class="workflow-form-error" role="alert">${message}</p>`);
+   return;
   }
   const proposalId=String(data.get('proposalId')??'');
-  if(!drafts.some(d=>d.id===proposalId&&d.status==='concluida')){workflowNotice='Selecione uma proposição concluída.';render();return;}
+  if(!drafts.some(d=>d.id===proposalId&&d.status==='concluida')){
+   const message='Selecione uma proposição concluída.';
+   const old=form.querySelector<HTMLElement>('.workflow-form-error');
+   if(old)old.textContent=message;
+   else form.insertAdjacentHTML('afterbegin',`<p class="workflow-form-error" role="alert">${message}</p>`);
+   return;
+  }
   const item:Deliberation={id:`sched-${Date.now().toString(36)}`,title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),status:'programada'};
-  schedule.unshift(item);saveWorkflows();workflowNotice='Deliberação programada nesta demonstração.';scheduleFormOpen=false;expandedSchedule=item.id;render();return;
+  schedule.unshift(item);saveWorkflows();workflowNotice='Deliberação programada nesta demonstração.';scheduleFormOpen=false;expandedSchedule=item.id;
+  const date=new Date(`${start.slice(0,10)}T12:00:00`);calendarYear=date.getFullYear();calendarMonth=date.getMonth();selectedCalendarDay=start.slice(0,10);
+  render();return;
  }
 });
-
 document.addEventListener('submit',(event)=>{
  const form=event.target;
  if(!(form instanceof HTMLFormElement)||form.getAttribute('id')!=='edit-member-form') return;
