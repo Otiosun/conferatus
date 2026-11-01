@@ -8,9 +8,9 @@ const sources = await Promise.all(files.map(async file => {
   return source.replace(/^import .*?;\s*$/gm, '').replace(/^export /gm, '');
 }));
 let js = `const __fixture = (()=>{${sources[0]}; return { members,sections,ballots,activities };})();
-const __rules = (()=>{${sources[1]};return {escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote};})();
+const __rules = (()=>{${sources[1]};return {escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory};})();
 const __providers = (({members,sections})=>{${sources[2]};return {FixtureMemberProvider};})(__fixture);
-await (async ({activities,ballots},{FixtureMemberProvider},{escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote})=>{${sources[3]}})(__fixture,__providers,__rules);`;
+await (async ({activities,ballots},{FixtureMemberProvider},{escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory})=>{${sources[3]}})(__fixture,__providers,__rules);`;
 for (const name of ['crest', 'editar', 'rebaixamento', 'painel']) {
   const asset = await readFile(path.join(cwd,'public','assets',`${name}.png`));
   js = js.replaceAll(`./assets/${name}.png`,`data:image/png;base64,${asset.toString('base64')}`);

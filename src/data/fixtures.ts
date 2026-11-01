@@ -1,61 +1,114 @@
 import type { Activity, Ballot, Member, Section } from '../domain/types.js';
 /** 100% synthetic content. No personal records from the WhatsApp export. */
 export const sections: Section[] = [
-  {id:'integridade',name:'Comitê de Integridade Institucional Academy'},
-  {id:'representantes',name:'Conselho de Coligado de Representantes'},
-  {id:'desenvolvimento',name:'Diretoria de Desenvolvimentos Institucional Academy'},
-  {id:'coordenacao',name:'Coordenação Institucional Academy'},
-  {id:'membros',name:'Membros Institucionais Academy'},
+  {id:'diretoria',name:'Diretoria',category:'deliberativa',places:4},
+  {id:'coordenacao',name:'Coordenação',category:'deliberativa',places:8},
+  {id:'integridade',name:'Conselho de Integridade',category:'deliberativa',places:12},
+  {id:'representantes',name:'Representantes Devos',category:'deliberativa',places:24},
+  {id:'membros',name:'Membros da Academy',category:'comum'},
 ];
 export const members: Member[] = [
-  {id:'m01',acdmId:'DEMO-0001',name:'Helena Avelar',subtitle:'Conselharia de Integridade',totalVotes:80,proposals:12,approved:6,collaborations:35,sectionIds:['coordenacao'],role:'diretor'},
+  {id:'m01',acdmId:'DEMO-0001',name:'Helena Avelar',subtitle:'Coordenação institucional',totalVotes:80,proposals:12,approved:6,collaborations:35,sectionIds:['coordenacao'],role:'diretor'},
   {id:'m02',acdmId:'DEMO-0002',name:'Caio Martins',subtitle:'Representação institucional',totalVotes:24,proposals:12,approved:6,collaborations:19,sectionIds:['coordenacao'],role:'membro'},
-  {id:'m03',acdmId:'DEMO-0003',name:'Lia Batista',subtitle:'Coordenação Academy',totalVotes:80,proposals:22,approved:14,collaborations:35,sectionIds:['coordenacao'],role:'membro'},
+  {id:'m03',acdmId:'DEMO-0003',name:'Lia Batista',subtitle:'Comitê de integridade',totalVotes:80,proposals:22,approved:14,collaborations:35,sectionIds:['coordenacao','integridade'],role:'diretor'},
   {id:'m04',acdmId:'DEMO-0004',name:'Bruno Leal',subtitle:'Equipe institucional',totalVotes:84,proposals:10,approved:6,collaborations:16,sectionIds:['coordenacao','integridade'],role:'membro'},
-  {id:'m05',acdmId:'DEMO-0005',name:'Sara Monteiro',subtitle:'Equipe institucional',totalVotes:77,proposals:20,approved:10,collaborations:40,sectionIds:['coordenacao'],role:'membro'},
-  {id:'m06',acdmId:'DEMO-0006',name:'Daniel Freitas',subtitle:'Equipe institucional',totalVotes:148,proposals:37,approved:25,collaborations:21,sectionIds:['representantes'],role:'membro'},
-  {id:'m07',acdmId:'DEMO-0007',name:'Mila Torres',subtitle:'Equipe institucional',totalVotes:89,proposals:16,approved:9,collaborations:27,sectionIds:['desenvolvimento'],role:'membro'},
-  {id:'m08',acdmId:'DEMO-0008',name:'Rafael Vieira',subtitle:'Comitê de integridade',totalVotes:34,proposals:5,approved:2,collaborations:11,sectionIds:['integridade'],role:'diretor'},
-  {id:'m09',acdmId:'DEMO-0009',name:'Olívia Campos',subtitle:'Conselho de representantes',totalVotes:41,proposals:6,approved:3,collaborations:13,sectionIds:['representantes'],role:'membro'},
-  {id:'m10',acdmId:'DEMO-0010',name:'Pedro Nogueira',subtitle:'Desenvolvimento institucional',totalVotes:48,proposals:7,approved:4,collaborations:15,sectionIds:['desenvolvimento'],role:'diretor'},
-  {id:'m11',acdmId:'DEMO-0011',name:'Vitor Almeida',subtitle:'Participação institucional',totalVotes:55,proposals:8,approved:5,collaborations:17,sectionIds:['desenvolvimento'],role:'membro'},
-  {id:'m12',acdmId:'DEMO-0012',name:'Marina Duarte',subtitle:'Membro institucional',totalVotes:62,proposals:9,approved:6,collaborations:19,sectionIds:['membros'],role:'membro'},
-  {id:'m13',acdmId:'DEMO-0013',name:'Thiago Reis',subtitle:'Membro institucional',totalVotes:69,proposals:10,approved:7,collaborations:21,sectionIds:['membros'],role:'membro'},
-  {id:'m14',acdmId:'DEMO-0014',name:'Júlia Barreto',subtitle:'Membro institucional',totalVotes:76,proposals:11,approved:8,collaborations:23,sectionIds:['membros'],role:'membro'},
-  {id:'m15',acdmId:'DEMO-0015',name:'Lucas Melo',subtitle:'Membro institucional',totalVotes:83,proposals:12,approved:9,collaborations:25,sectionIds:['membros'],role:'membro'},
-  {id:'m16',acdmId:'DEMO-0016',name:'Ana Ferreira',subtitle:'Membro institucional',totalVotes:90,proposals:13,approved:10,collaborations:27,sectionIds:['membros'],role:'membro'},
+  {id:'m05',acdmId:'DEMO-0005',name:'Sara Monteiro',subtitle:'Coordenação institucional',totalVotes:77,proposals:20,approved:10,collaborations:40,sectionIds:['coordenacao'],role:'membro'},
+  {id:'m06',acdmId:'DEMO-0006',name:'Daniel Freitas',subtitle:'Conselho de representantes',totalVotes:148,proposals:37,approved:25,collaborations:21,sectionIds:['representantes'],role:'diretor'},
+  {id:'m07',acdmId:'DEMO-0007',name:'Mila Torres',subtitle:'Desenvolvimento institucional',totalVotes:89,proposals:16,approved:9,collaborations:27,sectionIds:['diretoria'],role:'membro'},
+  {id:'m08',acdmId:'DEMO-0008',name:'Rafael Vieira',subtitle:'Comitê de integridade',totalVotes:63,proposals:8,approved:4,collaborations:22,sectionIds:['integridade'],role:'diretor'},
+  {id:'m09',acdmId:'DEMO-0009',name:'Olívia Campos',subtitle:'Conselho de representantes',totalVotes:56,proposals:11,approved:5,collaborations:18,sectionIds:['representantes'],role:'membro'},
+  {id:'m10',acdmId:'DEMO-0010',name:'Pedro Nogueira',subtitle:'Desenvolvimento institucional',totalVotes:73,proposals:14,approved:7,collaborations:29,sectionIds:['diretoria'],role:'diretor'},
+  {id:'m11',acdmId:'DEMO-0011',name:'Vitor Almeida',subtitle:'Participação institucional',totalVotes:44,proposals:6,approved:3,collaborations:15,sectionIds:['diretoria'],role:'membro'},
+  {id:'m12',acdmId:'DEMO-0012',name:'Marina Duarte',subtitle:'Membro institucional',totalVotes:39,proposals:4,approved:2,collaborations:12,sectionIds:['membros'],role:'membro'},
+  {id:'m13',acdmId:'DEMO-0013',name:'Thiago Reis',subtitle:'Membro institucional',totalVotes:28,proposals:3,approved:1,collaborations:9,sectionIds:['membros'],role:'membro'},
+  {id:'m14',acdmId:'DEMO-0014',name:'Júlia Barreto',subtitle:'Membro institucional',totalVotes:52,proposals:6,approved:3,collaborations:15,sectionIds:['membros'],role:'membro'},
+  {id:'m15',acdmId:'DEMO-0015',name:'Lucas Melo',subtitle:'Membro institucional',totalVotes:31,proposals:5,approved:2,collaborations:11,sectionIds:['membros'],role:'membro'},
+  {id:'m16',acdmId:'DEMO-0016',name:'Ana Ferreira',subtitle:'Membro institucional',totalVotes:42,proposals:7,approved:4,collaborations:17,sectionIds:['membros'],role:'membro'},
 ];
 export const ballots: Ballot[] = [
-  {id:'b1',title:'Revisão do calendário de reuniões',section:'Comitê de Integridade Institucional Academy',description:'Escolha do modelo de calendário para os próximos encontros.',status:'aberta',options:[{id:'o1',label:'Calendário mensal',votes:80},{id:'o2',label:'Calendário quinzenal',votes:20}]},
+  {id:'b1',title:'Revisão do calendário de reuniões',section:'Conselho de Integridade',description:'Escolha do modelo de calendário para os próximos encontros.',status:'aberta',options:[{id:'o1',label:'Calendário mensal',votes:80},{id:'o2',label:'Calendário quinzenal',votes:20}]},
 ];
 const proposalSummary = 'Organização das datas de reunião, com antecedência para convocação e registro das decisões.';
 export const activities: Activity[] = [
-  {id:'a1',memberId:'m01',type:'voto',title:'Revisão do calendário de reuniões',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:true,votes:56,percentage:74},
-  {id:'a2',memberId:'m01',type:'voto',title:'Representação nas reuniões conjuntas',section:'Seção: Conjunto Literário Institucional Academy',code:'SCC-003 · 20/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:false,votes:58,percentage:32},
-  {id:'a3',memberId:'m01',type:'voto',title:'Prioridades do próximo encontro',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Participação registrada na consulta sobre o calendário.',approved:true,votes:58,percentage:57},
+  {id:'a1',memberId:'m01',type:'voto',title:'Revisão do calendário de reuniões',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:'Consulta sobre a periodicidade dos encontros.',approved:true,votes:56,percentage:74},
+  {id:'a2',memberId:'m01',type:'voto',title:'Representação nas reuniões conjuntas',section:'Seção: Conselho Academy',code:'SCC-003 · 20/10/26',summary:'Definição de representantes para reuniões entre seções.',approved:false,votes:58,percentage:32},
+  {id:'a3',memberId:'m01',type:'voto',title:'Prioridades do próximo encontro',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Escolha das pautas a serem examinadas primeiro.',approved:true,votes:58,percentage:57},
   {id:'a4',memberId:'m01',type:'proposicao',title:'Calendário institucional de reuniões',section:'Seção: Integridade Academy',code:'SCC-004 · 24/10/26',summary:proposalSummary,approved:true,votes:56,percentage:74},
-  {id:'a5',memberId:'m01',type:'proposicao',title:'Prazo para envio de contribuições',section:'Seção: Conselho Academy',code:'SCC-003 · 20/10/26',summary:'Definição de prazos para contribuições e registro das decisões nas atas.',approved:false,votes:44,percentage:37},
-  {id:'a6',memberId:'m01',type:'proposicao',title:'Registro das decisões em ata',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Organização de um procedimento interno para revisar documentos e acompanhar respostas a propostas recebidas.',approved:true,votes:58,percentage:74},
+  {id:'a5',memberId:'m01',type:'proposicao',title:'Prazo para envio de contribuições',section:'Seção: Conselho Academy',code:'SCC-003 · 20/10/26',summary:'Proposta de um período fixo para receber alterações antes das reuniões.',approved:false,votes:44,percentage:37},
+  {id:'a6',memberId:'m01',type:'proposicao',title:'Registro das decisões em ata',section:'Seção: Integridade Academy',code:'SCC-002 · 19/10/26',summary:'Padronização do registro das decisões e dos responsáveis pelo acompanhamento.',approved:true,votes:58,percentage:74},
 ];
 
-// Participações e propostas fictícias distintas para cada perfil.
-const participationSamples = [["m02","Revisão do regimento","voto",true,38,69,"Consulta sobre a redação de artigos do regimento."],["m02","Período de apresentação das pautas","proposicao",true,23,62,"Recebimento antecipado de pautas para exame do conselho."],["m03","Representação nas sessões abertas","voto",false,19,32,"Escolha do formato de representação em sessões públicas."],["m03","Procedimento de análise do regimento","proposicao",true,33,71,"Etapas para receber e revisar sugestões de alteração."],["m04","Ordem das pautas extraordinárias","voto",true,55,84,"Prioridade das matérias convocadas fora do calendário."],["m04","Encaminhamento de pareceres","proposicao",false,17,29,"Definição do prazo de envio dos pareceres à coordenação."],["m05","Canais oficiais de comunicação","voto",true,41,73,"Consulta sobre os meios usados para divulgar deliberações."],["m05","Agenda de reuniões conjuntas","proposicao",true,30,64,"Calendário para encontros entre diferentes seções."],["m06","Representação em comissões temporárias","voto",false,22,38,"Consulta sobre indicação de representantes temporários."],["m06","Ciclo de apreciação das propostas","proposicao",true,46,79,"Etapas de recebimento, discussão e encaminhamento."],["m07","Planejamento dos encontros de equipe","voto",true,61,91,"Escolha da organização dos próximos encontros internos."],["m07","Canal de sugestões dos membros","proposicao",false,14,27,"Criação de um canal para sugestões acompanhadas por seção."],["m08","Prazos para resposta às solicitações","voto",true,37,73,"Consulta sobre os prazos de retorno aos participantes."],["m09","Distribuição das pautas do conselho","voto",true,24,61,"Ordem de apresentação dos temas em reunião."],["m10","Disponibilização das atas","voto",false,19,35,"Forma de consulta aos documentos de reuniões anteriores."],["m11","Abertura do período de propostas","voto",true,31,65,"Escolha da data de abertura de novas contribuições."],["m12","Encontros entre novos membros","voto",true,17,58,"Consulta sobre a frequência dos encontros de integração."],["m13","Organização das pautas recebidas","voto",false,12,40,"Método de agrupamento dos assuntos por tema."],["m14","Reuniões de acompanhamento","voto",true,26,68,"Frequência das reuniões de acompanhamento de propostas."],["m15","Consulta de encaminhamentos","voto",true,29,62,"Escolha da ordem de apresentação dos encaminhamentos."],["m16","Critérios de revisão dos documentos","voto",false,14,38,"Consulta sobre o procedimento de revisão interna."]] as const;
+// Participações fictícias, distintas para que cada perfil tenha contexto próprio.
+const participationSamples = [
+  ['m02','Revisão do regimento','voto',true,38,69,'Consulta sobre a redação de artigos do regimento.'],
+  ['m02','Período de apresentação das pautas','proposicao',true,23,62,'Recebimento antecipado de pautas para exame do conselho.'],
+  ['m03','Representação nas sessões abertas','voto',false,19,32,'Escolha do formato de representação em sessões públicas.'],
+  ['m03','Procedimento de análise do regimento','proposicao',true,33,71,'Etapas para receber e revisar sugestões de alteração.'],
+  ['m04','Ordem das pautas extraordinárias','voto',true,55,84,'Prioridade das matérias convocadas fora do calendário.'],
+  ['m04','Encaminhamento de pareceres','proposicao',false,17,29,'Definição do prazo de envio dos pareceres à coordenação.'],
+  ['m05','Canais oficiais de comunicação','voto',true,41,73,'Consulta sobre os meios usados para divulgar deliberações.'],
+  ['m05','Agenda de reuniões conjuntas','proposicao',true,30,64,'Calendário para encontros entre diferentes seções.'],
+  ['m06','Representação em comissões temporárias','voto',false,22,38,'Consulta sobre indicação de representantes temporários.'],
+  ['m06','Ciclo de apreciação das propostas','proposicao',true,46,79,'Etapas de recebimento, discussão e encaminhamento.'],
+  ['m07','Planejamento dos encontros de equipe','voto',true,61,91,'Escolha da organização dos próximos encontros internos.'],
+  ['m07','Canal de sugestões dos membros','proposicao',false,14,27,'Criação de um canal para sugestões acompanhadas por seção.'],
+  ['m08','Prazos para resposta às solicitações','voto',true,37,73,'Consulta sobre os prazos de retorno aos participantes.'],
+  ['m09','Distribuição das pautas do conselho','voto',true,24,61,'Ordem de apresentação dos temas em reunião.'],
+  ['m10','Disponibilização das atas','voto',false,19,35,'Forma de consulta aos documentos de reuniões anteriores.'],
+  ['m11','Abertura do período de propostas','voto',true,31,65,'Escolha da data de abertura de novas contribuições.'],
+  ['m12','Encontros entre novos membros','voto',true,17,58,'Consulta sobre a frequência dos encontros de integração.'],
+  ['m13','Organização das pautas recebidas','voto',false,12,40,'Método de agrupamento dos assuntos por tema.'],
+  ['m14','Reuniões de acompanhamento','voto',true,26,68,'Frequência das reuniões de acompanhamento de propostas.'],
+  ['m15','Consulta de encaminhamentos','voto',true,29,62,'Escolha da ordem de apresentação dos encaminhamentos.'],
+  ['m16','Critérios de revisão dos documentos','voto',false,14,38,'Consulta sobre o procedimento de revisão interna.'],
+] as const;
 for (const [index, item] of participationSamples.entries()) {
   const [memberId,title,type,approved,votes,percentage,summary]=item;
   const member=members.find(m=>m.id===memberId);
+  // Ordinary Academy members vote through a separate, unspecified process.
+  // They must not receive synthetic personal vote history.
+  if(type==='voto' && member?.sectionIds.every(id=>id==='membros')) continue;
   const section=sections.find(s=>s.id===member?.sectionIds[0]);
-  activities.push({ id:`sample-${index+1}`,memberId,type,title,section:`Seção: ${section?.name ?? 'Academy'}`,code:`SIM-${String(index+1).padStart(3,'0')} · 2026`,summary,approved,votes,percentage });
+  activities.push({
+    id:`sample-${index+1}`,memberId,type,title,
+    section:`Seção: ${section?.name ?? 'Academy'}`,
+    code:`SIM-${String(index+1).padStart(3,'0')} · 2026`,
+    summary,approved,votes,percentage,
+  });
 }
-const memberProposals = [[["Acompanhamento das pautas pendentes","Identificação das pautas que aguardam encaminhamento."],["Comunicação após cada reunião","Envio do resumo das decisões aos participantes."]],[["Canal de dúvidas sobre o regimento","Registro de dúvidas para resposta nos encontros."],["Registro da presença em reuniões","Organização da lista de participantes por sessão."]],[["Revisão periódica de procedimentos","Avaliação dos procedimentos utilizados pelo comitê."],["Publicação de orientações internas","Organização das orientações que precisam ser consultadas."]],[["Recebimento de pareceres escritos","Prazo para reunir pareceres antes da próxima sessão."],["Ordem de análise de solicitações","Critério de organização das solicitações recebidas."]],[["Resumo mensal de deliberações","Preparação de um resumo das decisões tomadas no mês."],["Calendário de comunicados","Distribuição das datas para envio dos comunicados."]],[["Rodízio de representantes","Organização de uma escala entre os representantes."],["Pauta conjunta com a coordenação","Definição das matérias examinadas em reunião conjunta."]],[["Organização da documentação técnica","Estrutura de pastas para documentos de trabalho."],["Registro das etapas de desenvolvimento","Acompanhamento das etapas em andamento."]],[["Análise de solicitações de revisão","Critérios para encaminhar pedidos ao comitê."],["Guia de procedimentos internos","Reunião das orientações mais consultadas."]],[["Agenda de representantes suplentes","Organização da disponibilidade dos suplentes."],["Relatório das reuniões do conselho","Registro dos temas examinados pelo conselho."]],[["Calendário de entregas internas","Definição de datas para os trabalhos da diretoria."],["Registro de solicitações técnicas","Acompanhamento das demandas recebidas."]],[["Organização de arquivos de trabalho","Classificação dos arquivos compartilhados pela equipe."],["Revisão das descrições de tarefas","Atualização de tarefas com descrições incompletas."]],[["Recepção de novos participantes","Orientações iniciais para membros recém-integrados."],["Disponibilização de documentos básicos","Acesso aos documentos utilizados na participação."]],[["Reunião de dúvidas frequentes","Seleção das dúvidas para um encontro de orientação."],["Formulário de sugestões","Proposta de um formato para receber sugestões."]],[["Compartilhamento das pautas futuras","Envio antecipado das pautas para consulta."],["Registro de contribuições recebidas","Organização das sugestões por assunto."]],[["Divulgação de decisões encerradas","Consulta às decisões que já tiveram encaminhamento."],["Organização do arquivo de reuniões","Separação das atas por período e seção."]],[["Encontros de apresentação da Academy","Programação de encontros para novos participantes."],["Resumo dos procedimentos de participação","Material breve com orientações para integrantes."]]] as const;
+
+// Duas proposições diferentes por perfil, sem dados da Academy ou de pessoas reais.
+const memberProposals = [
+  [['Acompanhamento das pautas pendentes','Identificação das pautas que aguardam encaminhamento.'],['Comunicação após cada reunião','Envio do resumo das decisões aos participantes.']],
+  [['Canal de dúvidas sobre o regimento','Registro de dúvidas para resposta nos encontros.'],['Registro da presença em reuniões','Organização da lista de participantes por sessão.']],
+  [['Revisão periódica de procedimentos','Avaliação dos procedimentos utilizados pelo comitê.'],['Publicação de orientações internas','Organização das orientações que precisam ser consultadas.']],
+  [['Recebimento de pareceres escritos','Prazo para reunir pareceres antes da próxima sessão.'],['Ordem de análise de solicitações','Critério de organização das solicitações recebidas.']],
+  [['Resumo mensal de deliberações','Preparação de um resumo das decisões tomadas no mês.'],['Calendário de comunicados','Distribuição das datas para envio dos comunicados.']],
+  [['Rodízio de representantes','Organização de uma escala entre os representantes.'],['Pauta conjunta com a coordenação','Definição das matérias examinadas em reunião conjunta.']],
+  [['Organização da documentação técnica','Estrutura de pastas para documentos de trabalho.'],['Registro das etapas de desenvolvimento','Acompanhamento das etapas em andamento.']],
+  [['Análise de solicitações de revisão','Critérios para encaminhar pedidos ao comitê.'],['Guia de procedimentos internos','Reunião das orientações mais consultadas.']],
+  [['Agenda de representantes suplentes','Organização da disponibilidade dos suplentes.'],['Relatório das reuniões do conselho','Registro dos temas examinados pelo conselho.']],
+  [['Calendário de entregas internas','Definição de datas para os trabalhos da diretoria.'],['Registro de solicitações técnicas','Acompanhamento das demandas recebidas.']],
+  [['Organização de arquivos de trabalho','Classificação dos arquivos compartilhados pela equipe.'],['Revisão das descrições de tarefas','Atualização de tarefas com descrições incompletas.']],
+  [['Recepção de novos participantes','Orientações iniciais para membros recém-integrados.'],['Disponibilização de documentos básicos','Acesso aos documentos utilizados na participação.']],
+  [['Reunião de dúvidas frequentes','Seleção das dúvidas para um encontro de orientação.'],['Formulário de sugestões','Proposta de um formato para receber sugestões.']],
+  [['Compartilhamento das pautas futuras','Envio antecipado das pautas para consulta.'],['Registro de contribuições recebidas','Organização das sugestões por assunto.']],
+  [['Divulgação de decisões encerradas','Consulta às decisões que já tiveram encaminhamento.'],['Organização do arquivo de reuniões','Separação das atas por período e seção.']],
+  [['Encontros de apresentação da Academy','Programação de encontros para novos participantes.'],['Resumo dos procedimentos de participação','Material breve com orientações para integrantes.']],
+] as const;
 for (const [memberIndex, member] of members.entries()) {
-  const choices=memberProposals[memberIndex];
+  const ideas=memberProposals[memberIndex];
   const section=sections.find(s=>s.id===member.sectionIds[0]);
-  if (!choices) continue;
-  for (const [index,[title,summary]] of choices.entries()) {
+  if(!ideas) continue;
+  for (const [index,[title,summary]] of ideas.entries()) {
     const approved=(memberIndex+index)%3!==1;
-    activities.push({ id:`proposal-${member.id}-${index+1}`,memberId:member.id,type:'proposicao',title,
-      section:`Seção: ${section?.name ?? 'Academy'}`,code:`SIM-P${String(memberIndex*2+index+1).padStart(3,'0')} · 2026`,
+    activities.push({
+      id:`proposal-${member.id}-${index+1}`,
+      memberId:member.id,type:'proposicao',title,
+      section:`Seção: ${section?.name ?? 'Academy'}`,
+      code:`SIM-P${String(memberIndex*2+index+1).padStart(3,'0')} · 2026`,
       summary,approved,votes:approved?32+(memberIndex%5)*4:15+(memberIndex%4)*3,
-      percentage:approved?63+(memberIndex%4)*6:29+(memberIndex%4)*4 });
+      percentage:approved?63+(memberIndex%4)*6:29+(memberIndex%4)*4,
+    });
   }
 }

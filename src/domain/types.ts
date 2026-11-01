@@ -13,10 +13,14 @@ export interface Member {
   collaborations: number;
   sectionIds: SectionId[];
   role: Role;
+  /** Previous deliberative participation remains on record after a demotion. */
+  hadDeliberativeHistory?: boolean;
 }
 export interface Section {
   id: SectionId;
   name: string;
+  category: 'deliberativa' | 'comum';
+  places?: number;
 }
 export interface OptionResult {
   id: string;
@@ -51,4 +55,12 @@ export interface GovernanceChange {
   nextSectionIds: SectionId[];
   previousRole: Role;
   nextRole: Role;
+}
+
+// Planned model for the eventual authenticated voting system; not yet stored on a server.
+export interface PersonalVoteRecord {
+  ballotId: string;
+  memberId: MemberId;
+  optionId: string;
+  recordedAt: string;
 }
