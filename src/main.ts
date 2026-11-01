@@ -199,7 +199,10 @@ function profilePage() {
  const personalVotingHistory = hasPersonalVoteHistory(member, sections);
  const activeTab: Tab = personalVotingHistory ? profileTab : 'proposicoes';
  const relevant=activities.filter(a=>a.memberId===member.id && a.type===(activeTab==='votos'?'voto':'proposicao'));
+ const local=member.id===members[0]?.id && activeTab==='proposicoes'
+  ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${d.status==='concluida'?'Concluída':d.status==='revisao'?'Aguardando Socii':'Em redação'} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button></article>`).join('') : '';
  return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
+ ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}<h2 class="session-proposals-heading">Histórico demonstrativo</h2>`:''}
  ${relevant.length?relevant.map(activityItem).join(''):'<p class="status-line">Nenhum registro encontrado.</p>'}</section>`;
 }
 function overviewPage() {
