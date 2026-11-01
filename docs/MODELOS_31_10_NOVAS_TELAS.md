@@ -28,3 +28,12 @@ Toda alteração deverá passar por compilação, testes e revisão de preview a
 - A redação só segue para revisão quando os campos atendem aos critérios mínimos da prévia.
 - O armazenamento continua limitado à sessão do navegador; nada é enviado a outros participantes.
 - Teste de regressão: `tests/browser_drafts_v011.py` (320, 390, 740 e 1280 px).
+
+## v0.10.2 — calendário utilizável e ligação entre módulos
+- Grade mensal com navegação, indicação visual de datas agendadas e filtro por dia; mantém a paleta e a tipografia de referência.
+- Uma programação criada aparece na data selecionada; o detalhe abre a proposição vinculada.
+- Proposições já concluídas são consultáveis sem repetir o formulário de conclusão.
+- Sem proposições concluídas, o agendamento informa o pré-requisito e aponta para a redação.
+- Erros no intervalo de datas não apagam os campos preenchidos.
+- As alterações continuam locais à sessão: os modelos não representam uma agenda compartilhada.
+- Browser regression: `tests/browser_calendar_v012.py`. Verificação de integração adicional no pacote local.
