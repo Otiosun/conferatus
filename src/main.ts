@@ -3,7 +3,7 @@ import { FixtureMemberProvider } from './domain/providers.js';
 import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory } from './domain/rules.js';
 import type { Activity, Member } from './domain/types.js';
 
-type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance';
+type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance' | 'calendar' | 'proposals' | 'compose' | 'review';
 type Tab = 'votos' | 'proposicoes';
 const root = document.querySelector<HTMLDivElement>('#root');
 if (!root) throw new Error('Root missing');
@@ -64,7 +64,7 @@ const demoBallot = ballots[0];
 function routeFromHash(): Route {
   const name = location.hash.replace(/^#\/?/, '').split('/')[0];
   switch(name) {
-    case 'members': case 'profile': case 'overview': case 'governance': return name;
+    case 'members': case 'profile': case 'overview': case 'governance': case 'calendar': case 'proposals': case 'compose': case 'review': return name;
     default: return 'ballot';
   }
 }
@@ -83,6 +83,8 @@ function footer() {
   return `${menuOpen ? `<nav class="bottom-menu" aria-label="Navegação principal"><div class="menu-list">
     <button class="menu-item" data-route="members" ${routeFromHash()==='members'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3.5 19v-2.2a5.5 5.5 0 0 1 11 0V19M17 8h4M17 12h4M17 16h4"/></svg></span>Membros e Serviços da Cúpula Cíntia</button>
     <button class="menu-item" data-route="overview" ${routeFromHash()==='overview'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h2M12 9h5M7 13h2M12 13h5M7 17h2M12 17h5"/></svg></span>Histórico de Votações e Proposições</button>
+    <button class="menu-item" data-route="calendar" ${routeFromHash()==='calendar'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true">▦</span>Agendar e Iniciar Deliberação</button>
+    <button class="menu-item" data-route="proposals" ${['proposals','compose','review'].includes(routeFromHash())?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true">✎</span>Elaborar Proposição e Socii</button>
   </div></nav>` : ''}
   <footer class="app-footer">${crest()}<button type="button" class="footer-home" data-route="ballot" aria-label="Voltar à votação">CONFERATUS</button><small class="footer-demo">DADOS FICTÍCIOS · PRÉVIA</small>
    <button type="button" class="footer-nav" aria-expanded="${menuOpen}" aria-label="${menuOpen?'Fechar':'Abrir'} menu" data-action="menu">${menuOpen?'Fechar ×':'☰ Menu'}</button>
@@ -108,7 +110,7 @@ function metricRow(m: Member) {
   <div class="metric-cell">${personalVotes}<small>Votos</small></div>
   <div class="metric-cell">${m.proposals}<small>PDR</small></div>
   <div class="metric-cell">${m.approved}<small>PR</small></div>
-  <div class="metric-cell">${m.collaborations}<small>Colab</small></div></div>`;
+  <div class="metric-cell">${m.officialLetters ?? 0}<small>Ofício</small></div><div class="metric-cell">${m.collaborations}<small>Socii</small></div></div>`;
 }
 function tabBar(tab: Tab, personalVotingHistory = true) {
   const showSelected=routeFromHash()!=='members';
@@ -225,6 +227,74 @@ function governancePage() {
  ${members.every(m=>!m.sectionIds.includes(s.id))?'<p class="section-empty">Nenhum membro nesta seção.</p>':''}</div>`:''}</div>`).join('')}</div>`}
  ${notice?`<p class="status-line" role="status">${escapeHTML(notice)} ${lastChange?'<button type="button" class="undo-action" data-action="undo">Desfazer</button>':''}</p>`:''}`;
 }
+
+type ProposalType = 'PDR' | 'PR' | 'Ofício';
+type Draft = {id:string;title:string;body:string;sectionId:string;type:ProposalType;authorComplete:boolean;partners:{id:string;complete:boolean}[];status:'redacao'|'revisao'|'concluida'};
+type Deliberation = {id:string;title:string;objective:string;proposalId:string;sectionId:string;start:string;end:string;type:string;status:'programada'|'cancelada'};
+const draftKey='conferatus:proposals-v010';
+const deliberationKey='conferatus:deliberations-v010';
+function readSessionArray<T>(key:string):T[]{
+ try {const value=JSON.parse(sessionStorage.getItem(key)??'[]');return Array.isArray(value)?value:[];}catch{return [];}
+}
+const drafts:Draft[]=readSessionArray<Draft>(draftKey).filter(d=>typeof d?.id==='string'&&typeof d?.title==='string');
+const schedule:Deliberation[]=readSessionArray<Deliberation>(deliberationKey).filter(d=>typeof d?.id==='string'&&typeof d?.title==='string');
+const blankDraft=()=>({title:'',body:''});
+let draftForm=blankDraft();
+let currentDraftId='';
+let workflowNotice='';
+let scheduleFormOpen=false;
+let expandedSchedule='sample-1';
+let inviteOpen=false;
+function saveWorkflows(){
+ try{sessionStorage.setItem(draftKey,JSON.stringify(drafts));sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));}catch{}
+}
+function selectOptions(selected:string,items:{id:string;name:string}[]){return items.map(x=>`<option value="${escapeHTML(x.id)}" ${selected===x.id?'selected':''}>${escapeHTML(x.name)}</option>`).join('');}
+function draftReady(d:Draft){return d.authorComplete&&d.partners.every(p=>p.complete);}
+function friendlyStamp(date:string){const parsed=new Date(date);return Number.isNaN(parsed.getTime())?'Data não definida':parsed.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});}
+function proposalsPage(){
+ const author=members[0];
+ const examples=activities.filter(a=>a.type==='proposicao').slice(0,4);
+ return `${header(undefined,undefined,false)}<div class="workflow-head"><h1>Proposições e Socii</h1><p>${escapeHTML(author?.name??'Membro')}</p></div>
+ <div class="workflow-layout"><div class="workflow-metrics"><span>${author?.totalVotes??0} Votos</span><span>${author?.proposals??0} PDR</span><span>${author?.approved??0} PR</span><span>${author?.officialLetters??0} Ofício</span><span>${author?.collaborations??0} Socii</span></div>
+ <div class="tabs workflow-tabs"><button class="tab" data-route="profile" aria-label="Consultar histórico de votação">Histórico de votações</button><button class="tab" aria-pressed="true">Proposições e Socii</button></div>
+ ${drafts.length?drafts.map(d=>`<article class="workflow-record"><button data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title)}</strong><small>${d.status==='concluida'?'Concluída':d.status==='revisao'?'Aguardando Socii':'Em redação'} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${d.partners.length?`<p class="workflow-partners">Socii: ${d.partners.map(p=>`${escapeHTML(members.find(m=>m.id===p.id)?.name??'Membro')} (${p.complete?'concluiu':'pendente'})`).join(', ')}</p>`:''}${advancedPreview&&d.partners.some(p=>!p.complete)?d.partners.filter(p=>!p.complete).map(p=>`<button class="workflow-demo-confirm" data-confirm-partner="${escapeHTML(d.id)}:${escapeHTML(p.id)}">Simular conclusão de ${escapeHTML(members.find(m=>m.id===p.id)?.name??'participante')}</button>`).join(''):''}</article>`).join(''):''}
+ ${examples.map(a=>`<article class="workflow-record"><strong>${escapeHTML(a.title)}</strong><small>${escapeHTML(a.code)}</small><p>${escapeHTML(a.summary)}</p></article>`).join('')}
+ </div><div class="workflow-actions"><button type="button" class="workflow-outline" data-action="invite-socii">Convidar para Socii</button>${inviteOpen?`<form id="invite-socii-form" class="workflow-inline"><label>Proposição<select name="draftId" required>${drafts.filter(d=>d.status!=='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label><label>Participante<select name="memberId" required>${selectOptions('',members.slice(1))}</select></label><button class="workflow-primary" ${!drafts.some(d=>d.status!=='concluida')?'disabled':''}>Adicionar participante</button></form>`:''}
+ <button type="button" class="workflow-primary" data-route="compose">Redigir proposição</button></div>
+ ${workflowNotice?`<p role="status" class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}`;
+}
+function composePage(){
+ return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
+ <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required placeholder="Título" value="${escapeHTML(draftForm.title)}">
+ <label for="draft-body">Redação</label><textarea id="draft-body" name="body" required minlength="20" placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
+ <div class="workflow-editor-actions"><button class="workflow-primary" type="submit">Concluir redação</button><button class="workflow-outline" type="button" data-route="proposals">Voltar</button></div></form>`;
+}
+function reviewPage(){
+ const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
+ return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div>
+ <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
+ <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form"><p>Confira os dados e a redação antes de confirmar a conclusão.</p>
+ <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>
+ <label>Tipo de proposição<select name="type" required>${['PDR','PR','Ofício'].map(t=>`<option value="${t}" ${t===d.type?'selected':''}>${t}</option>`).join('')}</select></label>
+ <div class="workflow-review-buttons"><button type="button" class="workflow-outline" data-route="compose">Voltar</button><button class="workflow-primary" type="submit">Confirmar conclusão</button></div></form></div>`;
+}
+function calendarPage(){
+ const sample=[{id:'sample-1',title:'Revisão do calendário de reuniões',sectionId:'integridade',objective:'Organizar o calendário de reuniões institucionais.',start:'2026-11-22T14:00',end:'2026-11-23T14:00',type:'PDR',proposalId:'',status:'programada' as const}];
+ const visible=[...sample,...schedule.filter(s=>s.status==='programada')];
+ return `<div class="workflow-layout"><div class="calendar-hero">CALENDÁRIO</div><button class="workflow-open" type="button" data-action="open-schedule">${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
+ ${scheduleFormOpen?`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
+ <label>Título da deliberação<input name="title" maxlength="140" required placeholder="Título da deliberação"></label>
+ <label>Descrição objetiva<textarea name="objective" required minlength="15" rows="3" placeholder="Descrição objetiva"></textarea></label>
+ <label>Selecione a proposição<select name="proposalId" required><option value="">Selecione</option>${drafts.filter(d=>d.status==='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label>
+ <label>Seção deliberativa<select name="sectionId" required>${selectOptions('integridade',sections.filter(s=>s.category==='deliberativa'))}</select></label>
+ <div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
+ <label>Tipo de deliberação<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
+ <button class="workflow-primary" type="submit">Confirmar programação</button></form>`:''}
+ ${workflowNotice?`<p role="status" class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
+ <div class="calendar-list">${visible.map(item=>`<article class="calendar-item"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}"><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span></button>
+ ${expandedSchedule===item.id?`<div class="calendar-expanded"><div class="calendar-status">${escapeHTML(item.type)} <strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p><button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
+}
+
 let lastRenderedHash = location.hash;
 function render() {
  if (!root) return;
@@ -239,7 +309,7 @@ function render() {
    ? attributes.map(attr => [attr, active.getAttribute(attr)] as const).find(([,value]) => value!==null)
    : undefined;
  const route=routeFromHash();
- const page=route==='ballot'?ballotPage():route==='members'?memberList():route==='profile'?profilePage():route==='overview'?overviewPage():governancePage();
+ const page=route==='ballot'?ballotPage():route==='members'?memberList():route==='profile'?profilePage():route==='overview'?overviewPage():route==='calendar'?calendarPage():route==='proposals'?proposalsPage():route==='compose'?composePage():route==='review'?reviewPage():governancePage();
  root.innerHTML=`<div class="app-shell" aria-label="CONFERATUS — dados fictícios"><a href="#main-content" class="skip-link">Ir para o conteúdo</a><main id="main-content" tabindex="-1">${page}</main>${footer()}
 </div>`;
  if (focusTarget) {
@@ -319,6 +389,18 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='reset-vote'){demoVoteId=null;try{sessionStorage.removeItem('conferatus:demo-vote');}catch{}render();return;}
  if (actionEl?.dataset.action==='menu') {menuOpen=!menuOpen; render(); (menuOpen?document.querySelector<HTMLButtonElement>('.menu-item'):document.querySelector<HTMLButtonElement>('.footer-nav'))?.focus(); return;}
  if (routeEl?.classList.contains('footer-home') && Date.now() < suppressFooterHomeClickUntil) {return;}
+
+ if(advancedPreview){const partnerEl=target.closest<HTMLElement>('[data-confirm-partner]');
+  if(partnerEl?.dataset.confirmPartner){const [draftId,partnerId]=partnerEl.dataset.confirmPartner.split(':');const d=drafts.find(d=>d.id===draftId);const partner=d?.partners.find(p=>p.id===partnerId);if(d&&partner){partner.complete=true;d.status=draftReady(d)?'concluida':'revisao';saveWorkflows();workflowNotice=d.status==='concluida'?'Todas as partes concluíram. Proposição concluída.':'Participação registrada nesta simulação.';render();}return;}}
+ if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
+ if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;workflowNotice='';render();return;}
+ const draftEl=target.closest<HTMLElement>('[data-draft]');
+ if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;draftForm={title:d.title,body:d.body};navigate(d.status==='redacao'?'compose':'review');}return;}
+ const scheduleEl=target.closest<HTMLElement>('[data-schedule]');
+ if(scheduleEl?.dataset.schedule){expandedSchedule=expandedSchedule===scheduleEl.dataset.schedule?'':scheduleEl.dataset.schedule;render();return;}
+ const cancelEl=target.closest<HTMLElement>('[data-cancel-schedule]');
+ if(cancelEl?.dataset.cancelSchedule){const item=schedule.find(x=>x.id===cancelEl.dataset.cancelSchedule);if(item){item.status='cancelada';saveWorkflows();workflowNotice='Programação cancelada.';render();}return;}
+
  if (routeEl?.dataset.route) {navigate(routeEl.dataset.route as Route);return;}
  if (memberEl?.dataset.member) {currentMember=memberEl.dataset.member;profileTab='votos';navigate('profile', currentMember);return;}
  if (tabEl) {if (tabEl.dataset.overviewTab){overviewTab=tabEl.dataset.overviewTab as Tab;overviewExpanded=false;expandedActivity='';} else profileTab=tabEl.dataset.tab as Tab; if(routeFromHash()==='members'){currentMember=members[0]?.id??'m01';navigate('profile', currentMember);}else{render();}return;}
@@ -346,6 +428,48 @@ document.addEventListener('click',(event)=>{
   if(member){rememberChange(member);member.sectionIds=updateSectionAssignment(member,expandedSection,true).member.sectionIds;saveDemoMembers();notice=`${member.name} adicionado à seção.`;demoToolsOpen=false;render();}
  }
 });
+
+document.addEventListener('submit',(event)=>{
+ const form=event.target;if(!(form instanceof HTMLFormElement))return;
+ const id=form.id;
+ if(!['compose-proposal-form','confirm-proposal-form','schedule-deliberation-form','invite-socii-form'].includes(id))return;
+ event.preventDefault();if(!form.reportValidity())return;
+ const data=new FormData(form);
+ if(id==='compose-proposal-form'){
+  const title=String(data.get('title')??'').trim(),body=String(data.get('body')??'').trim();
+  if(title.length<3||body.length<20)return;
+  draftForm={title,body};
+  let d=drafts.find(x=>x.id===currentDraftId);
+  if(!d||d.status==='concluida'){
+   d={id:`draft-${Date.now().toString(36)}`,title,body,sectionId:'integridade',type:'PDR',authorComplete:false,partners:[],status:'redacao'};drafts.unshift(d);currentDraftId=d.id;
+  }else{d.title=title;d.body=body;}
+  saveWorkflows();navigate('review');return;
+ }
+ if(id==='confirm-proposal-form'){
+  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return;
+  d.sectionId=String(data.get('sectionId')??'integridade');d.type=String(data.get('type')??'PDR') as ProposalType;
+  d.authorComplete=true;d.status=draftReady(d)?'concluida':'revisao';saveWorkflows();workflowNotice=d.status==='concluida'?'Proposição concluída.':'Sua parte foi concluída. Aguardando participantes do Socii.';navigate('proposals');return;
+ }
+ if(id==='invite-socii-form'){
+  const d=drafts.find(x=>x.id===String(data.get('draftId')??'')),memberId=String(data.get('memberId')??'');
+  if(d&&memberId&&memberId!==members[0]?.id&&!d.partners.some(p=>p.id===memberId)){
+   d.partners.push({id:memberId,complete:false});if(d.authorComplete)d.status='revisao';saveWorkflows();workflowNotice='Participante incluído na simulação. Nenhum convite real foi enviado.';
+  }else workflowNotice='Selecione uma pessoa que ainda não esteja no Socii.';
+  inviteOpen=false;render();return;
+ }
+ if(id==='schedule-deliberation-form'){
+  const title=String(data.get('title')??'').trim(),objective=String(data.get('objective')??'').trim();
+  const start=String(data.get('start')??''),end=String(data.get('end')??'');
+  if(!title||!objective||!start||!end||new Date(start).getTime()>=new Date(end).getTime()){
+   workflowNotice='O encerramento precisa ser posterior ao início.';render();return;
+  }
+  const proposalId=String(data.get('proposalId')??'');
+  if(!drafts.some(d=>d.id===proposalId&&d.status==='concluida')){workflowNotice='Selecione uma proposição concluída.';render();return;}
+  const item:Deliberation={id:`sched-${Date.now().toString(36)}`,title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),status:'programada'};
+  schedule.unshift(item);saveWorkflows();workflowNotice='Deliberação programada nesta demonstração.';scheduleFormOpen=false;expandedSchedule=item.id;render();return;
+ }
+});
+
 document.addEventListener('submit',(event)=>{
  const form=event.target;
  if(!(form instanceof HTMLFormElement)||form.getAttribute('id')!=='edit-member-form') return;

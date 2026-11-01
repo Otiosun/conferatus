@@ -8,7 +8,7 @@ export const sections: Section[] = [
   {id:'membros',name:'Membros da Academy',category:'comum'},
 ];
 export const members: Member[] = [
-  {id:'m01',acdmId:'DEMO-0001',name:'Helena Avelar',subtitle:'Coordenação institucional',totalVotes:80,proposals:12,approved:6,collaborations:35,sectionIds:['coordenacao'],role:'diretor'},
+  {id:'m01',acdmId:'DEMO-0001',name:'Helena Avelar',officialLetters:23,subtitle:'Coordenação institucional',totalVotes:80,proposals:12,approved:6,collaborations:35,sectionIds:['coordenacao'],role:'diretor'},
   {id:'m02',acdmId:'DEMO-0002',name:'Caio Martins',subtitle:'Representação institucional',totalVotes:24,proposals:12,approved:6,collaborations:19,sectionIds:['coordenacao'],role:'membro'},
   {id:'m03',acdmId:'DEMO-0003',name:'Lia Batista',subtitle:'Comitê de integridade',totalVotes:80,proposals:22,approved:14,collaborations:35,sectionIds:['coordenacao','integridade'],role:'diretor'},
   {id:'m04',acdmId:'DEMO-0004',name:'Bruno Leal',subtitle:'Equipe institucional',totalVotes:84,proposals:10,approved:6,collaborations:16,sectionIds:['coordenacao','integridade'],role:'membro'},
