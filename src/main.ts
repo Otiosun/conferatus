@@ -291,8 +291,20 @@ function proposalsPage(){
  <button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>
  ${workflowNotice?`<p role="status" class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}`;
 }
+// Show only participants linked to this proposal; a local preview has no valid elapsed time.
+function sociiEditorBar(d:Draft|undefined){
+ if(!d?.partners.length)return '';
+ const names=d.partners.map(p=>members.find(m=>m.id===p.id)?.name).filter((n):n is string=>Boolean(n));
+ const participantText=names.length===1?`Você e ${names[0]}`:`Você e ${d.partners.length} participantes`;
+ const finished=Number(d.authorComplete)+d.partners.filter(p=>p.complete).length;
+ return `<aside class="workflow-socii-editor-bar" aria-label="Socii desta proposição, demonstração local">
+ <span class="workflow-socii-avatars" aria-hidden="true"><i></i><i></i></span>
+ <div class="workflow-socii-editor-status"><strong>${escapeHTML(participantText)} em Socii</strong><small>Prévia local · Concluíram ${finished} de ${d.partners.length+1}</small></div>
+ <span class="workflow-socii-editor-label" aria-hidden="true">Socii</span></aside>`;
+}
 function composePage(){
- return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
+ const editing=drafts.find(d=>d.id===currentDraftId);
+ return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
  <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required placeholder="Título" value="${escapeHTML(draftForm.title)}">
  <label for="draft-body">Redação</label><textarea id="draft-body" name="body" required minlength="20" placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
  <div class="workflow-editor-actions"><button class="workflow-primary" type="submit" name="intent" value="conclude">Concluir redação</button><button class="workflow-outline" type="submit" name="intent" value="save" formnovalidate>Salvar rascunho</button><button class="workflow-outline" type="button" data-route="proposals">Voltar</button></div></form>`;
