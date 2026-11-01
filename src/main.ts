@@ -269,7 +269,7 @@ function calendarGrid(items:Deliberation[]){
   const day=isoDay(new Date(calendarYear,calendarMonth,n+1));
   const events=items.filter(item=>item.start.slice(0,10)<=day&&item.end.slice(0,10)>=day).length;
   const selected=selectedCalendarDay===day;
-  const current=day===isoDay(today);
+  const current=day===isoDay(new Date());
   return `<button type="button" class="calendar-day${selected?' calendar-day--selected':''}${current?' calendar-day--today':''}" data-calendar-day="${day}" aria-pressed="${selected}" aria-label="${new Intl.DateTimeFormat('pt-BR',{dateStyle:'full'}).format(new Date(calendarYear,calendarMonth,n+1))}${events?`, ${events} programação${events===1?'':'ões'}`:''}"><span>${n+1}</span>${events?`<i aria-hidden="true" class="calendar-marker"></i>`:''}</button>`;
  });
  return `<div class="calendar-hero"><div class="calendar-toolbar"><h1>CALENDÁRIO</h1><div class="calendar-month-nav"><button type="button" data-action="calendar-prev" aria-label="Mês anterior">‹</button><h2 aria-live="polite">${escapeHTML(monthLabel)}</h2><button type="button" data-action="calendar-next" aria-label="Próximo mês">›</button></div></div><div class="calendar-grid" aria-label="Dias do mês">${['D','S','T','Q','Q','S','S'].map(d=>`<span class="calendar-weekday">${d}</span>`).join('')}${'<span class="calendar-empty"></span>'.repeat(offset)}${days.join('')}</div><div class="calendar-foot"><span><i class="calendar-marker" aria-hidden="true"></i> Dia programado</span><button type="button" data-action="calendar-today">Hoje</button></div></div>`;
@@ -441,7 +441,7 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;workflowNotice='';render();return;}
  if(actionEl?.dataset.action==='calendar-prev'){calendarShift(-1);render();return;}
  if(actionEl?.dataset.action==='calendar-next'){calendarShift(1);render();return;}
- if(actionEl?.dataset.action==='calendar-today'){calendarYear=today.getFullYear();calendarMonth=today.getMonth();selectedCalendarDay=isoDay(today);render();return;}
+ if(actionEl?.dataset.action==='calendar-today'){const currentDay=new Date();calendarYear=currentDay.getFullYear();calendarMonth=currentDay.getMonth();selectedCalendarDay=isoDay(currentDay);render();return;}
  if(actionEl?.dataset.action==='calendar-all'){selectedCalendarDay='';render();return;}
  const dayEl=target.closest<HTMLElement>('[data-calendar-day]');
  if(dayEl?.dataset.calendarDay){selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();return;}
