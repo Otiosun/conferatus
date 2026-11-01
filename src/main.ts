@@ -620,8 +620,16 @@ document.addEventListener('submit',(event)=>{
  }
  if(id==='confirm-proposal-form'){
   const d=drafts.find(x=>x.id===currentDraftId);if(!d)return;
-  d.sectionId=String(data.get('sectionId')??'integridade');d.type=String(data.get('type')??'PDR') as ProposalType;
-  d.authorComplete=true;d.status=draftReady(d)?'concluida':'revisao';saveWorkflows();workflowNotice=d.status==='concluida'?'Proposição concluída.':'Sua parte foi concluída. Aguardando participantes do Socii.';navigate('proposals');return;
+  const sectionId=String(data.get('sectionId')??'integridade');
+  const proposalType=String(data.get('type')??'PDR') as ProposalType;
+  const classificationChanged=d.sectionId!==sectionId||d.type!==proposalType;
+  // A Socii signoff cannot approve a different section or type of proposal.
+  if(classificationChanged)d.partners.forEach(p=>{p.complete=false;});
+  d.sectionId=sectionId;d.type=proposalType;
+  d.authorComplete=true;d.status=draftReady(d)?'concluida':'revisao';saveWorkflows();
+  workflowNotice=(classificationChanged&&d.partners.length?'A seção ou o tipo mudou; as confirmações do Socii foram reiniciadas nesta prévia. ':'')+
+   (d.status==='concluida'?'Proposição concluída.':'Sua parte foi concluída. Aguardando participantes do Socii.');
+  navigate('proposals');return;
  }
  if(id==='invite-socii-form'){
   const d=drafts.find(x=>x.id===String(data.get('draftId')??'')),memberId=String(data.get('memberId')??'');
