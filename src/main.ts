@@ -241,8 +241,37 @@ const deliberationKey='conferatus:deliberations-v010';
 function readSessionArray<T>(key:string):T[]{
  try {const value=JSON.parse(sessionStorage.getItem(key)??'[]');return Array.isArray(value)?value:[];}catch{return [];}
 }
-const drafts:Draft[]=readSessionArray<Draft>(draftKey).filter(d=>typeof d?.id==='string'&&typeof d?.title==='string');
-const schedule:Deliberation[]=readSessionArray<Deliberation>(deliberationKey).filter(d=>typeof d?.id==='string'&&typeof d?.title==='string');
+// Session storage is untrusted input, including incomplete records from older previews.
+// Keep good records usable instead of letting a single malformed entry break a whole view.
+function isSavedDraft(value:unknown):value is Draft{
+ if(!value||typeof value!=='object'||Array.isArray(value))return false;
+ const d=value as Record<string,unknown>;
+ return typeof d.id==='string'&&!!d.id&&typeof d.title==='string'&&typeof d.body==='string'&&
+  typeof d.sectionId==='string'&&['PDR','PR','Ofício'].includes(String(d.type))&&
+  typeof d.authorComplete==='boolean'&&['redacao','revisao','concluida'].includes(String(d.status))&&
+  Array.isArray(d.partners)&&d.partners.every((p:unknown)=>{
+   if(!p||typeof p!=='object'||Array.isArray(p))return false;
+   const partner=p as Record<string,unknown>;
+   return typeof partner.id==='string'&&!!partner.id&&typeof partner.complete==='boolean';
+  });
+}
+function isSavedSchedule(value:unknown):value is Deliberation{
+ if(!value||typeof value!=='object'||Array.isArray(value))return false;
+ const item=value as Record<string,unknown>;
+ return typeof item.id==='string'&&!!item.id&&typeof item.title==='string'&&
+  typeof item.objective==='string'&&typeof item.proposalId==='string'&&typeof item.sectionId==='string'&&
+  typeof item.start==='string'&&typeof item.end==='string'&&
+  !Number.isNaN(Date.parse(item.start))&&!Number.isNaN(Date.parse(item.end))&&
+  Date.parse(item.start)<Date.parse(item.end)&&
+  ['PDR','PR','Ofício'].includes(String(item.type))&&['programada','cancelada'].includes(String(item.status));
+}
+const savedDrafts=readSessionArray<unknown>(draftKey);
+const savedSchedule=readSessionArray<unknown>(deliberationKey);
+const drafts:Draft[]=savedDrafts.filter(isSavedDraft);
+const schedule:Deliberation[]=savedSchedule.filter(isSavedSchedule);
+const ignoredSavedRecords=savedDrafts.length>drafts.length||savedSchedule.length>schedule.length;
+const ignoredRecordsBackup={drafts:savedDrafts.filter(d=>!isSavedDraft(d)),schedule:savedSchedule.filter(d=>!isSavedSchedule(d))};
+function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos desta prévia local não foram carregados.</p>':'';}
 const blankDraft=()=>({title:'',body:''});
 let draftForm=blankDraft();
 let currentDraftId='';
@@ -275,8 +304,12 @@ function calendarGrid(items:Deliberation[]){
  return `<div class="calendar-hero"><div class="calendar-toolbar"><h1>CALENDÁRIO</h1><div class="calendar-month-nav"><button type="button" data-action="calendar-prev" aria-label="Mês anterior">‹</button><h2 aria-live="polite">${escapeHTML(monthLabel)}</h2><button type="button" data-action="calendar-next" aria-label="Próximo mês">›</button></div></div><div class="calendar-grid" aria-label="Dias do mês">${['D','S','T','Q','Q','S','S'].map(d=>`<span class="calendar-weekday">${d}</span>`).join('')}${'<span class="calendar-empty"></span>'.repeat(offset)}${days.join('')}</div><div class="calendar-foot"><span><i class="calendar-marker" aria-hidden="true"></i> Dia programado</span><button type="button" data-action="calendar-today">Hoje</button></div></div>`;
 }
 function saveWorkflows():boolean{
- try{sessionStorage.setItem(draftKey,JSON.stringify(drafts));sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));return true;}
- catch{return false;}
+ try{
+  // Preserve rejected entries separately before overwriting the working session state.
+  if(ignoredSavedRecords&&!sessionStorage.getItem('conferatus:invalid-session-backup-v0114'))
+   sessionStorage.setItem('conferatus:invalid-session-backup-v0114',JSON.stringify(ignoredRecordsBackup));
+  sessionStorage.setItem(draftKey,JSON.stringify(drafts));sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));return true;
+ }catch{return false;}
 }
 function selectOptions(selected:string,items:{id:string;name:string}[]){return items.map(x=>`<option value="${escapeHTML(x.id)}" ${selected===x.id?'selected':''}>${escapeHTML(x.name)}</option>`).join('');}
 function draftReady(d:Draft){return d.authorComplete&&d.partners.every(p=>p.complete);}
@@ -286,7 +319,7 @@ function proposalsPage(){
  const author=members[0];
  const examples=activities.filter(a=>a.type==='proposicao' && a.memberId===author?.id).slice(0,4);
  return `${header(undefined,undefined,false)}<div class="workflow-profile">${author?memberHeader(author,'proposicoes',false):''}<div class="tabs workflow-tabs" role="group" aria-label="Histórico do membro"><button class="tab" type="button" data-route="profile" aria-label="Consultar histórico de votação">Histórico de votações</button><span class="tab" aria-current="page">Proposições e Socii</span></div></div>
-  <div class="workflow-layout workflow-proposals-layout">${drafts.length?'<h2 class="workflow-record-heading">Proposições desta sessão</h2>':''}${drafts.length?drafts.map(d=>`<article class="workflow-record"><button data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${d.partners.length?`<p class="workflow-partners"><strong>Concluíram ${Number(d.authorComplete)+d.partners.filter(p=>p.complete).length} de ${d.partners.length+1}</strong><span>Autoria: ${d.authorComplete?'concluída':'pendente'} · Socii: ${d.partners.map(p=>`${escapeHTML(members.find(m=>m.id===p.id)?.name??'Membro')} (${p.complete?'concluiu':'pendente'})`).join(', ')}</span></p>`:''}${advancedPreview&&d.partners.some(p=>!p.complete)?d.partners.filter(p=>!p.complete).map(p=>`<button class="workflow-demo-confirm" data-confirm-partner="${escapeHTML(d.id)}:${escapeHTML(p.id)}">Simular conclusão de ${escapeHTML(members.find(m=>m.id===p.id)?.name??'participante')}</button>`).join(''):''}</article>`).join(''):''}
+  <div class="workflow-layout workflow-proposals-layout">${savedRecordNotice()}${drafts.length?'<h2 class="workflow-record-heading">Proposições desta sessão</h2>':''}${drafts.length?drafts.map(d=>`<article class="workflow-record"><button data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${d.partners.length?`<p class="workflow-partners"><strong>Concluíram ${Number(d.authorComplete)+d.partners.filter(p=>p.complete).length} de ${d.partners.length+1}</strong><span>Autoria: ${d.authorComplete?'concluída':'pendente'} · Socii: ${d.partners.map(p=>`${escapeHTML(members.find(m=>m.id===p.id)?.name??'Membro')} (${p.complete?'concluiu':'pendente'})`).join(', ')}</span></p>`:''}${advancedPreview&&d.partners.some(p=>!p.complete)?d.partners.filter(p=>!p.complete).map(p=>`<button class="workflow-demo-confirm" data-confirm-partner="${escapeHTML(d.id)}:${escapeHTML(p.id)}">Simular conclusão de ${escapeHTML(members.find(m=>m.id===p.id)?.name??'participante')}</button>`).join(''):''}</article>`).join(''):''}
  ${examples.length?'<h2 class="workflow-record-heading">Histórico demonstrativo</h2>':''}${examples.map(activityItem).join('')}
  </div><div class="workflow-actions"><button type="button" class="workflow-outline" data-action="invite-socii">Convidar para Socii</button>${inviteOpen?`<form id="invite-socii-form" class="workflow-inline"><label>Proposição<select name="draftId" required>${drafts.filter(d=>d.status!=='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label><label>Participante<select name="memberId" required>${selectOptions('',members.slice(1))}</select></label><button class="workflow-primary" ${!drafts.some(d=>d.status!=='concluida')?'disabled':''}>Adicionar participante</button></form>`:''}
  <button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>
@@ -333,7 +366,7 @@ function calendarPage(){
  const all=[...sample,...schedule.filter(s=>s.status==='programada')]
   .sort((a,b)=>a.start.localeCompare(b.start));
  const visible=selectedCalendarDay?all.filter(item=>item.start.slice(0,10)<=selectedCalendarDay&&item.end.slice(0,10)>=selectedCalendarDay):all;
- return `<div class="workflow-layout">${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}">${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
+ return `<div class="workflow-layout">${savedRecordNotice()}${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}">${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
  ${scheduleFormOpen?`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
  ${!drafts.some(d=>d.status==='concluida')?'<p class="workflow-help">Para agendar, conclua uma proposição primeiro. <button type="button" data-route="proposals">Ir às proposições</button></p>':''}
  <label>Título da deliberação<input name="title" maxlength="140" required placeholder="Título da deliberação"></label>
@@ -345,7 +378,7 @@ function calendarPage(){
  <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
  ${workflowNotice?`<p role="status" class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}"><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
- ${expandedSchedule===item.id?`<div class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
+ ${expandedSchedule===item.id?`<div class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
 }
 
 let lastRenderedHash = location.hash;
