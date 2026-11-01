@@ -20,10 +20,12 @@ with sync_playwright() as p:
   page.locator('[name=memberId]').select_option(index=1)
   page.locator('#invite-socii-form button.workflow-primary').click()
   page.get_by_text('Concluíram 0 de 2').wait_for()
+  page.get_by_text('Autoria: pendente',exact=False).wait_for()
   page.locator('[data-draft]').first.click()
   page.locator('#compose-proposal-form [value=conclude]').click()
   page.locator('#confirm-proposal-form button[type=submit]').click()
   page.get_by_text('Concluíram 1 de 2').wait_for()
+  page.get_by_text('Autoria: concluída',exact=False).wait_for()
   page.locator('[data-confirm-partner]').click()
   page.get_by_text('Concluíram 2 de 2').wait_for()
   assert page.locator('[data-confirm-partner]').count()==0
