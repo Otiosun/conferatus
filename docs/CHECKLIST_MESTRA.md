@@ -2,7 +2,7 @@
 
 Atualização de referência: 01/11/2026
 Responsável pelo acompanhamento: desenvolvimento CONFERATUS
-Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado). O preview isolado `preview/v0.10.6-calendar-form-state` contém a correção de retenção do agendamento (Cloudflare aprovado em `3423ba4`; regressão Playwright adicionada, execução de navegador pendente). Todos os fluxos permanecem demonstrativos; a revisão final das telas continua pendente.
+Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`). Último preview remoto aprovado antes desta rodada: `preview/v0.10.16-unique-records` (`4eb97cd`, Cloudflare Pages `completed/success`). A v0.10.17 é uma prévia isolada de **clareza do agendamento e auditoria visual**, não uma versão institucional aceita. Toda colaboração, votação e programação permanece demonstrativa; a revisão visual final da Megalos e a integração Academy estão pendentes.
 
 > Fonte oficial para retomar o trabalho. Nenhuma tarefa é concluída apenas por existir uma tela ou um commit. Não mudar o nome do produto sem confirmar a grafia com a Megalos.
 
@@ -49,12 +49,13 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 - [x] Corrigir integridade de versões na prévia: alteração de título/texto reinicia confirmações anteriores de autoria e Socii sem remover participantes; texto idêntico preserva progresso; distinguir pendência de autoria/Socii (v0.10.13, teste de falha antes/depois).
 - [x] Aproximar o editor Socii do modelo `1001930224.jpg` com faixa de participantes vinculados, identificação de prévia local e progresso 0/2–2/2, sem tempo fictício ou colaboração remota (v0.10.12; quatro larguras e regressões).
 - [x] Aproximar o editor de proposições do modelo de redação minimalista, preservando título editável, rascunho e botões (v0.10.5; comparação visual local).
+- [x] Realizar comparação documental de cada uma das seis imagens e amostragem do vídeo da Megalos, registrando diferenças, decisões não autorizadas e critérios de aceite (auditoria v0.10.17; **não equivale a validação visual final**).
 - [ ] Conferir as novas telas com as seis imagens e o vídeo da Megalos.
 - [x] Alinhar perfil, indicadores, histórico de proposições e Socii com a referência `1001930225.jpg`; reusar componente de membro, filtrar proposições por autor e manter rascunhos identificados como dados locais (preview v0.10.11, verificação em quatro larguras).
 - [x] Ajustar apresentação do formulário de agendamento para o painel azul da referência 1001930226.jpg, mantendo campos e regras existentes (v0.10.8; comparação local e regressão visual funcional).
 - [x] Executar e validar em navegador a retenção de campos de agendamento durante a navegação do calendário (preview v0.10.6; Chromium em 320, 390, 740 e 1280 px; ainda não promovido a `main`).
 - [x] Manter o botão Hoje e a marcação do dia consistentes após a meia-noite (preview v0.10.7; Chromium com relógio controlado em 390 e 740 px).
-**Estado:** a `main` permaneceu na v0.10.5 (`4b24459`) durante a retomada. A branch de prévia avança até v0.10.11, com ajustes visuais e funcionais testados em quatro larguras; a integração e as regras institucionais definitivas continuam pendentes.
+**Estado atualizado:** a `main` permanece na v0.10.5 (`4b24459`). A última prévia aprovada é a v0.10.16 (`4eb97cd`); a v0.10.17 acrescenta auditoria visual documentada e explicação de que programar não é votar. Cinco tarefas funcionais gerais da etapa permanecem abertas: fidelidade final do calendário, agendamento institucional, redação/revisão definitiva, colaboração Socii e aceite das seis imagens/vídeo. Os subitens técnicos anteriores são checkpoints, não aprovação desses cinco itens.
 **Dependências:** regras detalhadas de Socii e atribuição de responsabilidades.
 
 **Progresso incremental:** ajuste de rascunhos pronto e testado localmente; publicação da v0.10.1 aguardando confirmação do build de preview.
@@ -172,3 +173,11 @@ Status verificado: `main` está em v0.10.5 (`4b24459`, check Cloudflare aprovado
 - **Testado:** TypeScript + bundle offline + 18/18 testes Node. **16/16 suítes Playwright ativas**, incluindo `browser_unique_records_v0116.py` em 320/390/740/1280 px (falha comprovada antes do patch). Cloudflare Pages `completed/success` no commit `323aa9a` do código e teste; hash dos dois arquivos coincide com o executado localmente.
 - **Limites:** não existe backend, login Academy integrado ou backup remoto; o histórico de quarentena está apenas em `sessionStorage`. Teste `browser_smoke.py` legado fora da matriz ativa precisa atualizar seletor de botão descontinuado; não contabilizá-lo como aprovado. Ver `docs/CHECKPOINT_V026_2026-11-01.md`.
 - **Isolamento:** branch `preview/v0.10.16-unique-records`. `main` intocada, aceite Megalos e regras institucionais continuam pendentes.
+
+## Retomada disciplinada — preview v0.10.17 (01/11/2026)
+- **Item de prioridade:** Etapa 04 — fidelidade da jornada de calendário e honestidade da demonstração, com dependência da Etapa 06 (comunicação do estado real).
+- **Achado verificável:** o botão **Iniciar uma Votação** — texto presente na referência da Megalos — abre apenas o formulário de programação de deliberação, não inicia votação real. Antes desta rodada, a tela não explicava isso perto da ação.
+- **Ajuste mínimo:** preservar o título exato do botão, acrescentar uma nota legível sobre o comportamento demonstrativo, sem alterar estrutura, permissões, campos, regras, backend ou paleta; conferir em quatro larguras. Ver `docs/AUDITORIA_VISUAL_V0117_2026-11-01.md`.
+- **Conferência visual:** as seis capturas de 710×1536 e amostragem do vídeo de ~55 s foram examinadas e comparadas com a prévia existente. Registro de observações **não substitui aceite da Megalos**. A tela final continua como pendência.
+- **Qualidade/limites:** compilação TypeScript e testes Node confirmados; controles novos precisam de regressão em Chromium. `package.json` não possui comando `lint` (não chamar build de lint); `tests/browser_smoke.py` é legado e requer atualização. Reload HTTP real e colaboração entre contas continuam não verificados.
+- **Próximo passo após esta rodada:** apresentação das diferenças para validação de design da Megalos; depois, consolidar a experiência funcional conforme as regras recebidas. Não transformar correções preventivas de armazenamento em novas etapas sem necessidade observada.
