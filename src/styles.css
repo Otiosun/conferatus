@@ -578,3 +578,50 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .workflow-editor-actions button{width:180px;max-width:100%;min-height:44px;border-radius:20px;font-size:13px;}
 .workflow-editor-actions button.workflow-outline{color:#50547a;background:#f2f3f8;border:1px solid #e0e3ee;}
 @media(max-width:400px){.workflow-editor{padding:12px 15px 24px}.workflow-editor-actions button{width:155px;min-height:42px}}
+
+/* Megalos's scheduling reference: blue, integrated lower panel, not a grey card. */
+.workflow-schedule-form {
+ background:#515dc7;
+ color:#fff;
+ border-radius:24px;
+ padding:22px 18px 20px;
+ box-shadow:0 2px 6px #00000014;
+}
+.workflow-schedule-form h2 {color:#fff;font-size:16px;margin:0 0 4px;}
+.workflow-schedule-form label {color:#fff;font-size:12px;gap:7px;}
+.workflow-schedule-form input,
+.workflow-schedule-form textarea,
+.workflow-schedule-form select {
+ background:#ffffff1d;
+ border:1px solid #ffffff87;
+ color:#fff;
+ border-radius:13px;
+ min-width:0;
+}
+.workflow-schedule-form input::placeholder,
+.workflow-schedule-form textarea::placeholder {color:#ffffffe0;opacity:1;}
+.workflow-schedule-form select option {color:#252b48;background:#fff;}
+.workflow-schedule-form input:focus-visible,
+.workflow-schedule-form textarea:focus-visible,
+.workflow-schedule-form select:focus-visible {
+ outline:2px solid #fff;
+ outline-offset:2px;
+}
+.workflow-schedule-form input[type="datetime-local"] {color-scheme:dark;}
+.workflow-schedule-form .workflow-grid-two {
+ border-top:1px solid #ffffff91;
+ padding-top:18px;
+ margin-top:3px;
+}
+.workflow-schedule-form .workflow-primary {
+ background:#e5e7fc;
+ color:#434cb1;
+ margin-top:6px;
+ border-radius:13px;
+}
+.workflow-schedule-form .workflow-primary:disabled {opacity:.76;}
+.workflow-schedule-form .workflow-help {border-radius:11px;}
+.workflow-schedule-form .workflow-help button {min-height:28px;}
+@media (max-width:400px) {
+ .workflow-schedule-form {padding:18px 14px 18px;}
+}
