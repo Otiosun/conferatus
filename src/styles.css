@@ -515,3 +515,37 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 @media(max-width:400px){.workflow-layout{padding:12px 12px 36px}.workflow-grid-two{grid-template-columns:1fr}.workflow-metrics{font-size:11px;gap:10px}.workflow-review-buttons{grid-template-columns:1fr}.calendar-item>button strong{font-size:14px}}
 .workflow-partners{font-size:12px;color:#4b58b6;margin-top:10px}.workflow-demo-confirm{margin:5px 7px 5px 0;border:1px solid #9ea8e3;border-radius:8px;background:#f2f3ff;color:#4e5ab4;padding:8px 11px;font-size:12px}
 
+/* Calendar view. Plain native controls rather than a calendar dependency. */
+.calendar-hero{height:auto;display:block;padding:19px 20px 18px;box-shadow:0 2px 7px #0002;color:#fff;}
+.calendar-toolbar h1{font-size:15px;letter-spacing:.035em;margin:0 0 16px;text-align:center;font-weight:700;}
+.calendar-month-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.calendar-month-nav h2{font-size:17px;text-transform:capitalize;font-weight:600;margin:0;letter-spacing:0;}
+.calendar-month-nav button,.calendar-foot button{border:1px solid #ffffff69;border-radius:9px;background:#fff1;color:#fff;min-width:40px;min-height:37px;cursor:pointer;font:inherit;}
+.calendar-month-nav button{font-size:26px;line-height:1;}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center;}
+.calendar-weekday{font-size:12px;opacity:.8;padding:6px 0;}
+.calendar-empty{min-height:39px;}
+.calendar-day{border:1px solid transparent;border-radius:9px;min-height:45px;background:transparent;color:white;font:inherit;font-size:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;}
+.calendar-day:hover{background:#ffffff29;}
+.calendar-day--today{border-color:#ffffff9e;}
+.calendar-day--selected{background:#f5f5ff!important;color:#4b55ad;font-weight:700;}
+.calendar-marker{width:5px;height:5px;background:#fff0a2;border-radius:50%;display:inline-block;flex-shrink:0;}
+.calendar-day--selected .calendar-marker{background:#5665c3;}
+.calendar-foot{display:flex;align-items:center;justify-content:space-between;font-size:11px;opacity:.96;margin-top:13px;}
+.calendar-foot span{display:flex;align-items:center;gap:6px;}
+.calendar-foot button{font-size:12px;padding:5px 12px;}
+.calendar-list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:15px;}
+.calendar-list-head h2{font-size:17px;margin:0 0 3px;}
+.calendar-list-head button{font:inherit;color:#515dc7;background:none;border:0;padding:8px 3px;cursor:pointer;}
+.calendar-empty-message{padding:24px 0;font-size:13px;color:#626b78;}
+.workflow-form-error{background:#fff1f1;border:1px solid #eab8b8;padding:10px 13px;border-radius:9px;font-size:13px;color:#923b3b;margin:0;}
+@media(max-width:400px){.calendar-hero{padding:14px 10px}.calendar-day{min-height:39px;font-size:12px}.calendar-month-nav h2{font-size:15px}.calendar-grid{gap:2px}}
+
+.workflow-help{margin:0;padding:12px;border-radius:9px;background:#f6f7fc;color:#3d467a;font-size:13px;line-height:1.5;}
+.workflow-help button{border:0;background:transparent;color:#4754b2;font:inherit;font-weight:700;text-decoration:underline;padding:0 3px;cursor:pointer;}
+.workflow-form button:disabled{cursor:not-allowed;opacity:.55;}
+.calendar-expanded .calendar-proposal-link{margin:0 0 9px;background:#eff0fa;color:#4854b6;border:0;font-weight:600;cursor:pointer;}
+.workflow-finished{background:#f2f3fa;padding:20px;border-radius:12px;line-height:1.5;}
+.workflow-finished strong{color:#4a56b6;}
+.workflow-finished p{font-size:13px;margin-bottom:18px;}
+.workflow-finished button{width:100%;}
