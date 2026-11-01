@@ -304,10 +304,11 @@ function reviewPage(){
  if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p><button type="button" class="workflow-primary" data-route="proposals">Voltar às proposições</button></div></div>`;
  return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
- <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form"><p>Confira os dados e a redação antes de confirmar a conclusão.</p>
+ <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
+ <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>Confira os dados e a redação antes de confirmar a conclusão.</p>
  <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>
  <label>Tipo de proposição<select name="type" required>${['PDR','PR','Ofício'].map(t=>`<option value="${t}" ${t===d.type?'selected':''}>${t}</option>`).join('')}</select></label>
- <div class="workflow-review-buttons"><button type="button" class="workflow-outline" data-route="compose">Voltar</button><button class="workflow-primary" type="submit">Confirmar conclusão</button></div></form></div>`;
+ </div><div class="workflow-review-buttons"><button type="button" class="workflow-outline" data-route="compose" aria-label="Cancelar confirmação e voltar à redação">Cancelar</button><button class="workflow-primary" type="submit">Confirmar</button></div></form></div>`;
 }
 // Display only Socii participants already linked to this session's proposal.
 function calendarSociiLine(proposalId:string){
