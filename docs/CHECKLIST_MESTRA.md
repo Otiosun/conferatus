@@ -2,17 +2,17 @@
 
 Atualização de referência: 01/11/2026
 Responsável pelo acompanhamento: desenvolvimento CONFERATUS
-Status verificado: `main` publicou a v0.9.9 (`3150cd2`, Cloudflare aprovado); a branch antiga `preview/v0.9.9-cinstia` falhou, mas a branch reconciliada `preview/v0.9.9-reconciled` passou (`0bb4435`). A v0.10.0 continua validada localmente, sem publicação.
+Status verificado: `main` publicou a v0.10.0 (`8f50177`, Cloudflare aprovado); preview `preview/v0.10.0-workflows` aprovado (`fe4bbeb`). Os fluxos novos permanecem demonstrativos e a revisão final das telas continua pendente.
 
 > Fonte oficial para retomar o trabalho. Nenhuma tarefa é concluída apenas por existir uma tela ou um commit. Não mudar o nome do produto sem confirmar a grafia com a Megalos.
 
 ## 01 — Estabilização e consolidação
 - [x] Investigar e corrigir o build remoto da v0.9.9. Preview aprovado (`0bb4435`), produção aprovada (`3150cd2`).
-- [ ] Comparar e reconciliar o código local da v0.10.0 com o repositório.
-- [ ] Validar as quatro seções oficiais da CINSTIA e a separação entre deliberativos e membros comuns.
-- [ ] Validar o gesto de arrastar CONFERATUS para abrir o menu, mantendo alternativa acessível.
+- [x] Reconciliar a v0.10.0 com o GitHub; preview `fe4bbeb` e produção `8f50177` publicados.
+- [x] Validar localmente as quatro seções e a separação entre deliberativos e membros comuns (base v0.9.9).
+- [x] Validar localmente o gesto de arrastar o rodapé e manter o botão alternativo.
 - [ ] Confirmar com a Megalos a grafia oficial: CONFERATUS ou CONFFRATUS.
-**Estado:** primeira tarefa concluída; v0.9.9 foi publicada. Consolidação da v0.10.0 ainda pendente.
+**Estado:** quatro de cinco tarefas concluídas. Falta confirmar a grafia oficial com a Megalos.
 
 ## 02 — Votação e registro
 - [ ] Consolidar o modelo de votação e seus estados.
@@ -35,7 +35,7 @@ Status verificado: `main` publicou a v0.9.9 (`3150cd2`, Cloudflare aprovado); a 
 - [ ] Finalizar redação, revisão, confirmação e estados de proposições.
 - [ ] Consolidar a colaboração Socii e seus estados de conclusão.
 - [ ] Conferir as novas telas com as seis imagens e o vídeo da Megalos.
-**Estado:** protótipo v0.10.0 local testado; ainda não publicado.
+**Estado:** protótipo v0.10.0 publicado em `main`; fluxos testados localmente em quatro larguras de tela. Integração e regras de negócio definitivas pendentes.
 **Dependências:** regras detalhadas de Socii e atribuição de responsabilidades.
 
 ## 05 — Integração posterior à Academy
@@ -74,3 +74,9 @@ Status verificado: `main` publicou a v0.9.9 (`3150cd2`, Cloudflare aprovado); a 
 - Regras completas da votação e dos registros pessoais.
 - Funcionamento detalhado dos convites, edição compartilhada e conclusão Socii.
 - Responsáveis e permissões das novas operações de agendamento e elaboração.
+
+## Checkpoint — v0.10.0 (01/11/2026)
+- **Feito:** branch de preview com calendário, agendamento, redação, revisão, Socii e indicador Ofício; produção recebeu exatamente a mesma árvore de código.
+- **Testado:** compilação e 18 testes de lógica na v0.10.0 local; Chromium em 320, 390, 740 e 1280 px para proposição/agendamento; fluxo Socii pendente testado separadamente.
+- **Publicado:** preview `fe4bbeb` e produção `8f50177`, ambos com compilação Cloudflare aprovada.
+- **Pendente:** confirmação da grafia oficial, revisão visual integral das novas referências, regras finais de Socii e votação, integração com a Academy e validação física do domínio hospedado.
