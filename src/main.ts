@@ -261,7 +261,7 @@ function isSavedDraft(value:unknown):value is Draft{
    if(!p||typeof p!=='object'||Array.isArray(p))return false;
    const partner=p as Record<string,unknown>;
    return typeof partner.id==='string'&&!!partner.id&&typeof partner.complete==='boolean';
-  })&&
+  })&&new Set((d.partners as {id:string}[]).map(p=>p.id)).size===d.partners.length&&
   // A legacy or damaged record must not claim completion without every signoff.
   !(d.status==='concluida'&&(!d.authorComplete||(d.partners as {complete:boolean}[]).some(p=>!p.complete)));
 }
@@ -279,13 +279,25 @@ const draftRestore=readSessionRecords(draftKey);
 const scheduleRestore=readSessionRecords(deliberationKey);
 const savedDrafts=draftRestore.records;
 const savedSchedule=scheduleRestore.records;
-const drafts:Draft[]=savedDrafts.filter(isSavedDraft);
-const schedule:Deliberation[]=savedSchedule.filter(isSavedSchedule);
+// A duplicated ID can misdirect an action to another record. Keep the first valid
+// occurrence, quarantine later ones, and preserve their original content before saving.
+function uniqueSavedRecords<T extends {id:string}>(items:unknown[],valid:(value:unknown)=>value is T){
+ const seen=new Set<string>(),accepted:T[]=[],rejected:unknown[]=[];
+ for(const item of items){
+  if(valid(item)&&!seen.has(item.id)){seen.add(item.id);accepted.push(item);}
+  else rejected.push(item);
+ }
+ return {accepted,rejected};
+}
+const restoredDrafts=uniqueSavedRecords(savedDrafts,isSavedDraft);
+const restoredSchedule=uniqueSavedRecords(savedSchedule,isSavedSchedule);
+const drafts:Draft[]=restoredDrafts.accepted;
+const schedule:Deliberation[]=restoredSchedule.accepted;
 const unreadableRecordsBackup={drafts:draftRestore.unreadableRaw,schedule:scheduleRestore.unreadableRaw};
-const ignoredSavedRecords=savedDrafts.length>drafts.length||savedSchedule.length>schedule.length||
+const ignoredRecordsBackup={drafts:restoredDrafts.rejected,schedule:restoredSchedule.rejected};
+const ignoredSavedRecords=ignoredRecordsBackup.drafts.length>0||ignoredRecordsBackup.schedule.length>0||
  draftRestore.unreadableRaw!==null||scheduleRestore.unreadableRaw!==null;
-const ignoredRecordsBackup={drafts:savedDrafts.filter(d=>!isSavedDraft(d)),schedule:savedSchedule.filter(d=>!isSavedSchedule(d))};
-function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos desta prévia local não foram carregados.</p>':'';}
+function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos ou repetidos desta prévia local não foram carregados.</p>':'';}
 const blankDraft=()=>({title:'',body:''});
 let draftForm=blankDraft();
 let currentDraftId='';
@@ -323,9 +335,19 @@ function saveWorkflows():boolean{
   if((unreadableRecordsBackup.drafts!==null||unreadableRecordsBackup.schedule!==null)&&
      !sessionStorage.getItem('conferatus:unreadable-session-backup-v0115'))
    sessionStorage.setItem('conferatus:unreadable-session-backup-v0115',JSON.stringify(unreadableRecordsBackup));
-  if((ignoredRecordsBackup.drafts.length||ignoredRecordsBackup.schedule.length)&&
-     !sessionStorage.getItem('conferatus:invalid-session-backup-v0114'))
-   sessionStorage.setItem('conferatus:invalid-session-backup-v0114',JSON.stringify(ignoredRecordsBackup));
+  if(ignoredRecordsBackup.drafts.length||ignoredRecordsBackup.schedule.length){
+   // Keep the original legacy backup unchanged, even if a later session has new rejects.
+   const legacyKey='conferatus:invalid-session-backup-v0114';
+   if(!sessionStorage.getItem(legacyKey))sessionStorage.setItem(legacyKey,JSON.stringify(ignoredRecordsBackup));
+   // A separate append-only journal covers later rejections without overwriting older copies.
+   const journalKey='conferatus:quarantined-session-backups-v0116';
+   const previous=sessionStorage.getItem(journalKey);
+   const journal:unknown=previous===null?[]:JSON.parse(previous);
+   if(!Array.isArray(journal))throw new Error('Invalid local recovery journal');
+   const current=JSON.stringify(ignoredRecordsBackup);
+   if(!journal.some(entry=>JSON.stringify(entry)===current))
+    sessionStorage.setItem(journalKey,JSON.stringify([...journal,ignoredRecordsBackup]));
+  }
   sessionStorage.setItem(draftKey,JSON.stringify(drafts));sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));return true;
  }catch{return false;}
 }
