@@ -115,3 +115,9 @@ Evidências: `tests/browser_stage7_keyboard_focus_v0139.py` **76/76** em quatro 
 ## 07.10 — contraste e estrutura semântica, lote 1 (v0.10.40)
 
 No Chromium offline, o novo teste `browser_stage7_contrast_semantics_v0140.py` reproduziu 51 violações dentre 87 verificações da amostra (3 larguras, 8 rotas). CSS ajustado pontualmente para a relação mínima 4,5:1 nas combinações de texto amostradas, incluindo estados normal/hover do menu; renderização insere título principal acessível somente nas cinco rotas sem `<h1>`. Após correção: **87/87 PASS**. Build TypeScript/Node 18/18, regressões de teclado/desktop/tablet/reflow/Academy aprovadas. **07.10 continua [ ] e 07 permanece 7/12**, já que contraste global, ARIA de estados, tecnologias assistivas e motores adicionais ainda não foram auditados. Evidência: `docs/CHECKPOINT_V050_2026-11-02.md`.
+
+## 07.10 — lote 2, ARIA dinâmico e erros (v0.10.41)
+
+A prévia offline tinha sete classes de botões com `aria-expanded=true` mas sem referência ao conteúdo controlado. Novo teste falhou antes, passou **28/28** depois; ids referenciados válidos inclusive nos estados expandidos de menu, votação demonstrativa, busca, gerenciamento, ferramentas, calendário e programação em quatro larguras. Campos do rascunho e do agendamento têm agora associação semântica com erros `role=alert` e foco no campo inválido; teste falhou antes e passou **12/12** depois. Grupos de indicadores e diretório ganharam papel semântico. Somente `src/main.ts` e testes/docs foram alterados; CSS, arte oficial e estética permanecem iguais.
+
+Regressões Node 18/18, contraste/semântica 87/87, teclado/foco 76/76, fluxo de revisão 24/24, formulários 72, reflow 63, zoom sintético 70, desktop/tablets e inventário de controles passaram separadamente. **07.10 permanece [ ] e 07=7/12**: leitores de tela reais, contraste não textual/foco e verificação multibrowser/hardware não estão cobertos. Checkpoint detalhado em `docs/CHECKPOINT_V051_2026-11-02.md`.

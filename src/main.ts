@@ -84,21 +84,21 @@ function navigate(route: Route, memberId?: string) {
 }
 function crest() { return '<img src="./assets/crest.png" width="29" height="29" alt="Símbolo da Academy">'; }
 function footer() {
-  return `${menuOpen ? `<nav class="bottom-menu" aria-label="Navegação principal"><div class="menu-list">
+  return `${menuOpen ? `<nav id="bottom-navigation" class="bottom-menu" aria-label="Navegação principal"><div class="menu-list">
     <button class="menu-item" data-route="members" ${routeFromHash()==='members'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3.5 19v-2.2a5.5 5.5 0 0 1 11 0V19M17 8h4M17 12h4M17 16h4"/></svg></span>Membros e Serviços da Cúpula Cíntia</button>
     <button class="menu-item" data-route="overview" ${routeFromHash()==='overview'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h2M12 9h5M7 13h2M12 13h5M7 17h2M12 17h5"/></svg></span>Histórico de Votações e Proposições</button>
     <button class="menu-item" data-route="calendar" ${routeFromHash()==='calendar'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true">▦</span>Agendar e Iniciar Deliberação</button>
     <button class="menu-item" data-route="proposals" ${['proposals','compose','review'].includes(routeFromHash())?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true">✎</span>Elaborar Proposição e Socii</button>
   </div></nav>` : ''}
   <footer class="app-footer">${crest()}<button type="button" class="footer-home" data-route="ballot" aria-label="Voltar à votação">CONFFRATUS</button><small class="footer-demo">DADOS FICTÍCIOS · PRÉVIA</small>
-   <button type="button" class="footer-nav" aria-expanded="${menuOpen}" aria-label="${menuOpen?'Fechar':'Abrir'} menu" data-action="menu">${menuOpen?'Fechar ×':'☰ Menu'}</button>
+   <button type="button" class="footer-nav" aria-expanded="${menuOpen}" ${menuOpen?'aria-controls="bottom-navigation"':''} aria-label="${menuOpen?'Fechar':'Abrir'} menu" data-action="menu">${menuOpen?'Fechar ×':'☰ Menu'}</button>
   </footer>`;
 }
 function header(title?: string, subtitle?: string, tall=false) {
   if (title) return `<header class="page-header">
-   ${advancedPreview?`<button type="button" class="panel-button" data-action="toggle-tools" aria-label="Opções de teste" aria-expanded="${demoToolsOpen}"><img src="./assets/painel.png" alt=""></button>`:`<img class="panel-mark" src="./assets/painel.png" alt="">`}
+   ${advancedPreview?`<button type="button" class="panel-button" data-action="toggle-tools" aria-label="Opções de teste" aria-expanded="${demoToolsOpen}" ${demoToolsOpen?'aria-controls="demo-tools-panel"':''}><img src="./assets/painel.png" alt=""></button>`:`<img class="panel-mark" src="./assets/painel.png" alt="">`}
    <h1>${escapeHTML(title)}</h1>${subtitle?`<p>${escapeHTML(subtitle)}</p>`:''}
-   ${advancedPreview && demoToolsOpen?`<aside class="demo-tools" aria-label="Ferramentas de demonstração">
+   ${advancedPreview && demoToolsOpen?`<aside id="demo-tools-panel" class="demo-tools" aria-label="Ferramentas de demonstração">
      <strong>Opções de visualização</strong><p>Selecione um perfil para visualizar as permissões.</p>
      <label for="role-mode">Visualizar como</label><select id="role-mode" aria-label="Simular perfil"><option value="diretor" ${rolePreview==='diretor'?'selected':''}>Diretor</option><option value="membro" ${rolePreview==='membro'?'selected':''}>Membro comum</option></select>
      ${expandedSection&&rolePreview==='diretor'?`<div class="tools-divider"><label for="add-member">Vincular à seção aberta</label><div class="tools-add"><select id="add-member"><option value="">Selecione um membro…</option>${members.filter(m=>!m.sectionIds.includes(expandedSection)).map(m=>`<option value="${m.id}">${escapeHTML(m.name)}</option>`).join('')}</select><button type="button" class="small-action" data-action="add-member">Vincular</button></div></div>`:''}
@@ -110,7 +110,7 @@ function header(title?: string, subtitle?: string, tall=false) {
 }
 function metricRow(m: Member) {
   const personalVotes = hasPersonalVoteHistory(m, sections) ? String(m.totalVotes) : '—';
-  return `<div class="metrics" aria-label="Indicadores de participação">
+  return `<div class="metrics" role="group" aria-label="Indicadores de participação">
   <div class="metric-cell">${personalVotes}<small>Votos</small></div>
   <div class="metric-cell">${m.proposals}<small>PDR</small></div>
   <div class="metric-cell">${m.approved}<small>PR</small></div>
@@ -137,8 +137,8 @@ function ballotPage() {
  const sum=totalVotes(demoOptions);
  return `<div class="main-pad">${header(undefined,undefined,true)}<div class="results">
  ${demoOptions.map(o=>`<div class="result-row ${demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
- </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="toggle-demo" aria-expanded="${demoExpanded}">${demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':'Ver situação'}</button></div>
- <p class="ballot-description">${escapeHTML(ballot.description)}</p>${demoExpanded?`<div class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Votação aberta. Selecione uma opção.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
+ </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="toggle-demo" aria-expanded="${demoExpanded}" ${demoExpanded?'aria-controls="demo-vote-panel"':''}>${demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':'Ver situação'}</button></div>
+ <p class="ballot-description">${escapeHTML(ballot.description)}</p>${demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Votação aberta. Selecione uma opção.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
  ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
  <p class="vote-feedback" role="status">${demoVoteId?'Escolha registrada.':'Selecione uma das opções.'}</p>
  ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}</section>`;
@@ -169,9 +169,9 @@ function memberList() {
  const candidates=matchingMembers();
  const visible=(directoryExpanded || (searchExpanded && filter.trim()))?candidates:candidates.slice(0,7);
  return `${header(undefined,undefined,false)}${memberHeader(lead,'votos')}
- <div class="member-list" aria-label="Diretório de membros">
- <button type="button" class="search-trigger" data-action="search" aria-expanded="${searchExpanded}" aria-label="${searchExpanded?'Fechar busca de membros':'Buscar membros'}">${searchExpanded?'Fechar busca ×':'Buscar ⌕'}</button>
- ${searchExpanded?`<div class="toolbar"><label for="search-members">Buscar membro</label><input id="search-members" type="search" placeholder="Nome ou identificador" value="${escapeHTML(filter)}" autocomplete="off" aria-controls="member-results"><button type="button" class="clear-search" data-action="clear-search" ${filter?'':'hidden'}>Limpar</button></div>`:''}
+ <div class="member-list" role="region" aria-label="Diretório de membros">
+ <button type="button" class="search-trigger" data-action="search" aria-expanded="${searchExpanded}" ${searchExpanded?'aria-controls="directory-search-tools"':''} aria-label="${searchExpanded?'Fechar busca de membros':'Buscar membros'}">${searchExpanded?'Fechar busca ×':'Buscar ⌕'}</button>
+ ${searchExpanded?`<div id="directory-search-tools" class="toolbar"><label for="search-members">Buscar membro</label><input id="search-members" type="search" placeholder="Nome ou identificador" value="${escapeHTML(filter)}" autocomplete="off" aria-controls="member-results"><button type="button" class="clear-search" data-action="clear-search" ${filter?'':'hidden'}>Limpar</button></div>`:''}
  ${searchExpanded?`<p id="member-count" class="sr-only" role="status" aria-live="polite">${visible.length} ${visible.length===1?"membro encontrado":"membros encontrados"}</p>`:""}
  <div id="member-results">${memberResults(visible)}</div>
  ${!directoryExpanded && candidates.length>7?`<button class="member-more" type="button" data-action="show-more-members" ${searchExpanded&&filter.trim()?'hidden':''}>Mostrar mais ${candidates.length-7} membros</button>`:''}
@@ -215,7 +215,7 @@ function overviewPage() {
  const relevant=overviewTab==='votos'?votes:proposals;
  const visible=overviewExpanded?relevant:relevant.slice(0,6);
  const remaining=relevant.length-visible.length;
- return `${header(undefined,undefined,false)}<div class="overview-stats" aria-label="Indicadores institucionais">
+ return `${header(undefined,undefined,false)}<div class="overview-stats" role="group" aria-label="Indicadores institucionais">
   <span class="stat-chip">${accepted} Aprovados</span><span class="stat-chip">${proposals.length-accepted} Arquivados</span>
   <span class="stat-figure">${votes.reduce((n,a)=>n+a.votes,0)} Votos</span>
   <span class="stat-figure">${proposals.length} PDR</span><span class="stat-figure">${String(accepted).padStart(2,'0')} PR</span>
@@ -228,8 +228,8 @@ function governancePage() {
  const active=sections.find(s=>s.id===expandedSection);
  return `${header('GERENCIAMENTO DELIBERATIVO','Gerencie as seções e deliberados da Cúpula Institucional Academy.')}
  ${rolePreview==='membro'?'<p class="status-line" role="status">O gerenciamento das seções é exclusivo da diretoria.</p>':
- `<div class="governance-list">${sections.map(s=>`${s.category==='comum'?'<h2 class="governance-group-heading">Membros da Academy</h2>':''}<div><button type="button" class="section-toggle" data-section="${s.id}" aria-expanded="${expandedSection===s.id}"><span>${escapeHTML(s.name)}${s.places ? `<small class="section-capacity">${s.places} integrantes previstos</small>` : ''}</span><span class="section-chevron" aria-hidden="true">${expandedSection===s.id?'▾':'▸'}</span></button>
- ${expandedSection===s.id?`<div>${members.filter(m=>m.sectionIds.includes(s.id)).map(m=>`<div class="section-member"><div class="avatar" aria-hidden="true"></div><button class="section-member-name" type="button" data-edit="${m.id}" title="Editar ${escapeHTML(m.name)}">${escapeHTML(m.name)}</button><button class="icon-button icon-button--edit" type="button" data-edit="${m.id}" aria-label="Editar identificador de ${escapeHTML(m.name)}"><img src="./assets/editar.png" alt=""></button>${s.id==='membros'?'':`<button class="icon-button" type="button" data-demote="${m.id}" aria-label="Rebaixar ${escapeHTML(m.name)} para membro comum"><img src="./assets/rebaixamento.png" alt=""></button>`}</div>
+ `<div class="governance-list">${sections.map(s=>`${s.category==='comum'?'<h2 class="governance-group-heading">Membros da Academy</h2>':''}<div><button type="button" class="section-toggle" data-section="${s.id}" aria-expanded="${expandedSection===s.id}" ${expandedSection===s.id?`aria-controls="section-members-${escapeHTML(s.id)}"`: ''}><span>${escapeHTML(s.name)}${s.places ? `<small class="section-capacity">${s.places} integrantes previstos</small>` : ''}</span><span class="section-chevron" aria-hidden="true">${expandedSection===s.id?'▾':'▸'}</span></button>
+ ${expandedSection===s.id?`<div id="section-members-${escapeHTML(s.id)}">${members.filter(m=>m.sectionIds.includes(s.id)).map(m=>`<div class="section-member"><div class="avatar" aria-hidden="true"></div><button class="section-member-name" type="button" data-edit="${m.id}" title="Editar ${escapeHTML(m.name)}">${escapeHTML(m.name)}</button><button class="icon-button icon-button--edit" type="button" data-edit="${m.id}" aria-label="Editar identificador de ${escapeHTML(m.name)}"><img src="./assets/editar.png" alt=""></button>${s.id==='membros'?'':`<button class="icon-button" type="button" data-demote="${m.id}" aria-label="Rebaixar ${escapeHTML(m.name)} para membro comum"><img src="./assets/rebaixamento.png" alt=""></button>`}</div>
  ${editingMemberId===m.id?`<form class="edit-form" id="edit-member-form" novalidate><label for="member-acdm-id">ACDM ID</label><input id="member-acdm-id" name="acdmId" value="${escapeHTML(m.acdmId ?? '')}" placeholder="DEMO-0001" required minlength="3" maxlength="40" pattern="[A-Za-z0-9_-]+" autocomplete="off" ${editError?'aria-invalid="true" aria-describedby="edit-error"':''}><input type="hidden" name="memberId" value="${m.id}"><button type="submit" class="small-action">Salvar</button>${editError?`<p id="edit-error" class="edit-error" role="alert">${escapeHTML(editError)}</p>`:''}</form>`:''}`).join('')}
  ${members.every(m=>!m.sectionIds.includes(s.id))?'<p class="section-empty">Nenhum membro nesta seção.</p>':''}</div>`:''}</div>`).join('')}</div>`}
  ${notice?`<p class="status-line" role="status">${escapeHTML(notice)} ${lastChange?'<button type="button" class="undo-action" data-action="undo">Desfazer</button>':''}</p>`:''}`;
@@ -396,8 +396,8 @@ function sociiEditorBar(d:Draft|undefined){
 function composePage(){
  const editing=drafts.find(d=>d.id===currentDraftId);
  return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
- <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required placeholder="Título" value="${escapeHTML(draftForm.title)}">
- <label for="draft-body">Redação</label><textarea id="draft-body" name="body" required minlength="20" placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
+ <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required ${composeError?'aria-describedby="compose-save-error"':''} placeholder="Título" value="${escapeHTML(draftForm.title)}">
+ <label for="draft-body">Redação</label><textarea id="draft-body" name="body" required minlength="20" ${composeError?'aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
  ${composeError?`<p id="compose-save-error" class="workflow-form-error" role="alert">${escapeHTML(composeError)}</p>`:''}
  <div class="workflow-editor-actions"><button class="workflow-primary" type="submit" name="intent" value="conclude">Concluir redação</button><button class="workflow-outline" type="submit" name="intent" value="save" formnovalidate>Salvar rascunho</button><button class="workflow-outline" type="button" data-route="proposals">Voltar</button></div></form>`;
 }
@@ -424,7 +424,7 @@ function calendarPage(){
  const all=[...sample,...schedule.filter(s=>s.status==='programada')]
   .sort((a,b)=>a.start.localeCompare(b.start));
  const visible=selectedCalendarDay?all.filter(item=>item.start.slice(0,10)<=selectedCalendarDay&&item.end.slice(0,10)>=selectedCalendarDay):all;
- return `<div class="workflow-layout">${savedRecordNotice()}${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}">${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
+ return `<div class="workflow-layout">${savedRecordNotice()}${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}" ${scheduleFormOpen?'aria-controls="schedule-deliberation-form"':''}>${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
  <p class="calendar-preview-disclosure" role="note">Esta prévia apenas programa uma deliberação; não inicia uma votação real.</p>
  ${scheduleFormOpen?`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
  ${!drafts.some(d=>d.status==='concluida')?'<p class="workflow-help">Para agendar, conclua uma proposição primeiro. <button type="button" data-route="proposals">Ir às proposições</button></p>':''}
@@ -436,8 +436,8 @@ function calendarPage(){
  <label>Tipo de deliberação<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
  <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
  ${workflowNotice?`<p role="status" class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
- <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}"><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
- ${expandedSchedule===item.id?`<div class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
+ <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
+ ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -647,6 +647,18 @@ document.addEventListener('click',(event)=>{
  }
 });
 
+// Associate custom scheduling errors with their field as well as announcing them.
+function showScheduleFormError(form: HTMLFormElement,message:string,fieldName:string) {
+ const old=form.querySelector<HTMLElement>('#schedule-form-error');
+ if(old)old.textContent=message;
+ else form.insertAdjacentHTML('afterbegin',`<p id="schedule-form-error" class="workflow-form-error" role="alert">${escapeHTML(message)}</p>`);
+ const field=form.elements.namedItem(fieldName);
+ if(field instanceof HTMLInputElement || field instanceof HTMLSelectElement){
+  field.setAttribute('aria-invalid','true');
+  field.setAttribute('aria-describedby','schedule-form-error');
+  field.focus({preventScroll:true});
+ }
+}
 document.addEventListener('submit',(event)=>{
  const form=event.target;if(!(form instanceof HTMLFormElement))return;
  const id=form.id;
@@ -715,18 +727,12 @@ document.addEventListener('submit',(event)=>{
   const title=String(data.get('title')??'').trim(),objective=String(data.get('objective')??'').trim();
   const start=String(data.get('start')??''),end=String(data.get('end')??'');
   if(!title||!objective||!start||!end||new Date(start).getTime()>=new Date(end).getTime()){
-   const message='Confira o título, a descrição e o período: o encerramento deve ser posterior ao início.';
-   const old=form.querySelector<HTMLElement>('.workflow-form-error');
-   if(old)old.textContent=message;
-   else form.insertAdjacentHTML('afterbegin',`<p class="workflow-form-error" role="alert">${message}</p>`);
+   showScheduleFormError(form,'Confira o título, a descrição e o período: o encerramento deve ser posterior ao início.','end');
    return;
   }
   const proposalId=String(data.get('proposalId')??'');
   if(!drafts.some(d=>d.id===proposalId&&d.status==='concluida')){
-   const message='Selecione uma proposição concluída.';
-   const old=form.querySelector<HTMLElement>('.workflow-form-error');
-   if(old)old.textContent=message;
-   else form.insertAdjacentHTML('afterbegin',`<p class="workflow-form-error" role="alert">${message}</p>`);
+   showScheduleFormError(form,'Selecione uma proposição concluída.','proposalId');
    return;
   }
   const item:Deliberation={id:`sched-${Date.now().toString(36)}`,title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),status:'programada'};
@@ -759,6 +765,15 @@ document.addEventListener('submit',(event)=>{
 });
 document.addEventListener('input',(event)=>{
  const target=event.target;
+ if(target instanceof HTMLInputElement && target.closest('#schedule-deliberation-form') && (target.name==='start'||target.name==='end')){
+  const form=target.form;
+  const start=form?.elements.namedItem('start'),end=form?.elements.namedItem('end');
+  if(start instanceof HTMLInputElement && end instanceof HTMLInputElement && end.getAttribute('aria-invalid')==='true' && start.value && end.value && new Date(start.value).getTime()<new Date(end.value).getTime()){
+   end.removeAttribute('aria-invalid');end.removeAttribute('aria-describedby');
+   form?.querySelector('#schedule-form-error')?.remove();
+  }
+ }
+
  if(target instanceof HTMLInputElement&&target.id==='search-members') {
   filter=target.value;
   updateMemberSearch();
@@ -766,6 +781,13 @@ document.addEventListener('input',(event)=>{
 });
 document.addEventListener('change',(event)=>{
  const target=event.target;
+ if(target instanceof HTMLSelectElement && target.name==='proposalId' && target.closest('#schedule-deliberation-form') && target.getAttribute('aria-invalid')==='true'){
+  if(drafts.some(d=>d.id===target.value && d.status==='concluida')){
+   target.removeAttribute('aria-invalid');target.removeAttribute('aria-describedby');
+   target.form?.querySelector('#schedule-form-error')?.remove();
+  }
+ }
+
  if(advancedPreview && target instanceof HTMLSelectElement&&target.id==='role-mode'){
   rolePreview=target.value==='membro'?'membro':'diretor';render();
   document.querySelector<HTMLSelectElement>('#role-mode')?.focus({preventScroll:true});

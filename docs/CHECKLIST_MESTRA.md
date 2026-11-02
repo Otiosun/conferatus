@@ -380,3 +380,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 NÃO concluída**: faltam demais cores/estados, contraste não textual/foco, semântica ARIA profunda, leitor de tela, navegador/hardware adicional. Sem alegar conformidade WCAG global.
 
 **Contagens não alteradas:** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, **07=7/12**. D1–D6 Megalos ainda sem aceite; main/produção intactas.
+
+## Etapa 07.10 — lote 2, v0.10.41 (02/11/2026) — AINDA ABERTA
+
+- [x] Reproduzir relações ARIA incompletas em controles expansíveis (teste falhou no menu) e associar sete tipos de botão/painel com `aria-controls` válido quando abertos: menu, votação demonstrativa, busca, seção, ferramentas, agendamento e detalhe de programação. Grupos de indicadores e região de diretório recebem papel semântico adequado.
+- [x] Reproduzir erro de rascunho não associado ao campo (teste falhou antes), aplicar `aria-describedby` a título/redação, e identificar o período inválido do agendamento com `role=alert`, `aria-invalid`, associação e foco; limpar o erro após correção.
+- [x] Testes depois: 28/28 relações ARIA, 12/12 verificações de erro, Node 18/18, auditoria de contraste anterior 87/87, teclado 76/76, editor 24/24, formulários 72, reflow 63, zoom simulado 70, tablets 64, desktop 56, inventário 2.583 controles. Ver `docs/CHECKPOINT_V051_2026-11-02.md` e logs de regressão.
+- [ ] **07.10 permanece aberta**: contraste não textual e foco, totalidade dos estados e tecnologias assistivas/motores/dispositivos reais não certificados. Nada de presumir aceitações D1–D6.
+
+**Contagens inalteradas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Produção e `main` preservadas.
