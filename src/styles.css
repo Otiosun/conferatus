@@ -986,3 +986,9 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .workflow-review-sheet select {
   border-color:#747c9a;
 }
+
+/* Stage 07.10 / v0.10.43: keep white labels readable on two blue surfaces.
+   The previous overview chips measured 3.71:1 and the Socii invitation 3.59:1.
+   Reuse the existing CONFFRATUS violet-blue palette; no new layout. */
+.overview-stats .stat-chip {background:#515dc7;}
+.workflow-actions .workflow-outline {background:#4754b2;color:#fff;}

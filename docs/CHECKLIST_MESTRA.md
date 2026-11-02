@@ -398,3 +398,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 AINDA ABERTA:** mais estados/pares de cores, contraste de foco integral, tecnologias assistivas, motores/navegadores adicionais; nada de afirmar conformidade WCAG completa.
 
 **Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. `main`, dados, produção, Academy real e D1–D6 sem alterações/aceites.
+
+## Etapa 07.10 — lote 4, v0.10.43 (02/11/2026) — AINDA ABERTA
+
+- [x] Auditoria de contraste textual de fundos sólidos em **56 estados/larguras, 2.464 trechos**. Teste novo `tests/browser_stage7_dynamic_text_contrast_v0143.py` falhou antes em **24 ocorrências** de dois componentes: indicadores Aprovados/Arquivados (3,71:1) e botão Convidar para Socii (3,59:1); depois **2.464/2.464 PASS**, razões calculadas aproximadamente 5,62:1 e 6,61:1. Somente CSS alterado; arte Megalos e emblema Academy preservados.
+- [x] Build **18/18 Node** e regressões isoladas: 87/87 contraste anterior, 40/40 bordas/foco, 28/28 ARIA, 12/12 erros, 76/76 teclado, 24/24 revisão por teclado, 63/63 reflow, 56 layouts desktop, 2.827 controles, 70/70 zoom sintético, Academy 9×2 e 108/108 conteúdo extremo. Capturas antes/depois 390px.
+- [ ] **07.10 continua aberta**: motor/leitor de tela real, contraste em gradientes/imagens, revisão manual global WCAG e todos os estados restantes pendentes. Consulta `docs/CHECKPOINT_V053_2026-11-02.md`.
+
+**Contagem canônica não alterada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Nenhum merge/deploy, autorização institucional ou aprovação D1–D6 presumida.
