@@ -293,3 +293,5 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.03 ainda ABERTA:** inventariar restantes dos controles dinâmicos, testes completos de hit-test/colisão, estados de erro/vazio e exceções, validação com motores/dispositivos adicionais. D1–D6, Academy, votos oficiais e Socii real sem aceites.
 
 **Contagens preservadas:** 01 4/5; 02 0/4; 03 1/5; 04 17/22 ativa; 05 0/4; 06 0/5; 07 **2/12 ativa**.
+
+**Registro v0.10.29 (02/11/2026) — símbolo oficial Academy:** o responsável forneceu `1001930329.png` e rejeitou o emblema de pixel art do rodapé. Substituição pontual em `public/assets/crest.png`, sem redesenhar a imagem; ajuste CSS para evitar sobreposição com o menu aberto. Compilação 18/18 Node e teste novo em nove larguras × duas rotas aprovados, além de regressões específicas. Ver `docs/CHECKPOINT_V039_2026-11-02.md`. 07.03 continua aberta e **07=2/12**, sem aceite Megalos presumido.

@@ -770,3 +770,14 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
   .calendar-month-nav {gap:4px;}
   .calendar-month-nav h2 {white-space:nowrap;font-size:14px;}
 }
+
+/* Etapa 07 — símbolo oficial enviado pelo responsável (02/11/2026).
+   Mantê-lo dentro do rodapé, sem invadir o último item do menu aberto. */
+.app-footer > img {
+  width:52px;
+  height:44px;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  object-fit:contain;
+}
