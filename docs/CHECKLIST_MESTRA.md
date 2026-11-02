@@ -432,3 +432,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 segue ABERTA**: leitores de tela reais, WCAG completo, contraste de imagens/gradientes e hardware/motores adicionais; 07.05/07.06, 07.11 e 07.12 também não encerradas.
 
 **Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Sem merge/deploy, mudança em produção, backend, regras institucionais ou aceite D1–D6 da Megalos.
+
+## Etapa 07.10 — lote 8, v0.10.47 (02/11/2026) — convite Socii acessível, ABERTA
+
+- [x] O botão "Convidar para Socii" alternava um formulário sem anunciar estado expandido nem identificá-lo como conteúdo controlado. Teste novo `browser_stage7_socii_disclosure_v0147.py` falhou ANTES em 280px e passou **36/36 DEPOIS**, em nove larguras, com Enter para abrir/fechar, nome acessível do formulário, fluxo completo de rascunho e inclusão fictícia, status visível e anúncio persistente. Alteração somente em `src/main.ts`; nenhuma regra de Socii, convite real, dado ou estética modificados.
+- [x] Build/Node **18/18**; regressões isoladas ARIA **28/28**, avisos **12/12**, foco **76/76**, recuperação de erros **24/24**, contraste/semântica **87/87**, reflow **63/63**, inventário **2.732 controles**, fluxo de Socii no editor, perfil/proposições e erros de campos aprovados. Zoom sintético da execução adicional não completou e **não** foi contabilizado.
+- [ ] **07.10 ainda ABERTA:** tecnologias assistivas reais, gradientes/imagens, revisão manual WCAG abrangente e outros motores/hardware. D1–D6 Megalos não aprovadas.
+
+**Contagem preservada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Veja `docs/CHECKPOINT_V057_2026-11-02.md`. `main`/produção intactas.
