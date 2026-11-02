@@ -1,8 +1,8 @@
-# CONFERATUS — prévia institucional
+# CONFFRATUS — prévia institucional
 
-Aplicação em desenvolvimento a partir dos modelos da Megalos para a Academy. **A grafia oficial ainda precisa ser confirmada** (CONFERATUS/CONFFRATUS); não renomear o código ou o domínio sem essa confirmação.
+Aplicação em desenvolvimento a partir dos modelos da Megalos para a Academy. **Nome exibido na prévia: CONFFRATUS**, conforme correção solicitada pelo responsável no chat de 02/11/2026. A grafia CONFERATUS aparece em referências históricas e caminhos técnicos legados; essas fontes são preservadas. O aceite formal da Megalos continua pendente, assim como a eventual troca de domínio/repositório.
 
-Prévia pública: **https://conferatus.pages.dev**.
+Endereço técnico existente: **https://conferatus.pages.dev** (domínio legado, não renomeado nem redirecionado).
 
 ## O que existe
 
@@ -26,7 +26,7 @@ npm run serve
 
 - `npm run build`: compila TypeScript, monta a prévia independente e executa os testes Node.
 - `npm test`: executa o mesmo build com testes.
-- `dist/CONFERATUS_demo_offline.html`: arquivo independente para testar o protótipo. Alguns navegadores restringem JavaScript ou sessionStorage ao abrir arquivos locais.
+- `dist/CONFFRATUS_demo_offline.html`: arquivo independente (a versão `CONFERATUS_demo_offline.html` também é gerada como alias de compatibilidade) para testar o protótipo. Alguns navegadores restringem JavaScript ou sessionStorage ao abrir arquivos locais.
 - `publish/index.html`: artefato estático usado pela Cloudflare Pages.
 - `?demo=1`: ferramentas de simulação adicionais para desenvolvimento; não correspondem a permissões reais da Academy.
 
