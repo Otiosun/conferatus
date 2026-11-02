@@ -424,3 +424,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 continua aberta**: testes com leitores de tela reais, contraste sobre imagens, mais estados e revisão manual WCAG. 07.05/07.06, 07.11 e 07.12 seguem abertas. D1–D6 Megalos aguardam aceite.
 
 **Contagem oficial preservada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Nenhum merge, deploy, alteração institucional, backend ou produção.
+
+## Etapa 07.10 — lote 7, v0.10.46 (02/11/2026) — AINDA ABERTA
+
+- [x] **Semântica do calendário reproduzida e corrigida:** `role=group` nomeado na grade, nomes completos de domingo a sábado acessíveis sem mudar as letras visuais; anúncio persistente de mês, seleção de dia e contagem de programações via a região ARIA existente. O teste novo `browser_stage7_calendar_semantics_v0146.py` falhou antes (sem papel nomeável) e passou **36/36** depois, em seis larguras. Não se pressupõe leitura efetiva por NVDA/TalkBack/VoiceOver.
+- [x] **Regressões concluídas separadamente:** `npm run build`/Node **18/18**, Hoje/retorno/calendário, relações ARIA **28/28**, região persistente **12/12**, teclado/foco **76/76**, formulários **12/12**, contraste **87/87**, reflow **63/63**, inventário de **2.703 controles observados** (19 estados × nove larguras). Captura de 390px inspecionada; arte, paleta, layout e emblema Academy sem alteração visual. Checkpoint `docs/CHECKPOINT_V056_2026-11-02.md`.
+- [ ] **07.10 segue ABERTA**: leitores de tela reais, WCAG completo, contraste de imagens/gradientes e hardware/motores adicionais; 07.05/07.06, 07.11 e 07.12 também não encerradas.
+
+**Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Sem merge/deploy, mudança em produção, backend, regras institucionais ou aceite D1–D6 da Megalos.

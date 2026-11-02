@@ -341,7 +341,7 @@ function calendarGrid(items:Deliberation[]){
   const current=day===isoDay(new Date());
   return `<button type="button" class="calendar-day${selected?' calendar-day--selected':''}${current?' calendar-day--today':''}" data-calendar-day="${day}" aria-pressed="${selected}" aria-label="${new Intl.DateTimeFormat('pt-BR',{dateStyle:'full'}).format(new Date(calendarYear,calendarMonth,n+1))}${events?`, ${events} programação${events===1?'':'ões'}`:''}"><span>${n+1}</span>${events?`<i aria-hidden="true" class="calendar-marker"></i>`:''}</button>`;
  });
- return `<div class="calendar-hero"><div class="calendar-toolbar"><h1>CALENDÁRIO</h1><div class="calendar-month-nav"><button type="button" data-action="calendar-prev" aria-label="Mês anterior">‹</button><h2 aria-live="polite">${escapeHTML(monthLabel)}</h2><button type="button" data-action="calendar-next" aria-label="Próximo mês">›</button></div></div><div class="calendar-grid" aria-label="Dias do mês">${['D','S','T','Q','Q','S','S'].map(d=>`<span class="calendar-weekday">${d}</span>`).join('')}${'<span class="calendar-empty"></span>'.repeat(offset)}${days.join('')}</div><div class="calendar-foot"><span><i class="calendar-marker" aria-hidden="true"></i> Dia programado</span><button type="button" data-action="calendar-today">Hoje</button></div></div>`;
+ return `<div class="calendar-hero"><div class="calendar-toolbar"><h1>CALENDÁRIO</h1><div class="calendar-month-nav"><button type="button" data-action="calendar-prev" aria-label="Mês anterior">‹</button><h2 aria-live="polite">${escapeHTML(monthLabel)}</h2><button type="button" data-action="calendar-next" aria-label="Próximo mês">›</button></div></div><div class="calendar-grid" role="group" aria-label="Dias do mês">${[['D','Domingo'],['S','Segunda-feira'],['T','Terça-feira'],['Q','Quarta-feira'],['Q','Quinta-feira'],['S','Sexta-feira'],['S','Sábado']].map(([short,full])=>`<span class="calendar-weekday"><span aria-hidden="true">${short}</span><span class="sr-only">${full}</span></span>`).join('')}${'<span class="calendar-empty"></span>'.repeat(offset)}${days.join('')}</div><div class="calendar-foot"><span><i class="calendar-marker" aria-hidden="true"></i> Dia programado</span><button type="button" data-action="calendar-today">Hoje</button></div></div>`;
 }
 function saveWorkflows():boolean{
  try{
@@ -503,6 +503,17 @@ function render() {
  }
  if (preserveScroll) window.scrollTo({top:previousScroll,behavior:'instant'});
 }
+// Announce calendar filtering and month changes through the existing stable
+// status region. Recreating an aria-live element during render() does not
+// reliably announce its contents to assistive technologies.
+function announceCalendarView() {
+ const month=document.querySelector<HTMLElement>('.calendar-month-nav h2')?.textContent?.trim()??'';
+ const heading=document.querySelector<HTMLElement>('.calendar-list-head h2')?.textContent?.trim()??'Programações';
+ const count=document.querySelectorAll('.calendar-list .calendar-item').length;
+ const message=`${month}. ${heading}: ${count} ${count===1?'programação':'programações'} na lista.`;
+ announcedWorkflowNotice=message;
+ workflowAnnouncer.textContent=message;
+}
 function syncRouteState() {
  const [route,id] = location.hash.replace(/^#\/?/, '').split('/');
  if(route==='profile' && id && members.some(member=>member.id===id)) currentMember=id;
@@ -606,17 +617,17 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
  if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;workflowNotice='';render();return;}
- if(actionEl?.dataset.action==='calendar-prev'){calendarShift(-1);render();return;}
- if(actionEl?.dataset.action==='calendar-next'){calendarShift(1);render();return;}
- if(actionEl?.dataset.action==='calendar-today'){const currentDay=new Date();calendarYear=currentDay.getFullYear();calendarMonth=currentDay.getMonth();selectedCalendarDay=isoDay(currentDay);render();return;}
+ if(actionEl?.dataset.action==='calendar-prev'){calendarShift(-1);render();announceCalendarView();return;}
+ if(actionEl?.dataset.action==='calendar-next'){calendarShift(1);render();announceCalendarView();return;}
+ if(actionEl?.dataset.action==='calendar-today'){const currentDay=new Date();calendarYear=currentDay.getFullYear();calendarMonth=currentDay.getMonth();selectedCalendarDay=isoDay(currentDay);render();announceCalendarView();return;}
  if(actionEl?.dataset.action==='calendar-all'){
-  selectedCalendarDay='';render();
+  selectedCalendarDay='';render();announceCalendarView();
   const heading=document.querySelector<HTMLElement>('.calendar-list-head h2');
   if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
   return;
  }
  const dayEl=target.closest<HTMLElement>('[data-calendar-day]');
- if(dayEl?.dataset.calendarDay){selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();return;}
+ if(dayEl?.dataset.calendarDay){selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();announceCalendarView();return;}
  const draftEl=target.closest<HTMLElement>('[data-draft]');
  if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo='proposals';draftForm={title:d.title,body:d.body};composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
  const scheduleEl=target.closest<HTMLElement>('[data-schedule]');
