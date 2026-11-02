@@ -1,4 +1,6 @@
-# CONFERATUS — Leis máximas de engenharia
+# CONFFRATUS — Leis máximas de engenharia
+
+> **Identidade de prévia (02/11/2026):** exibir **CONFFRATUS** conforme correção explícita do responsável. A arte original em alguns modelos contém **CONFERATUS** e deve ser preservada intacta como prova histórica, sem atribuir a mudança à Megalos. Não migrar automaticamente chaves de `sessionStorage`, nomes técnicos de repositório/domínio ou imagens-fonte. O aceite formal da Megalos continua pendente e a Etapa 01 não é marcada como concluída apenas por este ajuste.
 
 > **Retomada obrigatória (01/11/2026):** consultar `docs/CHECKLIST_MESTRA.md` antes de iniciar qualquer tarefa e atualizá-la após os testes. A implementação atualmente mantida usa TypeScript, HTML e CSS sem framework; as sugestões antigas de React/Vite abaixo são históricas e **não autorizam reescrita**. Priorizar código humano, natural e legível, preguiça inteligente, fidelidade ao material da Megalos, revisões pequenas e distinção explícita entre simulação e funcionamento integrado.
 
@@ -7,7 +9,7 @@ Versão 1.0 — 28/10/2026. Este arquivo foi preparado para virar `AGENTS.md` na
 ## Constituição
 1. **Preguiça inteligente.** Antes de criar código, procure recurso nativo, componente próprio, função existente e solução mais simples. Não implemente infraestrutura que já seja provida com segurança.
 2. **Perfeccionismo verificável.** Não chame algo de concluído sem funcionamento observado, testes pertinentes e revisão visual. Perfeição não é polimento infinito: é cumprir integralmente critérios objetivos.
-3. **Uma fonte de verdade por dado.** Cadastro institucional deve manter seu dono; CONFERATUS controla apenas seus dados de deliberação. IDs externos não são prova de autenticação.
+3. **Uma fonte de verdade por dado.** Cadastro institucional deve manter seu dono; CONFFRATUS controla apenas seus dados de deliberação. IDs externos não são prova de autenticação.
 4. **Nenhuma suposição de regra institucional.** Elegibilidade, voto secreto/identificado, alteração de voto, encerramento, empate e visibilidade precisam de definição antes de implementar lógica definitiva.
 5. **Sem código cenográfico.** Botões clicáveis sem ação, valores fixos representados como reais, URLs quebradas, controles inertes e testes falsos são proibidos.
 6. **Fidelidade visual.** Referências da Megalos são fonte de design. Preservar hierarquia, proporções, paleta, tipografia e estados; mudanças não previstas precisam de validação.
@@ -30,7 +32,7 @@ Versão 1.0 — 28/10/2026. Este arquivo foi preparado para virar `AGENTS.md` na
 - TypeScript strict, React, Vite, React Router (modo simples), Tailwind.
 - shadcn/ui somente onde poupar trabalho e puder ser restilizado fielmente.
 - TanStack Query quando houver sincronização de dados assíncronos.
-- Supabase/PostgreSQL para dados próprios do CONFERATUS, provisoriamente; compatibilidade com cadastro institucional via `MemberProvider`.
+- Supabase/PostgreSQL para dados próprios do CONFFRATUS, provisoriamente; compatibilidade com cadastro institucional via `MemberProvider`.
 - Operações críticas por função transacional no Postgres ou endpoint de servidor; nunca implementação exclusiva no cliente.
 - Vitest para lógica e Playwright para jornadas mobile, visual regression e autorizações.
 - Publicação de preview como frontend estático; hospedar produção apenas após revisão de requisitos e custos.
