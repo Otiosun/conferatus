@@ -800,3 +800,18 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .page-header .panel-button, .hero .panel-button {min-width:44px;min-height:44px;display:grid;place-items:center;}
 .app-footer .footer-nav {min-height:44px;}
 .bottom-menu .menu-item {min-height:44px;}
+
+/* Stage 07.03 / batch 5: controls only revealed in advanced-preview tools,
+   live directory search, and the keyboard skip-link. Increase the actionable
+   rectangles, not the labels, colors or institutional behavior. */
+.demo-tools select,
+.demo-tools .tools-add .small-action,
+.member-list > .toolbar input,
+.skip-link:focus-visible {
+  min-height:44px;
+  box-sizing:border-box;
+}
+.skip-link:focus-visible {
+  display:inline-flex;
+  align-items:center;
+}

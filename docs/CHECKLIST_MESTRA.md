@@ -85,7 +85,7 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 
 - [x] **07.01** Reflow inicial: 7 rotas × 9 larguras 280–1440px, 63/63 sem rolagem horizontal/clipping (Chromium offline; não todos os estados).
 - [x] **07.02** Alvo de toque Buscar: reproduzido com 18px de altura; corrigido para 44px em 280–540px sem cobrir a primeira linha, toque e filtro testados em 5 larguras.
-- [ ] **07.03** Inventariar e adequar TODOS os alvos de toque, espaçamento e ícones clicáveis.
+- [x] **07.03** Auditoria da prévia offline: inventário dos controles mapeados, dimensões e estados dinâmicos; 19 estados × 9 larguras, 2.769 observações, com exceções documentadas dos dias de calendário. Evidência V042.
 - [ ] **07.04** Corrigir legibilidade tipográfica, microtextos, nomes extensos, erros e conteúdo de tamanho extremo.
 - [ ] **07.05** Testar zoom 200%/400% e reflow de 320 CSS px sem perda de conteúdo/ação.
 - [ ] **07.06** Testar todas as jornadas em celulares compactos, alturas curtas, rotação, teclado virtual e safe areas.
@@ -96,7 +96,7 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.11** Manter diffs visuais reproduzíveis e obter aceite Megalos de D1–D6 antes de declarar fidelidade.
 - [ ] **07.12** Rodar matriz final em Chromium/Firefox/WebKit quando disponíveis e aparelhos reais, documentando limites.
 
-**Estado da Etapa 07: 2/12.** Início v0.10.26, com `npm run build` **18/18 Node**, `tests/browser_frontend_touch_target_v0126.py` **5/5 larguras**, `tests/browser_frontend_reflow_v0126.py` **63/63 estados-larguras**, regressões direcionadas **13/13 suítes Playwright**. Nenhuma dessas medições é certificação de responsividade absoluta ou substitui testes em dispositivos reais. A marca da prévia permanece **CONFFRATUS**; `main` intocada.
+**Estado da Etapa 07: 3/12.** Início v0.10.26, com `npm run build` **18/18 Node**, `tests/browser_frontend_touch_target_v0126.py` **5/5 larguras**, `tests/browser_frontend_reflow_v0126.py` **63/63 estados-larguras**, regressões direcionadas **13/13 suítes Playwright**. Nenhuma dessas medições é certificação de responsividade absoluta ou substitui testes em dispositivos reais. A marca da prévia permanece **CONFFRATUS**; `main` intocada.
 
 ## Leis permanentes
 1. **Código humano:** legível, direto, com comentários úteis e sem abstrações artificiais; não falsificar autoria.
@@ -299,3 +299,13 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 **v0.10.30 — 07.03, lote 3, 02/11/2026:** teste reproduzível em nove larguras revelou 36/36 instâncias com alvos abaixo de 44px nos estados dinâmicos de busca vazia, Desfazer, reset avançado e perfil inexistente. Correção **somente CSS**; depois 36/36 atendem a 44×44px e ações funcionam com hit-testing do centro, sem overflow. `npm run build` + 18 Node, reflow 63, lote2 135, smoke e regressões seletivas aprovados. Referência: `docs/CHECKPOINT_V040_2026-11-02.md`. **07.03 [ ] aberta; 07=2/12.**
 
 **Registro V041 (02/11/2026) — 07.03 lote 4, erro visível de formulário e menu:** o botão “Salvar rascunho” vazio gerava aviso interno invisível; teste reproduziu falha antes e passou após `composeError` com `role="alert"` dentro do editor. Três famílias de alvos intermediários abaixo da meta (painel, botão do menu e duas entradas em 740px) também corrigidas apenas com CSS específico. Teste novo `browser_stage7_form_edge_targets_v0131.py` 72/72 alvos, 9 larguras, validação de ID, rascunho e agendamento; build 18/18 Node, reflow 63/63, anteriores 135/135 e 36/36, fluxos de revisão/rascunho/retorno/smoke reexecutados. **07.03 permanece ABERTA e 07=2/12**; ver `docs/CHECKPOINT_V041_2026-11-02.md`. Sem D1–D6 aceitas, produção, backend ou mudanças em voto/Socii real.
+
+
+## Fechamento 07.03 — prévia v0.10.32 (02/11/2026)
+
+- [x] Inventário automatizado dos controles habilitados e visíveis nas **nove larguras de 280–1440 px**, cobrindo **19 estados mapeados** de voto demonstrativo, membros e busca vazia, perfil, histórico, gerenciamento e painel avançado, calendário e agendamento, propostas, Socii, editor e revisão. O teste `browser_stage7_all_controls_v0132.py` observou **2.769 instâncias** sem alvos abaixo dos mínimos. Os **300 registros estreitos** eram apenas dias do calendário, todos com largura >=24px e altura >=44px, preservando a grade de sete colunas. Teste restrito ao Chromium offline, sem alegar conformidade global.
+- [x] Reproduzidos **45/45 alvos menores que a meta de 44px de altura** no teste `browser_stage7_advanced_controls_v0132.py`: skip-link em foco (35px), seleção de perfil (35px), seleção de membro (35px), Vincular (28px), busca (35px), em nove larguras. Após ajuste **somente CSS**, **45/45 conformes à meta**; centro acionável e fluxos reais de filtro/limpar, inclusão demonstrativa e atalho de teclado funcionando, sem erros JS/overflow.
+- [x] Regressões isoladas após a mudança: Node **18/18**; lote2 **135/135**; formulários **72/72**; alvos dinâmicos **36/36**; lote1 nove larguras; reflow **63/63**; antiga busca cinco larguras; emblema oficial Academy nove larguras × duas rotas; smoke quatro larguras. A tentativa de execução agrupada expirou e **não** foi contabilizada; as suítes pertinentes foram concluídas isoladamente.
+- [x] **07.03 encerrada no escopo testável da prévia offline**, sem condicionar este subitem aos gates independentes. Não implica certificação WCAG AA/AAA, zoom 200/400%, WebKit/Firefox ou aparelhos reais, tratados em **07.05, 07.09, 07.10, 07.12**. D1–D6 ainda dependem da Megalos. Ver `docs/CHECKPOINT_V042_2026-11-02.md`.
+
+**Contagem atual (não retroativa):** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, 07=**3/12**. Próximo item 07.04 (tipografia/conteúdo extremo). `main`/produção, autenticação, integrações e banco permanecem intactos.

@@ -13,11 +13,11 @@
 - **Telas/estados:** votação, diretório, perfis, histórico, gerenciamento, calendário, agendamento, proposições, editor, folha de revisão, estados Socii, menus, pesquisa, formulários, feedbacks e estados vazios/erro.
 - **Regressão:** teste funcional de fluxo + medida DOM + captura visual antes/depois, relatório de divergências e decisão explícita sobre qualquer mudança de hierarquia da Megalos. Não usar `overflow-x:hidden` como remendo que esconda conteúdo inacessível.
 
-## Checklist exclusiva da Etapa 07 — 2/12 subitens concluídos na v0.10.26
+## Checklist exclusiva da Etapa 07 — 3/12 subitens concluídos na v0.10.32
 
 - [x] **07.01 — Inventário inicial de reflow:** sete rotas principais × nove larguras (280–1440 px) em Chromium, **63 verificações sem rolagem horizontal nem elementos escapando**, no HTML offline. Evidência: `tests/browser_frontend_reflow_v0126.py`. *Isto não cobre todos os estados/zoom.*
 - [x] **07.02 — Primeiro alvo de toque corrigido:** botão Buscar do diretório media **18 px de altura** antes; teste falhou nessa condição. A prévia agora garante 44 px em 280–540 px, sem cobrir a primeira linha, mantendo busca e filtros funcionais. Evidência: `tests/browser_frontend_touch_target_v0126.py`, cinco larguras, capturas 320/390.
-- [ ] **07.03 — Auditoria de TODOS os alvos interativos:** mapa de botões, ícones, links, calendário, abas e campos; dimensões por plataforma, espaçamento suficiente e sem controles escondidos.
+- [x] **07.03 — Auditoria dos alvos da prévia offline:** nove larguras, 19 estados mapeados, 2.769 ocorrências de controles; exceções do calendário, testes de clique, erros e retorno contextual. Cobertura restrita a Chromium offline, não dispositivo real.
 - [ ] **07.04 — Tipografia legível e conteúdo extremo:** textos muito longos, palavras sem separação, nomes extensos, dados ausentes, erros e validação, quebra sem sobreposição; evitar microtipografia em telas compactas.
 - [ ] **07.05 — Zoom/reflow acessível:** 200% de texto e 400% de zoom onde aplicável, equivalência a viewport CSS de 320 px conforme WCAG; nenhuma perda funcional ou scroll bidirecional indevido.
 - [ ] **07.06 — Telas compactas completas:** 280/320/360/390 px, orientação, altura curta, teclado virtual e safe-area; testar fluxos inteiros em vez de só página inicial.
@@ -51,3 +51,14 @@ Novo ensaio `tests/browser_stage7_expanded_touch_v0128.py` comprovou 106 ocorrê
 **07.03 — Lote 3, v0.10.30:** auditoria isolada de quatro alvos contextuais (buscar sem resultados, desfazer alteração administrativa da prévia, reiniciar painel de simulação, perfil inexistente) em nove larguras × quatro estados = 36 medições. Antes 36 retângulos abaixo da meta de conforto em altura; depois 0 abaixo, com clique/hit-test comprovados, nenhuma rolagem horizontal e sem mudanças em lógica/arte. Ver `tests/browser_stage7_dynamic_targets_v0130.py` e `docs/CHECKPOINT_V040_2026-11-02.md`. **07.03 ainda [ ]**, 07=2/12, D1–D6 pendentes.
 
 **07.03 — Lote 4, V041:** ao salvar um rascunho vazio, o aviso da validação não aparecia na tela embora existisse no estado interno. Falha reproduzida em Chromium; mensagem agora é visível no próprio editor como `role="alert"` e foco retorna ao título. O teste de nove larguras também cobriu campos inválidos de gerenciamento, salvamento, confirmação e cronologia de agendamento; **72/72** medições de alvos de menu/painel. CSS apenas amplia painel, botão Menu e duas entradas intermediárias. Build 18/18 Node, reflow 63/63 e testes de regressão selecionados aprovados; detalhes e limitações em `docs/CHECKPOINT_V041_2026-11-02.md`. **07.03 continua [ ]; 07=2/12.**
+
+
+## Fechamento da 07.03 — v0.10.32 (02/11/2026)
+
+O último lote mediu os controles que ainda faltavam em estados menos comuns: seletor de perfil simulado (35px), seletor de membro (35px), Vincular (28px), campo de busca (35px) e skip-link visível ao focar (35px). Antes, 45/45 ocorrências tinham altura inferior à meta de conforto. Após regras CSS específicas, 45/45 estão >=44px, com hit-testing no centro e funcionalidade preservada.
+
+O inventário reproduzível `tests/browser_stage7_all_controls_v0132.py` cobriu 19 estados × 9 larguras (280, 320, 360, 390, 540, 740, 768, 1024, 1440 CSS px), coletou 2.769 ocorrências e registrou zero alvos abaixo dos mínimos previstos. Todos os controles com largura <44px eram **dias da grade** (300 medições; mínimo >=24px e altura >=44px), conforme a exceção espacial explicitada para sete colunas. O link de pular conteúdo foi medido quando efetivamente visível com foco, fora do scanner principal.
+
+Regressões específicas concluídas após a última mudança: build 18/18 Node, formulário 72/72, lote expandido 135/135, dinâmicos 36/36, lote1 em nove larguras, reflow 63/63, pesquisa original em cinco, emblema Academy nove × duas rotas e smoke quatro larguras. Logs e capturas estão no backup delta. Há limites: nenhuma verificação WebKit/Firefox, zoom, hardware físico ou homologação Megalos; WCAG 2.2 AA global **não foi certificada**. Estas são etapas posteriores 07.05/07.09/07.10/07.12, não motivo para reabrir 07.03 sem defeito novo.
+
+**07.03 [x] encerrada no escopo da prévia offline; 07=3/12.** Próxima tarefa: **07.04** — tipografia, nomes longos, textos extremos, estados vazios e microtextos. Etapa 06 e D1–D6 continuam pendentes.
