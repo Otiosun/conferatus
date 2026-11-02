@@ -37,3 +37,7 @@
 **Verificação:** `npm run build` aprovou TypeScript, publicação HTML e 18/18 testes Node; `tests/browser_frontend_touch_target_v0126.py` passou 5/5 larguras e `tests/browser_frontend_reflow_v0126.py` passou 63/63 combinações. Capturas 320 e 390 px foram revisadas. As demais suítes do repositório são executadas e reportadas separadamente; nenhuma aprovação será presumida sem término. A prévia é offline e não certifica identidade Academy, WebKit/Firefox ou dispositivos físicos.
 
 **Status preservado das etapas anteriores:** 01 4/5, 02 0/4, 03 1/5, 04 17/22 ativa, 05 0/4, 06 0/5. Etapa 07 **2/12**. Nenhuma produção alterada.
+
+## 07.03 — lote técnico inicial, v0.10.27 (não encerrado)
+
+O item 07.03 permanece **[ ] PENDENTE**. 63 cenários exploratórios de sete rotas em nove larguras mediram 810 nós interativos visíveis; quatro defeitos/fragilidades alvos receberam correção CSS pequena: perfil 19,2px, home 28px, participar na votação fictícia 23px, busca desktop 18px. Novo teste falhou antes (23px) e passou 9/9 depois, com dimensões 44px e ações funcionando. Reflow 63/63, regressão 07.02 5/5, build + 18/18 Node aprovados. O inventário ainda não cobre todos os estados e não certifica WCAG. Conferir `docs/CHECKPOINT_V037_2026-11-02.md`; prosseguir com expansão de calendário, abas, gerenciamento, editor e revisão antes de marcar 07.03, sem modificar D1–D6 ou lógica institucional.

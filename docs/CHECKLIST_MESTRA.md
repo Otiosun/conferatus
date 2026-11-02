@@ -275,3 +275,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - Auditoria inicial sem overflow: 7 rotas × 9 larguras 280/320/360/390/540/740/768/1024/1440px, 63/63 no Chromium offline; não equivale a validar todas as jornadas, zoom elevado, outros navegadores ou aparelhos físicos.
 - Build local com 18/18 Node, testes Playwright novos e 13/13 suítes direcionadas (não a matriz completa do repositório). Visual e decisões Megalos D1–D6 preservadas.
 - Documento canônico: `docs/ETAPA_07_FRONTEND_PERFECCIONISMO_2026-11-02.md`. Checkpoint: `docs/CHECKPOINT_V036_2026-11-02.md`.
+
+### Etapa 07.03 — lote 1 da v0.10.27 (02/11/2026; NÃO concluir 07.03)
+
+- [x] Lote parcial: medir três controles móveis previamente suspeitos e o botão de busca desktop em Chromium, nove larguras, sete rotas principais; teste novo falhou antes da correção (`.demo-toggle` 23px em 280px).
+- [x] Lote parcial: quatro alvos verificados com pelo menos 44×44px, interações de votação **fictícia**, perfil, busca e rodapé; eliminar colisão de 5px no desktop e preservar legenda de demonstração no rodapé.
+- [x] Regressões pertinentes: build/18 Node, teste de toque novo 9/9 larguras, reflow 63/63, teste de toque 07.02 em cinco larguras. Ver `docs/CHECKPOINT_V037_2026-11-02.md`.
+- [ ] **07.03 continua aberta:** auditar outros estados e controles (calendário, abas, ícones, gestão, editor, revisão, formulários), testar spacing, colisões e motores adicionais. Não converter esses subpassos em novos critérios da checklist 01–07.
+
+**Contagens preservadas:** 01 4/5; 02 0/4; 03 1/5; 04 17/22 ATIVA; 05 0/4; 06 0/5; **07 2/12 ATIVA**. Nenhuma autorização/aceite da Megalos inferida. Marca CONFFRATUS, dependências legadas intactas.
