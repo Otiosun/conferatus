@@ -4,7 +4,7 @@
 
 ## Proveniência e método
 
-- **Fonte exata:** `1001930216.mp4`, 25.041.156 bytes, SHA-256 `cd038526637541ed7ad960c7dbb7ac654278e0aa04e8124543daabb221f3570b`.
+- **Fonte exata:** `1001930216.mp4`, 25.041.156 bytes, SHA-256 `cd038526637541ed7ad960c7dbb7ac654278e0aa04e8124543daabb221f3570b`. O [arquivo original completo também está preservado no Komekko](https://drive.google.com/file/d/11rIyxCOFPX_zeWQOG59pLkbCdTkDgnuP/view): foi **baixado novamente do Drive** e seu SHA-256 conferido byte a byte com o arquivo original; 25.041.156 bytes idênticos.
 - **Propriedades:** H.264, 720 × 1604 px, duração **54,662844 s**, aproximadamente 15 quadros/s na média.
 - **Análise:** 109 amostras a cada 0,5 s, diferenças visuais de quadros reduzidos para localizar transições, com inspeção em resolução integral em ~22 instantes críticos; não houve OCR, identificação de pessoas ou transcrição automática. A gravação foi revisada visualmente em todo o intervalo, com maior densidade nos estados importantes.
 - **Artefato visual privado:** [Adendo PDF de quatro páginas no Komekko](https://drive.google.com/file/d/1zp8vzL74uAnvi7ygb8zLZupnIWNUA591/view). São imagens do vídeo original, mantidas fora do repositório público. SHA-256 do PDF: `f3e2e3b84161d82d1716bdf5c04ed724c6e456b986f469996f5510420acbea66`.
@@ -58,4 +58,4 @@
 - `docs/AUDITORIA_VIDEO_V0124_2026-11-02.md` — este documento.
 - `docs/KIT_DECISOES_MEGALOS_V0123_2026-11-01.md` — matriz de aprovação antes da revisão temporal.
 - PDF privado Komekko: https://drive.google.com/file/d/1zp8vzL74uAnvi7ygb8zLZupnIWNUA591/view
-- Fonte original no upload: `1001930216.mp4`, SHA-256 acima; o repositório **não** contém nem precisa conter o vídeo original.
+- [Vídeo original completo no Komekko](https://drive.google.com/file/d/11rIyxCOFPX_zeWQOG59pLkbCdTkDgnuP/view), baixado e comparado por SHA-256 idêntico à fonte local `1001930216.mp4`. O repositório **não** contém nem precisa conter o vídeo original.
