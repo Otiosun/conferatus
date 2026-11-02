@@ -349,7 +349,19 @@ function saveWorkflows():boolean{
    if(!journal.some(entry=>JSON.stringify(entry)===current))
     sessionStorage.setItem(journalKey,JSON.stringify([...journal,ignoredRecordsBackup]));
   }
-  sessionStorage.setItem(draftKey,JSON.stringify(drafts));sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));return true;
+  // Both keys represent one local workflow snapshot. If the second write fails,
+  // restore the first key rather than leaving a partially committed session.
+  const previousDrafts=sessionStorage.getItem(draftKey);
+  sessionStorage.setItem(draftKey,JSON.stringify(drafts));
+  try{sessionStorage.setItem(deliberationKey,JSON.stringify(schedule));}
+  catch(error){
+   try{
+    if(previousDrafts===null)sessionStorage.removeItem(draftKey);
+    else sessionStorage.setItem(draftKey,previousDrafts);
+   }catch{/* Best effort only: browser storage can also fail during rollback. */}
+   throw error;
+  }
+  return true;
  }catch{return false;}
 }
 function selectOptions(selected:string,items:{id:string;name:string}[]){return items.map(x=>`<option value="${escapeHTML(x.id)}" ${selected===x.id?'selected':''}>${escapeHTML(x.name)}</option>`).join('');}
