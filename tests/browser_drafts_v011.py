@@ -17,7 +17,7 @@ with sync_playwright() as p:
         page.locator('#draft-title').fill('Primeiro documento')
         page.locator('#draft-body').fill('Texto provisório.')
         page.get_by_role('button', name='Salvar rascunho').click()
-        page.get_by_text('Rascunho mantido somente enquanto a página estiver aberta.').wait_for()
+        page.locator('.workflow-status').filter(has_text='Rascunho mantido somente enquanto a página estiver aberta.').wait_for()
         page.locator('[data-action="new-proposal"]').click()
         assert page.locator('#draft-title').input_value() == ''
         assert page.locator('#draft-body').input_value() == ''
@@ -25,7 +25,7 @@ with sync_playwright() as p:
         page.locator('#draft-body').fill('Texto finalizado do segundo documento com conteúdo suficiente para revisão.')
         page.get_by_role('button', name='Concluir redação').click()
         page.locator('#confirm-proposal-form button[type=submit]').click()
-        page.get_by_text('Proposição concluída.').wait_for()
+        page.locator('.workflow-status').filter(has_text='Proposição concluída.').wait_for()
         first = page.locator('.workflow-record').filter(has_text='Primeiro documento')
         second = page.locator('.workflow-record').filter(has_text='Segundo documento')
         assert first.count() == 1 and second.count() == 1

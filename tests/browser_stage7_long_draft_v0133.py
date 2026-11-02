@@ -37,7 +37,7 @@ with sync_playwright() as p:
   if width in (280,390,740):
    pg.screenshot(path=str(ROOT/'dist'/f'stage7_long_draft_review_{width}.png'),full_page=True)
   pg.locator('#confirm-proposal-form button[type="submit"]').click()
-  pg.get_by_text('Proposição concluída.').wait_for()
+  pg.locator('.workflow-status').filter(has_text='Proposição concluída.').wait_for()
   listing=pg.locator('.workflow-record').filter(has_text=TITLE)
   assert listing.count()==1,(width,'draft missing in records')
   assert not pg.evaluate('document.documentElement.scrollWidth > innerWidth + 1'),(width,'record overflow')

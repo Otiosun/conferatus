@@ -13,7 +13,7 @@ with sync_playwright() as p:
   page.locator('#draft-title').fill('Rascunho de comunicação')
   page.locator('#draft-body').fill('Primeiro parágrafo ainda incompleto.')
   page.locator('#compose-proposal-form [value=save]').click()
-  page.get_by_text('Rascunho mantido somente enquanto a página estiver aberta.').wait_for()
+  page.locator('.workflow-status').filter(has_text='Rascunho mantido somente enquanto a página estiver aberta.').wait_for()
   page.locator('.footer-nav').click();page.locator('[data-route=members]').first.click()
   page.locator('.profile-name-button').click()
   page.locator('[data-tab=proposicoes]').click()

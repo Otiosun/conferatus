@@ -131,3 +131,8 @@ O script `tests/browser_stage7_nontext_focus_v0142.py` mediu a cor de borda, a s
 ## 07.10 — contraste textual dos estados dinâmicos, lote 4 (v0.10.43)
 
 `tests/browser_stage7_dynamic_text_contrast_v0143.py` mediu 2.464 trechos em 56 estados/larguras da prévia Chromium, com composição CSS de fundos sólidos. Reproduziu 24 ocorrências abaixo de 4,5:1 no par de chips Aprovados/Arquivados e no botão Convidar para Socii; duas regras CSS pontuais elevaram ambos acima do limiar, com **2.464/2.464 PASS**. Build e regressões relevantes concluídos, incluindo 18/18 Node, 87/87 contraste anterior, 40/40 contraste não textual, 28/28 ARIA, 12/12 erros, teclado, reflow, zoom sintético e emblema oficial. Os limites de gradientes, leitores de tela, motores e dispositivos permanecem. **07.10 [ ] e etapa 07=7/12**; evidência: `docs/CHECKPOINT_V053_2026-11-02.md`.
+
+
+## 07.10 — Lote 5 v0.10.44 — região de avisos ARIA duradoura
+
+A versão anterior recriava `role=status` junto com cada `root.innerHTML`, sem manter uma região viva para anúncio incremental de rascunho, conclusão e programação. Teste novo reprovou baseline. Em `src/main.ts`, uma região `#app-live-announcer` visualmente oculta, fora de `#root`, permanece ligada enquanto telas são renderizadas e recebe apenas avisos novos; o texto visível permanece e não duplica o papel de status. Testes: 12/12 trajetórias em quatro larguras, `aria_snapshot` Chromium, AX e estabilidade do nó; build 18/18, regressões documentadas em `docs/CHECKPOINT_V054_2026-11-02.md`. Foram refinados seletores de quatro testes antigos para distinguir mensagens visíveis da região acessível, sem reduzir o escopo funcional. **07.10 permanece [ ], 07 = 7/12**, pois não se testou anúncio por leitor de tela real.

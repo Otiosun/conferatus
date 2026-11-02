@@ -406,3 +406,13 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 continua aberta**: motor/leitor de tela real, contraste em gradientes/imagens, revisão manual global WCAG e todos os estados restantes pendentes. Consulta `docs/CHECKPOINT_V053_2026-11-02.md`.
 
 **Contagem canônica não alterada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Nenhum merge/deploy, autorização institucional ou aprovação D1–D6 presumida.
+
+
+## Etapa 07.10 — lote 5, v0.10.44 (02/11/2026) — avisos ARIA persistentes
+
+- [x] Defeito demonstrado em `workflowNotice`: os avisos visíveis eram recriados com a tela e a região ARIA não persistia. Baseline reprovou. Implementado um `#app-live-announcer` persistente fora do `#root`, estado educado (`role=status`), `aria-atomic`, atualizações só para novas mensagens e esvaziamento. Mantidos avisos visíveis, sem `role=status` duplicado, CSS/visual, dados e lógica inalterados.
+- [x] Novo `tests/browser_stage7_live_announcer_v0144.py`: 12/12 fluxos em quatro larguras, identidade DOM estável, árvore AX Chromium e sincronização de avisos; quatro testes históricos agora miram somente `.workflow-status` visível, preservando toda a cobertura.
+- [x] Build 18/18 Node, typecheck, ARIA 28/28, erros 12/12, teclado 76/76 + 24/24 + 14/14, contraste 87/87 + 40/40 + 2464/2464, reflow 63/63, Academy oficial, rascunhos/revisão/perfil/calendário. Detalhes e limitações: `docs/CHECKPOINT_V054_2026-11-02.md`.
+- [ ] **07.10 segue ABERTA:** atualização na AX tree não é teste de fala em leitor de tela. WCAG completa, dispositivos reais, gradientes/imagens/vídeo e motores adicionais ainda pendentes.
+
+**Contagens sem alteração:** 01 4/5; 02 0/4; 03 1/5; 04 17/22; 05 0/4; 06 0/5; **07 7/12**. `main`/produção intocadas, D1–D6 Megalos sem aceite.

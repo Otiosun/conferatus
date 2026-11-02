@@ -7,6 +7,15 @@ type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance' | 'cal
 type Tab = 'votos' | 'proposicoes';
 const root = document.querySelector<HTMLDivElement>('#root');
 if (!root) throw new Error('Root missing');
+// A polite announcement must survive our screen rerenders. The visible workflow
+// notices are kept in place; this separate, persistent region owns speech output.
+const workflowAnnouncer = document.createElement('div');
+workflowAnnouncer.id = 'app-live-announcer';
+workflowAnnouncer.className = 'sr-only';
+workflowAnnouncer.setAttribute('role', 'status');
+workflowAnnouncer.setAttribute('aria-atomic', 'true');
+root.insertAdjacentElement('afterend', workflowAnnouncer);
+let announcedWorkflowNotice = '';
 const memberProvider = new FixtureMemberProvider();
 const [members, sections] = await Promise.all([memberProvider.listMembers(), memberProvider.listSections()]);
 let currentMember = members[0]?.id ?? 'm01';
@@ -380,7 +389,7 @@ function proposalsPage(){
  ${examples.length?'<h2 class="workflow-record-heading">Histórico demonstrativo</h2>':''}${examples.map(activityItem).join('')}
  </div><div class="workflow-actions"><button type="button" class="workflow-outline" data-action="invite-socii">Convidar para Socii</button>${inviteOpen?`<form id="invite-socii-form" class="workflow-inline"><label>Proposição<select name="draftId" required>${drafts.filter(d=>d.status!=='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label><label>Participante<select name="memberId" required><option value="" selected disabled>Selecione uma pessoa</option>${selectOptions('',members.slice(1))}</select></label><button class="workflow-primary" ${!drafts.some(d=>d.status!=='concluida')?'disabled':''}>Adicionar participante</button></form>`:''}
  <button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>
- ${workflowNotice?`<p role="status" class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}`;
+ ${workflowNotice?`<p class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}`;
 }
 // Show only participants linked to this proposal; a local preview has no valid elapsed time.
 function sociiEditorBar(d:Draft|undefined){
@@ -435,7 +444,7 @@ function calendarPage(){
  <div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
  <label>Tipo de deliberação<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
  <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
- ${workflowNotice?`<p role="status" class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
+ ${workflowNotice?`<p class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
  ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
 }
@@ -486,6 +495,11 @@ function render() {
   const [attr,value]=focusTarget;
   [...root.querySelectorAll<HTMLElement>(`[${attr}]`)]
    .find(element=>element.getAttribute(attr)===value)?.focus({preventScroll:true});
+ }
+ // Only changed notices should be announced, not unrelated rerenders.
+ if (workflowNotice !== announcedWorkflowNotice) {
+  announcedWorkflowNotice = workflowNotice;
+  workflowAnnouncer.textContent = workflowNotice;
  }
  if (preserveScroll) window.scrollTo({top:previousScroll,behavior:'instant'});
 }

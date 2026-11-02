@@ -34,7 +34,7 @@ with sync_playwright() as p:
         page.locator('[value="conclude"]').click()
         page.locator('#confirm-proposal-form').wait_for()
         page.locator('#confirm-proposal-form button[type="submit"]').click()
-        page.get_by_text('Proposição concluída.').wait_for()
+        page.locator('.workflow-status').filter(has_text='Proposição concluída.').wait_for()
         assert not errors, (width, errors)
         page.close()
     browser.close()
