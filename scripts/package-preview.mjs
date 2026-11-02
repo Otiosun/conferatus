@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const target = path.join(root,'publish');
 await mkdir(target,{recursive:true});
-const html = await readFile(path.join(root,'dist','CONFERATUS_demo_offline.html'),'utf8');
+const html = await readFile(path.join(root,'dist','CONFFRATUS_demo_offline.html'),'utf8');
 await writeFile(path.join(target,'index.html'),html);
 await rm(path.join(target,'preview.png'),{force:true});
 await writeFile(path.join(target,'robots.txt'),'User-agent: *\nAllow: /\n');
