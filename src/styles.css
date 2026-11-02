@@ -952,3 +952,17 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
      Anchor it above the protected edge, matching the menu control. */
   .app-footer > img { top:auto; bottom:calc(10px + env(safe-area-inset-bottom,0px)); transform:none; }
 }
+
+/* Stage 07.08 — on mouse/trackpad desktops, passive tabs and calendar arrows
+   provide the same hover acknowledgement as the existing menu/list controls.
+   Never recolor the selected/current tab or change touch-only behavior. */
+@media (hover:hover) and (pointer:fine) {
+  .overview-tabs .tab:not([aria-pressed="true"]):hover,
+  .profile-head .tabs .tab:not([aria-pressed="true"]):not([aria-current="page"]):hover {
+    background:#bbc6e1;
+  }
+  .calendar-month-nav button:hover,
+  .calendar-foot button:hover {
+    background:rgba(255,255,255,.22);
+  }
+}

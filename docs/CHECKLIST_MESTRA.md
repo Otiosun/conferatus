@@ -351,3 +351,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [x] **07.07 concluída para o escopo da prévia Chromium offline**, sem alegar uso de hardware real; validação de tablet físico, Firefox/WebKit, rotação de sistema e aprovação visual continuam em 07.12/07.11. **07.05/07.06 permanecem abertas.**
 
 **Contagem atualizada:** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, **07=5/12**. Próximo item independente: 07.08 (desktop largo). `main`, produção, D1–D6, autenticação, dados, votos oficiais e Socii permanecem intactos.
+
+## Etapa 07.08 — desktop largo, V048 (02/11/2026)
+
+- [x] **07.08 concluída na prévia Chromium offline:** matriz 7 desktops (1280–2560 CSS px) × 8 rotas/estados, **56/56 layouts**, sem rolagem horizontal, fuga da coluna de leitura de 740 px, colisões do emblema e erros JavaScript.
+- [x] Corrigir retorno visual de **hover exclusivo de mouse/trackpad** nas abas inativas de visão geral/perfil e na navegação do calendário. Falha comprovada **antes** do CSS: aba sem mudança de cor ao hover; **depois**: 21/21 estados de hover, aba selecionada preservada, modo touch sem a regra.
+- [x] Sete jornadas de menu, busca/limpeza, aba, calendário e rascunho; Node 18/18, reflow 63/63, tablet 64/64, Academy 9×2, zoom sintético 70/70, controles 2.805, microtipografia 567 e conteúdo longo 108 aprovados em testes separados. Consultar `docs/CHECKPOINT_V048_2026-11-02.md`.
+- [ ] **Gates ainda abertos em outros subitens:** 07.05 zoom nativo, 07.06 teclado virtual/safe-area e rotação reais, 07.09 teclado/foco extensivo, 07.10 WCAG, 07.11 D1–D6 com Megalos, 07.12 browsers/dispositivos. Firefox/WebKit indisponíveis localmente, sem alegar certificação.
+
+**Contagem oficial atual:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=6/12**. `main` e produção intactas. Próximo item independente: **07.09**.
