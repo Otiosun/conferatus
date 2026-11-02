@@ -416,3 +416,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 segue ABERTA:** atualização na AX tree não é teste de fala em leitor de tela. WCAG completa, dispositivos reais, gradientes/imagens/vídeo e motores adicionais ainda pendentes.
 
 **Contagens sem alteração:** 01 4/5; 02 0/4; 03 1/5; 04 17/22; 05 0/4; 06 0/5; **07 7/12**. `main`/produção intocadas, D1–D6 Megalos sem aceite.
+
+## Etapa 07.10 — lote 6, v0.10.45 (02/11/2026) — AINDA ABERTA
+
+- [x] **Recuperação de erros reproduzida:** formulário de rascunho vazio não sinalizava campos com `aria-invalid`; mensagem de erro do rascunho e identificador de membro permanecia após correção. Teste `browser_stage7_error_recovery_v0145.py` falhou antes em `draft-title`, e passou **24/24** após pequena correção em `src/main.ts`, sem salvamento automático nem mudança de regras. Capturas de antes/depois do estado de validação em 390px. Checkpoint `docs/CHECKPOINT_V055_2026-11-02.md`.
+- [x] Regressões executadas isoladamente: build/Node **18/18**, erros **12/12**, ARIA **28/28**, avisos persistentes **12/12**, contraste/semântica **87/87**, teclado **76/76**, formulários **72 controles**, rascunhos/revisão, reflow **63/63** e inventário **2.850 controles**. O timeout de execução agrupada **não** foi contabilizado; reflow foi repetido isoladamente com aprovação.
+- [ ] **07.10 continua aberta**: testes com leitores de tela reais, contraste sobre imagens, mais estados e revisão manual WCAG. 07.05/07.06, 07.11 e 07.12 seguem abertas. D1–D6 Megalos aguardam aceite.
+
+**Contagem oficial preservada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Nenhum merge, deploy, alteração institucional, backend ou produção.

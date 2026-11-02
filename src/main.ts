@@ -405,8 +405,8 @@ function sociiEditorBar(d:Draft|undefined){
 function composePage(){
  const editing=drafts.find(d=>d.id===currentDraftId);
  return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
- <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required ${composeError?'aria-describedby="compose-save-error"':''} placeholder="Título" value="${escapeHTML(draftForm.title)}">
- <label for="draft-body">Redação</label><textarea id="draft-body" name="body" required minlength="20" ${composeError?'aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
+ <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Título" value="${escapeHTML(draftForm.title)}">
+ <label for="draft-body">Redação</label><textarea id="draft-body" name="body" required minlength="20" ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
  ${composeError?`<p id="compose-save-error" class="workflow-form-error" role="alert">${escapeHTML(composeError)}</p>`:''}
  <div class="workflow-editor-actions"><button class="workflow-primary" type="submit" name="intent" value="conclude">Concluir redação</button><button class="workflow-outline" type="submit" name="intent" value="save" formnovalidate>Salvar rascunho</button><button class="workflow-outline" type="button" data-route="proposals">Voltar</button></div></form>`;
 }
@@ -779,6 +779,31 @@ document.addEventListener('submit',(event)=>{
 });
 document.addEventListener('input',(event)=>{
  const target=event.target;
+ // An empty draft save is invalid only while *both* fields are blank. Do not
+ // leave a stale error attached after the user supplies either field.
+ if((target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) &&
+    target.closest('#compose-proposal-form') && composeError){
+  const form=target.form;
+  const title=form?.elements.namedItem('title');
+  const body=form?.elements.namedItem('body');
+  if(title instanceof HTMLInputElement && body instanceof HTMLTextAreaElement && (title.value.trim() || body.value.trim())){
+   composeError='';
+   form?.querySelector('#compose-save-error')?.remove();
+   title.removeAttribute('aria-invalid');title.removeAttribute('aria-describedby');
+   body.removeAttribute('aria-invalid');body.removeAttribute('aria-describedby');
+  }
+ }
+ // The demonstration member ID is validated on save. A corrected value
+ // should stop being reported as invalid without applying changes early.
+ if(target instanceof HTMLInputElement && target.id==='member-acdm-id' && editError){
+  const id=target.value.trim().toUpperCase();
+  const memberId=(target.form?.elements.namedItem('memberId') as HTMLInputElement | null)?.value;
+  if(/^[A-Z0-9_-]{3,40}$/.test(id) && !members.some(m=>m.id!==memberId && m.acdmId===id)){
+   editError='';
+   target.removeAttribute('aria-invalid');target.removeAttribute('aria-describedby');
+   target.form?.querySelector('#edit-error')?.remove();
+  }
+ }
  if(target instanceof HTMLInputElement && target.closest('#schedule-deliberation-form') && (target.name==='start'||target.name==='end')){
   const form=target.form;
   const start=form?.elements.namedItem('start'),end=form?.elements.namedItem('end');
