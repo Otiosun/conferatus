@@ -309,3 +309,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [x] **07.03 encerrada no escopo testável da prévia offline**, sem condicionar este subitem aos gates independentes. Não implica certificação WCAG AA/AAA, zoom 200/400%, WebKit/Firefox ou aparelhos reais, tratados em **07.05, 07.09, 07.10, 07.12**. D1–D6 ainda dependem da Megalos. Ver `docs/CHECKPOINT_V042_2026-11-02.md`.
 
 **Contagem atual (não retroativa):** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, 07=**3/12**. Próximo item 07.04 (tipografia/conteúdo extremo). `main`/produção, autenticação, integrações e banco permanecem intactos.
+
+## Etapa 07.04 — lote 1, V043 (02/11/2026)
+
+- [x] Falha de palavras sem separação reproduzida em 94/108 cenários de 12 estados × 9 larguras. Correção CSS mínima; novo teste `browser_stage7_long_content_v0133.py` **108/108**, sem rolagem horizontal ou erros JS. Nome do diretório continua com reticências e nome integral acessível no botão.
+- [x] Fluxo real de rascunho com título no limite de 140 caracteres e corpo de 2.001 caracteres: **9/9 larguras** em editor, revisão, listagem e registro final, sem overflow nem perda de texto. Teste `browser_stage7_long_draft_v0133.py`.
+- [x] Build **18/18 Node**, reflow **63/63**, inventário 07.03 **2.769 alvos**, regressões específicas de painel avançado, controles expandidos, formulários, rascunhos, revisão e emblema Academy passaram individualmente. Handoff e backup vinculados ao `docs/CHECKPOINT_V043_2026-11-02.md`.
+- [ ] **07.04 permanece ABERTA**: auditoria de fonte minúscula mostrou 174 ocorrências visíveis abaixo de 10px em três larguras/e oito rotas amostradas; rever legibilidade e proporcionalidade contra Megalos sem adivinhação. Explorar mensagens de erro extremas e texto ampliado, sem confundir com certificação WCAG/zoom (07.05/07.10).
+
+**Contagens preservadas:** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, **07=3/12**. `main` e produção intactas, D1–D6 pendentes.

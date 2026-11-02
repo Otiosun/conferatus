@@ -815,3 +815,29 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
   display:inline-flex;
   align-items:center;
 }
+
+/* Stage 07.04 / batch 1: long unbroken titles and identifiers must reflow.
+   Keep typography and Megalos' hierarchy; do not hide overflowing content.
+   The directory's existing single-line ellipsis remains intentional, with the
+   complete name available through the clickable member row/profile. */
+.result-row > .result-label,
+.description-panel p,
+.activity-head > .activity-title,
+.activity-head > .activity-code,
+.section-toggle > span:first-child,
+.section-member-name,
+.calendar-item > button strong,
+.workflow-editor-head h1,
+.workflow-record-btn strong,
+.workflow-record-btn p,
+.proposal-expansion p,
+.workflow-form-error {
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.activity-head > .activity-title {flex:1 1 auto;}
+.activity-head > .activity-code {flex:0 1 auto;}
+.section-toggle > span:first-child {flex:1 1 auto;}
+/* Codes beside a long proposal title must wrap rather than escape their
+   shrunken flex slot. Normal codes are unaffected by this rule. */
+.proposal-trigger .activity-code {white-space:normal;}
