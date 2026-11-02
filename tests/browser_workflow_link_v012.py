@@ -30,8 +30,10 @@ with sync_playwright() as p:
   page.locator('[data-open-schedule-proposal]').click()
   page.get_by_text('Proposição concluída',exact=True).wait_for()
   assert page.locator('#confirm-proposal-form').count()==0
-  page.locator('.workflow-finished [data-route=proposals]').click()
-  page.get_by_text('Regimento de comunicação interna').wait_for()
+  page.locator('.workflow-finished [data-route=calendar]').click()
+  assert page.evaluate('location.hash')=='#/calendar',width
+  assert page.locator('[data-calendar-day="2026-12-12"]').get_attribute('aria-pressed')=='true',width
+  assert page.locator('.calendar-item--expanded').filter(has_text='Reunião da proposta').count()==1,width
   assert not errors,(width,errors)
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
   page.close()
