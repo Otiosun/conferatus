@@ -327,3 +327,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [x] **07.04 encerrada no Chromium offline**, não inclui zoom 200/400%, hardware real, WCAG total ou aceite visual da Megalos. Estes continuam nos gates posteriores; sem qualquer efeito em produção/main, votos oficiais, Academy/Socii real ou autorizações.
 
 **Contagem atualizada:** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, **07=4/12**. Próximo: **07.05**.
+
+## Etapa 07.05 — lote de zoom/reflow V045 (02/11/2026)
+
+- [x] Baseline idêntica à V044 e teste automatizado reproduziram **45/70** cenários de texto/zoom com defeito; CSS corrigiu mês e setas, título de gerenciamento, abas e rodapé sem trocar o emblema Academy nem ocultar conteúdo.
+- [x] Depois: **70/70** verificações (21 equivalências de viewport 400/200/100% × sete rotas; 49 estresses sintéticos de texto 200%), navegação do mês funcional, nenhum overflow horizontal documental/colisão fundamental, sem erro JS; build com 18/18 Node, regressões relevantes executadas separadamente e documentadas em `docs/CHECKPOINT_V045_2026-11-02.md`.
+- [ ] **07.05 ainda não encerrada:** validar zoom nativo e texto ampliado em motores reais. A barra de indicadores em 640px mantém rolagem horizontal interna: examinar operabilidade por teclado na 07.09/07.10. Não chamar a prévia certificada nem simulação de fonte equivalente ao zoom nativo.
+
+**Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; 07=**4/12**. `main`, banco, autenticação, votos oficiais, Academy real, Socii e aceites D1–D6 inalterados.

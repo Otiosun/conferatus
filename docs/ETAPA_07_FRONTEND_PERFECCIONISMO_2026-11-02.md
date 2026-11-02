@@ -75,3 +75,9 @@ Após V043, a microtipografia de metadados (7–9px) ainda era difícil de ler. 
 **Depois:** 567/567 amostras de metadados conformes à meta interna, auditoria equivalente **174→0** ocorrências <10px; nove larguras sem colisão de métricas; reflow **63/63**, conteúdo longo **108/108**, Node **18/18**, inventário geral **2.870** alvos sem falhas, formulários, Academy e controles prévios aprovados em execução isolada. **10 CSS px não é uma exigência WCAG** e esta aprovação só vale à prévia Chromium offline. Provas, limitações e capturas: `docs/CHECKPOINT_V044_2026-11-02.md`.
 
 **07.04 [x] CONCLUÍDA no escopo testado; 07=4/12.** Zoom, texto ampliado, acessibilidade global, motores adicionais, hardware e aprovação Megalos continuam nas tarefas posteriores. Próxima **07.05 — zoom/reflow acessível**.
+
+## 07.05 — zoom/reflow, primeiro lote v0.10.35 (02/11/2026)
+
+O teste novo `tests/browser_stage7_zoom_reflow_v0135.py`, em cópia **inalterada da V044**, registrou **45/70** cenários falhos por clipping de texto, colisões rodapé/emblema/Menu, título do calendário sobre setas, gerenciamento ou abas longas. CSS focado permite quebra de mês, título e abas, e deixa o rodapé crescer em texto ampliado sem esconder informação. Depois, **70/70** cenários passaram: 21 equivalências de viewport CSS (320/640/1280px, layout relativo a 400/200/100% de 1280px) e 49 estresses sintéticos de texto com fonte 200%, em sete rotas. `npm run build`: 18/18 Node; regressões de reflow, inventário, Academy, microtipografia, texto longo e formulários aprovadas isoladamente. **Não é zoom nativo de navegador**, nem certificação WCAG. O trilho de estatísticas com scroll interno a 640px ampliados permanece para auditoria de teclado. Ver `docs/CHECKPOINT_V045_2026-11-02.md`.
+
+**07.05 continua [ ]**, porque falta validar zoom nativo e comportamento dos motores/dispositivos; **07=4/12** e D1–D6 pendentes. Sem alteração de dados institucionais/produção.
