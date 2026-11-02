@@ -301,6 +301,7 @@ function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form
 const blankDraft=()=>({title:'',body:''});
 let draftForm=blankDraft();
 let currentDraftId='';
+let finishedProposalReturnTo:'proposals'|'calendar'='proposals';
 let workflowNotice='';
 let scheduleFormOpen=false;
 let expandedSchedule='sample-1';
@@ -385,7 +386,7 @@ function composePage(){
 }
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
- if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p><button type="button" class="workflow-primary" data-route="proposals">Voltar às proposições</button></div></div>`;
+ if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p><button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':'Voltar às proposições'}</button></div></div>`;
  return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
  <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
@@ -539,13 +540,13 @@ document.addEventListener('click',(event)=>{
  const dayEl=target.closest<HTMLElement>('[data-calendar-day]');
  if(dayEl?.dataset.calendarDay){selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();return;}
  const draftEl=target.closest<HTMLElement>('[data-draft]');
- if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;draftForm={title:d.title,body:d.body};navigate(d.status==='redacao'?'compose':'review');}return;}
+ if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo='proposals';draftForm={title:d.title,body:d.body};navigate(d.status==='redacao'?'compose':'review');}return;}
  const scheduleEl=target.closest<HTMLElement>('[data-schedule]');
  if(scheduleEl?.dataset.schedule){expandedSchedule=expandedSchedule===scheduleEl.dataset.schedule?'':scheduleEl.dataset.schedule;render();return;}
  const proposalEl=target.closest<HTMLElement>('[data-open-schedule-proposal]');
  if(proposalEl?.dataset.openScheduleProposal){
   const d=drafts.find(x=>x.id===proposalEl.dataset.openScheduleProposal);
-  if(d){currentDraftId=d.id;draftForm={title:d.title,body:d.body};navigate('review');}
+  if(d){currentDraftId=d.id;finishedProposalReturnTo='calendar';draftForm={title:d.title,body:d.body};navigate('review');}
   return;
  }
  const cancelEl=target.closest<HTMLElement>('[data-cancel-schedule]');
