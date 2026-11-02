@@ -284,3 +284,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.03 continua aberta:** auditar outros estados e controles (calendário, abas, ícones, gestão, editor, revisão, formulários), testar spacing, colisões e motores adicionais. Não converter esses subpassos em novos critérios da checklist 01–07.
 
 **Contagens preservadas:** 01 4/5; 02 0/4; 03 1/5; 04 17/22 ATIVA; 05 0/4; 06 0/5; **07 2/12 ATIVA**. Nenhuma autorização/aceite da Megalos inferida. Marca CONFFRATUS, dependências legadas intactas.
+
+### Etapa 07.03 — lote 2 v0.10.28 (02/11/2026; ainda NÃO encerrar)
+
+- [x] Reprodução focal antes: 135 medições em nove larguras; 106 ocorrências abaixo das metas de conforto (não equivalem a 106 violações WCAG). Inclui calendário, votos demonstrativos, abas, gerenciamento, editor e revisão. Teste `tests/browser_stage7_expanded_touch_v0128.py` falhou antes.
+- [x] Correção CSS mínima nesses controles, usando exceção consciente de largura de calendário de sete colunas (>=24px em 280px, altura >=44px). 135/135 medidas de conforto passaram depois; ações existentes preservadas. Título do mês quebrou inicialmente em 280px, defeito reproduzido em teste e corrigido por ajuste apenas do cabeçalho.
+- [x] `npm run build` + 18/18 Node; matriz focal de 9 larguras; 26 scripts browser distintos executados e aprovados após patch principal. O último ajuste do mês tem regressões **selecionadas** reexecutadas (reflow 63/63, calendário, smoke, antiga busca e ambos lotes de toque). Não classificar isso como certificação WCAG nem como execução integral pós-último ajuste.
+- [ ] **07.03 ainda ABERTA:** inventariar restantes dos controles dinâmicos, testes completos de hit-test/colisão, estados de erro/vazio e exceções, validação com motores/dispositivos adicionais. D1–D6, Academy, votos oficiais e Socii real sem aceites.
+
+**Contagens preservadas:** 01 4/5; 02 0/4; 03 1/5; 04 17/22 ativa; 05 0/4; 06 0/5; 07 **2/12 ativa**.

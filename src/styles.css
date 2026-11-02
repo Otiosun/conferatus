@@ -749,3 +749,24 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 @media (min-width:541px) {
   .member-list > .search-trigger {top:7px;}
 }
+
+/* Stage 07.03, batch 2: touch rectangles reproduced in expanded flows.
+   Calendar cells keep the seven-column layout: 24px AA width is feasible at
+   280px; 44px height makes rows easier to tap without horizontal clipping. */
+.vote-actions .vote-button, .reset-vote {min-height:44px;}
+.reset-vote {padding:8px 6px;}
+.profile-head .tabs .tab, .overview-tabs .tab {min-height:44px;}
+.calendar-month-nav button, .calendar-foot button {min-width:44px;min-height:44px;}
+@media (max-width:400px) {.calendar-day {min-height:44px;}}
+.calendar-list-head button {min-height:44px;padding:8px 5px;}
+.workflow-schedule-form .workflow-help button {min-height:44px;padding:7px 4px;}
+@media (max-width:400px) {.workflow-editor-actions button {min-height:44px;}}
+.governance-list .section-toggle {min-height:44px;}
+.section-member .icon-button {min-width:44px;min-height:44px;}
+.section-member .section-member-name {min-height:44px;}
+.edit-form .small-action {min-height:44px;}
+/* Keep the month caption on a single line beside the enlarged arrow targets. */
+@media (max-width:320px) {
+  .calendar-month-nav {gap:4px;}
+  .calendar-month-nav h2 {white-space:nowrap;font-size:14px;}
+}
