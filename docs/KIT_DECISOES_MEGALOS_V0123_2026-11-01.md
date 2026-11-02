@@ -52,3 +52,16 @@ As imagens originais são de Megalos; as seis capturas foram produzidas no Chrom
 **Seis etapas inalteradas:** 01=4/5; 02=0/4; 03=1/5; **04=17/22 ativa**; 05=0/4; 06=0/5. Não confundir o kit de decisão com finalização de etapa. **Limites de execução:** `npm run build` aprovou TypeScript, HTML offline e 18/18 testes Node da v0.10.22. As capturas da v0.10.22 foram feitas em 390 px, sem erros JS ou overflow; **não foram executadas 22 suítes Playwright nesta rodada docs-only**, ainda que tenham passado na rodada anterior. Ausência de `lint` segue registrada.
 
 **Arquivo distribuível:** [PDF de comparação no Drive Komekko](https://drive.google.com/file/d/1M5NN_tT4VQ_-Vp7YF8PU48kzj4DT3Jz-/view). Documento original da auditoria: `docs/AUDITORIA_VISUAL_V0117_2026-11-01.md`.
+
+## ADENDO POSTERIOR: vídeo original revisado integralmente (v0.10.24, 02/11/2026)
+
+> A análise temporal de 54,66 s encontra-se em `docs/AUDITORIA_VIDEO_V0124_2026-11-02.md` e no [PDF privado de quatro páginas](https://drive.google.com/file/d/1zp8vzL74uAnvi7ygb8zLZupnIWNUA591/view). **Todas as decisões D1–D6 continuam aguardando Megalos.** Estes quadros reforçam evidências, não substituem aceitação explícita.
+
+- **D1:** aos ~42,7–50,0 s, painel calendário azul sem grade mensal aparente. Ainda não prova proibição de grade.
+- **D2:** ~23,5–25,0 s confirma visualmente agendamento sob o perfil. A rota Calendário da prévia ainda diverge desse posicionamento.
+- **D3:** ~31,8 s, somente Confirmar visível; ~39,3 s, Cancelar e Confirmar visíveis na sequência. A transição não determina a política/papel/estado exigido.
+- **D4:** ~31,8 e ~39,3 s, a barra superior Socii aparece inclusive na revisão, enquanto na prévia está ausente nessa tela. O texto 127 horas **não** é suficiente para definir contagem.
+- **D5:** ~29,2 s, editor com Concluir/Voltar. Não há demonstração de Salvar rascunho, mas sua existência na prévia protege o trabalho local.
+- **D6:** ~23,5–28,5 s reforçam a métrica Ofício no perfil e a hierarquia das abas.
+- **Ofício:** o texto direto da Megalos diz “Tipo (PDR, PR, Ofício)” (~04,1 s) e pede acrescentar Ofício às métricas (~18,4 s). A implementação atual já inclui `Ofício` na união `ProposalType`, na revisão, no agendamento, nos validadores e nas métricas do perfil. **Não criar ticket para reimplementar o que está presente**; isto não é homologação de regras para Ofícios.
+- **Natureza da fonte:** sequência mostrada em uma gravação de WhatsApp; ela evidencia aparência/ordem de telas, não prova funcionalidade institucional dos botões, compartilhamento, tempo real ou dados oficiais.
