@@ -13,7 +13,7 @@
 - **Telas/estados:** votação, diretório, perfis, histórico, gerenciamento, calendário, agendamento, proposições, editor, folha de revisão, estados Socii, menus, pesquisa, formulários, feedbacks e estados vazios/erro.
 - **Regressão:** teste funcional de fluxo + medida DOM + captura visual antes/depois, relatório de divergências e decisão explícita sobre qualquer mudança de hierarquia da Megalos. Não usar `overflow-x:hidden` como remendo que esconda conteúdo inacessível.
 
-## Checklist exclusiva da Etapa 07 — 6/12 subitens concluídos na v0.10.38
+## Checklist exclusiva da Etapa 07 — 7/12 subitens concluídos na v0.10.39
 
 - [x] **07.01 — Inventário inicial de reflow:** sete rotas principais × nove larguras (280–1440 px) em Chromium, **63 verificações sem rolagem horizontal nem elementos escapando**, no HTML offline. Evidência: `tests/browser_frontend_reflow_v0126.py`. *Isto não cobre todos os estados/zoom.*
 - [x] **07.02 — Primeiro alvo de toque corrigido:** botão Buscar do diretório media **18 px de altura** antes; teste falhou nessa condição. A prévia agora garante 44 px em 280–540 px, sem cobrir a primeira linha, mantendo busca e filtros funcionais. Evidência: `tests/browser_frontend_touch_target_v0126.py`, cinco larguras, capturas 320/390.
@@ -23,7 +23,7 @@
 - [ ] **07.06 — Telas compactas completas:** 280/320/360/390 px, orientação, altura curta, teclado virtual e safe-area; testar fluxos inteiros em vez de só página inicial.
 - [ ] **07.07 — Tablets 600–1024 px:** retrato, paisagem, distribuição de colunas e densidade; evitar interface apenas de celular aumentada.
 - [x] **07.08 — Desktop largo 1280–1920 px:** composição intencional e leitura confortável, foco/hover coerentes, sem esticar o mockup nem desperdiçar a área de forma acidental.
-- [ ] **07.09 — Teclado e foco:** Tab/Shift+Tab, Escape, controles de menu, formulários, revisão, seleção e retorno do foco; ordem lógica sem focus trap inadvertida.
+- [x] **07.09 — Teclado e foco (prévia Chromium offline):** Tab/Shift+Tab, Enter, Escape, menus, formulários, revisão, seleção e retorno do foco; 114/114 verificações de regressão. Outros motores/leitores de tela/hardware real permanecem sob 07.10 e 07.12.
 - [ ] **07.10 — Acessibilidade e legibilidade:** contraste, rótulos, semântica, mensagens de erro/estado, leitores de tela, reduced motion e WCAG 2.2 AA nos critérios aplicáveis, com evidência e exceções.
 - [ ] **07.11 — Regressão visual e Megalos:** capturas por estado, diferenças revisadas contra as seis imagens/vídeo, e aceite expresso das decisões D1–D6 antes de chamar fidelidade concluída.
 - [ ] **07.12 — Matrizes finais e aparelhos reais:** Chromium + motores adicionais disponíveis, celulares/tablets reais, rotação/zoom, regressão completa e aceite final técnico/visual documentado.
@@ -101,3 +101,12 @@ Nenhuma alteração de CSS/JS/arte; apenas teste automatizado e documentação. 
 Matriz de **7 tamanhos (1280×720 até 2560×1440)** × **8 rotas/estados = 56 layouts**, com leitura centralizada no máximo de 740 px, sem overflow, colisão de logo/rodapé, perda da navegação ou JS errors. O teste permanente `tests/browser_stage7_desktop_v0138.py` validou também **7 jornadas funcionais** e **21 estados de hover**. Antes da correção, abas inativas do diretório/visão geral e navegação de mês não mostravam mudança de fundo ao passar o mouse; o teste falhou nessa condição. CSS pequeno em `@media (hover:hover) and (pointer:fine)` corrigiu o retorno sem alterar o estilo ativo ou o toque, mantendo a composição e a marca da Megalos. Nenhum `src/main.ts` foi alterado.
 
 Node 18/18, reflow 63/63, tablet 64/64, Academy 9×2, zoom sintético 70/70, controles 2.805, microtipografia 567, texto longo 108 aprovados. Capturas/relatório/logs no backup e no `docs/CHECKPOINT_V048_2026-11-02.md`. **07.08 [x] concluída no escopo Chromium offline; 07=6/12.** Não confundir com teste de hardware, WCAG, zoom nativo ou aceite da Megalos; 07.05, 07.06 e 07.09–07.12 continuam abertas. A 07.08 não exige expandir arbitrariamente o layout além da referência de 740 px.
+
+
+## 07.09 — Execução v0.10.39: teclado e retorno do foco
+
+A aplicação recriava todo o DOM em mudanças de rota ou ações de demonstração. Testes **antes** da correção mostraram **20 falhas em 76 verificações** nos retornos de foco em 320/390/768/1440 px. Um segundo teste identificou **12 falhas em 14 verificações** quando uma ação removia o próprio botão, em 390/768 px. Esses defeitos ocorriam mesmo com a ação funcional: o foco passava para `body`, ou Escape retornava à seção em vez do botão que abriu a edição.
+
+Correção localizada em `src/main.ts`: foco programático em `#main-content` após navegação por hash ou para a mesma rota; retorno ao controle `data-edit` após Escape; manutenção do foco em `#role-mode` após sua troca; focos de destino após expandir membros/histórico, alterar escolha demonstrativa, zerar/vincular na demonstração de gerenciamento e mostrar todas as programações. Nenhuma regra institucional, fixture, UI visual, CSS, autenticação, banco ou produção foi alterada.
+
+Evidências: `tests/browser_stage7_keyboard_focus_v0139.py` **76/76** em quatro larguras; `tests/browser_stage7_keyboard_workflows_v0139.py` **24/24** (rascunho, revisão, Cancelar, Tab/Shift+Tab); `tests/browser_stage7_disappearing_actions_v0139.py` **14/14** em duas larguras. Node 18/18; reflow 63/63; navegação em nove larguras; perfil/proposta; inventário 2783 instâncias × 19 estados × 9 larguras; logo oficial 9 larguras × 2 rotas. Capturas de foco visível em 320/768. Outras suítes que terminaram antes da mudança foram reexecutadas isoladamente conforme checkpoint. **07.09 marcada [x] apenas no escopo da prévia Chromium offline**, não certificação de leitor de tela ou WCAG 2.2 AA; 07.05/07.06, 07.10, 07.11, 07.12 permanecem abertas. **07=7/12**.

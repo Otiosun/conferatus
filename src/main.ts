@@ -76,7 +76,10 @@ function navigate(route: Route, memberId?: string) {
   editError = '';
   lastChange = null;
   const hash = `#/${route}${route==='profile' && memberId?`/${encodeURIComponent(memberId)}`:''}`;
-  if (location.hash === hash) render(); else location.hash = hash;
+  if (location.hash === hash) {
+    render();
+    document.querySelector<HTMLElement>('#main-content')?.focus({preventScroll:true});
+  } else location.hash = hash;
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 function crest() { return '<img src="./assets/crest.png" width="29" height="29" alt="Símbolo da Academy">'; }
@@ -449,7 +452,7 @@ function render() {
  lastRenderedHash = location.hash;
  // Keep keyboard focus on the same action after updating the preview DOM.
  const active = document.activeElement;
- const attributes = ['data-vote','data-tab','data-overview-tab','data-section','data-activity','data-action','data-calendar-day','data-schedule'];
+ const attributes = ['data-vote','data-tab','data-overview-tab','data-section','data-edit','data-activity','data-action','data-calendar-day','data-schedule'];
  const focusTarget = active instanceof HTMLElement
    ? attributes.map(attr => [attr, active.getAttribute(attr)] as const).find(([,value]) => value!==null)
    : undefined;
@@ -475,7 +478,12 @@ function syncRouteState() {
  const [route,id] = location.hash.replace(/^#\/?/, '').split('/');
  if(route==='profile' && id && members.some(member=>member.id===id)) currentMember=id;
 }
-window.addEventListener('hashchange',()=>{menuOpen=false;demoToolsOpen=false;syncRouteState();render();});
+// The route rerenders the entire DOM. Move focus to the destination for keyboard
+// and screen-reader users instead of leaving it on the removed navigation button.
+window.addEventListener('hashchange',()=>{
+  menuOpen=false;demoToolsOpen=false;syncRouteState();render();
+  document.querySelector<HTMLElement>('#main-content')?.focus({preventScroll:true});
+});
 // Megalos' interaction: swipe the CONFFRATUS name upwards to reveal navigation.
 // Keep the existing button as an accessible alternative.
 document.addEventListener('touchstart', event => {
@@ -502,7 +510,13 @@ document.addEventListener('keydown', event => {
  if(event.key==='Escape') {
   if(demoToolsOpen){demoToolsOpen=false;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();}
   else if(menuOpen){menuOpen=false;render();document.querySelector<HTMLButtonElement>('.footer-nav')?.focus();}
-  else if(editingMemberId){editingMemberId=null;render();document.querySelector<HTMLButtonElement>('[data-section][aria-expanded=true]')?.focus();}
+  else if(editingMemberId){
+   const previousId=editingMemberId;
+   editingMemberId=null;render();
+   const editTrigger=[...document.querySelectorAll<HTMLButtonElement>('[data-edit]')]
+    .find(button=>button.dataset.edit===previousId);
+   (editTrigger ?? document.querySelector<HTMLButtonElement>('[data-section][aria-expanded=true]'))?.focus();
+  }
   else if(searchExpanded && routeFromHash()==='members'){
    searchExpanded=false;filter='';render();document.querySelector<HTMLButtonElement>('[data-action=search]')?.focus();
   }
@@ -531,14 +545,30 @@ document.addEventListener('click',(event)=>{
  if(advancedPreview && actionEl?.dataset.action==='toggle-tools'){demoToolsOpen=!demoToolsOpen;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();return;}
  if(advancedPreview && actionEl?.dataset.action==='reset-admin'){
   for(const member of members){const original=initialMembers.get(member.id);if(original){member.name=original.name;member.acdmId=original.acdmId;member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory;}}
-  editingMemberId=null;lastChange=null;notice='Alterações restauradas.';rolePreview='diretor';demoToolsOpen=false;try{sessionStorage.removeItem(demoMembersKey);}catch{}render();return;
+  editingMemberId=null;lastChange=null;notice='Alterações restauradas.';rolePreview='diretor';demoToolsOpen=false;try{sessionStorage.removeItem(demoMembersKey);}catch{}
+  render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus({preventScroll:true});
+  return;
  }
- if(actionEl?.dataset.action==='show-more-members'){directoryExpanded=true;render();return;}
- if(actionEl?.dataset.action==='show-more-history'){overviewExpanded=true;render();return;}
+ if(actionEl?.dataset.action==='show-more-members'){
+  directoryExpanded=true;render();
+  document.querySelectorAll<HTMLButtonElement>('.member-item')[7]?.focus({preventScroll:true});
+  return;
+ }
+ if(actionEl?.dataset.action==='show-more-history'){
+  overviewExpanded=true;render();
+  // The show-more button disappears; announce the first newly revealed article.
+  const firstRevealed=document.querySelectorAll<HTMLElement>('.overview-content .activity')[6];
+  if(firstRevealed){firstRevealed.tabIndex=-1;firstRevealed.focus({preventScroll:true});}
+  return;
+ }
  if(actionEl?.dataset.action==='search'){searchExpanded=!searchExpanded;if(!searchExpanded)filter='';render();if(searchExpanded)document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
  if(actionEl?.dataset.action==='clear-search'){filter='';render();document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
  if(actionEl?.dataset.action==='toggle-demo'){demoExpanded=!demoExpanded;render();return;}
- if(actionEl?.dataset.action==='reset-vote'){demoVoteId=null;try{sessionStorage.removeItem('conferatus:demo-vote');}catch{}render();return;}
+ if(actionEl?.dataset.action==='reset-vote'){
+  demoVoteId=null;try{sessionStorage.removeItem('conferatus:demo-vote');}catch{}
+  render();document.querySelector<HTMLButtonElement>('[data-vote]')?.focus({preventScroll:true});
+  return;
+ }
  if (actionEl?.dataset.action==='menu') {menuOpen=!menuOpen; render(); (menuOpen?document.querySelector<HTMLButtonElement>('.menu-item'):document.querySelector<HTMLButtonElement>('.footer-nav'))?.focus(); return;}
  if (routeEl?.classList.contains('footer-home') && Date.now() < suppressFooterHomeClickUntil) {return;}
 
@@ -550,7 +580,12 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='calendar-prev'){calendarShift(-1);render();return;}
  if(actionEl?.dataset.action==='calendar-next'){calendarShift(1);render();return;}
  if(actionEl?.dataset.action==='calendar-today'){const currentDay=new Date();calendarYear=currentDay.getFullYear();calendarMonth=currentDay.getMonth();selectedCalendarDay=isoDay(currentDay);render();return;}
- if(actionEl?.dataset.action==='calendar-all'){selectedCalendarDay='';render();return;}
+ if(actionEl?.dataset.action==='calendar-all'){
+  selectedCalendarDay='';render();
+  const heading=document.querySelector<HTMLElement>('.calendar-list-head h2');
+  if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+  return;
+ }
  const dayEl=target.closest<HTMLElement>('[data-calendar-day]');
  if(dayEl?.dataset.calendarDay){selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();return;}
  const draftEl=target.closest<HTMLElement>('[data-draft]');
@@ -589,7 +624,11 @@ document.addEventListener('click',(event)=>{
  if(advancedPreview && actionEl?.dataset.action==='add-member'&&expandedSection) {
   const select=document.querySelector<HTMLSelectElement>('#add-member');
   const member=members.find(m=>m.id===select?.value);
-  if(member){rememberChange(member);member.sectionIds=updateSectionAssignment(member,expandedSection,true).member.sectionIds;saveDemoMembers();notice=`${member.name} adicionado à seção.`;demoToolsOpen=false;render();}
+  if(member){
+   rememberChange(member);member.sectionIds=updateSectionAssignment(member,expandedSection,true).member.sectionIds;
+   saveDemoMembers();notice=`${member.name} adicionado à seção.`;demoToolsOpen=false;render();
+   document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus({preventScroll:true});
+  }
  }
 });
 
@@ -712,7 +751,10 @@ document.addEventListener('input',(event)=>{
 });
 document.addEventListener('change',(event)=>{
  const target=event.target;
- if(advancedPreview && target instanceof HTMLSelectElement&&target.id==='role-mode'){rolePreview=target.value==='membro'?'membro':'diretor';render();}
+ if(advancedPreview && target instanceof HTMLSelectElement&&target.id==='role-mode'){
+  rolePreview=target.value==='membro'?'membro':'diretor';render();
+  document.querySelector<HTMLSelectElement>('#role-mode')?.focus({preventScroll:true});
+ }
 });
 syncRouteState();
 render();

@@ -360,3 +360,14 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **Gates ainda abertos em outros subitens:** 07.05 zoom nativo, 07.06 teclado virtual/safe-area e rotação reais, 07.09 teclado/foco extensivo, 07.10 WCAG, 07.11 D1–D6 com Megalos, 07.12 browsers/dispositivos. Firefox/WebKit indisponíveis localmente, sem alegar certificação.
 
 **Contagem oficial atual:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=6/12**. `main` e produção intactas. Próximo item independente: **07.09**.
+
+
+## Fechamento 07.09 — prévia v0.10.39 (02/11/2026)
+
+- [x] **Fluxos de teclado testados antes/depois:** 76 verificações em quatro larguras, com 20 falhas antes e 76/76 aprovados depois (menus, Tab, Shift+Tab, Enter, Escape, campo de busca, perfil, gerenciamento, editor, seleção e navegação).
+- [x] **Rascunho e revisão com teclado:** 24/24 verificações em duas larguras. Mantidos título, texto, foco e ordem entre campos e botões.
+- [x] **Controles que desaparecem após ações:** 12 falhas em 14 verificações antes; 14/14 após correção em duas larguras. Contextos: escolha de voto fictício, expansão de membros/histórico, reset e vínculo demonstrativo de gerenciamento, retorno às programações.
+- [x] **Regressões:** Node 18/18; reflow 63/63; navegação (9 tamanhos); perfil/proposta; auditoria de 2783 controles × 19 estados × 9 larguras; emblema Academy oficial 9 larguras × 2 rotas; desktop 56 layouts/7 jornadas/21 hover; zoom/reflow simulado 70/70; formulários 72/72 (testes completados individualmente; não confundir timeout de execução agrupada com aprovação).
+- [x] **07.09 concluída no escopo Chromium offline**, sem alterar CSS, estética, backend, voto real, Academy real, dados ou os aceites D1–D6. Sem testes de WebKit/Firefox/tecnologias assistivas reais; 07.10 e 07.12 abertos. Ver `docs/CHECKPOINT_V049_2026-11-02.md`.
+
+**Contagens canônicas (novo fechamento):** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. A 07.05/07.06 (testes reais), 07.10, 07.11, 07.12 seguem pendentes. Próximo avanço independente: **07.10 — semântica, contraste e acessibilidade**.
