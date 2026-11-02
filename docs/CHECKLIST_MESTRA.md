@@ -335,3 +335,10 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.05 ainda não encerrada:** validar zoom nativo e texto ampliado em motores reais. A barra de indicadores em 640px mantém rolagem horizontal interna: examinar operabilidade por teclado na 07.09/07.10. Não chamar a prévia certificada nem simulação de fonte equivalente ao zoom nativo.
 
 **Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; 07=**4/12**. `main`, banco, autenticação, votos oficiais, Academy real, Socii e aceites D1–D6 inalterados.
+
+## Etapa 07.06 — lote 1, V046 (02/11/2026) — NÃO ENCERRADO
+
+- [x] Defeito reproduzido: a regra `padding:0` da 07.05 anulava a safe-area inferior. Teste sintético com inset 24px falhou (`padding-bottom:0`); o primeiro ajuste encontrou ainda emblema sobreposto ao inset 48px. Correção somente CSS: restaurar `env(safe-area-inset-bottom,0px)` e ancorar emblema acima da área reservada. Depois **12/12** testes de inset em 4 larguras × 3 valores, sem overflow/interseção.
+- [x] Teste novo de alturas curtas/paisagem, **63/63** rotas × dimensões + **9/9** fluxos completos de busca → menu → redação com redução artificial da altura útil. Campos continuaram alcançáveis por rolagem, foco preservado e rascunho salvo. Não confundir simulação de teclado com teclado real.
+- [x] `npm run build` 18/18 Node; zoom simulado 70/70, reflow 63/63, emblema 9×2, inventário 2.880 controles e lote expandido 135/135 passaram. Teste de microtipografia impresso PASS mas com execução conjunta expirada: não computado como suíte terminada.
+- [ ] **07.05 e 07.06 permanecem ABERTAS**: zoom nativo, teclado OS, rotação física, safe-area real, motores/dispositivos externos. Referência `docs/CHECKPOINT_V046_2026-11-02.md`. **07=4/12**, D1–D6 e etapas de produção inalteradas.
