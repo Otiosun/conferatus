@@ -841,3 +841,38 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 /* Codes beside a long proposal title must wrap rather than escape their
    shrunken flex slot. Normal codes are unaffected by this rule. */
 .proposal-trigger .activity-code {white-space:normal;}
+
+/* Stage 07.04 / batch 2: readable demo disclosure and numeric metadata.
+   A 10 CSS-pixel project floor for small *information*, not a WCAG font-size
+   requirement. Preserve other typography and the Megalos-derived hierarchy. */
+.app-footer .footer-demo {
+  font-size:10px;
+  line-height:1.2;
+  letter-spacing:.02em;
+  text-align:center;
+  max-width:calc(100% - 152px);
+}
+@media (max-width:300px) {
+  .app-footer {
+    height:calc(78px + env(safe-area-inset-bottom,0px));
+    min-height:calc(78px + env(safe-area-inset-bottom,0px));
+  }
+}
+@media (max-width:360px) {
+  .result-count, .result-percentage {font-size:10px;}
+}
+.profile-summary>.metrics small,
+.member-item .metric-cell small {font-size:10px;}
+/* Respect the previously larger desktop metric typography. */
+@media (min-width:541px) {
+  .profile-summary>.metrics small {font-size:13px;}
+  .member-item .metric-cell small {font-size:11px;}
+}
+.activity-code {font-size:10px; color:#59627d;}
+/* Higher-specificity proposal/profile variants also carry essential metadata. */
+.workflow-profile .profile-summary>.metrics small,
+.proposal-trigger .activity-code {font-size:10px;}
+/* The compact profile role is informative text, not an ornamental glyph. */
+@media (max-width:540px) {
+  .profile-identity small {font-size:10px;}
+}

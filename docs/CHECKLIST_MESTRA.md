@@ -318,3 +318,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.04 permanece ABERTA**: auditoria de fonte minúscula mostrou 174 ocorrências visíveis abaixo de 10px em três larguras/e oito rotas amostradas; rever legibilidade e proporcionalidade contra Megalos sem adivinhação. Explorar mensagens de erro extremas e texto ampliado, sem confundir com certificação WCAG/zoom (07.05/07.10).
 
 **Contagens preservadas:** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, **07=3/12**. `main` e produção intactas, D1–D6 pendentes.
+
+## 07.04 — fechamento da microtipografia na prévia offline, V044 (02/11/2026)
+
+- [x] Confirmada a base v0.10.33 antes das alterações. A 07.04 havia passado com palavras longas **108/108** e rascunho extremo em nove larguras, mas ainda tinha **174 ocorrências visíveis de microtexto <10px** na auditoria de oito rotas × três larguras.
+- [x] Novo teste específico falhou antes (**367 de 567 amostras** em 4 rotas × 9 larguras). CSS pontual aumentou metadados críticos a pelo menos **10 CSS px** sem achatar títulos, e o aviso `DADOS FICTÍCIOS · PRÉVIA` agora é legível em duas linhas aos 280px, sem cobrir o logotipo oficial nem o Menu.
+- [x] Testes depois: **567/567** sem microtexto alvo, auditoria comparável **174 → 0**, métricas de perfil/diretório sem colisões em **nove larguras**, reflow **63/63**, long content **108/108**, Node **18/18**, inventário de controles **2.870**, além de regressões relevantes de formulários, Academy e outros estados. Relatório completo em `docs/CHECKPOINT_V044_2026-11-02.md`; teste interrompido por timeout não foi contado.
+- [x] **07.04 encerrada no Chromium offline**, não inclui zoom 200/400%, hardware real, WCAG total ou aceite visual da Megalos. Estes continuam nos gates posteriores; sem qualquer efeito em produção/main, votos oficiais, Academy/Socii real ou autorizações.
+
+**Contagem atualizada:** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, **07=4/12**. Próximo: **07.05**.

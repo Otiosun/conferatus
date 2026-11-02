@@ -13,12 +13,12 @@
 - **Telas/estados:** votação, diretório, perfis, histórico, gerenciamento, calendário, agendamento, proposições, editor, folha de revisão, estados Socii, menus, pesquisa, formulários, feedbacks e estados vazios/erro.
 - **Regressão:** teste funcional de fluxo + medida DOM + captura visual antes/depois, relatório de divergências e decisão explícita sobre qualquer mudança de hierarquia da Megalos. Não usar `overflow-x:hidden` como remendo que esconda conteúdo inacessível.
 
-## Checklist exclusiva da Etapa 07 — 3/12 subitens concluídos na v0.10.32
+## Checklist exclusiva da Etapa 07 — 4/12 subitens concluídos na v0.10.34
 
 - [x] **07.01 — Inventário inicial de reflow:** sete rotas principais × nove larguras (280–1440 px) em Chromium, **63 verificações sem rolagem horizontal nem elementos escapando**, no HTML offline. Evidência: `tests/browser_frontend_reflow_v0126.py`. *Isto não cobre todos os estados/zoom.*
 - [x] **07.02 — Primeiro alvo de toque corrigido:** botão Buscar do diretório media **18 px de altura** antes; teste falhou nessa condição. A prévia agora garante 44 px em 280–540 px, sem cobrir a primeira linha, mantendo busca e filtros funcionais. Evidência: `tests/browser_frontend_touch_target_v0126.py`, cinco larguras, capturas 320/390.
 - [x] **07.03 — Auditoria dos alvos da prévia offline:** nove larguras, 19 estados mapeados, 2.769 ocorrências de controles; exceções do calendário, testes de clique, erros e retorno contextual. Cobertura restrita a Chromium offline, não dispositivo real.
-- [ ] **07.04 — Tipografia legível e conteúdo extremo:** textos muito longos, palavras sem separação, nomes extensos, dados ausentes, erros e validação, quebra sem sobreposição; evitar microtipografia em telas compactas.
+- [x] **07.04 — Tipografia legível e conteúdo extremo:** textos muito longos, palavras sem separação, nomes extensos, dados ausentes, erros e validação, quebra sem sobreposição; evitar microtipografia em telas compactas.
 - [ ] **07.05 — Zoom/reflow acessível:** 200% de texto e 400% de zoom onde aplicável, equivalência a viewport CSS de 320 px conforme WCAG; nenhuma perda funcional ou scroll bidirecional indevido.
 - [ ] **07.06 — Telas compactas completas:** 280/320/360/390 px, orientação, altura curta, teclado virtual e safe-area; testar fluxos inteiros em vez de só página inicial.
 - [ ] **07.07 — Tablets 600–1024 px:** retrato, paisagem, distribuição de colunas e densidade; evitar interface apenas de celular aumentada.
@@ -66,3 +66,12 @@ Regressões específicas concluídas após a última mudança: build 18/18 Node,
 ## 07.04 — lote 1, V043 (02/11/2026)
 
 Reprodução objetiva de overflow provocado por palavras/identificadores sem separação: **94/108** cenários em nove larguras falhavam antes; **0/108** falham após CSS local com `overflow-wrap:anywhere`, `min-width:0` para flex e código de atividade com quebra habilitada. Também testados títulos reais com 140 caracteres e corpos de 2.001 caracteres em nove larguras, de editor até registro final. Nenhum dado ou regra institucional foi alterado. `npm run build` com 18/18 Node e regressões de 07.03, reflow, formulários, rascunhos, folha de revisão, Academy passaram. Capturas foram revisadas. **07.04 ainda [ ]**, pois a varredura independente descobriu 174 ocorrências de elementos textuais visíveis abaixo de 10px em oito rotas × três larguras amostradas; examinar metadados, indicadores e disclosure com fidelidade à Megalos e sem corrigir indiscriminadamente fontes. Evidências em `docs/CHECKPOINT_V043_2026-11-02.md`; 07=**3/12**. Não afirmar WCAG completa, zoom/hardware real, D1–D6 ou etapa 07 concluída.
+
+
+## 07.04 — lote 2 e fechamento, V044 (02/11/2026)
+
+Após V043, a microtipografia de metadados (7–9px) ainda era difícil de ler. Uma auditoria de 8 rotas × 3 larguras registrou **174 ocorrências <10px**. O novo teste por grupos críticos (`tests/browser_stage7_microtype_v0134.py`) reproduziu **367/567** abaixo do piso legível antes da correção em quatro rotas × nove larguras. Ajuste CSS específico estabeleceu piso de **10px** nos dados de votação demonstrativa, rótulos de métricas, código/data de atividade, cargo do perfil e indicação de dados fictícios. O aviso da prévia quebra em duas linhas apenas na largura extrema 280px e não invade o emblema oficial/menu. As fontes desktop maiores foram preservadas.
+
+**Depois:** 567/567 amostras de metadados conformes à meta interna, auditoria equivalente **174→0** ocorrências <10px; nove larguras sem colisão de métricas; reflow **63/63**, conteúdo longo **108/108**, Node **18/18**, inventário geral **2.870** alvos sem falhas, formulários, Academy e controles prévios aprovados em execução isolada. **10 CSS px não é uma exigência WCAG** e esta aprovação só vale à prévia Chromium offline. Provas, limitações e capturas: `docs/CHECKPOINT_V044_2026-11-02.md`.
+
+**07.04 [x] CONCLUÍDA no escopo testado; 07=4/12.** Zoom, texto ampliado, acessibilidade global, motores adicionais, hardware e aprovação Megalos continuam nas tarefas posteriores. Próxima **07.05 — zoom/reflow acessível**.
