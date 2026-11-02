@@ -47,3 +47,7 @@ Versão 1.0 — 28/10/2026. Este arquivo foi preparado para virar `AGENTS.md` na
 
 ## Gate de liberação
 Não afirmar **pronto para produção** quando qualquer um ocorrer: autenticação pendente; autorização não testada; votos duplicáveis; integridade sob concorrência não testada; dados pessoais expostos; ausência de caminho de recuperação; interface importante não conferida no celular; regras institucionais sem confirmação.
+
+## Nova etapa permanente — 07 (02/11/2026)
+
+Por solicitação expressa do responsável, o projeto tem agora **sete etapas**. A Etapa 07 é dedicada **exclusivamente** a perfeccionismo visual, front-end, acessibilidade e responsividade por tamanho, zoom, conteúdo e tipo de interação. Seu checklist próprio está em `docs/ETAPA_07_FRONTEND_PERFECCIONISMO_2026-11-02.md`; ela não substitui a Etapa 06 de entrega. Todo novo ciclo deve retomar também a contagem `07=N/12`, publicar provas específicas antes de marcar itens e não chamar a responsividade de absoluta sem verificar motores adicionais e hardware real. A fidelidade à Megalos e a proteção de produção permanecem obrigatórias.
