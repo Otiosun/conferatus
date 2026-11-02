@@ -41,9 +41,8 @@ with sync_playwright() as p:
   assert original.locator('[data-open-schedule-proposal="p-primary"]').count()==1,width
   original.locator('[data-open-schedule-proposal="p-primary"]').click()
   page.get_by_text('Proposição concluída',exact=True).wait_for()
-  page.locator('[data-route=proposals]').last.click()
-  page.locator('.footer-nav').click()
-  page.locator('.menu-item[data-route=calendar]').click()
+  page.locator('.workflow-finished [data-route=calendar]').click()
+  assert page.evaluate('location.hash')=='#/calendar',width
   secondary=page.locator('.calendar-item').filter(has_text='Programação secundária')
   secondary.locator('[data-schedule]').click()
   secondary.locator('[data-cancel-schedule]').click()
