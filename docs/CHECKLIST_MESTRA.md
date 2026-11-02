@@ -79,6 +79,25 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] Atualizar documentação e preparar a demonstração à Megalos, distinguindo recursos reais dos simulados.
 **Estado:** revisão parcial e contínua; entrega final pendente.
 
+## 07 — Perfeccionismo visual, front-end e responsividade absoluta verificável
+
+**Etapa adicional solicitada pelo responsável em 02/11/2026.** Independente da Etapa 06 de entrega e da Etapa 04 de Socii. Critérios de aceite em `docs/ETAPA_07_FRONTEND_PERFECCIONISMO_2026-11-02.md`.
+
+- [x] **07.01** Reflow inicial: 7 rotas × 9 larguras 280–1440px, 63/63 sem rolagem horizontal/clipping (Chromium offline; não todos os estados).
+- [x] **07.02** Alvo de toque Buscar: reproduzido com 18px de altura; corrigido para 44px em 280–540px sem cobrir a primeira linha, toque e filtro testados em 5 larguras.
+- [ ] **07.03** Inventariar e adequar TODOS os alvos de toque, espaçamento e ícones clicáveis.
+- [ ] **07.04** Corrigir legibilidade tipográfica, microtextos, nomes extensos, erros e conteúdo de tamanho extremo.
+- [ ] **07.05** Testar zoom 200%/400% e reflow de 320 CSS px sem perda de conteúdo/ação.
+- [ ] **07.06** Testar todas as jornadas em celulares compactos, alturas curtas, rotação, teclado virtual e safe areas.
+- [ ] **07.07** Validar composição de tablets (600–1024px; retrato e paisagem).
+- [ ] **07.08** Validar composição desktop 1280–1920px, hierarquia e aproveitamento consciente da área.
+- [ ] **07.09** Revisar ordem de Tab/Shift+Tab, Escape, foco e navegação do teclado por fluxo.
+- [ ] **07.10** Auditar contraste, semântica, rótulos e leitor de tela contra critérios aplicáveis WCAG 2.2 AA.
+- [ ] **07.11** Manter diffs visuais reproduzíveis e obter aceite Megalos de D1–D6 antes de declarar fidelidade.
+- [ ] **07.12** Rodar matriz final em Chromium/Firefox/WebKit quando disponíveis e aparelhos reais, documentando limites.
+
+**Estado da Etapa 07: 2/12.** Início v0.10.26, com `npm run build` **18/18 Node**, `tests/browser_frontend_touch_target_v0126.py` **5/5 larguras**, `tests/browser_frontend_reflow_v0126.py` **63/63 estados-larguras**, regressões direcionadas **13/13 suítes Playwright**. Nenhuma dessas medições é certificação de responsividade absoluta ou substitui testes em dispositivos reais. A marca da prévia permanece **CONFFRATUS**; `main` intocada.
+
 ## Leis permanentes
 1. **Código humano:** legível, direto, com comentários úteis e sem abstrações artificiais; não falsificar autoria.
 2. **Preguiça inteligente:** reutilizar tudo o que funciona, evitar duplicação, dependências e infra desnecessárias.
@@ -248,3 +267,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - **Verificações locais:** TypeScript estrito e `npm run build` com **18/18 testes Node** aprovados; teste de marca `tests/browser_brand_v0125.py` passou em 320/390/740/1280 px, capturas conferidas em 390/740. O primeiro lote paralelo do navegador expirou; posteriormente, **18/18 scripts Playwright disponíveis na reconstrução local (17 herdados + 1 novo) foram individualmente concluídos e aprovados**, incluindo Socii, calendário, perfis, retorno, storage, assinatura e smoke. Ainda há testes legados adicionais no GitHub que não foram reexecutados nesta rodada; não alegar 22/22 da matriz anterior.
 - **Leis máximas preservadas:** mínima alteração de marca e geração de alias; nenhum esquema, lógica de votos, persistência, permissão ou regra institucional alterado. Não recriar arquivos históricos de auditoria como se sempre tivessem usado a grafia nova.
 - **Seis etapas SEM ALTERAÇÃO AUTOMÁTICA:** 01=4/5; 02=0/4; 03=1/5; **04=17/22 ativa**; 05=0/4; 06=0/5. Corrigir texto não significa homologar sistema nem concluir fidelidade visual.
+
+
+## Front-end responsivo — início da Etapa 07 (preview v0.10.26, 02/11/2026)
+- Nova etapa adicionada por solicitação expressa; a Etapa 06 continua independente e aberta. Sem alterar as seis contagens anteriores: **01=4/5; 02=0/4; 03=1/5; 04=17/22 ativa; 05=0/4; 06=0/5; 07=2/12 ativa.**
+- A busca do diretório móvel possuía altura clicável de 18px. Falha reproduzida ANTES da correção; CSS adaptado e teste em 280/320/360/390/540px confirma 44px e distância da primeira linha. Apenas `src/styles.css` mudou em produto.
+- Auditoria inicial sem overflow: 7 rotas × 9 larguras 280/320/360/390/540/740/768/1024/1440px, 63/63 no Chromium offline; não equivale a validar todas as jornadas, zoom elevado, outros navegadores ou aparelhos físicos.
+- Build local com 18/18 Node, testes Playwright novos e 13/13 suítes direcionadas (não a matriz completa do repositório). Visual e decisões Megalos D1–D6 preservadas.
+- Documento canônico: `docs/ETAPA_07_FRONTEND_PERFECCIONISMO_2026-11-02.md`. Checkpoint: `docs/CHECKPOINT_V036_2026-11-02.md`.
