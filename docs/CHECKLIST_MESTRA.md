@@ -389,3 +389,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 permanece aberta**: contraste não textual e foco, totalidade dos estados e tecnologias assistivas/motores/dispositivos reais não certificados. Nada de presumir aceitações D1–D6.
 
 **Contagens inalteradas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Produção e `main` preservadas.
+
+## Etapa 07.10 — lote 3, v0.10.42 (02/11/2026) — AINDA ABERTA
+
+- [x] **Contraste não textual nos campos amostrados:** teste reprodutível em Chromium offline/4 larguras com proposta fictícia habilitando a seleção. **20 falhas em 40 medições antes**, por bordas de agendamento a 2,392:1 e revisão a 1,280:1. Correção CSS mínima: `rgba(255,255,255,.88)` no agendamento e `#747c9a` na folha de revisão. **40/40 PASS depois**, contrastes de contorno 3,838:1 e 3,712:1.
+- [x] **Foco em teclado, amostra ampliada:** teste permanente em 3 larguras e 7 rotas/estados, **273/273 paradas de Tab** com `:focus-visible` e `outline` CSS presente. A verificação não mede contraste de todos os focos e não substitui leitor de tela.
+- [x] Build TypeScript/Node **18/18**; regressões isoladas: contraste textual **87/87**, ARIA **28/28**, mensagens de erro **12/12**, foco **76/76**, editor **24/24**, reflow **63/63**, zoom sintético **70/70**, inventário **2.742 controles**, Academy oficial 9×2, conteúdo extremo **108/108**, desktop 56 layouts/7 jornadas/21 hovers e formulários **72/72**. Capturas de agendamento/revisão antes/depois. `docs/CHECKPOINT_V052_2026-11-02.md`.
+- [ ] **07.10 AINDA ABERTA:** mais estados/pares de cores, contraste de foco integral, tecnologias assistivas, motores/navegadores adicionais; nada de afirmar conformidade WCAG completa.
+
+**Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. `main`, dados, produção, Academy real e D1–D6 sem alterações/aceites.

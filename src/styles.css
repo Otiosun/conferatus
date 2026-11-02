@@ -977,3 +977,12 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .bottom-menu .menu-item {background:#5d6ac1;}
 .bottom-menu .menu-item[aria-current="page"],
 .bottom-menu .menu-item:hover {background:#515dc7;}
+
+/* Stage 07.10, batch 3: maintain visible form boundaries (>=3:1 in the
+   measured calendar/review states) without changing form layout or focus. */
+.workflow-schedule-form :is(input, textarea, select) {
+  border-color:rgba(255,255,255,.88);
+}
+.workflow-review-sheet select {
+  border-color:#747c9a;
+}
