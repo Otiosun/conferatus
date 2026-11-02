@@ -1,9 +1,9 @@
 {
-  "name": "conferatus",
+  "name": "conffratus",
   "private": true,
   "version": "0.10.5",
   "type": "module",
-  "description": "CONFERATUS — prévia de desenvolvimento com dados fictícios",
+  "description": "CONFFRATUS — prévia de desenvolvimento com dados fictícios",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/prepare-dist.mjs && node scripts/build-standalone.mjs && node scripts/package-preview.mjs && node --test tests/*.test.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
