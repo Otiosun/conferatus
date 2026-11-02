@@ -87,7 +87,7 @@ function footer() {
     <button class="menu-item" data-route="calendar" ${routeFromHash()==='calendar'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true">▦</span>Agendar e Iniciar Deliberação</button>
     <button class="menu-item" data-route="proposals" ${['proposals','compose','review'].includes(routeFromHash())?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true">✎</span>Elaborar Proposição e Socii</button>
   </div></nav>` : ''}
-  <footer class="app-footer">${crest()}<button type="button" class="footer-home" data-route="ballot" aria-label="Voltar à votação">CONFERATUS</button><small class="footer-demo">DADOS FICTÍCIOS · PRÉVIA</small>
+  <footer class="app-footer">${crest()}<button type="button" class="footer-home" data-route="ballot" aria-label="Voltar à votação">CONFFRATUS</button><small class="footer-demo">DADOS FICTÍCIOS · PRÉVIA</small>
    <button type="button" class="footer-nav" aria-expanded="${menuOpen}" aria-label="${menuOpen?'Fechar':'Abrir'} menu" data-action="menu">${menuOpen?'Fechar ×':'☰ Menu'}</button>
   </footer>`;
 }
@@ -103,7 +103,7 @@ function header(title?: string, subtitle?: string, tall=false) {
    </aside>`:''}
   </header>`;
   const panelShortcut = routeFromHash()==='overview' ? `<button class="panel-button" data-route="governance" aria-label="Abrir gerenciamento deliberativo" title="Gerenciamento deliberativo"><img src="./assets/painel.png" alt=""></button>` : '';
-  return `<header class="hero ${tall?'':'hero--flat'}" aria-label="Faixa azul do CONFERATUS">${panelShortcut}</header>`;
+  return `<header class="hero ${tall?'':'hero--flat'}" aria-label="Faixa azul do CONFFRATUS">${panelShortcut}</header>`;
 }
 function metricRow(m: Member) {
   const personalVotes = hasPersonalVoteHistory(m, sections) ? String(m.totalVotes) : '—';
@@ -391,15 +391,15 @@ function sociiEditorBar(d:Draft|undefined){
 }
 function composePage(){
  const editing=drafts.find(d=>d.id===currentDraftId);
- return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
+ return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
  <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required placeholder="Título" value="${escapeHTML(draftForm.title)}">
  <label for="draft-body">Redação</label><textarea id="draft-body" name="body" required minlength="20" placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
  <div class="workflow-editor-actions"><button class="workflow-primary" type="submit" name="intent" value="conclude">Concluir redação</button><button class="workflow-outline" type="submit" name="intent" value="save" formnovalidate>Salvar rascunho</button><button class="workflow-outline" type="button" data-route="proposals">Voltar</button></div></form>`;
 }
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
- if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p><button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':'Voltar às proposições'}</button></div></div>`;
- return `<div class="workflow-editor-head"><span>CONFERATUS</span><h1>${escapeHTML(d.title)}</h1></div>
+ if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p><button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':'Voltar às proposições'}</button></div></div>`;
+ return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
  <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
  <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>Confira os dados e a redação antes de confirmar a conclusão.</p>
@@ -453,7 +453,7 @@ function render() {
    : undefined;
  const route=routeFromHash();
  const page=route==='ballot'?ballotPage():route==='members'?memberList():route==='profile'?profilePage():route==='overview'?overviewPage():route==='calendar'?calendarPage():route==='proposals'?proposalsPage():route==='compose'?composePage():route==='review'?reviewPage():governancePage();
- root.innerHTML=`<div class="app-shell" aria-label="CONFERATUS — dados fictícios"><a href="#main-content" class="skip-link">Ir para o conteúdo</a><main id="main-content" tabindex="-1">${page}</main>${footer()}
+ root.innerHTML=`<div class="app-shell" aria-label="CONFFRATUS — dados fictícios"><a href="#main-content" class="skip-link">Ir para o conteúdo</a><main id="main-content" tabindex="-1">${page}</main>${footer()}
 </div>`;
  if (scheduleValues) {
   const nextForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
@@ -474,7 +474,7 @@ function syncRouteState() {
  if(route==='profile' && id && members.some(member=>member.id===id)) currentMember=id;
 }
 window.addEventListener('hashchange',()=>{menuOpen=false;demoToolsOpen=false;syncRouteState();render();});
-// Megalos' interaction: swipe the CONFERATUS name upwards to reveal navigation.
+// Megalos' interaction: swipe the CONFFRATUS name upwards to reveal navigation.
 // Keep the existing button as an accessible alternative.
 document.addEventListener('touchstart', event => {
  const el = event.target;
