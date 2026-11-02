@@ -1,8 +1,10 @@
-# CONFERATUS — Checklist-mestra de execução
+# CONFFRATUS — Checklist-mestra de execução
 
 Atualização de referência: 01/11/2026
-Responsável pelo acompanhamento: desenvolvimento CONFERATUS
+Responsável pelo acompanhamento: desenvolvimento CONFFRATUS
 Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alterações de produção. Última prévia funcional confirmada remotamente antes desta rodada: `preview/v0.10.22-socii-explicit-choice` (`8023643`, Cloudflare `completed/success`). A v0.10.20 restaurou o retorno contextual do calendário. A v0.10.21 corrigiu gravação local parcial por reversão de melhor esforço. A v0.10.22 corrige a seleção implícita do primeiro participante na inclusão do Socii; agora o campo exige escolha explícita via validação HTML nativa. A v0.10.23 é **somente documentação de validação Megalos**: seis capturas comparadas às seis imagens originais, PDF de 7 páginas e decisões D1-D6; nenhum código de produto alterado, nenhum aceite presumido. A v0.10.24 acrescenta auditoria temporal de 54,66 s do vídeo original, sem modificar o produto: a faixa Socii aparece também na revisão, há duas variantes visíveis de confirmação sem regra conhecida, e Ofício já está contemplado na prévia. Nenhuma regra institucional ou integração foi inventada. A Etapa 04 continua ativa (17/22 subitens), com cinco critérios centrais pendentes; votação, Academy e Socii continuam exclusivamente demonstrativos.
+
+> **Marca exibida desde a prévia v0.10.25: CONFFRATUS.** Correção solicitada diretamente pelo responsável em 02/11/2026, substituindo a grafia de interface CONFERATUS. As capturas originais da Megalos exibem CONFERATUS e são preservadas como fontes históricas; validação formal de grafia com a Megalos não foi comprovada. Os endereços `Otiosun/conferatus`, `conferatus.pages.dev`, chaves `conferatus:*` e o arquivo offline legado são identificadores técnicos estáveis, não a marca pública. Sem migração automática que arrisque dados.
 
 > Fonte oficial para retomar o trabalho. Nenhuma tarefa é concluída apenas por existir uma tela ou um commit. Não mudar o nome do produto sem confirmar a grafia com a Megalos.
 
@@ -237,3 +239,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - **Entregáveis:** `docs/AUDITORIA_VIDEO_V0124_2026-11-02.md` e [adendo visual privado de 4 páginas](https://drive.google.com/file/d/1zp8vzL74uAnvi7ygb8zLZupnIWNUA591/view); `docs/KIT_DECISOES_MEGALOS_V0123_2026-11-01.md` recebeu atualização D1–D6. Original e capturas não foram incluídos no repositório público.
 - **Escopo honesto:** mudanças somente em documentação; nenhum teste Node/Playwright foi reexecutado nesta rodada; o CI da branch documental não substitui testes de navegador. `lint` continua não configurado.
 - **Contagem intocada:** 01=4/5, 02=0/4, 03=1/5, **04=17/22 ATIVA**, 05=0/4, 06=0/5. O gate de aprovação visual D1–D6 continua aberto, e a `main` não pode ser promovida sem autorização. Consulte `docs/CHECKPOINT_V034_2026-11-02.md`.
+
+
+## Correção da marca solicitada pelo responsável — preview v0.10.25 (02/11/2026)
+- **Mudança prioritária:** o responsável apontou erro no nome anterior. A prévia passa a exibir **CONFFRATUS** em título HTML, rodapé, telas de edição/revisão, textos acessíveis, pacote e arquivo offline canônico.
+- **Fonte e conflito documentados:** algumas imagens da Megalos mostram literalmente **CONFERATUS**. A alteração para CONFFRATUS foi solicitada pelo responsável neste chat, **não** é atribuída a uma aprovação ou a uma nova imagem da Megalos; manter ambas as evidências e solicitar validação institucional de grafia quando houver oportunidade. O item 01 continua marcado 4/5, sem inventar aprovação da Megalos.
+- **Compatibilidade:** arquivos `dist/CONFFRATUS_demo_offline.html` e `dist/CONFERATUS_demo_offline.html` têm bytes iguais; `publish/index.html` usa a marca nova. `sessionStorage` mantém chaves antigas `conferatus:*` para preservar drafts, backups e votos fictícios. O repositório GitHub e o domínio Cloudflare atuais NÃO foram renomeados; fazê-lo exige migração técnica e aprovação separadas.
+- **Verificações locais:** TypeScript estrito e `npm run build` com **18/18 testes Node** aprovados; teste específico `tests/browser_brand_v0125.py` aprovado em 320/390/740/1280 px e capturas verificadas em 390/740. Smoke, convite Socii e integridade de classificação também passaram isoladamente. Não alegar uma execução integral das 22 suítes antigas se o lote não terminou.
+- **Leis máximas preservadas:** mínima alteração de marca e geração de alias; nenhum esquema, lógica de votos, persistência, permissão ou regra institucional alterado. Não recriar arquivos históricos de auditoria como se sempre tivessem usado a grafia nova.
+- **Seis etapas SEM ALTERAÇÃO AUTOMÁTICA:** 01=4/5; 02=0/4; 03=1/5; **04=17/22 ativa**; 05=0/4; 06=0/5. Corrigir texto não significa homologar sistema nem concluir fidelidade visual.
