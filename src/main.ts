@@ -460,6 +460,21 @@ function render() {
  const page=route==='ballot'?ballotPage():route==='members'?memberList():route==='profile'?profilePage():route==='overview'?overviewPage():route==='calendar'?calendarPage():route==='proposals'?proposalsPage():route==='compose'?composePage():route==='review'?reviewPage():governancePage();
  root.innerHTML=`<div class="app-shell" aria-label="CONFFRATUS — dados fictícios"><a href="#main-content" class="skip-link">Ir para o conteúdo</a><main id="main-content" tabindex="-1">${page}</main>${footer()}
 </div>`;
+ // Some legacy visual layouts have no visible heading. Supply one for heading
+ // navigation without changing their typography or the Megalos composition.
+ const mainContent = root.querySelector<HTMLElement>('#main-content');
+ if (mainContent && !mainContent.querySelector('h1')) {
+  const heading = document.createElement('h1');
+  heading.className = 'sr-only';
+  const routeHeadings: Record<Route,string> = {
+   ballot:'Votação demonstrativa', members:'Membros', profile:'Perfil do membro',
+   overview:'Histórico de votações e proposições', governance:'Gerenciamento deliberativo',
+   calendar:'Calendário', proposals:'Proposições e Socii',
+   compose:'Redigir proposição', review:'Revisão de proposição'
+  };
+  heading.textContent = routeHeadings[route];
+  mainContent.prepend(heading);
+ }
  if (scheduleValues) {
   const nextForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
   if (nextForm) for (const [name, value] of scheduleValues) {

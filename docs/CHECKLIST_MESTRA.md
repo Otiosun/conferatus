@@ -371,3 +371,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [x] **07.09 concluída no escopo Chromium offline**, sem alterar CSS, estética, backend, voto real, Academy real, dados ou os aceites D1–D6. Sem testes de WebKit/Firefox/tecnologias assistivas reais; 07.10 e 07.12 abertos. Ver `docs/CHECKPOINT_V049_2026-11-02.md`.
 
 **Contagens canônicas (novo fechamento):** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. A 07.05/07.06 (testes reais), 07.10, 07.11, 07.12 seguem pendentes. Próximo avanço independente: **07.10 — semântica, contraste e acessibilidade**.
+
+
+## Etapa 07.10 — lote 1, v0.10.40 (02/11/2026) — AINDA ABERTA
+
+- [x] Teste reproduzível de contraste e semântica básica: 87 observações em 8 rotas × 3 larguras, **51 ocorrências reprovadas antes**; **87/87 PASS depois**. Cinco telas sem título principal agora recebem `<h1 class="sr-only">` apenas quando não existe heading. Contraste dos principais rótulos/estados de menu, aviso de prévia e resultados elevado acima de 4,5:1, sem trocar identidade. Arquivos: `src/main.ts`, `src/styles.css`, `tests/browser_stage7_contrast_semantics_v0140.py`.
+- [x] Build 18/18 Node; regressões de teclado 76/76 e editor 24/24, desktop, tablet, reflow, emblema Academy, capturas visuais. Checkpoint `docs/CHECKPOINT_V050_2026-11-02.md`.
+- [ ] **07.10 NÃO concluída**: faltam demais cores/estados, contraste não textual/foco, semântica ARIA profunda, leitor de tela, navegador/hardware adicional. Sem alegar conformidade WCAG global.
+
+**Contagens não alteradas:** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, **07=7/12**. D1–D6 Megalos ainda sem aceite; main/produção intactas.
