@@ -303,6 +303,7 @@ let draftForm=blankDraft();
 let currentDraftId='';
 let finishedProposalReturnTo:'proposals'|'calendar'='proposals';
 let workflowNotice='';
+let composeError='';
 let scheduleFormOpen=false;
 let expandedSchedule='sample-1';
 let inviteOpen=false;
@@ -394,6 +395,7 @@ function composePage(){
  return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
  <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required placeholder="Título" value="${escapeHTML(draftForm.title)}">
  <label for="draft-body">Redação</label><textarea id="draft-body" name="body" required minlength="20" placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
+ ${composeError?`<p id="compose-save-error" class="workflow-form-error" role="alert">${escapeHTML(composeError)}</p>`:''}
  <div class="workflow-editor-actions"><button class="workflow-primary" type="submit" name="intent" value="conclude">Concluir redação</button><button class="workflow-outline" type="submit" name="intent" value="save" formnovalidate>Salvar rascunho</button><button class="workflow-outline" type="button" data-route="proposals">Voltar</button></div></form>`;
 }
 function reviewPage(){
@@ -542,7 +544,7 @@ document.addEventListener('click',(event)=>{
 
  if(advancedPreview){const partnerEl=target.closest<HTMLElement>('[data-confirm-partner]');
   if(partnerEl?.dataset.confirmPartner){const [draftId,partnerId]=partnerEl.dataset.confirmPartner.split(':');const d=drafts.find(d=>d.id===draftId);const partner=d?.partners.find(p=>p.id===partnerId);if(d&&partner){partner.complete=true;d.status=draftReady(d)?'concluida':'revisao';saveWorkflows();workflowNotice=d.status==='concluida'?'Todas as partes concluíram. Proposição concluída.':'Participação registrada nesta simulação.';render();}return;}}
- if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';navigate('compose');return;}
+ if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
  if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;workflowNotice='';render();return;}
  if(actionEl?.dataset.action==='calendar-prev'){calendarShift(-1);render();return;}
@@ -552,7 +554,7 @@ document.addEventListener('click',(event)=>{
  const dayEl=target.closest<HTMLElement>('[data-calendar-day]');
  if(dayEl?.dataset.calendarDay){selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();return;}
  const draftEl=target.closest<HTMLElement>('[data-draft]');
- if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo='proposals';draftForm={title:d.title,body:d.body};navigate(d.status==='redacao'?'compose':'review');}return;}
+ if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo='proposals';draftForm={title:d.title,body:d.body};composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
  const scheduleEl=target.closest<HTMLElement>('[data-schedule]');
  if(scheduleEl?.dataset.schedule){expandedSchedule=expandedSchedule===scheduleEl.dataset.schedule?'':scheduleEl.dataset.schedule;render();return;}
  const proposalEl=target.closest<HTMLElement>('[data-open-schedule-proposal]');
@@ -603,10 +605,14 @@ document.addEventListener('submit',(event)=>{
  if(id==='compose-proposal-form'){
   const title=String(data.get('title')??'').trim(),body=String(data.get('body')??'').trim();
   if(saveOnly ? (!title && !body) : (title.length<3||body.length<20)){
-   workflowNotice='Escreva um título ou algum texto antes de salvar.';
-   if(saveOnly)render();
+   if(saveOnly){
+    composeError='Escreva um título ou algum texto antes de salvar.';
+    render();
+    document.querySelector<HTMLInputElement>('#draft-title')?.focus({preventScroll:true});
+   }
    return;
   }
+  composeError='';
   draftForm={title,body};
   let d=drafts.find(x=>x.id===currentDraftId);
   let confirmationsReset=false;
