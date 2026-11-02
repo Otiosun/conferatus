@@ -342,3 +342,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [x] Teste novo de alturas curtas/paisagem, **63/63** rotas × dimensões + **9/9** fluxos completos de busca → menu → redação com redução artificial da altura útil. Campos continuaram alcançáveis por rolagem, foco preservado e rascunho salvo. Não confundir simulação de teclado com teclado real.
 - [x] `npm run build` 18/18 Node; zoom simulado 70/70, reflow 63/63, emblema 9×2, inventário 2.880 controles e lote expandido 135/135 passaram. Teste de microtipografia impresso PASS mas com execução conjunta expirada: não computado como suíte terminada.
 - [ ] **07.05 e 07.06 permanecem ABERTAS**: zoom nativo, teclado OS, rotação física, safe-area real, motores/dispositivos externos. Referência `docs/CHECKPOINT_V046_2026-11-02.md`. **07=4/12**, D1–D6 e etapas de produção inalteradas.
+
+## Etapa 07.07 — tablets, verificação da prévia offline, V047 (02/11/2026)
+
+- [x] Matriz reproduzível de **8 dimensões tablet (600–1024 CSS px)** × **8 rotas/estados** = **64/64 verificações Chromium**, sem rolagem horizontal nem colisões entre título do rodapé, Menu e símbolo oficial Academy. Capturas reais do navegador para 600, 768 e 1024px foram revisadas; coluna central limitada conscientemente a 740px, sem redesenho não aprovado.
+- [x] **11 sequências funcionais:** oito navegações de menu → membros → busca → limpar → visão geral → aba de proposições, e três rotações **simuladas** por mudança de viewport, com navegação mensal e preservação do texto de rascunho. Nenhum erro JavaScript observado.
+- [x] Regressões após a criação do teste: `npm run build` 18/18 Node, reflow 63/63, emblema Academy 9×2, zoom/reflow sintético 70/70, inventário 2.847 controles e conteúdo extremo 108/108. Nenhum CSS, TypeScript ou asset alterado neste lote. Evidência: `tests/browser_stage7_tablet_v0137.py` e `docs/CHECKPOINT_V047_2026-11-02.md`.
+- [x] **07.07 concluída para o escopo da prévia Chromium offline**, sem alegar uso de hardware real; validação de tablet físico, Firefox/WebKit, rotação de sistema e aprovação visual continuam em 07.12/07.11. **07.05/07.06 permanecem abertas.**
+
+**Contagem atualizada:** 01=4/5, 02=0/4, 03=1/5, 04=17/22, 05=0/4, 06=0/5, **07=5/12**. Próximo item independente: 07.08 (desktop largo). `main`, produção, D1–D6, autenticação, dados, votos oficiais e Socii permanecem intactos.

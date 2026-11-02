@@ -87,3 +87,11 @@ O teste novo `tests/browser_stage7_zoom_reflow_v0135.py`, em cópia **inalterada
 Safe-area: bug de cascata reproduzido em footer grid da V045 (`padding:0` anulava o inset inferior). CSS mínimo restaura padding por `env()` e move o emblema oficial para cima da borda reservada. Ensaio isolado de inset sintético **12/12** em 280/320/390/540px. Outro ensaio passou em **63/63** estados de sete rotas × nove combinações curtas/retrato/paisagem, além de **9/9** jornadas de busca e formulário com encolhimento artificial da altura do navegador. Regressões Node 18/18, zoom sintético 70/70, reflow 63/63, Academy 9×2, inventário 2.880 controles e lote expandido 135/135. Sem alteração de lógica ou arte.
 
 **07.06 [ ] aberta**, ainda depende de teclado virtual e rotação de dispositivo real, safe-area OS, hardware/other browsers. **07.05 [ ] também aberta** por zoom nativo. Não afirmar equivalência entre scroll em viewport simulada e reposicionamento automático sob teclado real. Evidência `docs/CHECKPOINT_V046_2026-11-02.md`. Etapa 07 = **4/12**.
+
+## 07.07 — encerramento da matriz tablet na prévia Chromium offline, V047 (02/11/2026)
+
+Novo teste de regressão `tests/browser_stage7_tablet_v0137.py`: **8 tamanhos de 600–1024px × 8 telas = 64/64 layouts**, mais **11 sequências funcionais**, incluindo 3 rotações simuladas com navegação do calendário e rascunho preservado. O símbolo oficial da Academy, rodapé/Menu, abas, diretório, editor e calendário permaneceram funcionais e sem overflow/colisões. A coluna central, intencionalmente limitada a 740px, foi preservada em vez de inventar um segundo design sem aceite Megalos.
+
+Nenhuma alteração de CSS/JS/arte; apenas teste automatizado e documentação. `npm run build` 18/18 Node, reflow 63/63, teste Academy 9×2, zoom sintético 70/70, inventário 2.847 alvos e estresse de texto 108/108 aprovados. Evidência: `docs/CHECKPOINT_V047_2026-11-02.md` e capturas em 600/768/1024px.
+
+**07.07 [x] no escopo de Chromium offline; Etapa 07 = 5/12.** Não equivale a tablet real nem aceite D1–D6; hardware, navegador WebKit/Firefox, rotação física e acessibilidade global continuam pendentes nas suas respectivas etapas. **07.05/07.06 seguem abertas**; próximo gate independente 07.08 — desktop largo.
