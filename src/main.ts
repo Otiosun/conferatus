@@ -3,7 +3,8 @@ import { FixtureMemberProvider } from './domain/providers.js';
 import { UnconnectedAcademyIdentityProvider } from './domain/academy-identity.js';
 import { resolveMemberReference } from './domain/member-reference.js';
 import { exportWorkflowArchive, parseWorkflowArchive, WORKFLOW_ARCHIVE_MAX_BYTES } from './domain/workflow-archive.js';
-import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight } from './domain/rules.js';
+import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight, PREVIEW_BINARY_OPTIONS, PREVIEW_LIST_OPTIONS, validatePreviewVote } from './domain/rules.js';
+import type { PreviewVote } from './domain/rules.js';
 import type { Activity, Member, DeliberationMethod } from './domain/types.js';
 
 type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance' | 'calendar' | 'proposals' | 'compose' | 'review';
@@ -50,6 +51,7 @@ function resetDemoState() {
     if (original) { member.name=original.name; member.acdmId=original.acdmId; member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory;member.cumulativeVoteWeight=original.cumulativeVoteWeight; }
   }
   demoVoteId=null; demoExpanded=false; editingMemberId=null; editError=''; lastChange=null;
+  previewMode='binaria';previewVoteError='';previewVoteReceipt=null;previewVoteMemberId='';
   rolePreview='diretor'; demoToolsOpen=false; expandedSection=''; expandedActivity='';
   profileTab='votos'; overviewTab='votos'; overviewExpanded=false; searchExpanded=false; directoryExpanded=false; filter='';
   try { sessionStorage.removeItem(demoMembersKey); sessionStorage.removeItem('conferatus:demo-vote'); } catch {}
@@ -68,6 +70,11 @@ try {
 } catch { /* Ignore damaged or blocked session data. */ }
 let demoVoteId: string | null = null;
 let demoExpanded = false;
+// All six new ballot modes run in memory only, behind ?demo=1.
+let previewMode: DeliberationMethod = 'binaria';
+let previewVoteError = '';
+let previewVoteReceipt: PreviewVote | null = null;
+let previewVoteMemberId = '';
 try {
   const saved = sessionStorage.getItem('conferatus:demo-vote');
   if (ballots[0] && canRecordVote(ballots[0]) && ballots[0].options.some(option => option.id === saved)) demoVoteId = saved;
@@ -672,6 +679,9 @@ document.addEventListener('click',(event)=>{
  const activityEl=target.closest<HTMLElement>('[data-activity]');
  const voteEl=target.closest<HTMLElement>('[data-vote]');
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
+ if(advancedPreview && actionEl?.dataset.action==='reset-preview-vote'){
+  previewVoteReceipt=null;previewVoteError='';render();document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
+ }
  if(actionEl?.dataset.action==='undo'&&lastChange){
   const member=members.find(m=>m.id===lastChange?.memberId);
   if(member){member.acdmId=lastChange.acdmId;member.sectionIds=[...lastChange.sectionIds];member.role=lastChange.role;member.hadDeliberativeHistory=lastChange.hadDeliberativeHistory;member.cumulativeVoteWeight=lastChange.cumulativeVoteWeight;saveDemoMembers();}
@@ -684,7 +694,8 @@ document.addEventListener('click',(event)=>{
  }
  if(advancedPreview && actionEl?.dataset.action==='toggle-tools'){demoToolsOpen=!demoToolsOpen;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();return;}
  if(advancedPreview && actionEl?.dataset.action==='reset-admin'){
-  for(const member of members){const original=initialMembers.get(member.id);if(original){member.name=original.name;member.acdmId=original.acdmId;member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory;}}
+  for(const member of members){const original=initialMembers.get(member.id);if(original){member.name=original.name;member.acdmId=original.acdmId;member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory;member.cumulativeVoteWeight=original.cumulativeVoteWeight;}}
+  previewVoteReceipt=null;previewVoteMemberId='';
   editingMemberId=null;lastChange=null;notice='Alterações restauradas.';rolePreview='diretor';demoToolsOpen=false;try{sessionStorage.removeItem(demoMembersKey);}catch{}
   render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus({preventScroll:true});
   return;
@@ -987,6 +998,24 @@ document.addEventListener('submit',(event)=>{
 });
 document.addEventListener('submit',(event)=>{
  const form=event.target;
+ if(!(form instanceof HTMLFormElement)||form.id!=='preview-vote-form'||!advancedPreview)return;
+ event.preventDefault();
+ const data=new FormData(form);
+ let payload:unknown;
+ if(previewMode==='binaria'||previewMode==='nominal')payload={selected:data.get('selected')};
+ else if(previewMode==='ordenada')payload={ranking:PREVIEW_LIST_OPTIONS.map((_,index)=>data.get('rank-'+String(index)))};
+ else if(previewMode==='aprovacao')payload={approved:data.getAll('approved')};
+ else if(previewMode==='escalar')payload={scores:Object.fromEntries(PREVIEW_LIST_OPTIONS.map(option=>[option.id,Number(data.get('score-'+option.id))]))};
+ else payload={allocation:Object.fromEntries(PREVIEW_LIST_OPTIONS.map(option=>[option.id,Number(data.get('alloc-'+option.id))]))};
+ const selectedMember=members.find(member=>member.id===previewVoteMemberId&&isDeliberativeMember(member,sections));
+ const result=validatePreviewVote(previewMode,payload,selectedMember?.cumulativeVoteWeight);
+ if(!result.ok){previewVoteError=result.error;render();document.querySelector<HTMLElement>('#preview-vote-error')?.focus({preventScroll:true});return;}
+ previewVoteError='';previewVoteReceipt=result.vote;render();
+ const receipt=document.querySelector<HTMLElement>('.preview-vote-receipt');
+ if(receipt){receipt.tabIndex=-1;receipt.focus({preventScroll:true});}
+});
+document.addEventListener('submit',(event)=>{
+ const form=event.target;
  if(!(form instanceof HTMLFormElement)||form.getAttribute('id')!=='edit-member-form') return;
  event.preventDefault();
  const data=new FormData(form), member=members.find(m=>m.id===data.get('memberId'));
@@ -1056,6 +1085,16 @@ document.addEventListener('input',(event)=>{
 });
 document.addEventListener('change',(event)=>{
  const target=event.target;
+ if(advancedPreview && target instanceof HTMLSelectElement && target.id==='preview-vote-method'){
+  if(isDeliberationMethod(target.value)){
+   previewMode=target.value;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
+   document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});
+  }return;
+ }
+ if(advancedPreview && target instanceof HTMLSelectElement && target.id==='preview-vote-member'){
+  previewVoteMemberId=target.value;previewVoteReceipt=null;previewVoteError='';render();
+  document.querySelector<HTMLSelectElement>('#preview-vote-member')?.focus({preventScroll:true});return;
+ }
  if(target instanceof HTMLSelectElement && target.name==='proposalId' && target.closest('#schedule-deliberation-form') && target.getAttribute('aria-invalid')==='true'){
   if(drafts.some(d=>d.id===target.value && d.status==='concluida')){
    target.removeAttribute('aria-invalid');target.removeAttribute('aria-describedby');
