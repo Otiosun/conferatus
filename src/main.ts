@@ -152,6 +152,87 @@ function memberHeader(m:Member, tab:Tab, displayTabs=true) {
    ${metricRow(m)}</div><div class="profile-identity"><div>${identity} <small>${m.role==='diretor'?'Diretoria':isDeliberativeMember(m, sections)?'Membro deliberativo':'Membro da Academy'}</small></div>
    <p>${escapeHTML(m.subtitle)}</p>${routeFromHash()==='profile' && m.acdmId?`<p class="profile-reference"><a class="profile-reference-link" href="#/profile/acdm/${encodeURIComponent(m.acdmId)}" aria-label="Abrir link de referência demonstrativa ACDM ID ${escapeHTML(m.acdmId)}">ACDM ID: ${escapeHTML(m.acdmId)}</a><span> · prévia local</span></p>`:''}</div>${displayTabs?tabBar(tab, hasPersonalVoteHistory(m, sections)):''}</div>`;
 }
+
+function previewVoteChoices() {
+ return previewMode==='binaria'?PREVIEW_BINARY_OPTIONS:PREVIEW_LIST_OPTIONS;
+}
+function previewVoteFieldset():string {
+ const options=previewVoteChoices();
+ if(previewMode==='binaria'||previewMode==='nominal') {
+  return '<fieldset class="preview-vote-fieldset"><legend>Escolha uma alternativa</legend>'+
+   options.map(option=>'<label class="preview-vote-choice"><input type="radio" name="selected" value="'+option.id+'"> '+escapeHTML(option.label)+'</label>').join('')+'</fieldset>';
+ }
+ if(previewMode==='ordenada') {
+  return '<fieldset class="preview-vote-fieldset"><legend>Organize as alternativas por preferência</legend>'+
+   options.map((_,position)=>'<label>'+String(position+1)+'º lugar'+
+    '<select name="rank-'+String(position)+'" required><option value="">Selecione</option>'+
+    options.map(option=>'<option value="'+option.id+'">'+escapeHTML(option.label)+'</option>').join('')+
+    '</select></label>').join('')+'</fieldset>';
+ }
+ if(previewMode==='aprovacao') {
+  return '<fieldset class="preview-vote-fieldset"><legend>Marque as alternativas aceitáveis</legend>'+
+   options.map(option=>'<label class="preview-vote-choice"><input type="checkbox" name="approved" value="'+option.id+'"> '+escapeHTML(option.label)+'</label>').join('')+'</fieldset>';
+ }
+ if(previewMode==='escalar') {
+  return '<fieldset class="preview-vote-fieldset"><legend>De 1 a 10 para cada alternativa</legend>'+
+   options.map(option=>'<label>'+escapeHTML(option.label)+
+    '<select name="score-'+option.id+'" required><option value="">Selecione uma nota</option>'+
+    Array.from({length:10},(_,index)=>'<option value="'+String(index+1)+'">'+String(index+1)+'</option>').join('')+
+    '</select></label>').join('')+'</fieldset>';
+ }
+ const qualified=members.filter(member=>isDeliberativeMember(member,sections)&&
+  isPositiveCumulativeVoteWeight(member.cumulativeVoteWeight));
+ const selected=qualified.find(member=>member.id===previewVoteMemberId);
+ const weight=selected?.cumulativeVoteWeight;
+ const intro='<label for="preview-vote-member">Membro fictício com cota configurada</label>'+
+  '<select id="preview-vote-member" name="voteMemberId"><option value="">Selecione um membro</option>'+
+  qualified.map(member=>'<option value="'+member.id+'"'+(member.id===previewVoteMemberId?' selected':'')+'>'+
+   escapeHTML(member.name)+' — '+String(member.cumulativeVoteWeight)+' votos</option>').join('')+'</select>';
+ if(!qualified.length) {
+  return '<div class="preview-vote-fieldset">'+intro+
+   '<p role="status">Nenhum membro deliberativo fictício tem proporção cumulativa definida. Configure-a em Gerenciamento Deliberativo.</p>'+
+   '<button type="button" class="preview-vote-secondary" data-route="governance">Configurar cotas dos membros</button></div>';
+ }
+ if(!weight) return '<div class="preview-vote-fieldset">'+intro+
+  '<p>Escolha um membro para distribuir sua cota de votos fictícia.</p></div>';
+ return '<div class="preview-vote-fieldset">'+intro+
+  '<fieldset><legend>Distribua até '+String(weight)+' votos entre as alternativas</legend>'+
+  options.map(option=>'<label>'+escapeHTML(option.label)+
+   '<input type="number" min="0" max="'+String(weight)+'" step="1" inputmode="numeric" name="alloc-'+option.id+'" value="0" required></label>').join('')+
+  '</fieldset><p>Uso parcial da cota permitido somente nesta simulação. A regra institucional permanece indefinida.</p></div>';
+}
+function previewVoteReceiptText(vote:PreviewVote):string {
+ const label=(id:string)=>escapeHTML(previewVoteChoices().find(option=>option.id===id)?.label??id);
+ if(vote.method==='binaria'||vote.method==='nominal')return 'Escolha: '+label(vote.selected);
+ if(vote.method==='ordenada')return vote.ranking.map((id,index)=>String(index+1)+'º '+label(id)).join(' · ');
+ if(vote.method==='aprovacao')return 'Aceitas: '+vote.approved.map(label).join(', ');
+ if(vote.method==='escalar')return PREVIEW_LIST_OPTIONS.map(option=>label(option.id)+': '+String(vote.scores[option.id])+'/10').join(' · ');
+ const used=Object.values(vote.allocation).reduce((sum,count)=>sum+count,0);
+ return PREVIEW_LIST_OPTIONS.map(option=>label(option.id)+': '+String(vote.allocation[option.id])).join(' · ')+
+  ' (distribuídos '+String(used)+' de '+String(vote.weight)+')';
+}
+function previewVoteLab():string {
+ const method=DELIBERATION_METHODS.find(entry=>entry.id===previewMode);
+ const receipt=previewVoteReceipt?.method===previewMode?previewVoteReceipt:null;
+ return '<section class="preview-vote-lab" aria-labelledby="preview-vote-title">'+
+  '<h2 id="preview-vote-title">Laboratório das seis modalidades</h2>'+
+  '<p class="preview-vote-disclaimer">Apenas em ?demo=1. Alternativas fictícias, sem voto oficial, apuração institucional, login ou envio de informações.</p>'+
+  '<label for="preview-vote-method">Modalidade de deliberação</label>'+
+  '<select id="preview-vote-method">'+DELIBERATION_METHODS.map(mode=>
+   '<option value="'+mode.id+'"'+(mode.id===previewMode?' selected':'')+'>'+escapeHTML(mode.label)+'</option>').join('')+'</select>'+
+  '<p class="preview-vote-detail">'+escapeHTML(method?.detail??'')+'</p>'+
+  (receipt?'<div class="preview-vote-receipt" role="status"><strong>Voto simulado conferido nesta aba</strong>'+
+   '<p>'+previewVoteReceiptText(receipt)+'</p>'+
+   '<button type="button" class="preview-vote-secondary" data-action="reset-preview-vote">Alterar simulação</button></div>':
+   '<form id="preview-vote-form" novalidate>'+previewVoteFieldset()+
+   (previewVoteError?'<p class="preview-vote-error" role="alert" id="preview-vote-error" tabindex="-1">'+escapeHTML(previewVoteError)+'</p>':'')+
+   '<button type="submit" class="preview-vote-submit"'+
+    (previewMode==='cumulativa' && !members.some(m=>isDeliberativeMember(m,sections)&&
+     isPositiveCumulativeVoteWeight(m.cumulativeVoteWeight))?' disabled':'')+
+   '>Conferir voto fictício</button></form>')+
+  '</section>';
+}
+
 function ballotPage() {
  const ballot=ballots[0]; if(!ballot) return '<p>Nenhuma votação disponível.</p>';
  const demoOptions = ballot.options.map(o => ({...o, votes:o.votes + (canRecordVote(ballot) && demoVoteId===o.id?1:0)}));
@@ -162,7 +243,7 @@ function ballotPage() {
  <p class="ballot-description">${escapeHTML(ballot.description)}</p>${demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Votação aberta. Selecione uma opção.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
  ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
  <p class="vote-feedback" role="status">${demoVoteId?'Escolha registrada.':'Selecione uma das opções.'}</p>
- ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}</section>`;
+ ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}</section>${advancedPreview?previewVoteLab():''}`;
 }
 function matchingMembers() {
  const candidates = searchExpanded && filter.trim() ? members : members.slice(1);
