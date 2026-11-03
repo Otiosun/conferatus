@@ -213,6 +213,7 @@ function previewVoteReceiptText(vote:PreviewVote):string {
  if(vote.method==='ordenada')return vote.ranking.map((id,index)=>String(index+1)+'º '+label(id)).join(' · ');
  if(vote.method==='aprovacao')return 'Aceitas: '+vote.approved.map(label).join(', ');
  if(vote.method==='escalar')return previewVoteChoices().map(option=>label(option.id)+': '+String(vote.scores[option.id])+'/10').join(' · ');
+ if(vote.method!=='cumulativa')return '';
  const used=Object.values(vote.allocation).reduce((sum,count)=>sum+count,0);
  return previewVoteChoices().map(option=>label(option.id)+': '+String(vote.allocation[option.id])).join(' · ')+
   ' (distribuídos '+String(used)+' de '+String(vote.weight)+')';
@@ -622,7 +623,7 @@ function calendarSociiLine(proposalId:string){
  return names.length?`<span class="calendar-socii">Socii: ${names.map(escapeHTML).join(', ')}</span>`:'';
 }
 function calendarPage(){
- const sample=[{id:'sample-1',title:'Revisão do calendário de reuniões',sectionId:'integridade',objective:'Organizar o calendário de reuniões institucionais.',start:'2026-11-22T14:00',end:'2026-11-23T14:00',type:'PDR',proposalId:'',status:'programada' as const}];
+ const sample:Deliberation[]=[{id:'sample-1',title:'Revisão do calendário de reuniões',sectionId:'integridade',objective:'Organizar o calendário de reuniões institucionais.',start:'2026-11-22T14:00',end:'2026-11-23T14:00',type:'PDR',proposalId:'',status:'programada' as const}];
  const all=[...sample,...schedule.filter(s=>s.status==='programada')]
   .sort((a,b)=>a.start.localeCompare(b.start));
  const visible=selectedCalendarDay?all.filter(item=>item.start.slice(0,10)<=selectedCalendarDay&&item.end.slice(0,10)>=selectedCalendarDay):all;
