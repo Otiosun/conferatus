@@ -53,6 +53,7 @@ with sync_playwright() as p:
         assert page.locator('.result-row--chosen').count()==0, (width,'sample altered legacy voting results')
         page.locator('.footer-nav').click()
         page.locator('.menu-item[data-route=calendar]').click()
+        page.locator('.calendar-list').wait_for(state='visible')
         item=page.locator('.calendar-item').filter(has_text='Programação ligada à proposição')
         if not item.locator('[data-open-schedule-proposal]').is_visible(): item.locator('[data-schedule]').click()
         item.locator('[data-open-schedule-proposal]').click()

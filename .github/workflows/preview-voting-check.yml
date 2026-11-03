@@ -27,8 +27,16 @@ jobs:
           sudo ln -sf "$BROWSER" /usr/bin/chromium
       - name: Browser smoke and six-mode voting
         run: |
-          python tests/browser_smoke.py
-          python tests/browser_calendar_return_v0120.py
-          python tests/browser_stage7_advanced_controls_v0132.py
-          python tests/browser_restored_links_integrity_v0157.py
-          python tests/browser_local_archive_v0158.py
+          sudo mkdir -p /mnt/data
+          sudo chmod 777 /mnt/data
+          failed=0
+          for script in \
+            tests/browser_smoke.py \
+            tests/browser_calendar_return_v0120.py \
+            tests/browser_stage7_advanced_controls_v0132.py \
+            tests/browser_restored_links_integrity_v0157.py \
+            tests/browser_local_archive_v0158.py; do
+            echo "Checking $script"
+            python "$script" || failed=1
+          done
+          exit "$failed"
