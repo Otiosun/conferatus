@@ -68,3 +68,9 @@ Quando o navegador não consegue salvar um cancelamento, ele permanece aplicado 
 ### Gravação de alterações na prévia
 
 As proposições, confirmações de autoria e Socii e programações usam exclusivamente `sessionStorage` do navegador. Se a gravação falhar, o projeto não considera o registro persistido: avisa que a mudança está apenas na aba e oferece **Tentar salvar alterações nesta sessão**. O cancelamento de programação mantém sua mensagem e recuperação próprias. **Não recarregue antes de salvar novamente** se quiser preservar um registro temporário que falhou; este mecanismo não é backup, sincronização, autenticação ou histórico institucional.
+
+## Cópia local dos fluxos de demonstração (v0.10.58)
+
+Na tela **Proposições e Socii**, abra a prévia com `?demo=1` para usar **Baixar cópia JSON** e **Restaurar cópia JSON**. O arquivo contém exclusivamente proposições, participantes Socii sintéticos e programações desta aba; não contém login, votos, tokens ou permissões da Academy. O arquivo **pode conter textos que você escreveu** e não é criptografado — não o compartilhe inadvertidamente.
+
+A restauração exige confirmação e **substitui**, não mescla, os fluxos locais atuais. Antes de restaurar, exporte uma cópia do estado atual. Arquivos incompatíveis, duplicados ou com registros inválidos são recusados sem mudar o estado. Se a gravação da sessão falhar, os registros anteriores permanecem na aba. Não há servidor, sincronização entre contas nem recuperação automática de arquivos perdidos.

@@ -2,6 +2,7 @@ import { activities, ballots } from './data/fixtures.js';
 import { FixtureMemberProvider } from './domain/providers.js';
 import { UnconnectedAcademyIdentityProvider } from './domain/academy-identity.js';
 import { resolveMemberReference } from './domain/member-reference.js';
+import { exportWorkflowArchive, parseWorkflowArchive, WORKFLOW_ARCHIVE_MAX_BYTES } from './domain/workflow-archive.js';
 import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory } from './domain/rules.js';
 import type { Activity, Member } from './domain/types.js';
 
@@ -302,6 +303,17 @@ function isSavedDraft(value:unknown):value is Draft{
   // A legacy or damaged record must not claim completion without every signoff.
   !(d.status==='concluida'&&(!d.authorComplete||(d.partners as {complete:boolean}[]).some(p=>!p.complete)));
 }
+// Export/import only the documented synthetic fields, even if a legacy local
+// storage object contains unrelated properties. Never include tokens, votes or
+// administrative simulation state in a downloaded workflow file.
+function cleanDraftRecord(d:Draft):Draft{
+ return {id:d.id,title:d.title,body:d.body,sectionId:d.sectionId,type:d.type,
+  authorComplete:d.authorComplete,partners:d.partners.map(p=>({id:p.id,complete:p.complete})),status:d.status};
+}
+function cleanScheduleRecord(s:Deliberation):Deliberation{
+ return {id:s.id,title:s.title,objective:s.objective,proposalId:s.proposalId,
+  sectionId:s.sectionId,start:s.start,end:s.end,type:s.type,status:s.status};
+}
 function isSavedSchedule(value:unknown):value is Deliberation{
  if(!value||typeof value!=='object'||Array.isArray(value))return false;
  const item=value as Record<string,unknown>;
@@ -331,10 +343,10 @@ const drafts:Draft[]=restoredDrafts.accepted;
 // An active local schedule cannot point at a draft that still needs approval,
 // or at a section unavailable in the same demo. Keep cancelled history intact.
 // An unavailable older proposal is retained and shown explicitly as missing.
-function isRestorableSchedule(value:unknown):value is Deliberation{
+function isRestorableSchedule(value:unknown, candidateDrafts:readonly Draft[]=drafts):value is Deliberation{
  return isSavedSchedule(value)&&(value.status==='cancelada'||
   (knownDeliberativeSection(value.sectionId)&&
-   !drafts.some(d=>d.id===value.proposalId&&d.status!=='concluida')));
+   !candidateDrafts.some(d=>d.id===value.proposalId&&d.status!=='concluida')));
 }
 const restoredSchedule=uniqueSavedRecords(savedSchedule,isRestorableSchedule);
 const schedule:Deliberation[]=restoredSchedule.accepted;
@@ -370,6 +382,8 @@ let scheduleFormOpen=false;
 let expandedSchedule='sample-1';
 let cancelledHistoryOpen=false;
 let inviteOpen=false;
+let archiveMessage='';
+let archiveIsError=false;
 // The calendar is a view over the local demo schedule, never a separate data store.
 const today=new Date();
 let calendarYear=today.getFullYear();
@@ -449,6 +463,7 @@ function proposalsPage(){
  return `${header(undefined,undefined,false)}<div class="workflow-profile">${author?memberHeader(author,'proposicoes',false):''}<div class="tabs workflow-tabs" role="group" aria-label="Histórico do membro"><button class="tab" type="button" data-route="profile" aria-label="Consultar histórico de votação">Histórico de votações</button><span class="tab" aria-current="page">Proposições e Socii</span></div></div>
   <div class="workflow-layout workflow-proposals-layout">${savedRecordNotice()}${drafts.length?'<h2 class="workflow-record-heading">Proposições desta sessão</h2>':''}${drafts.length?drafts.map(d=>`<article class="workflow-record"><button data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${linkedScheduleButtons(d)}${d.partners.length?`<p class="workflow-partners"><strong>Concluíram ${Number(d.authorComplete)+d.partners.filter(p=>p.complete).length} de ${d.partners.length+1}</strong><span>Autoria: ${d.authorComplete?'concluída':'pendente'} · Socii: ${d.partners.map(p=>`${escapeHTML(members.find(m=>m.id===p.id)?.name??'Membro')} (${p.complete?'concluiu':'pendente'})`).join(', ')}</span></p>`:''}${advancedPreview&&d.partners.some(p=>!p.complete)?d.partners.filter(p=>!p.complete).map(p=>`<button class="workflow-demo-confirm" data-confirm-partner="${escapeHTML(d.id)}:${escapeHTML(p.id)}">Simular conclusão de ${escapeHTML(members.find(m=>m.id===p.id)?.name??'participante')}</button>`).join(''):''}</article>`).join(''):''}
  ${examples.length?'<h2 class="workflow-record-heading">Histórico demonstrativo</h2>':''}${examples.map(activityItem).join('')}
+ ${advancedPreview?`<section class="local-archive" aria-label="Cópia de segurança dos registros da prévia"><h2>Cópia local da prévia</h2><p>Exporta apenas proposições, Socii e programações desta aba. O arquivo pode conter o texto que você escreveu. Não inclui login, votos, permissões ou dados da Academy.</p><div class="local-archive-actions"><button type="button" data-action="export-local-archive">Baixar cópia JSON</button><button type="button" data-action="import-local-archive">Restaurar cópia JSON</button><input id="archive-file-input" type="file" accept=".json,application/json" hidden></div>${archiveMessage?`<p class="local-archive-message" role="${archiveIsError?'alert':'status'}">${escapeHTML(archiveMessage)}</p>`:''}</section>`:''}
  </div><div class="workflow-actions"><button type="button" class="workflow-outline" data-action="invite-socii" aria-expanded="${inviteOpen}" ${inviteOpen?'aria-controls="invite-socii-form"':''}>Convidar para Socii</button>${inviteOpen?`<form id="invite-socii-form" class="workflow-inline" aria-label="Adicionar participante Socii (prévia local)"><label>Proposição<select name="draftId" required>${drafts.filter(d=>d.status!=='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label><label>Participante<select name="memberId" required><option value="" selected disabled>Selecione uma pessoa</option>${selectOptions('',members.slice(1))}</select></label><button class="workflow-primary" ${!drafts.some(d=>d.status!=='concluida')?'disabled':''}>Adicionar participante</button></form>`:''}
  <button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>
  ${workflowNotice?`<p class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}`;
@@ -697,6 +712,25 @@ document.addEventListener('click',(event)=>{
    const saved=saveWorkflows();
    workflowNotice=saved?(d.status==='concluida'?'Todas as partes concluíram. Proposição concluída.':'Participação registrada nesta simulação.'):'Conclusão aplicada somente nesta aba: não foi possível salvar.';
    render();}return;}}
+ if(advancedPreview && actionEl?.dataset.action==='export-local-archive'){
+  try{
+   const data=exportWorkflowArchive(drafts.map(cleanDraftRecord),schedule.map(cleanScheduleRecord));
+   if(new TextEncoder().encode(data).length>WORKFLOW_ARCHIVE_MAX_BYTES)throw new Error('Archive too large');
+   const blob=new Blob([data],{type:'application/json;charset=utf-8'});
+   const url=URL.createObjectURL(blob);
+   const anchor=document.createElement('a');anchor.href=url;
+   anchor.download=`conffratus-previa-${new Date().toISOString().slice(0,10)}.json`;
+   document.body.append(anchor);anchor.click();anchor.remove();
+   // Revoke on the next user turn, not synchronously during the click.
+   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   archiveMessage='Cópia gerada neste dispositivo. Guarde o arquivo em local seguro.';
+   archiveIsError=false;
+  }catch{archiveMessage='Não foi possível gerar a cópia nesta sessão.';archiveIsError=true;}
+  render();return;
+ }
+ if(advancedPreview && actionEl?.dataset.action==='import-local-archive'){
+  document.querySelector<HTMLInputElement>('#archive-file-input')?.click();return;
+ }
  if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
  if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;if(!cancellationSaveFailed)workflowNotice='';render();return;}
@@ -804,6 +838,46 @@ function showScheduleFormError(form: HTMLFormElement,message:string,fieldName:st
   field.focus({preventScroll:true});
  }
 }
+// Restoring a downloaded archive is explicit, validated and all-or-nothing
+// for the two session workflow keys. It does not import demo votes or members.
+document.addEventListener('change',async event=>{
+ const field=event.target;
+ if(!advancedPreview || !(field instanceof HTMLInputElement) || field.id!=='archive-file-input')return;
+ const file=field.files?.[0];if(!file)return;
+ const report=(text:string,error=true)=>{
+  archiveMessage=text;archiveIsError=error;render();
+  document.querySelector<HTMLButtonElement>('[data-action="import-local-archive"]')?.focus({preventScroll:true});
+ };
+ if(file.size>WORKFLOW_ARCHIVE_MAX_BYTES){report('O arquivo excede o limite de 2 MB.');return;}
+ let text:string;
+ try{text=await file.text();}catch{report('Não foi possível ler o arquivo selecionado.');return;}
+ const parsed=parseWorkflowArchive(text);
+ if(!parsed.ok){report(parsed.error);return;}
+ const items=uniqueSavedRecords(parsed.archive.drafts,isSavedDraft);
+ const validatedDrafts=items.accepted.map(cleanDraftRecord);
+ const appointments=uniqueSavedRecords(parsed.archive.schedule,(value):value is Deliberation=>isRestorableSchedule(value,validatedDrafts));
+ if(items.rejected.length||appointments.rejected.length){
+  report('A cópia contém registros inválidos ou IDs repetidos. Nada foi substituído.');return;
+ }
+ if(workflowSaveFailed||cancellationSaveFailed){
+  report('Há alterações ainda não salvas nesta aba. Salve-as antes de restaurar outra cópia.');return;
+ }
+ if(!window.confirm(`Restaurar ${items.accepted.length} proposição(ões) e ${appointments.accepted.length} programação(ões)? Isso substituirá os registros locais atuais. Guarde uma cópia deles antes de continuar.`))return;
+ const previousDrafts=[...drafts],previousSchedule=[...schedule];
+ drafts.splice(0,drafts.length,...validatedDrafts);
+ schedule.splice(0,schedule.length,...appointments.accepted.map(cleanScheduleRecord));
+ if(!saveWorkflows()){
+  drafts.splice(0,drafts.length,...previousDrafts);
+  schedule.splice(0,schedule.length,...previousSchedule);
+  workflowSaveFailed=false;
+  report('Não foi possível salvar a cópia restaurada. Os registros anteriores permanecem nesta aba.');
+  return;
+ }
+ currentDraftId='';draftForm=blankDraft();inviteOpen=false;expandedSchedule='';
+ archiveMessage=`Cópia restaurada nesta sessão: ${drafts.length} proposição(ões) e ${schedule.length} programação(ões).`;
+ archiveIsError=false;render();
+ document.querySelector<HTMLButtonElement>('[data-action="import-local-archive"]')?.focus({preventScroll:true});
+});
 document.addEventListener('submit',(event)=>{
  const form=event.target;if(!(form instanceof HTMLFormElement))return;
  const id=form.id;

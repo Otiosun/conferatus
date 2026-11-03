@@ -1046,3 +1046,12 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
   cursor: pointer;
 }
 .workflow-save-warning button:focus-visible { outline: 3px solid #303fb3; outline-offset: 2px; }
+
+/* Optional local-only workspace tools; never shown in the Megalos reference UI. */
+.local-archive {padding:16px; border-top:1px solid #dce0ed; background:#f7f8fc; color:#434968;}
+.local-archive h2 {font-size:14px;margin:0 0 6px;color:#3543a0;}
+.local-archive p {font-size:12px;line-height:1.5;margin:0 0 12px;overflow-wrap:anywhere;}
+.local-archive-actions {display:flex;flex-wrap:wrap;gap:8px;}
+.local-archive-actions button {min-height:44px;border:1px solid #6c74a3;border-radius:8px;background:white;color:#3444a0;padding:9px 12px;cursor:pointer;font:inherit;font-size:12px;}
+.local-archive-actions button:focus-visible {outline:3px solid #253ba2;outline-offset:2px;}
+.local-archive .local-archive-message {margin-top:10px;font-weight:600;color:#3543a0;}

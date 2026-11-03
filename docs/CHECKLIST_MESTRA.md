@@ -535,3 +535,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] Sem confundir consistência da sessão com autorização real, elegibilidade, assinaturas institucionais, colaboração multiusuário ou aprovação Megalos D1–D6. Etapas 03/04/05/07 permanecem pendentes nos mesmos critérios.
 
 **Contagens canônicas mantidas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. `main`/produção inalteradas; nenhuma promoção ou deploy.
+
+## Continuidade funcional — v0.10.58, backup local transportável (03/11/2026)
+
+- [x] Exportação/importação **exclusivamente para ferramentas de demonstração** (`?demo=1`) do conjunto de proposições, Socii e programações locais, sem campos de votos, credenciais ou permissões Academy. JSON versionado, limite 2 MB/500 registros e apenas campos conhecidos; nenhuma conexão ou envio externo.
+- [x] Validação integral da cópia antes da substituição: referências, assinaturas, IDs duplicados, seção, status e vínculos, com recusa sem mudança quando houver erro; confirmação explícita, rollback em memória e no armazenamento da sessão quando possível. Registros cancelados continuam somente no histórico.
+- [x] Novo teste Node do envelope, teste Chromium em cinco larguras com download/restore/rollback e regressões direcionadas de integridade, calendário, reflow, smoke e Socci. Ver `docs/CHECKPOINT_V068_2026-11-03.md`.
+- [ ] Não é backup seguro institucional, sincronização real ou solução de login. Dependências da Megalos, validação WCAG/hardware e integração Academy não foram concluídas.
+
+**Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**. `main` e produção intactas.
