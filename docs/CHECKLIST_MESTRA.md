@@ -440,3 +440,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 ainda ABERTA:** tecnologias assistivas reais, gradientes/imagens, revisão manual WCAG abrangente e outros motores/hardware. D1–D6 Megalos não aprovadas.
 
 **Contagem preservada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. Veja `docs/CHECKPOINT_V057_2026-11-02.md`. `main`/produção intactas.
+
+## Etapa 07.10 — lote 9, v0.10.48, foco após ações removidas (02/11/2026)
+
+- [x] Teste novo reproduziu foco no `body` ao confirmar Socii na prévia (280px). Exploração isolada confirmou a perda no botão Desfazer; outros formulários que se fecham não tinham retorno de foco explícito. Sem implementar convite ou programação institucional real.
+- [x] Correção mínima somente `src/main.ts`: foco retorna ao botão de convite, agendamento recém-criado, título da lista após cancelamento e edição do membro afetado após Desfazer. `tests/browser_stage7_disappearing_forms_v0148.py` **28/28 PASS** (4 trajetórias × 7 larguras). Node **18/18**. Regressões concluídas: teclado 76/76, revisão 24/24, ações 14/14, Socii 36/36, ARIA 28/28, erros 24/24, reflow 63/63, Academy 9×2. Teste agrupado de anúncios expirou e não foi contabilizado. Ver `docs/CHECKPOINT_V058_2026-11-02.md`.
+- [ ] **07.10 continua ABERTA**: leitores de tela reais, contraste imagem/gradiente, WCAG integral e outros dispositivos/motores; D1–D6 dependem de Megalos.
+
+**Contagens oficiais preservadas:** 01 4/5, 02 0/4, 03 1/5, 04 17/22, 05 0/4, 06 0/5, **07 7/12**. Sem merge, deploy ou mudança em `main`.

@@ -580,7 +580,12 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='undo'&&lastChange){
   const member=members.find(m=>m.id===lastChange?.memberId);
   if(member){member.acdmId=lastChange.acdmId;member.sectionIds=[...lastChange.sectionIds];member.role=lastChange.role;member.hadDeliberativeHistory=lastChange.hadDeliberativeHistory;saveDemoMembers();}
-  lastChange=null;notice='Alteração desfeita.';render();return;
+  const affectedId=lastChange.memberId;
+  lastChange=null;notice='Alteração desfeita.';render();
+  // Undo removes its own button: return focus to the affected member's editor.
+  ([...document.querySelectorAll<HTMLButtonElement>('[data-edit]')].find(el=>el.dataset.edit===affectedId)
+   ?? document.querySelector<HTMLButtonElement>('[data-section][aria-expanded=true]'))?.focus({preventScroll:true});
+  return;
  }
  if(advancedPreview && actionEl?.dataset.action==='toggle-tools'){demoToolsOpen=!demoToolsOpen;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();return;}
  if(advancedPreview && actionEl?.dataset.action==='reset-admin'){
@@ -639,7 +644,11 @@ document.addEventListener('click',(event)=>{
   return;
  }
  const cancelEl=target.closest<HTMLElement>('[data-cancel-schedule]');
- if(cancelEl?.dataset.cancelSchedule){const item=schedule.find(x=>x.id===cancelEl.dataset.cancelSchedule);if(item){item.status='cancelada';saveWorkflows();workflowNotice='Programação cancelada.';render();}return;}
+ if(cancelEl?.dataset.cancelSchedule){const item=schedule.find(x=>x.id===cancelEl.dataset.cancelSchedule);if(item){
+  item.status='cancelada';saveWorkflows();workflowNotice='Programação cancelada.';render();
+  const heading=document.querySelector<HTMLElement>('.calendar-list-head h2');
+  if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+ }return;}
  if (routeEl?.dataset.route) {navigate(routeEl.dataset.route as Route);return;}
  if (memberEl?.dataset.member) {currentMember=memberEl.dataset.member;profileTab='votos';navigate('profile', currentMember);return;}
  if (tabEl) {if (tabEl.dataset.overviewTab){overviewTab=tabEl.dataset.overviewTab as Tab;overviewExpanded=false;expandedActivity='';} else profileTab=tabEl.dataset.tab as Tab; if(routeFromHash()==='members'){currentMember=members[0]?.id??'m01';navigate('profile', currentMember);}else{render();}return;}
@@ -746,7 +755,11 @@ document.addEventListener('submit',(event)=>{
   if(d&&memberId&&memberId!==members[0]?.id&&!d.partners.some(p=>p.id===memberId)){
    d.partners.push({id:memberId,complete:false});if(d.authorComplete)d.status='revisao';saveWorkflows();workflowNotice='Participante incluído na simulação. Nenhum convite real foi enviado.';
   }else workflowNotice='Selecione uma pessoa que ainda não esteja no Socii.';
-  inviteOpen=false;render();return;
+  inviteOpen=false;render();
+  // The submitter disappears when the invitation form closes. Restore a
+  // meaningful keyboard destination without introducing a visual control.
+  document.querySelector<HTMLButtonElement>('[data-action=invite-socii]')?.focus({preventScroll:true});
+  return;
  }
  if(id==='schedule-deliberation-form'){
   const title=String(data.get('title')??'').trim(),objective=String(data.get('objective')??'').trim();
@@ -763,7 +776,10 @@ document.addEventListener('submit',(event)=>{
   const item:Deliberation={id:`sched-${Date.now().toString(36)}`,title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),status:'programada'};
   schedule.unshift(item);const stored=saveWorkflows();workflowNotice=stored?'Deliberação programada nesta demonstração.':'Programação mantida somente enquanto a página estiver aberta.';scheduleFormOpen=false;expandedSchedule=item.id;
   const date=new Date(`${start.slice(0,10)}T12:00:00`);calendarYear=date.getFullYear();calendarMonth=date.getMonth();selectedCalendarDay=start.slice(0,10);
-  render();return;
+  render();
+  // The saved schedule is the result of the form which has just disappeared.
+  document.querySelector<HTMLButtonElement>(`[data-schedule="${item.id}"]`)?.focus({preventScroll:true});
+  return;
  }
 });
 document.addEventListener('submit',(event)=>{
