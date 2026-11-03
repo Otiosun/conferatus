@@ -44,6 +44,7 @@ with sync_playwright() as p:
             form.locator('[name="title"]').fill(title)
             form.locator('[name="objective"]').fill('Motivação fictícia para demonstrar preservação de histórico de cancelamento.')
             form.locator('[name="proposalId"]').select_option(index=1)
+            form.locator('[name="method"]').select_option("binaria")
             form.locator('[name="start"]').fill(start)
             form.locator('[name="end"]').fill(end)
             form.locator('button[type=submit]').click()

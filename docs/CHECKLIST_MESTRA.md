@@ -705,3 +705,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 
 - [x] A CI reaproveita as capturas `.png` que os testes Playwright existentes já produzem em `dist/`, e publica um artefato separado de evidências, mesmo quando uma regressão de navegador falha. Não captura identidades reais nem solicitações Academy, e não adiciona bibliotecas.
 - [ ] As capturas mostram **apenas o produto demonstrativo**, não são comparações aprovadas com as referências Megalos. O gate 07.11 exige revisão humana contra D1–D6.
+
+## Matriz estendida de regressão — 25 jornadas (03/11/2026)
+
+- [x] Reutilizadas **13 suítes Playwright já presentes** no repositório, somadas às 12 executadas anteriormente: navegação, rascunhos, Socii, assinaturas, recuperação e duplicatas, colisão de IDs, programação/cancelamento, integridade de importação e controles de formulário. Não foi instalada nenhuma dependência.
+- [x] Ajustado um teste de cancelamento antigo para informar a modalidade binária obrigatória e corrigido um erro de indentação em um script antigo; nenhuma validação foi removida do produto.
+- [ ] O novo gate deve concluir integralmente em Chromium antes de registrar 25/25. Homologação Megalos, WCAG global e outras engines/dispositivos seguem pendentes.

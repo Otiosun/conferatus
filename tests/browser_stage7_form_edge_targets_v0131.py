@@ -70,7 +70,7 @@ with sync_playwright() as p:
   form.locator('[name="title"]').fill('Teste de evento demonstrativo')
   form.locator('[name="objective"]').fill('Conferência dos estados visuais do formulário')
   form.locator('[name="proposalId"]').select_option(index=1)
-   form.locator('[name="method"]').select_option('binaria')
+  form.locator('[name="method"]').select_option('binaria')
   form.locator('[name="start"]').fill('2026-11-24T16:00')
   form.locator('[name="end"]').fill('2026-11-24T14:00')
   form.locator('button[type="submit"]').tap()

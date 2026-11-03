@@ -83,7 +83,20 @@ jobs:
             tests/browser_review_metadata_integrity_v0119.py \
             tests/browser_workflow_save_failures_v0155.py \
             tests/browser_stage7_keyboard_focus_v0139.py \
-            tests/browser_stage7_zoom_reflow_v0135.py; do
+            tests/browser_stage7_zoom_reflow_v0135.py \
+            tests/browser_calendar_v012.py \
+            tests/browser_drafts_v011.py \
+            tests/browser_socii_progress_v014.py \
+            tests/browser_signature_integrity_v0113.py \
+            tests/browser_restore_integrity_v0114.py \
+            tests/browser_session_recovery_v0115.py \
+            tests/browser_unique_records_v0116.py \
+            tests/browser_workflow_id_collision_v0152.py \
+            tests/browser_cancelled_schedule_history_v0153.py \
+            tests/browser_cancelled_save_recovery_v0154.py \
+            tests/browser_restored_proposal_integrity_v0156.py \
+            tests/browser_navigation_v014.py \
+            tests/browser_stage7_form_edge_targets_v0131.py; do
             echo "Checking $script"
             python "$script" || failed=1
           done
