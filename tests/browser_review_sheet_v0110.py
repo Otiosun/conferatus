@@ -9,6 +9,16 @@ with sync_playwright() as p:
         page = browser.new_page(viewport={'width': width, 'height': 844})
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
+        # Ensure this success-path test has a writable local session even
+        # when Chromium treats about:blank as an opaque origin.
+        page.evaluate("""() => {
+          const records=new Map();
+          Object.defineProperty(window,'sessionStorage',{configurable:true,value:{
+            getItem:k=>records.get(k)??null,
+            setItem:(k,v)=>records.set(k,v),
+            removeItem:k=>records.delete(k)
+          }});
+        }""")
         page.set_content(html)
         page.locator('.footer-nav').click()
         page.locator('[data-route="proposals"]').first.click()

@@ -64,3 +64,7 @@ O painel `?demo=1` exibe o estado indisponível e distingue as permissões demon
 ### Recuperação de cancelamento na prévia
 
 Quando o navegador não consegue salvar um cancelamento, ele permanece aplicado **somente nesta aba**. O calendário avisa explicitamente que o registro poderá voltar ao estado anterior ao recarregar e oferece **Tentar salvar cancelamento nesta sessão**. Esta tentativa não reativa registros nem cria uma trilha de auditoria institucional; a gravação continua sendo apenas `sessionStorage` e depende das permissões e limites do navegador.
+
+### Gravação de alterações na prévia
+
+As proposições, confirmações de autoria e Socii e programações usam exclusivamente `sessionStorage` do navegador. Se a gravação falhar, o projeto não considera o registro persistido: avisa que a mudança está apenas na aba e oferece **Tentar salvar alterações nesta sessão**. O cancelamento de programação mantém sua mensagem e recuperação próprias. **Não recarregue antes de salvar novamente** se quiser preservar um registro temporário que falhou; este mecanismo não é backup, sincronização, autenticação ou histórico institucional.

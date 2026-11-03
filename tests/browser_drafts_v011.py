@@ -10,6 +10,17 @@ with sync_playwright() as p:
         page = browser.new_page(viewport={'width': width, 'height': 800})
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
+        # The legacy test needs one failed save (memory-only draft) followed
+        # by a successful save. An opaque about:blank origin cannot guarantee
+        # native sessionStorage, so use a deterministic local-only store.
+        page.evaluate("""() => {
+          const records=new Map(); let fails=1;
+          Object.defineProperty(window,'sessionStorage',{configurable:true,value:{
+            getItem:k=>records.get(k)??null,
+            setItem:(k,v)=>{if(k==='conferatus:deliberations-v010' && fails-- > 0) throw Error('Synthetic blocked save'); records.set(k,v)},
+            removeItem:k=>records.delete(k)
+          }});
+        }""")
         page.set_content(HTML)
         page.locator('.footer-nav').click()
         page.locator('.menu-item[data-route="proposals"]').click()

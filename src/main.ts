@@ -320,6 +320,11 @@ const schedule:Deliberation[]=restoredSchedule.accepted;
 // A failed cancellation is kept in this tab, but must never be presented as saved.
 const cancellationSaveWarning='Programação cancelada somente nesta aba: não foi possível salvar. Ao recarregar, a programação poderá reaparecer.';
 let cancellationSaveFailed=false;
+// Any local draft/Socii/schedule write can fail: never call a change saved
+// until both session keys are committed. The pending in-memory state is
+// recoverable with a single explicit retry, without changing record IDs.
+let workflowSaveFailed=false;
+const workflowSaveWarning='Não foi possível salvar as alterações desta sessão. Elas estão apenas nesta aba e podem desaparecer ao recarregar.';
 const unreadableRecordsBackup={drafts:draftRestore.unreadableRaw,schedule:scheduleRestore.unreadableRaw};
 const ignoredRecordsBackup={drafts:restoredDrafts.rejected,schedule:restoredSchedule.rejected};
 const ignoredSavedRecords=ignoredRecordsBackup.drafts.length>0||ignoredRecordsBackup.schedule.length>0||
@@ -400,8 +405,12 @@ function saveWorkflows():boolean{
    throw error;
   }
   cancellationSaveFailed=false;
+  workflowSaveFailed=false;
   return true;
- }catch{return false;}
+ }catch{
+  workflowSaveFailed=true;
+  return false;
+ }
 }
 function selectOptions(selected:string,items:{id:string;name:string}[]){return items.map(x=>`<option value="${escapeHTML(x.id)}" ${selected===x.id?'selected':''}>${escapeHTML(x.name)}</option>`).join('');}
 function draftReady(d:Draft){return d.authorComplete&&d.partners.every(p=>p.complete);}
@@ -509,7 +518,10 @@ function render() {
    : undefined;
  const route=routeFromHash();
  const page=route==='ballot'?ballotPage():route==='members'?memberList():route==='profile'?profilePage():route==='overview'?overviewPage():route==='calendar'?calendarPage():route==='proposals'?proposalsPage():route==='compose'?composePage():route==='review'?reviewPage():governancePage();
- root.innerHTML=`<div class="app-shell" aria-label="CONFFRATUS — dados fictícios"><a href="#main-content" class="skip-link">Ir para o conteúdo</a><main id="main-content" tabindex="-1">${page}</main>${footer()}
+ const saveWarning=workflowSaveFailed && !(cancellationSaveFailed && route==='calendar')
+  ? `<section class="workflow-save-warning" role="alert" aria-label="Gravação local pendente"><p>${workflowSaveWarning}</p><button type="button" data-action="retry-workflow-save">Tentar salvar alterações nesta sessão</button></section>`
+  : '';
+ root.innerHTML=`<div class="app-shell" aria-label="CONFFRATUS — dados fictícios"><a href="#main-content" class="skip-link">Ir para o conteúdo</a><main id="main-content" tabindex="-1">${saveWarning}${page}</main>${footer()}
 </div>`;
  // Some legacy visual layouts have no visible heading. Supply one for heading
  // navigation without changing their typography or the Megalos composition.
@@ -660,11 +672,21 @@ document.addEventListener('click',(event)=>{
  if (routeEl?.classList.contains('footer-home') && Date.now() < suppressFooterHomeClickUntil) {return;}
 
  if(advancedPreview){const partnerEl=target.closest<HTMLElement>('[data-confirm-partner]');
-  if(partnerEl?.dataset.confirmPartner){const [draftId,partnerId]=partnerEl.dataset.confirmPartner.split(':');const d=drafts.find(d=>d.id===draftId);const partner=d?.partners.find(p=>p.id===partnerId);if(d&&partner){partner.complete=true;d.status=draftReady(d)?'concluida':'revisao';saveWorkflows();workflowNotice=d.status==='concluida'?'Todas as partes concluíram. Proposição concluída.':'Participação registrada nesta simulação.';render();}return;}}
+  if(partnerEl?.dataset.confirmPartner){const [draftId,partnerId]=partnerEl.dataset.confirmPartner.split(':');const d=drafts.find(d=>d.id===draftId);const partner=d?.partners.find(p=>p.id===partnerId);if(d&&partner){partner.complete=true;d.status=draftReady(d)?'concluida':'revisao';
+   const saved=saveWorkflows();
+   workflowNotice=saved?(d.status==='concluida'?'Todas as partes concluíram. Proposição concluída.':'Participação registrada nesta simulação.'):'Conclusão aplicada somente nesta aba: não foi possível salvar.';
+   render();}return;}}
  if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
  if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;if(!cancellationSaveFailed)workflowNotice='';render();return;}
  if(actionEl?.dataset.action==='toggle-cancelled-history'){cancelledHistoryOpen=!cancelledHistoryOpen;render();return;}
+ if(actionEl?.dataset.action==='retry-workflow-save' && workflowSaveFailed){
+  const saved=saveWorkflows();
+  workflowNotice=saved?'Alterações salvas nesta sessão.':workflowSaveWarning;
+  render();
+  (saved?document.querySelector<HTMLElement>('#main-content'):document.querySelector<HTMLButtonElement>('[data-action="retry-workflow-save"]'))?.focus({preventScroll:true});
+  return;
+ }
  if(actionEl?.dataset.action==='retry-cancellation-save' && cancellationSaveFailed){
   const saved=saveWorkflows();
   workflowNotice=saved?'Cancelamento salvo nesta sessão.':cancellationSaveWarning;
@@ -813,15 +835,18 @@ document.addEventListener('submit',(event)=>{
   // A Socii signoff cannot approve a different section or type of proposal.
   if(classificationChanged)d.partners.forEach(p=>{p.complete=false;});
   d.sectionId=sectionId;d.type=proposalType;
-  d.authorComplete=true;d.status=draftReady(d)?'concluida':'revisao';saveWorkflows();
+  d.authorComplete=true;d.status=draftReady(d)?'concluida':'revisao';
+  const saved=saveWorkflows();
   workflowNotice=(classificationChanged&&d.partners.length?'A seção ou o tipo mudou; as confirmações do Socii foram reiniciadas nesta prévia. ':'')+
-   (d.status==='concluida'?'Proposição concluída.':'Sua parte foi concluída. Aguardando participantes do Socii.');
+   (saved?(d.status==='concluida'?'Proposição concluída.':'Sua parte foi concluída. Aguardando participantes do Socii.'):'Conclusão aplicada somente nesta aba: não foi possível salvar.');
   navigate('proposals');return;
  }
  if(id==='invite-socii-form'){
   const d=drafts.find(x=>x.id===String(data.get('draftId')??'')),memberId=String(data.get('memberId')??'');
   if(d&&memberId&&memberId!==members[0]?.id&&!d.partners.some(p=>p.id===memberId)){
-   d.partners.push({id:memberId,complete:false});if(d.authorComplete)d.status='revisao';saveWorkflows();workflowNotice='Participante incluído na simulação. Nenhum convite real foi enviado.';
+   d.partners.push({id:memberId,complete:false});if(d.authorComplete)d.status='revisao';
+   const saved=saveWorkflows();
+   workflowNotice=saved?'Participante incluído na simulação. Nenhum convite real foi enviado.':'Participante incluído apenas nesta aba: não foi possível salvar. Nenhum convite real foi enviado.';
   }else workflowNotice='Selecione uma pessoa que ainda não esteja no Socii.';
   inviteOpen=false;render();
   // The submitter disappears when the invitation form closes. Restore a

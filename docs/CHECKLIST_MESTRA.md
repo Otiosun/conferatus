@@ -509,3 +509,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **Histórico institucional ainda pendente:** esta recuperação é local e não substitui backend, autorização, logs imutáveis, autenticação Academy ou políticas Megalos.
 
 **Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**. Nenhuma promoção a `main`, deploy ou aprovação D1–D6.
+
+## Integridade da prévia — v0.10.55 / V065 (02/11/2026)
+
+- [x] Falhas de gravação **em autoria, conclusão/inclusão Socii e agendamento** reproduzidas com armazenamento bloqueado. O teste novo falhou antes em 280px por ausência de aviso; depois **16/16** cenários passaram em quatro larguras, incluindo falha repetida, recuperação, recarga e vínculo correto. Usa `saveWorkflows()` e seu rollback existentes, sem regra institucional nova.
+- [x] Aviso de gravação não confirmada e botão de retry aparecem enquanto as alterações só existem na aba, com foco e região ARIA persistente. Mensagens não confundem conclusão local temporária com persistência. O calendário mantém o aviso especial para cancelamento sem duplicá-lo.
+- [x] Build TypeScript/HTML + **23/23 Node**; regressões de rascunhos, revisão, Socii, integridade de assinaturas, históricos cancelados, recuperação de cancelamentos, armazenamento ilegível, navegação entre perfis/agendas, foco e anúncios, smoke quatro tamanhos e reflow 63/63 aprovados em execuções terminadas. Testes antigos corrigidos para não presumir armazenamento disponível em `about:blank`. Ver `docs/CHECKPOINT_V065_2026-11-02.md`.
+- [ ] **Permanecem pendentes**: integração real, sessão compartilhada/autenticação, autorizações e auditoria institucional, regras Megalos D1–D6, telas/zoom reais e WCAG completa. Nenhuma promoção à `main`.
+
+**Contagem oficial inalterada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**.
