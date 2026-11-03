@@ -19,31 +19,31 @@ VALUES(
 
 DO $fault$
 DECLARE
- id uuid := '99999999-1111-4999-8999-999999999999';
+ fault_ballot_id uuid := '99999999-1111-4999-8999-999999999999';
  request_key uuid := 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 BEGIN
  BEGIN
-   PERFORM conffratus_vote_lab.record_fixture_vote(id,'fault_one',request_key,'{"selected":"a"}');
+   PERFORM conffratus_vote_lab.record_fixture_vote(fault_ballot_id,'fault_one',request_key,'{"selected":"a"}');
    RAISE EXCEPTION 'Audit collision did not reject transaction';
  EXCEPTION WHEN unique_violation THEN
    -- The audit unique index rejected the same request_id after vote insertion.
    NULL;
  END;
 
- IF EXISTS (SELECT 1 FROM conffratus_vote_lab.votes WHERE ballot_id=id) THEN
+ IF EXISTS (SELECT 1 FROM conffratus_vote_lab.votes WHERE ballot_id=fault_ballot_id) THEN
    RAISE EXCEPTION 'Atomicity violated: vote survived audit insert failure';
  END IF;
- IF (SELECT count(*) FROM conffratus_vote_lab.audit WHERE ballot_id=id) <> 1 THEN
+ IF (SELECT count(*) FROM conffratus_vote_lab.audit WHERE ballot_id=fault_ballot_id) <> 1 THEN
    RAISE EXCEPTION 'Audit count unexpected after controlled fault';
  END IF;
 
  -- A new clean request can succeed; failed request did not consume actor's vote.
  IF (conffratus_vote_lab.record_fixture_vote(
-   id,'fault_one',gen_random_uuid(),'{"selected":"b"}'
+   fault_ballot_id,'fault_one,gen_random_uuid(),'{"selected":"b"}'
  ))->>'status' <> 'recorded' THEN
    RAISE EXCEPTION 'Atomicity violated: valid retry after rollback was denied';
  END IF;
- IF (SELECT count(*) FROM conffratus_vote_lab.votes WHERE ballot_id=id) <> 1 THEN
+ IF (SELECT count(*) FROM conffratus_vote_lab.votes WHERE ballot_id=fault_ballot_id) <> 1 THEN
    RAISE EXCEPTION 'Valid retry should record exactly one accepted vote';
  END IF;
  RAISE NOTICE 'Audit-insert fault injection: complete vote rollback and subsequent retry PASS';
