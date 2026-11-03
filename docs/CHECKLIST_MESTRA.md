@@ -617,7 +617,7 @@ Contagens canônicas inalteradas: 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0
 - [x] A função não é EXECUTE para PUBLIC; papel NOLOGIN do laboratório tem USAGE do esquema e EXECUTE na função, mas sem acesso direto às tabelas. RLS habilitado como defesa adicional; nenhuma identidade oficial é inferida a partir do actor_ref fornecido na simulação.
 - [x] Preparados testes SQL sintéticos para seis modalidades, entradas malformadas, quota, não inscrição, votação fechada, repetição, auditoria e proibição de update/delete; corrida de 12 chamadas iguais, 6 duplicatas distintas e verificação de acesso por papel. CI com PostgreSQL 16 descartável adicionada como bloqueio do build final.
 - [ ] Integração com backend institucional, gateway autenticado Academy, autorização de leitura/escrita, regras aprovadas de eleitor, alteração de voto, sigilo, quórum, política de resultado e encerramento **não implementados**.
-- [ ] Resultados do job postgres-lab precisam ser lidos e eventuais erros corrigidos antes de afirmar validação final.
+- [x] Job postgres-lab final aprovado em 03/11/2026, incluindo seis modalidades, entradas adversariais, concorrência, rollback de auditoria e encerramento concorrente. Evidência: Actions #41695893050.
 
 **Contagem institucional mantida:** Etapa 02 0/4. Não tocar main, produção, banco ativo ou identidades reais.
 
@@ -626,13 +626,28 @@ Contagens canônicas inalteradas: 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0
 - [x] Acrescentados casos adversariais para JSON com campos ausentes, arrays de tipos incorretos, alternativas duplicadas, modalidade binária incompatível, escala fora do limite, quota cumulativa negativa/fracionária/excessiva, números enormes e identificador malformado. Falhas não podem inserir votos nem registros de auditoria.
 - [x] Adicionada injeção de falha controlada depois da inserção do voto e durante a escrita de auditoria; a transação deve reverter completamente. A repetição posterior com nova chave deve ser aceita. Uso exclusivo em PostgreSQL descartável.
 - [x] A verificação SQL agora condiciona o job de compilação e navegação; o banco do CI é destruído após a execução. Nenhuma credencial institucional existe nos testes.
-- [ ] Executar, inspecionar logs e corrigir antes de chamar este lote de validado.
+- [x] Logs da CI inspecionados; injeção de falha, rejeição adversarial e corrida de 12 solicitações confirmadas no job PostgreSQL 16 descartável, Actions #41695893050.
 
 Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branch main.
 ## SQL experimental — encerramento e simultaneidade (03/11/2026)
 
 - [x] Teste de múltiplos atores fictícios em uma mesma votação: uma solicitação repetida não impede que outro ator cadastrado registre sua própria amostra com nova chave.
 - [x] Teste concorrente de encerramento: transação separada mantém bloqueio na linha da votação depois de alterar seu estado para closed; um voto solicitado enquanto a trava está ativa deve aguardar e ser recusado, sem escrita de voto ou auditoria.
-- [ ] Validar resultado desse novo teste no PostgreSQL descartável do workflow. Políticas reais de encerramento, sigilo e alteração seguem indefinidas.
+- [x] O teste de encerramento concorrente passou no PostgreSQL 16 descartável, Actions #41695893050. Políticas reais de encerramento, sigilo e alteração seguem indefinidas.
 
 - [x] Defesa adicional no limite de entrada SQL: limite explícito de 8 KiB para o corpo JSON da amostra e search_path seguro com pg_temp por último; teste adversarial de payload grande adicionado. Não substitui limites nem autenticação na futura API institucional.
+
+## Checkpoint confirmado — lote PostgreSQL de 03/11/2026
+
+**Commit de código e testes verificado:** `45771b8f9b94a596bfbfc70dae678ab0819a3c12`.
+**Evidência GitHub Actions:** https://github.com/Otiosun/conferatus/actions/runs/41695893050
+
+- [x] `postgres-lab`: SQL e migração experimental aprovados em PostgreSQL 16 descartável. Seis modalidades, liberação padrão negada, RLS/permissões do papel, idempotência, entradas adversariais e limite do corpo JSON verificados.
+- [x] Concorrência: 12 chamadas simultâneas com a mesma solicitação geraram 1 voto e 11 recibos de repetição; seis solicitações com chaves diferentes para o mesmo ator foram bloqueadas; outro participante fictício habilitado pôde votar.
+- [x] Integridade: erro injetado na escrita de auditoria reverteu a inserção do voto; posterior tentativa válida foi aceita. Encerramento concorrente bloqueou nova gravação e não deixou voto nem auditoria.
+- [x] `validate`: TypeScript, 44/44 testes Node e 5/5 suítes Chromium aprovados; artefato offline do CI gerado.
+- [x] A versão de prévia **não incorpora** SQL ao HTML público: teste automatizado de exclusão da migração, papel e credenciais CI.
+- [x] `main` verificada inalterada no SHA `4b244591c2f42913d2dca051b7d1256b896d25d8`, sem deploy ou conexão com banco/PM2/integrações reais.
+- [ ] Aplicação institucional: não autorizar por ID fornecido pelo cliente. Acesso real depende de gateway autenticado Academy, regras aprovadas pela Megalos, autorização transacional no servidor, política de quórum/resultado, privacidade e homologação.
+
+**Contagens sem inflação:** Etapa 01 = 4/5; 02 = 0/4; 03 = 1/5; 04 = 17/22; 05 = 2/4; 06 = 0/5; 07 = 7/12. O laboratório SQL não equivale à aprovação da Etapa 02.
