@@ -60,3 +60,7 @@ O sistema de login já pertence à Academy. O responsável por ele poderá integ
 O arquivo `src/domain/academy-identity.ts` define `AcademyIdentityProvider`, uma interface assíncrona para **consultar uma referência institucional já autenticada pelo sistema da Academy**. A prévia usa `UnconnectedAcademyIdentityProvider`, que retorna `unavailable`: não há login, token, sessão nem permissão real. O ACDM ID é apenas referência, **nunca autorização**.
 
 O painel `?demo=1` exibe o estado indisponível e distingue as permissões demonstrativas. A integração futura exige um adaptador de responsabilidade da Academy e autorização **verificada no servidor**, sob contrato aprovado. Nenhuma consulta a serviço real ou dado de produção ocorre nesta prévia.
+
+### Recuperação de cancelamento na prévia
+
+Quando o navegador não consegue salvar um cancelamento, ele permanece aplicado **somente nesta aba**. O calendário avisa explicitamente que o registro poderá voltar ao estado anterior ao recarregar e oferece **Tentar salvar cancelamento nesta sessão**. Esta tentativa não reativa registros nem cria uma trilha de auditoria institucional; a gravação continua sendo apenas `sessionStorage` e depende das permissões e limites do navegador.

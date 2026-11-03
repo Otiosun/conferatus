@@ -500,3 +500,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **Histórico institucional real ainda pendente**: esta consulta usa apenas `sessionStorage`, sem identidade autenticada, timestamp do cancelamento, autorização de servidor ou trilha transacional. Não inflar as Etapas 03/04.
 
 **Contagem canônica preservada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. `main`/produção intactas; D1–D6 Megalos pendentes.
+
+## Integridade local — v0.10.54, V064 — cancelamento sem gravação e recuperação (02/11/2026)
+
+- [x] **Falha reproduzida ANTES:** se `saveWorkflows()` falhava ao cancelar, a interface dizia «Programação cancelada» embora o registro persistido continuasse `programada`, podendo reaparecer ao recarregar.
+- [x] **Correção:** aviso explícito de cancelamento **somente nesta aba** e risco ao recarregar, mais ação secundária «Tentar salvar cancelamento nesta sessão». Segunda falha mantém aviso e foco; sucesso grava os registros locais, remove ação de recuperação e restaura o foco. Aviso permanece ao navegar para outro fluxo e voltar. Nenhuma mudança em backend, regras ou dados de produção.
+- [x] **Antes/depois e regressões:** `browser_cancelled_save_recovery_v0154.py` falhou antes em 280 px e passou depois em quatro larguras, incluindo repetição da falha e recarga. `npm run build` **23/23 Node**, histórico 4 larguras, rollback parcial 4, quarentena de IDs, vínculos locais, teclado 28/28, restauração, reflow 63/63 e smoke quatro viewports concluídos. Capturas Chromium de falha e recuperação em 390px. `docs/CHECKPOINT_V064_2026-11-02.md`.
+- [ ] **Histórico institucional ainda pendente:** esta recuperação é local e não substitui backend, autorização, logs imutáveis, autenticação Academy ou políticas Megalos.
+
+**Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**. Nenhuma promoção a `main`, deploy ou aprovação D1–D6.

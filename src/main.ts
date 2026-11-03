@@ -317,6 +317,9 @@ const restoredDrafts=uniqueSavedRecords(savedDrafts,isSavedDraft);
 const restoredSchedule=uniqueSavedRecords(savedSchedule,isSavedSchedule);
 const drafts:Draft[]=restoredDrafts.accepted;
 const schedule:Deliberation[]=restoredSchedule.accepted;
+// A failed cancellation is kept in this tab, but must never be presented as saved.
+const cancellationSaveWarning='Programação cancelada somente nesta aba: não foi possível salvar. Ao recarregar, a programação poderá reaparecer.';
+let cancellationSaveFailed=false;
 const unreadableRecordsBackup={drafts:draftRestore.unreadableRaw,schedule:scheduleRestore.unreadableRaw};
 const ignoredRecordsBackup={drafts:restoredDrafts.rejected,schedule:restoredSchedule.rejected};
 const ignoredSavedRecords=ignoredRecordsBackup.drafts.length>0||ignoredRecordsBackup.schedule.length>0||
@@ -396,6 +399,7 @@ function saveWorkflows():boolean{
    }catch{/* Best effort only: browser storage can also fail during rollback. */}
    throw error;
   }
+  cancellationSaveFailed=false;
   return true;
  }catch{return false;}
 }
@@ -481,7 +485,8 @@ function calendarPage(){
  <div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
  <label>Tipo de deliberação<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
  <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
- ${workflowNotice?`<p class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
+ ${cancellationSaveFailed||workflowNotice?`<p class="workflow-status">${escapeHTML(cancellationSaveFailed?cancellationSaveWarning:workflowNotice)}</p>`:''}
+ ${cancellationSaveFailed?'<button type="button" class="calendar-save-retry" data-action="retry-cancellation-save">Tentar salvar cancelamento nesta sessão</button>':''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
  ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria (prévia local)</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
 }
@@ -658,8 +663,15 @@ document.addEventListener('click',(event)=>{
   if(partnerEl?.dataset.confirmPartner){const [draftId,partnerId]=partnerEl.dataset.confirmPartner.split(':');const d=drafts.find(d=>d.id===draftId);const partner=d?.partners.find(p=>p.id===partnerId);if(d&&partner){partner.complete=true;d.status=draftReady(d)?'concluida':'revisao';saveWorkflows();workflowNotice=d.status==='concluida'?'Todas as partes concluíram. Proposição concluída.':'Participação registrada nesta simulação.';render();}return;}}
  if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
- if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;workflowNotice='';render();return;}
+ if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;if(!cancellationSaveFailed)workflowNotice='';render();return;}
  if(actionEl?.dataset.action==='toggle-cancelled-history'){cancelledHistoryOpen=!cancelledHistoryOpen;render();return;}
+ if(actionEl?.dataset.action==='retry-cancellation-save' && cancellationSaveFailed){
+  const saved=saveWorkflows();
+  workflowNotice=saved?'Cancelamento salvo nesta sessão.':cancellationSaveWarning;
+  render();
+  (saved?document.querySelector<HTMLElement>('[data-action=toggle-cancelled-history]'):document.querySelector<HTMLElement>('[data-action=retry-cancellation-save]'))?.focus({preventScroll:true});
+  return;
+ }
  if(actionEl?.dataset.action==='calendar-prev'){calendarShift(-1);render();announceCalendarView();return;}
  if(actionEl?.dataset.action==='calendar-next'){calendarShift(1);render();announceCalendarView();return;}
  if(actionEl?.dataset.action==='calendar-today'){const currentDay=new Date();calendarYear=currentDay.getFullYear();calendarMonth=currentDay.getMonth();selectedCalendarDay=isoDay(currentDay);render();announceCalendarView();return;}
@@ -699,7 +711,9 @@ document.addEventListener('click',(event)=>{
  }
  const cancelEl=target.closest<HTMLElement>('[data-cancel-schedule]');
  if(cancelEl?.dataset.cancelSchedule){const item=schedule.find(x=>x.id===cancelEl.dataset.cancelSchedule);if(item){
-  item.status='cancelada';saveWorkflows();workflowNotice='Programação cancelada.';render();
+  item.status='cancelada';const saved=saveWorkflows();cancellationSaveFailed=!saved;
+  workflowNotice=saved?'Programação cancelada e salva nesta sessão.':cancellationSaveWarning;
+  render();
   const heading=document.querySelector<HTMLElement>('.calendar-list-head h2');
   if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
  }return;}
