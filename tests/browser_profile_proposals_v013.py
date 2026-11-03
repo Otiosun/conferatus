@@ -24,6 +24,7 @@ with sync_playwright() as p:
   assert page.locator('#draft-body').input_value()=='Primeiro parágrafo ainda incompleto.'
   page.locator('#compose-proposal-form [data-route=profile]').click()
   assert page.evaluate('location.hash')=='#/profile/m01',width
+  page.locator('.session-proposal-link').wait_for(state='visible')
   assert page.locator('.session-proposal-link').count()==1,width
   page.locator('.session-proposal-link').click()
   page.locator('#draft-body').fill('Esta é a versão final consolidada do documento para consulta e revisão institucional.')
@@ -36,6 +37,7 @@ with sync_playwright() as p:
   assert page.locator('#confirm-proposal-form').count()==0
   page.locator('.workflow-finished [data-route=profile]').click()
   assert page.evaluate('location.hash')=='#/profile/m01',width
+  page.locator('.session-proposal-link').wait_for(state='visible')
   assert page.locator('.session-proposal-link').count()==1,width
   page.locator('.footer-nav').click();page.locator('[data-route=members]').first.click()
   page.locator('.member-item[data-member="m04"]').click()
