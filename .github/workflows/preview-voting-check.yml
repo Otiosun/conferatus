@@ -97,7 +97,10 @@ jobs:
             tests/browser_restored_proposal_integrity_v0156.py \
             tests/browser_navigation_v014.py \
             tests/browser_stage7_form_edge_targets_v0131.py \
-            tests/browser_preview_disclosure_v0117.py; do
+            tests/browser_preview_disclosure_v0117.py \
+            tests/browser_stage7_dynamic_aria_v0141.py \
+            tests/browser_stage7_live_announcer_v0144.py \
+            tests/browser_stage7_error_fields_v0141.py; do
             echo "Checking $script"
             python "$script" || failed=1
           done

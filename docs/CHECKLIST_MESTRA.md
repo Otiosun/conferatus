@@ -749,3 +749,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Corrigida a expectativa do teste: a prévia básica **persiste a escolha simulada na chave local `conferatus:demo-vote`**, para manter o estado nesta aba. Isso não é um voto institucional, nem uma gravação em banco ou Academy.
 - [x] O teste observa as chamadas de gravação em um `sessionStorage` simulado e exige apenas essa chave para a ação do voto. A ausência de toda gravação era uma suposição incorreta; a verificação foi ajustada ao comportamento real em vez de enfraquecer a interface.
 - [ ] Confirmar nova execução da CI antes de declarar o conjunto validado.
+
+## Acessibilidade: reutilização de testes existentes (03/11/2026)
+
+- [x] A matriz contínua inclui três verificações Playwright já existentes: relacionamento ARIA entre controles e painéis, avisos de estado persistentes e vínculo de erros aos campos de formulário. **29 suítes** de navegador selecionadas, sem dependências novas.
+- [x] Corrigidos dois scripts legados: indentação no ensaio de avisos e seleção explícita da modalidade binária na verificação de datas inválidas. Nenhuma validação do produto foi reduzida.
+- [ ] Validar 29/29 no GitHub Actions antes de afirmar conclusão. Evidência de DOM/ARIA no Chromium não substitui leitor de tela real nem certificação WCAG.
