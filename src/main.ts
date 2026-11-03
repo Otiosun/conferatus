@@ -274,6 +274,11 @@ function readSessionRecords(key:string):{records:unknown[];unreadableRaw:string|
  }catch{return {records:[],unreadableRaw:raw};}
 }
 // Session storage is untrusted input, including incomplete records from older previews.
+// Reuse the same selectable sections as the existing review/scheduling forms.
+// This is a reference check for the local fixture, not an authorization rule.
+function knownDeliberativeSection(id:unknown):boolean{
+ return typeof id==='string'&&sections.some(s=>s.id===id&&s.category==='deliberativa');
+}
 // Keep good records usable instead of letting a single malformed entry break a whole view.
 function isSavedDraft(value:unknown):value is Draft{
  if(!value||typeof value!=='object'||Array.isArray(value))return false;
@@ -284,14 +289,16 @@ function isSavedDraft(value:unknown):value is Draft{
   Array.isArray(d.partners)&&d.partners.every((p:unknown)=>{
    if(!p||typeof p!=='object'||Array.isArray(p))return false;
    const partner=p as Record<string,unknown>;
-   return typeof partner.id==='string'&&!!partner.id&&typeof partner.complete==='boolean';
+   return typeof partner.id==='string'&&members.some(m=>m.id===partner.id)&&
+    typeof partner.complete==='boolean';
   })&&new Set((d.partners as {id:string}[]).map(p=>p.id)).size===d.partners.length&&
   // Apply the preview's existing author/participant distinction to restored data too.
   // A local author cannot sign twice by also appearing as their own Socii.
   !(d.partners as {id:string}[]).some(p=>p.id===members[0]?.id)&&
   // Keep legitimate partial drafts, but review/completion must satisfy the
   // same title/body limits enforced when leaving the editor.
-  (d.status==='redacao'||(d.title.trim().length>=3&&d.body.trim().length>=20))&&
+  (d.status==='redacao'||(d.title.trim().length>=3&&d.body.trim().length>=20&&
+    knownDeliberativeSection(d.sectionId)))&&
   // A legacy or damaged record must not claim completion without every signoff.
   !(d.status==='concluida'&&(!d.authorComplete||(d.partners as {complete:boolean}[]).some(p=>!p.complete)));
 }
@@ -320,8 +327,16 @@ function uniqueSavedRecords<T extends {id:string}>(items:unknown[],valid:(value:
  return {accepted,rejected};
 }
 const restoredDrafts=uniqueSavedRecords(savedDrafts,isSavedDraft);
-const restoredSchedule=uniqueSavedRecords(savedSchedule,isSavedSchedule);
 const drafts:Draft[]=restoredDrafts.accepted;
+// An active local schedule cannot point at a draft that still needs approval,
+// or at a section unavailable in the same demo. Keep cancelled history intact.
+// An unavailable older proposal is retained and shown explicitly as missing.
+function isRestorableSchedule(value:unknown):value is Deliberation{
+ return isSavedSchedule(value)&&(value.status==='cancelada'||
+  (knownDeliberativeSection(value.sectionId)&&
+   !drafts.some(d=>d.id===value.proposalId&&d.status!=='concluida')));
+}
+const restoredSchedule=uniqueSavedRecords(savedSchedule,isRestorableSchedule);
 const schedule:Deliberation[]=restoredSchedule.accepted;
 // A failed cancellation is kept in this tab, but must never be presented as saved.
 const cancellationSaveWarning='Programação cancelada somente nesta aba: não foi possível salvar. Ao recarregar, a programação poderá reaparecer.';

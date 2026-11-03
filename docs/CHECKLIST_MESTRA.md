@@ -526,3 +526,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **Não é conclusão das Etapas 03 ou 04:** integrações de autoria, regras reais de colaboração e aceite Megalos permanecem pendentes. Nenhuma contagem avançou, nenhuma mudança em `main`, produção, login ou dados reais.
 
 **Contagem canônica:** 01 4/5; 02 0/4; 03 1/5; 04 17/22; 05 2/4; 06 0/5; 07 7/12.
+
+## Integridade referencial da prévia restaurada — V067 / v0.10.57 (02/11/2026)
+
+- [x] **Falha reproduzida ANTES:** `sessionStorage` permitia Socii com participante inexistente, proposta em revisão/concluída com seção não encontrada e programação ativa vinculada a proposta presente ainda em redação. `browser_restored_links_integrity_v0157.py` reprovou em 280px com os registros fictícios `ghost-*` indevidamente restaurados.
+- [x] **Correção mínima e segura:** `src/main.ts` valida referências contra as opções de membros/seções da própria prévia e impede agenda ativa para proposta existente não concluída. Mantém rascunhos parciais, cancelamentos históricos e links antigos explicitamente indisponíveis. Registros rejeitados são preservados em quarentena, sem reatribuir autoria, inventar regra institucional ou alterar CSS/arte.
+- [x] **Testes concluídos:** novo navegador **4/4 larguras** (280/390/740/1280), `npm run build` **23/23 Node**, **12/12 suítes Playwright de regressão** concluídas e aprovadas, incluindo reflow **63/63** e smoke em quatro larguras. Uma chamada agrupada expirou, e os testes finais foram repetidos isoladamente com sucesso. Captura 390px revisada. `docs/CHECKPOINT_V067_2026-11-02.md`.
+- [ ] Sem confundir consistência da sessão com autorização real, elegibilidade, assinaturas institucionais, colaboração multiusuário ou aprovação Megalos D1–D6. Etapas 03/04/05/07 permanecem pendentes nos mesmos critérios.
+
+**Contagens canônicas mantidas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. `main`/produção inalteradas; nenhuma promoção ou deploy.
