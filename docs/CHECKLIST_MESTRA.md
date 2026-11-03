@@ -694,3 +694,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Teste de retorno do histórico aguarda a atualização assíncrona da rota antes de interagir com a programação; clicar no controle durante um render anterior fechava a expansão indevidamente.
 - [x] Corrigido o foco após «Registrar outra amostra»: se a modalidade contextual está bloqueada para edição, o primeiro campo real da votação recebe foco, e não o seletor desabilitado. Teste funcional de teclado adicionado.
 - [ ] Confirmar nova execução integral das 12 suítes antes de marcar o gate de qualidade como aprovado.
+
+## Histórico geral — retorno contextual da proposição (03/11/2026)
+
+- [x] Ao abrir uma proposição concluída pelo histórico geral, «Voltar ao histórico» deve restaurar a guia Proposições da visão geral. O retorno pelo calendário continua apontando para a programação; o retorno pelas outras listas mantém seu fluxo existente.
+- [x] Adicionada regressão Chromium na jornada já existente, sem novo pacote nem abstração. Verificar status completo da CI depois do commit.
+- [ ] A lista permanece local para documentos da sessão; não representa publicação institucional nem sincronização Academy.

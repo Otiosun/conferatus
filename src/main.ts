@@ -436,7 +436,7 @@ function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form
 const blankDraft=()=>({title:'',body:''});
 let draftForm=blankDraft();
 let currentDraftId='';
-let finishedProposalReturnTo:'proposals'|'calendar'='proposals';
+let finishedProposalReturnTo:'proposals'|'calendar'|'overview'='proposals';
 let workflowNotice='';
 let composeError='';
 let scheduleFormOpen=false;
@@ -550,7 +550,7 @@ function composePage(){
 }
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
- if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':'Voltar às proposições'}</button></div></div>`;
+ if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':'Voltar às proposições'}</button></div></div>`;
  return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
  <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
@@ -883,7 +883,7 @@ document.addEventListener('click',(event)=>{
   return;
  }
  const draftEl=target.closest<HTMLElement>('[data-draft]');
- if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo='proposals';draftForm={title:d.title,body:d.body};composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
+ if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo=routeFromHash()==='overview'?'overview':'proposals';draftForm={title:d.title,body:d.body};composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
  const scheduleEl=target.closest<HTMLElement>('[data-schedule]');
  if(scheduleEl?.dataset.schedule){expandedSchedule=expandedSchedule===scheduleEl.dataset.schedule?'':scheduleEl.dataset.schedule;render();return;}
  const proposalEl=target.closest<HTMLElement>('[data-open-schedule-proposal]');

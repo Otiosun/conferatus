@@ -47,6 +47,13 @@ with sync_playwright() as p:
         local=page.locator('.overview-local-proposal').filter(has_text='Proposição de navegação para agenda')
         assert local.count()==1,(width,'local proposal absent from overview')
         assert 'Não alteram os indicadores' in page.locator('.overview-local-disclosure').inner_text(),width
+        local.locator('[data-draft]').click()
+        assert page.locator('.workflow-finished strong').inner_text()=='Proposição concluída',width
+        back_to_history=page.locator('.workflow-finished [data-route=overview]')
+        assert back_to_history.inner_text()=='Voltar ao histórico',width
+        back_to_history.click()
+        page.locator('.overview-local-proposal').filter(has_text='Proposição de navegação para agenda').wait_for()
+        local=page.locator('.overview-local-proposal').filter(has_text='Proposição de navegação para agenda')
         local.locator('[data-linked-schedule]').click()
         assert page.evaluate('location.hash')=='#/calendar',width
         # Hash navigation rerenders asynchronously. Wait for the expanded item
