@@ -1,4 +1,22 @@
-import type { Member, OptionResult, GovernanceChange, Ballot, Section } from './types.js';
+import type { Member, OptionResult, GovernanceChange, Ballot, Section, DeliberationMethod } from './types.js';
+
+/** Definitions supplied by Megalos on 03/11/2026. Vote counting is not yet institutional. */
+export const DELIBERATION_METHODS: readonly {id: DeliberationMethod; label: string; detail: string}[] = [
+  {id:'binaria',label:'Binária',detail:'Sim ou Não para aprovar uma proposição'},
+  {id:'nominal',label:'Nominal',detail:'Uma opção da lista; a mais votada vence'},
+  {id:'ordenada',label:'Ordenada',detail:'Ranqueamento das opções, da primeira à última'},
+  {id:'aprovacao',label:'Por aprovação',detail:'Todas as opções consideradas aceitáveis'},
+  {id:'escalar',label:'Escalar',detail:'Nota de 1 a 10 para cada opção'},
+  {id:'cumulativa',label:'Cumulativa',detail:'Distribuição de uma cota proporcional de votos entre opções'},
+];
+export function isDeliberationMethod(value: unknown): value is DeliberationMethod {
+  return typeof value==='string' && DELIBERATION_METHODS.some(method=>method.id===value);
+}
+/** A cumulative allocation is a positive whole number, never inferred from a title or section. */
+export function isPositiveCumulativeVoteWeight(value: unknown): value is number {
+  return typeof value==='number' && Number.isSafeInteger(value) && value>0;
+}
+
 
 export function totalVotes(options: OptionResult[]): number {
   return options.reduce((sum, option) => sum + option.votes, 0);
@@ -78,6 +96,9 @@ export function restoreDemoMembers(members: Member[], validSectionIds: string[],
     if (entry.role === 'diretor' || entry.role === 'membro') member.role = entry.role;
     if (entry.hadDeliberativeHistory === true) member.hadDeliberativeHistory = true;
     if (entry.hadDeliberativeHistory === false) member.hadDeliberativeHistory = false;
+    if (isPositiveCumulativeVoteWeight(entry.cumulativeVoteWeight)) {
+      member.cumulativeVoteWeight = entry.cumulativeVoteWeight;
+    }
     if (typeof entry.acdmId === 'string') {
       const candidate = entry.acdmId.toUpperCase();
       if (/^[A-Z0-9_-]{3,40}$/.test(candidate) &&
