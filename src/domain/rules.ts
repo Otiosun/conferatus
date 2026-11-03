@@ -217,7 +217,7 @@ export function summarizePreviewVotes(
       :vote.method==='ordenada'?{ranking:vote.ranking}
       :vote.method==='aprovacao'?{approved:vote.approved}
       :vote.method==='escalar'?{scores:vote.scores}
-      :{allocation:vote.allocation};
+      :vote.method==='cumulativa'?{allocation:vote.allocation}:{};
     return validatePreviewVote(method,payload,vote.method==='cumulativa'?vote.weight:undefined,ids).ok;
   });
   const units:Record<DeliberationMethod,string>={
