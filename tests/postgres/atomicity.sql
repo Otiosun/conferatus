@@ -39,7 +39,7 @@ BEGIN
 
  -- A new clean request can succeed; failed request did not consume actor's vote.
  IF (conffratus_vote_lab.record_fixture_vote(
-   fault_ballot_id,'fault_one,gen_random_uuid(),'{"selected":"b"}'
+   fault_ballot_id,'fault_one',gen_random_uuid(),'{"selected":"b"}'
  ))->>'status' <> 'recorded' THEN
    RAISE EXCEPTION 'Atomicity violated: valid retry after rollback was denied';
  END IF;
