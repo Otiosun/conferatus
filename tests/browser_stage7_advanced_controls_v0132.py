@@ -68,6 +68,20 @@ with sync_playwright() as p:
   page.locator('[data-action=undo]').click()
   assert weight()==4,(width,'cumulative weight undo failed')
 
+  # A member's explicitly configured quota enables the cumulative ballot.
+  page.locator('.footer-home').click()
+  page.locator('#preview-vote-method').select_option('cumulativa')
+  page.locator('#preview-vote-member').select_option(chosen)
+  page.locator('[name=alloc-a]').fill('3')
+  page.locator('[name=alloc-b]').fill('2')
+  page.locator('.preview-vote-submit').click()
+  assert 'sem exceder' in page.locator('.preview-vote-error').inner_text(),(width,'over-budget vote accepted')
+  page.locator('[name=alloc-a]').fill('2')
+  page.locator('[name=alloc-b]').fill('2')
+  page.locator('.preview-vote-submit').click()
+  assert 'distribuídos 4 de 4' in page.locator('.preview-vote-receipt').inner_text(),(width,'cumulative receipt missing')
+  assert page.locator('.result-row--chosen').count()==0,(width,'sandbox receipt polluted legacy ballot')
+
   # The member search is interactive and should preserve the typed filter.
   page.locator('.footer-nav').click()
   page.locator('.menu-item[data-route="members"]').click()
