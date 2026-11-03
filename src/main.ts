@@ -776,6 +776,14 @@ document.addEventListener('click',(event)=>{
  if (!(target instanceof Element)) return;
  const skip=target.closest<HTMLAnchorElement>('.skip-link');
  if(skip){event.preventDefault();document.querySelector<HTMLElement>('#main-content')?.focus({preventScroll:true});return;}
+ const contextualVote=advancedPreview?target.closest<HTMLElement>('[data-preview-schedule]'):null;
+ if(contextualVote?.dataset.previewSchedule){
+  const item=schedule.find(s=>s.id===contextualVote.dataset.previewSchedule&&s.status==='programada');
+  if(item?.method && (item.method==='binaria'||isValidPreviewChoices(item.choices))){
+   previewScheduleId=item.id;previewMode=item.method;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';
+   navigate('ballot');document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
+  }return;
+ }
  const actionEl=target.closest<HTMLElement>('[data-action]');
  const routeEl=target.closest<HTMLElement>('[data-route]');
  const memberEl=target.closest<HTMLElement>('[data-member]');
@@ -786,6 +794,10 @@ document.addEventListener('click',(event)=>{
  const activityEl=target.closest<HTMLElement>('[data-activity]');
  const voteEl=target.closest<HTMLElement>('[data-vote]');
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
+ if(advancedPreview && actionEl?.dataset.action==='exit-preview-schedule'){
+  previewScheduleId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
+  document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
+ }
  if(advancedPreview && actionEl?.dataset.action==='reset-preview-vote'){
   previewVoteReceipt=null;previewVoteError='';render();document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
  }
@@ -856,7 +868,7 @@ document.addEventListener('click',(event)=>{
  }
  if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
- if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;if(!cancellationSaveFailed)workflowNotice='';render();return;}
+ if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;scheduleMethod=null;if(!cancellationSaveFailed)workflowNotice='';render();return;}
  if(actionEl?.dataset.action==='toggle-cancelled-history'){cancelledHistoryOpen=!cancelledHistoryOpen;render();return;}
  if(actionEl?.dataset.action==='retry-workflow-save' && workflowSaveFailed){
   const saved=saveWorkflows();
@@ -1094,8 +1106,13 @@ document.addEventListener('submit',(event)=>{
    if(!isDeliberationMethod(method)){
     showScheduleFormError(form,'Selecione uma das seis modalidades de votação.','method');return;
    }
-   const item:Deliberation={id:nextLocalRecordId('sched',schedule),title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),method,status:'programada'};
-  schedule.unshift(item);const stored=saveWorkflows();workflowNotice=stored?'Deliberação programada nesta demonstração.':'Programação mantida somente enquanto a página estiver aberta.';scheduleFormOpen=false;expandedSchedule=item.id;
+   const labels=method==='binaria'?[]:String(data.get('choices')??'').split(/\r?\n/).map(label=>label.trim()).filter(Boolean);
+   const choices:PreviewChoice[]=labels.map((label,index)=>({id:`opt-${index+1}`,label}));
+   if(method!=='binaria'&&!isValidPreviewChoices(choices)){
+    showScheduleFormError(form,'Informe de 2 a 8 alternativas distintas, com até 80 caracteres por linha.','choices');return;
+   }
+   const item:Deliberation={id:nextLocalRecordId('sched',schedule),title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),method,...(method!=='binaria'?{choices}:{}),status:'programada'};
+  schedule.unshift(item);const stored=saveWorkflows();workflowNotice=stored?'Deliberação programada nesta demonstração.':'Programação mantida somente enquanto a página estiver aberta.';scheduleFormOpen=false;scheduleMethod=null;expandedSchedule=item.id;
   const date=new Date(`${start.slice(0,10)}T12:00:00`);calendarYear=date.getFullYear();calendarMonth=date.getMonth();selectedCalendarDay=start.slice(0,10);
   render();
   // The saved schedule is the result of the form which has just disappeared.
@@ -1110,12 +1127,12 @@ document.addEventListener('submit',(event)=>{
  const data=new FormData(form);
  let payload:unknown;
  if(previewMode==='binaria'||previewMode==='nominal')payload={selected:data.get('selected')};
- else if(previewMode==='ordenada')payload={ranking:PREVIEW_LIST_OPTIONS.map((_,index)=>data.get('rank-'+String(index)))};
+ else if(previewMode==='ordenada')payload={ranking:previewVoteChoices().map((_,index)=>data.get('rank-'+String(index)))};
  else if(previewMode==='aprovacao')payload={approved:data.getAll('approved')};
- else if(previewMode==='escalar')payload={scores:Object.fromEntries(PREVIEW_LIST_OPTIONS.map(option=>[option.id,Number(data.get('score-'+option.id))]))};
- else payload={allocation:Object.fromEntries(PREVIEW_LIST_OPTIONS.map(option=>[option.id,Number(data.get('alloc-'+option.id))]))};
+ else if(previewMode==='escalar')payload={scores:Object.fromEntries(previewVoteChoices().map(option=>[option.id,Number(data.get('score-'+option.id))]))};
+ else payload={allocation:Object.fromEntries(previewVoteChoices().map(option=>[option.id,Number(data.get('alloc-'+option.id))]))};
  const selectedMember=members.find(member=>member.id===previewVoteMemberId&&isDeliberativeMember(member,sections));
- const result=validatePreviewVote(previewMode,payload,selectedMember?.cumulativeVoteWeight);
+ const result=validatePreviewVote(previewMode,payload,selectedMember?.cumulativeVoteWeight,previewVoteChoices().map(option=>option.id));
  if(!result.ok){previewVoteError=result.error;render();document.querySelector<HTMLElement>('#preview-vote-error')?.focus({preventScroll:true});return;}
  previewVoteError='';previewVoteReceipt=result.vote;render();
  const receipt=document.querySelector<HTMLElement>('.preview-vote-receipt');
@@ -1192,9 +1209,13 @@ document.addEventListener('input',(event)=>{
 });
 document.addEventListener('change',(event)=>{
  const target=event.target;
+ if(target instanceof HTMLSelectElement && target.id==='schedule-method' && target.closest('#schedule-deliberation-form')){
+  scheduleMethod=isDeliberationMethod(target.value)?target.value:null;render();
+  document.querySelector<HTMLSelectElement>('#schedule-method')?.focus({preventScroll:true});return;
+ }
  if(advancedPreview && target instanceof HTMLSelectElement && target.id==='preview-vote-method'){
   if(isDeliberationMethod(target.value)){
-   previewMode=target.value;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
+   previewMode=target.value;previewScheduleId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
    document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});
   }return;
  }
