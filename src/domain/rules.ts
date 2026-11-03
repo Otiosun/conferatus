@@ -121,3 +121,72 @@ export function isDeliberativeMember(member: Member, sections: Section[]): boole
 export function hasPersonalVoteHistory(member: Member, sections: Section[]): boolean {
  return member.hadDeliberativeHistory === true || isDeliberativeMember(member, sections);
 }
+
+
+/** Self-contained fixture choices for the opt-in voting laboratory. Never official ballots. */
+export const PREVIEW_BINARY_OPTIONS = [
+  {id:'sim', label:'Sim'}, {id:'nao', label:'Não'},
+] as const;
+export const PREVIEW_LIST_OPTIONS = [
+  {id:'a', label:'Alternativa A'}, {id:'b', label:'Alternativa B'},
+  {id:'c', label:'Alternativa C'},
+] as const;
+
+export type PreviewVote =
+  | {method:'binaria'|'nominal'; selected:string}
+  | {method:'ordenada'; ranking:string[]}
+  | {method:'aprovacao'; approved:string[]}
+  | {method:'escalar'; scores:Record<string,number>}
+  | {method:'cumulativa'; allocation:Record<string,number>; weight:number};
+
+export type PreviewVoteValidation =
+  | {ok:true; vote:PreviewVote}
+  | {ok:false; error:string};
+
+/** Validate a single in-memory sample, not eligibility, authentication or an institutional tally. */
+export function validatePreviewVote(method: DeliberationMethod, payload: unknown, cumulativeWeight?: number): PreviewVoteValidation {
+  if(!isDeliberationMethod(method) || !payload || typeof payload!=='object' || Array.isArray(payload))
+    return {ok:false,error:'Preencha um voto de demonstração válido.'};
+  const data=payload as Record<string,unknown>;
+  const choices=method==='binaria'?PREVIEW_BINARY_OPTIONS:PREVIEW_LIST_OPTIONS;
+  const ids=choices.map(option=>option.id);
+  const validId=(id:unknown):id is string=>typeof id==='string'&&ids.includes(id);
+  const exactList=(items:unknown):items is string[]=>Array.isArray(items)&&
+    items.every(validId)&&new Set(items).size===items.length;
+  const numericChoices=(value:unknown,min:number,max:number):value is Record<string,number>=>{
+    if(!value||typeof value!=='object'||Array.isArray(value))return false;
+    const record=value as Record<string,unknown>;
+    return Object.keys(record).length===ids.length &&
+      ids.every(id=>Object.prototype.hasOwnProperty.call(record,id)&&
+        typeof record[id]==='number'&&Number.isSafeInteger(record[id])&&
+        (record[id] as number)>=min&&(record[id] as number)<=max);
+  };
+  if(method==='binaria'||method==='nominal') {
+    if(!validId(data.selected))return {ok:false,error:'Selecione exatamente uma alternativa.'};
+    return {ok:true,vote:{method,selected:data.selected}};
+  }
+  if(method==='ordenada') {
+    if(!exactList(data.ranking)||data.ranking.length!==ids.length)
+      return {ok:false,error:'Ordene todas as alternativas sem repetir posições.'};
+    return {ok:true,vote:{method,ranking:[...data.ranking]}};
+  }
+  if(method==='aprovacao') {
+    if(!exactList(data.approved)||data.approved.length===0)
+      return {ok:false,error:'Marque pelo menos uma alternativa aceitável, sem repetições.'};
+    return {ok:true,vote:{method,approved:[...data.approved]}};
+  }
+  if(method==='escalar') {
+    if(!numericChoices(data.scores,1,10))
+      return {ok:false,error:'Atribua uma nota inteira de 1 a 10 para cada alternativa.'};
+    return {ok:true,vote:{method,scores:{...data.scores}}};
+  }
+  if(!isPositiveCumulativeVoteWeight(cumulativeWeight))
+    return {ok:false,error:'Configure primeiro uma quantidade de votos para este membro.'};
+  if(!numericChoices(data.allocation,0,cumulativeWeight))
+    return {ok:false,error:'Distribua quantidades inteiras, sem valores negativos.'};
+  const used=Object.values(data.allocation).reduce((total,value)=>total+value,0);
+  if(!Number.isSafeInteger(used)||used===0||used>cumulativeWeight)
+    return {ok:false,error:'Distribua pelo menos um voto, sem exceder a cota disponível.'};
+  // Partial use of the quota is allowed ONLY in this sandbox; Academy policy remains undefined.
+  return {ok:true,vote:{method:'cumulativa',allocation:{...data.allocation},weight:cumulativeWeight}};
+}
