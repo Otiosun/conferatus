@@ -11,6 +11,7 @@ with sync_playwright() as p:
         page.set_default_timeout(6500)
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
+        page.goto('about:blank?demo=1')
         page.set_content(html)
         page.locator('.footer-nav').click()
         page.locator('.menu-item[data-route=proposals]').click()
@@ -40,6 +41,20 @@ with sync_playwright() as p:
         assert day.get_attribute('aria-pressed') == 'true', width
         item = page.locator('.calendar-item').filter(has_text='Programação ligada à proposição')
         assert item.locator('[data-open-schedule-proposal]').is_visible(), width
+        item.locator('[data-preview-schedule]').click()
+        assert page.evaluate('location.hash') == '#/ballot', (width,'did not navigate to linked sandbox ballot')
+        assert page.locator('#preview-vote-method').input_value() == 'nominal', width
+        assert page.locator('#preview-vote-method').is_disabled(), width
+        labels=page.locator('#preview-vote-form [name=selected]').evaluate_all('(nodes)=>nodes.map(node=>node.parentElement.innerText.trim())')
+        assert labels==['Calendário mensal','Calendário quinzenal'], (width,labels)
+        page.locator('#preview-vote-form [name=selected][value=opt-2]').check()
+        page.locator('.preview-vote-submit').click()
+        assert 'Calendário quinzenal' in page.locator('.preview-vote-receipt').inner_text(), width
+        assert page.locator('.result-row--chosen').count()==0, (width,'sample altered legacy voting results')
+        page.locator('.footer-nav').click()
+        page.locator('.menu-item[data-route=calendar]').click()
+        item=page.locator('.calendar-item').filter(has_text='Programação ligada à proposição')
+        if not item.locator('[data-open-schedule-proposal]').is_visible(): item.locator('[data-schedule]').click()
         item.locator('[data-open-schedule-proposal]').click()
         assert page.locator('.workflow-finished strong').inner_text() == 'Proposição concluída', width
         back = page.locator('.workflow-finished [data-route=calendar]')
