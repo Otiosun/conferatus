@@ -16,7 +16,7 @@ with sync_playwright() as p:
         form = page.locator('#schedule-deliberation-form')
         assert form.is_visible(), width
         assert form.evaluate("el => getComputedStyle(el).backgroundColor") == 'rgb(81, 93, 199)', width
-        for name in ('title', 'objective', 'proposalId', 'sectionId', 'start', 'end', 'type'):
+        for name in ('title', 'objective', 'proposalId', 'sectionId', 'start', 'end', 'type', 'method'):
             assert form.locator(f'[name="{name}"]').count() == 1, (width, name)
         assert form.locator('[name="title"]').evaluate(
             "el => getComputedStyle(el).color") == 'rgb(255, 255, 255)', width
