@@ -63,6 +63,7 @@ with sync_playwright() as p:
   form.locator('[name=objective]').fill('Descrição válida para verificar a conclusão do agendamento.')
   form.locator('[name=proposalId]').select_option(index=1)
    form.locator('[name=method]').select_option('nominal')
+   form.locator('[name=choices]').fill('Opção um\nOpção dois')
   form.locator('[name=start]').fill('2026-12-12T09:00')
   form.locator('[name=end]').fill('2026-12-12T12:00')
   form.locator('button[type=submit]').click()
