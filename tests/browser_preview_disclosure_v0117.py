@@ -37,6 +37,13 @@ with sync_playwright() as p:
         page.locator('[data-action="reset-vote"]').click()
         assert page.locator('.result-row--chosen').count() == 0, width
         page.locator('.footer-nav').click()
+        page.locator('[data-route="overview"]').first.click()
+        page.locator('[data-route="governance"]').first.click()
+        warning=page.locator('.governance-preview-disclosure[role="note"]')
+        assert warning.is_visible(),width
+        assert 'Nenhum cadastro da Academy é modificado' in warning.inner_text(),width
+        assert page.locator('[data-action="toggle-tools"]').count()==0,width
+        page.locator('.footer-nav').click()
         page.locator('[data-route="calendar"]').first.click()
         action=page.locator('[data-action="open-schedule"]')
         assert action.inner_text()=='Iniciar uma Votação',width  # Megalos' prototype wording stays intact

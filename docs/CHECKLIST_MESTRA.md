@@ -731,3 +731,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] O guia antigo v0.6 foi substituído **no mesmo arquivo** `docs/DEMO_GUIDE.md`, sem adicionar documentos redundantes. Contém roteiro verificável do produto atual, modos normal/avançado, limitações de simulação, recuperação local, critérios de QA e decisões D1–D6.
 - [x] `README.md` aponta para o guia vigente. O quinto critério da Etapa 06 está concluído no escopo de **preparação documental**, sem inventar aceite visual ou publicação institucional; **Etapa 06 = 1/5**.
 - [ ] A apresentação à Megalos, feedback/assinatura de aceite, equipamentos reais e eventual promoção à produção seguem fora deste fechamento documental.
+
+## Gerenciamento administrativo da prévia — transparência (03/11/2026)
+
+- [x] O Gerenciamento Deliberativo passou a declarar explicitamente junto aos controles que edição e rebaixamento são operações sobre dados **fictícios deste navegador**, sem modificar cadastros Academy. A estrutura de botões, hierarquia e ações de demonstração permanecem preservadas.
+- [x] O teste de divulgação também percorre, no modo normal, histórico geral → gerenciamento, verifica o aviso acessível e garante que o painel avançado de desenvolvimento não aparece sem `?demo=1`.
+- [ ] Confirmar o gate completo da branch antes de declarar este lote validado; não implica autorização de um diretor real.
