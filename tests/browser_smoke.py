@@ -28,6 +28,47 @@ with sync_playwright() as p:
         assert page.locator('.result-row').count() == 2, width
         assert page.get_by_text('DADOS FICTÍCIOS').count() >= 1, width
 
+        # All six form families belong to an opt-in, non-institutional laboratory.
+        modes=page.locator('#preview-vote-method')
+        assert modes.locator('option').count()==6,width
+        page.locator('.preview-vote-submit').click()
+        assert 'Selecione exatamente uma' in page.locator('.preview-vote-error').inner_text(),width
+        page.locator('[name=selected][value=sim]').check()
+        page.locator('.preview-vote-submit').click()
+        assert 'Escolha: Sim' in page.locator('.preview-vote-receipt').inner_text(),width
+        page.locator('[data-action=reset-preview-vote]').click()
+
+        modes.select_option('nominal')
+        page.locator('[name=selected][value=b]').check()
+        page.locator('.preview-vote-submit').click()
+        assert 'Alternativa B' in page.locator('.preview-vote-receipt').inner_text(),width
+
+        modes.select_option('ordenada')
+        page.locator('[name=rank-0]').select_option('a')
+        page.locator('[name=rank-1]').select_option('a')
+        page.locator('[name=rank-2]').select_option('c')
+        page.locator('.preview-vote-submit').click()
+        assert 'sem repetir' in page.locator('.preview-vote-error').inner_text(),width
+        page.locator('[name=rank-1]').select_option('b')
+        page.locator('.preview-vote-submit').click()
+        assert '3º Alternativa C' in page.locator('.preview-vote-receipt').inner_text(),width
+
+        modes.select_option('aprovacao')
+        page.locator('[name=approved][value=a]').check()
+        page.locator('[name=approved][value=c]').check()
+        page.locator('.preview-vote-submit').click()
+        assert 'Alternativa A, Alternativa C' in page.locator('.preview-vote-receipt').inner_text(),width
+
+        modes.select_option('escalar')
+        for option,value in (('a','1'),('b','7'),('c','10')):
+            page.locator(f'[name=score-{option}]').select_option(value)
+        page.locator('.preview-vote-submit').click()
+        assert 'Alternativa C: 10/10' in page.locator('.preview-vote-receipt').inner_text(),width
+
+        modes.select_option('cumulativa')
+        assert 'Nenhum membro deliberativo fictício' in page.locator('.preview-vote-fieldset').inner_text(),width
+        assert page.locator('.preview-vote-submit').is_disabled(),width
+
         # Only a fictional ballot is selectable; the original UI labels have changed.
         page.locator('[data-action="toggle-demo"]').click()
         page.locator('[data-vote="o2"]').click()
@@ -79,7 +120,7 @@ with sync_playwright() as p:
         page.locator('[data-edit="m01"]').first.click()
         page.locator('#member-acdm-id').fill('DEMO-5012')
         page.locator('#edit-member-form button[type="submit"]').click()
-        assert 'Identificador de Helena Avelar atualizado' in page.locator('main').inner_text(), width
+        assert 'Cadastro demonstrativo de Helena Avelar atualizado' in page.locator('main').inner_text(), width
         page.locator('[data-action="undo"]').click()
         assert 'Alteração desfeita' in page.locator('main').inner_text(), width
 
