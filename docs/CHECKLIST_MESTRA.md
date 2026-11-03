@@ -700,3 +700,8 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Ao abrir uma proposição concluída pelo histórico geral, «Voltar ao histórico» deve restaurar a guia Proposições da visão geral. O retorno pelo calendário continua apontando para a programação; o retorno pelas outras listas mantém seu fluxo existente.
 - [x] Adicionada regressão Chromium na jornada já existente, sem novo pacote nem abstração. Verificar status completo da CI depois do commit.
 - [ ] A lista permanece local para documentos da sessão; não representa publicação institucional nem sincronização Academy.
+
+## Evidência visual reproduzível — revisão de entrega (03/11/2026)
+
+- [x] A CI reaproveita as capturas `.png` que os testes Playwright existentes já produzem em `dist/`, e publica um artefato separado de evidências, mesmo quando uma regressão de navegador falha. Não captura identidades reais nem solicitações Academy, e não adiciona bibliotecas.
+- [ ] As capturas mostram **apenas o produto demonstrativo**, não são comparações aprovadas com as referências Megalos. O gate 07.11 exige revisão humana contra D1–D6.
