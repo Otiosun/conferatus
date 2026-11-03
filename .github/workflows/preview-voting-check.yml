@@ -40,3 +40,10 @@ jobs:
             python "$script" || failed=1
           done
           exit "$failed"
+      - name: Upload tested offline preview
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CONFFRATUS-v0.10.60-preview
+          path: dist/CONFFRATUS_demo_offline.html
+          retention-days: 7

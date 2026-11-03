@@ -19,8 +19,10 @@ with sync_playwright() as p:
   page=browser.new_page(viewport={'width':width,'height':820},has_touch=True,is_mobile=True)
   page.set_default_timeout(7000)
   page.on('pageerror',lambda err:errors.append({'width':width,'error':str(err)}))
-  page.goto('about:blank?demo=1')
-  page.set_content(HTML)
+  # Fulfilled locally by Playwright: a real HTTP origin permits sessionStorage.
+  # No external request, server, identity or institutional data is involved.
+  page.route('https://conffratus.test/**', lambda route: route.fulfill(status=200, content_type='text/html', body=HTML))
+  page.goto('https://conffratus.test/?demo=1')
   def measure(name,loc):
    loc.wait_for(state='visible')
    loc.evaluate('e => e.scrollIntoView({block:"center",inline:"nearest"})')

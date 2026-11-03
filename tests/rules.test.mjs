@@ -215,3 +215,17 @@ test('cumulative voting requires configured weight, eligibility, nonnegative int
  // This is a sandbox-only decision, not an unapproved institutional counting policy.
  assert.equal(validatePreviewVote('cumulativa',{allocation:{a:1,b:0,c:0}},4).ok,true);
 });
+
+test('scheduled custom option IDs are respected for nominal, ranked, scalar and cumulative previews',()=>{
+ const ids=['opt-1','opt-2','opt-3','opt-4'];
+ assert.equal(validatePreviewVote('nominal',{selected:'opt-3'},undefined,ids).ok,true);
+ assert.equal(validatePreviewVote('nominal',{selected:'a'},undefined,ids).ok,false);
+ assert.equal(validatePreviewVote('ordenada',{ranking:['opt-4','opt-2','opt-1','opt-3']},undefined,ids).ok,true);
+ assert.equal(validatePreviewVote('ordenada',{ranking:['opt-1','opt-1','opt-2','opt-4']},undefined,ids).ok,false);
+ assert.equal(validatePreviewVote('escalar',{scores:{'opt-1':2,'opt-2':3,'opt-3':5,'opt-4':10}},undefined,ids).ok,true);
+ assert.equal(validatePreviewVote('cumulativa',{allocation:{'opt-1':1,'opt-2':2,'opt-3':0,'opt-4':1}},4,ids).ok,true);
+ assert.equal(validatePreviewVote('cumulativa',{allocation:{'opt-1':1,'opt-2':4,'opt-3':0,'opt-4':1}},4,ids).ok,false);
+ for(const bad of [[],['opt-1'],['opt-1','opt-1'],['a','bad/option'],Array(9).fill('opt-1')])
+  assert.equal(validatePreviewVote('nominal',{selected:'opt-1'},undefined,bad).ok,false);
+ assert.equal(validatePreviewVote('binaria',{selected:'sim'},undefined,['opt-1','opt-2']).ok,false);
+});
