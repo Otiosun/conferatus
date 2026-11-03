@@ -723,7 +723,7 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 
 - [x] A seção de votação da prévia padrão informa, junto à descrição, que resultados e escolhas são fictícios e **nenhum voto é enviado à Academy**. A escolha exibida após clicar é chamada de **simulada**, não de registro oficial.
 - [x] Mantido o layout e o rótulo da ação original onde as referências Megalos ainda aguardam decisão; não inventadas regras institucionais.
-- [x] Reaproveitado o teste `browser_preview_disclosure_v0117.py`, estendido para verificar comportamento normal, reinicialização da escolha e ausência de escrita em `sessionStorage`, além da prévia de agendamento. Agora são 26 suítes selecionadas na CI.
+- [x] Reaproveitado o teste `browser_preview_disclosure_v0117.py`, estendido para verificar comportamento normal, reinicialização da escolha e escrita **exclusivamente** na chave fictícia `conferatus:demo-vote` do `sessionStorage`, além da prévia de agendamento. Agora são 26 suítes selecionadas na CI.
 - [ ] Confirmar CI completa antes de marcar o lote como validado. Nenhuma interação implica voto remoto.
 
 ## Etapa 06 — guia vigente de apresentação (03/11/2026)
@@ -743,3 +743,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Auditoria simples das funções locais encontrou apenas `resetDemoState()` sem chamada. A função morta foi removida, sem criar novo controle ou nova dependência.
 - [x] **Preservado** o snapshot `initialMembers`, que é usado pela ação funcional `reset-admin` na prévia. A limpeza não altera o comportamento de desfazer nem de restaurar os dados administrativos fictícios.
 - [ ] Confirmar build e regressões após a remoção deste protótipo.
+
+## Verificação do armazenamento fictício de voto (03/11/2026)
+
+- [x] Corrigida a expectativa do teste: a prévia básica **persiste a escolha simulada na chave local `conferatus:demo-vote`**, para manter o estado nesta aba. Isso não é um voto institucional, nem uma gravação em banco ou Academy.
+- [x] O teste observa as chamadas de gravação em um `sessionStorage` simulado e exige apenas essa chave para a ação do voto. A ausência de toda gravação era uma suposição incorreta; a verificação foi ajustada ao comportamento real em vez de enfraquecer a interface.
+- [ ] Confirmar nova execução da CI antes de declarar o conjunto validado.

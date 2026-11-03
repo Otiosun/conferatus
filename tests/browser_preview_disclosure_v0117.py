@@ -33,7 +33,8 @@ with sync_playwright() as p:
         page.locator('[data-vote]').first.click()
         assert 'Nenhum voto foi enviado' in page.locator('.vote-feedback').inner_text(), width
         assert 'Escolha simulada' in page.locator('.result-row--chosen').inner_text(), width
-        assert page.evaluate("window.__previewStorageWrites.length") == before, width
+        writes = page.evaluate("window.__previewStorageWrites.slice()")
+        assert writes[before:] == ["conferatus:demo-vote"], (width, "vote should only write the local demo key", writes)
         page.locator('[data-action="reset-vote"]').click()
         assert page.locator('.result-row--chosen').count() == 0, width
         page.locator('.footer-nav').click()
