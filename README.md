@@ -80,3 +80,14 @@ A restauração exige confirmação e **substitui**, não mescla, os fluxos loca
 A Megalos definiu em 03/11/2026 seis modalidades de votação: **Binária (Sim/Não), Nominal (escolha única), Ordenada (ranqueamento), Por aprovação (múltiplas opções), Escalar (1–10 por alternativa) e Cumulativa (cota proporcional de votos distribuídos)**. Na prévia, essa modalidade é escolhida ao programar deliberações e é armazenada com a agenda fictícia. Não substituir PDR/PR/Ofício, que classificam a proposição.
 
 Em Gerenciamento Deliberativo, é possível informar uma quantidade positiva e inteira de votos cumulativos por membro sintético ao editar ou vincular um registro. Nenhum valor é atribuído automaticamente. Ainda não é cadastro real de usuários Academy nem voto compartilhado; apuração, elegibilidade, pesos institucionais, quórum e empates dependem de definição e integração seguras.
+
+
+## Votação SQL experimental — SOMENTE CI isolada
+
+Arquivos em experimental/postgres/ e tests/postgres/ formam um laboratório de PostgreSQL 16 que não é incluído no build estático, nem publicado no Cloudflare Pages e nem executado no banco da Academy. O workflow Preview voting checks inicia um contêiner PostgreSQL novo, executa os scripts com dados sintéticos e descarta o contêiner no final. A prévia pública continua sem acesso ao banco.
+
+O laboratório exige liberação explícita de uma votação fictícia (fixture_enabled false por padrão), cadastro sintético prévio dos participantes e estado open. A função de gravação usa uma trava transacional na linha da votação, chave idempotente por votação, unicidade por participante fictício e uma escrita de auditoria na mesma transação. As seis modalidades são validadas de novo no banco. Os registros são somente de teste e não estabelecem fórmula para vencedor.
+
+A função é restrita ao papel NOLOGIN conffratus_lab_gateway, que tem apenas USAGE no esquema e EXECUTE na função. Não possui SELECT ou INSERT direto nas tabelas; a concessão de acesso ao papel para contas reais não faz parte do projeto. O argumento actor_ref é um valor sintético do teste: **não pode ser aceito como identidade autenticada no mundo real**. Um gateway futuro precisará validar sessão, pertencimento, autorização, elegibilidade e decisão institucional no servidor antes de considerar qualquer fluxo real.
+
+**Proibido aplicar este script a produção sem uma migração aprovada e validação de segurança.** A regra laboratorial de uma amostra por participante não significa que a Megalos aprovou proibição de alteração, identificação do voto, quota ou qualquer outro parâmetro oficial.

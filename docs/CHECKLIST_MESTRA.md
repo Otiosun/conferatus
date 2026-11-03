@@ -608,3 +608,15 @@ No formulário de agendamento, novas programações exigem uma das seis modalida
 - [ ] Registro transacional oficial, autenticação e autorização de servidor, concorrência, auditoria, elegibilidade, sigilo, alteração e contagem institucional dependem da Megalos e da Academy; este módulo NÃO os implementa.
 
 Contagens canônicas inalteradas: 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Main e produção não alteradas.
+
+
+## Etapa 02 — PostgreSQL transacional isolado (experimento de CI; 03/11/2026)
+
+- [x] Preparada uma migração experimental SQL em esquema separado conffratus_vote_lab, com estado inicialmente bloqueado (fixture_enabled=false), participantes fictícios e seis estruturas de voto. Nada é aplicado a produção ou ao cadastro Academy.
+- [x] Uma função SECURITY DEFINER de laboratório serializa operações por votação com SELECT FOR UPDATE, retorna recibos recorded/replayed/conflict/rejected, impede requisição duplicada e inclui gravação de voto e evento de auditoria na mesma transação.
+- [x] A função não é EXECUTE para PUBLIC; papel NOLOGIN do laboratório tem USAGE do esquema e EXECUTE na função, mas sem acesso direto às tabelas. RLS habilitado como defesa adicional; nenhuma identidade oficial é inferida a partir do actor_ref fornecido na simulação.
+- [x] Preparados testes SQL sintéticos para seis modalidades, entradas malformadas, quota, não inscrição, votação fechada, repetição, auditoria e proibição de update/delete; corrida de 12 chamadas iguais, 6 duplicatas distintas e verificação de acesso por papel. CI com PostgreSQL 16 descartável adicionada como bloqueio do build final.
+- [ ] Integração com backend institucional, gateway autenticado Academy, autorização de leitura/escrita, regras aprovadas de eleitor, alteração de voto, sigilo, quórum, política de resultado e encerramento **não implementados**.
+- [ ] Resultados do job postgres-lab precisam ser lidos e eventuais erros corrigidos antes de afirmar validação final.
+
+**Contagem institucional mantida:** Etapa 02 0/4. Não tocar main, produção, banco ativo ou identidades reais.

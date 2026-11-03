@@ -7,7 +7,42 @@ on:
 permissions:
   contents: read
 jobs:
+  postgres-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    # This service is created per run and destroyed afterwards. Never production.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-disposable-only
+          POSTGRES_DB: conffratus_lab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d conffratus_lab"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: ci-disposable-only
+      PGDATABASE: conffratus_lab
+    steps:
+      - uses: actions/checkout@v4
+      - name: PostgreSQL client (CI only)
+        run: command -v psql >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y postgresql-client)
+      - name: Initialize isolated lab schema
+        run: psql -X -v ON_ERROR_STOP=1 -f experimental/postgres/001_vote_lab.sql
+      - name: Six methods, permissions, idempotency and audit tests
+        run: psql -X -v ON_ERROR_STOP=1 -f tests/postgres/voting_lab.sql
+      - name: Concurrent inserts, role denial and transaction integrity
+        run: bash tests/postgres/concurrency.sh
   validate:
+    needs: postgres-lab
     runs-on: ubuntu-24.04
     timeout-minutes: 18
     steps:
