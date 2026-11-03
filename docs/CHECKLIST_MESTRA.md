@@ -76,8 +76,8 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] Revisar responsividade, textos, navegação e fluidez dos fluxos.
 - [ ] Remover controles desnecessários de demonstração da experiência normal.
 - [ ] Consolidar testes e publicar novos builds primeiro em preview, depois no `main`.
-- [ ] Atualizar documentação e preparar a demonstração à Megalos, distinguindo recursos reais dos simulados.
-**Estado:** revisão parcial e contínua; entrega final pendente.
+- [x] Atualizar documentação e preparar a demonstração à Megalos, distinguindo recursos reais dos simulados (`docs/DEMO_GUIDE.md`, revisado em 03/11/2026; não equivale a aceite Megalos).
+**Estado:** 1/5 critérios cumpridos para a prévia demonstrativa; revisão visual, entrega final e promoção à `main` permanecem pendentes.
 
 ## 07 — Perfeccionismo visual, front-end e responsividade absoluta verificável
 
@@ -725,3 +725,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Mantido o layout e o rótulo da ação original onde as referências Megalos ainda aguardam decisão; não inventadas regras institucionais.
 - [x] Reaproveitado o teste `browser_preview_disclosure_v0117.py`, estendido para verificar comportamento normal, reinicialização da escolha e ausência de escrita em `sessionStorage`, além da prévia de agendamento. Agora são 26 suítes selecionadas na CI.
 - [ ] Confirmar CI completa antes de marcar o lote como validado. Nenhuma interação implica voto remoto.
+
+## Etapa 06 — guia vigente de apresentação (03/11/2026)
+
+- [x] O guia antigo v0.6 foi substituído **no mesmo arquivo** `docs/DEMO_GUIDE.md`, sem adicionar documentos redundantes. Contém roteiro verificável do produto atual, modos normal/avançado, limitações de simulação, recuperação local, critérios de QA e decisões D1–D6.
+- [x] `README.md` aponta para o guia vigente. O quinto critério da Etapa 06 está concluído no escopo de **preparação documental**, sem inventar aceite visual ou publicação institucional; **Etapa 06 = 1/5**.
+- [ ] A apresentação à Megalos, feedback/assinatura de aceite, equipamentos reais e eventual promoção à produção seguem fora deste fechamento documental.

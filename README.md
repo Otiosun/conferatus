@@ -50,6 +50,7 @@ Não existem segredos de autenticação para a prévia estática. Testar primeir
 ## Manutenção e próximas etapas
 
 - **`docs/CHECKLIST_MESTRA.md`**: roteiro oficial, estado de cada etapa e pendências.
+- **`docs/DEMO_GUIDE.md`**: roteiro vigente para demonstrar a experiência, separar recursos locais dos institucionais e recolher decisões da Megalos.
 - **`AGENTS.md`**: leis de código humano, preguiça inteligente, fidelidade ao material e entregas verificáveis.
 - **`docs/MODELOS_31_10_NOVAS_TELAS.md`**: descrição dos seis modelos novos e do vídeo de calendário/proposições/Socii.
 - **`docs/CHECKPOINT_V012_2026-11-01.md`**, **`docs/CHECKPOINT_V013_2026-11-01.md`** e **`docs/CHECKPOINT_V014_2026-11-01.md`**: registros recentes dos fluxos testados.
