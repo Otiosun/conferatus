@@ -1057,3 +1057,27 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .local-archive-actions button {min-height:44px;border:1px solid #6c74a3;border-radius:8px;background:white;color:#3444a0;padding:9px 12px;cursor:pointer;font:inherit;font-size:12px;}
 .local-archive-actions button:focus-visible {outline:3px solid #253ba2;outline-offset:2px;}
 .local-archive .local-archive-message {margin-top:10px;font-weight:600;color:#3543a0;}
+
+
+/* Isolated six-mode voting lab, opt-in via ?demo=1. The normal Megalos layout is unchanged. */
+.preview-vote-lab{width:min(100%,780px);box-sizing:border-box;margin:25px auto 36px;padding:20px;background:#f7f8fc;border:1px solid #d3d9eb;border-radius:12px;color:#232c49;font-size:13px;line-height:1.5;overflow-wrap:anywhere;}
+.preview-vote-lab h2{font-size:18px;line-height:1.3;color:#3745a1;margin:0 0 10px;}
+.preview-vote-lab .preview-vote-disclaimer{margin:0 0 16px;color:#4d5878;}
+.preview-vote-lab label{display:flex;flex-direction:column;gap:6px;margin:9px 0;font-weight:600;}
+.preview-vote-lab select,.preview-vote-lab input[type=number]{font:inherit;width:100%;box-sizing:border-box;min-width:0;min-height:44px;padding:8px 12px;border:1px solid #8c96b4;border-radius:8px;background:#fff;color:#232c49;}
+.preview-vote-lab .preview-vote-choice{flex-direction:row;align-items:center;gap:12px;min-height:44px;font-weight:500;padding:5px 3px;margin:2px 0;}
+.preview-vote-lab input[type=radio],.preview-vote-lab input[type=checkbox]{width:20px;height:20px;accent-color:#515dc7;flex:none;}
+.preview-vote-lab .preview-vote-detail{color:#545e80;margin:9px 0 14px;}
+.preview-vote-fieldset{border:0;padding:0;margin:0 0 15px;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.preview-vote-fieldset fieldset{border:0;padding:0;margin:5px 0;min-width:0;}
+.preview-vote-fieldset legend{font-weight:700;padding:0 0 7px;color:#343d70;}
+.preview-vote-fieldset p{color:#4c5673;margin:8px 0;}
+.preview-vote-submit,.preview-vote-secondary{font:inherit;min-height:44px;border-radius:8px;padding:9px 15px;cursor:pointer;}
+.preview-vote-submit{background:#515dc7;color:white;border:1px solid #515dc7;font-weight:700;}
+.preview-vote-submit:disabled{opacity:.52;cursor:not-allowed;}
+.preview-vote-secondary{background:#fff;color:#3848a8;border:1px solid #8794ce;}
+.preview-vote-error{color:#933343;background:#fff2f1;border:1px solid #b75a66;padding:10px;border-radius:8px;font-weight:600;}
+.preview-vote-receipt{border:1px solid #8c9fcb;border-left:4px solid #515dc7;background:#fff;padding:14px;border-radius:6px;line-height:1.5;}
+.preview-vote-receipt p{margin:8px 0 12px;}
+.preview-vote-lab :is(button,select,input):focus-visible,.preview-vote-receipt:focus{outline:3px solid #273f9d;outline-offset:3px;}
+@media(max-width:540px){.preview-vote-lab{margin:20px auto;padding:14px;border-radius:10px;}.preview-vote-lab h2{font-size:16px;}}
