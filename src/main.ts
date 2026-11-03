@@ -48,18 +48,6 @@ const advancedPreview = new URLSearchParams(location.search).get('demo') === '1'
 let lastChange: {memberId: string; acdmId: string | undefined; sectionIds: string[]; role: Member['role']; hadDeliberativeHistory?: boolean; cumulativeVoteWeight?: number} | null = null;
 const initialMembers = new Map(members.map(m=>[m.id,{name:m.name,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory,cumulativeVoteWeight:m.cumulativeVoteWeight}]));
 const demoMembersKey = 'conferatus:demo-members-v07';
-function resetDemoState() {
-  for (const member of members) {
-    const original = initialMembers.get(member.id);
-    if (original) { member.name=original.name; member.acdmId=original.acdmId; member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory;member.cumulativeVoteWeight=original.cumulativeVoteWeight; }
-  }
-  demoVoteId=null; demoExpanded=false; editingMemberId=null; editError=''; lastChange=null;
-  previewMode='binaria';previewVoteError='';previewVoteReceipt=null;previewVoteMemberId='';previewScheduleId=null;scheduleMethod=null;previewSampleLedger.clearAll();previewRequestId=null;
-  rolePreview='diretor'; demoToolsOpen=false; expandedSection=''; expandedActivity='';
-  profileTab='votos'; overviewTab='votos'; overviewExpanded=false; searchExpanded=false; directoryExpanded=false; filter='';
-  try { sessionStorage.removeItem(demoMembersKey); sessionStorage.removeItem('conferatus:demo-vote'); } catch {}
-}
-
 function saveDemoMembers() {
   try {
     sessionStorage.setItem(demoMembersKey, JSON.stringify(members.map(m=>({id:m.id, acdmId:m.acdmId, sectionIds:m.sectionIds,role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory,cumulativeVoteWeight:m.cumulativeVoteWeight}))));

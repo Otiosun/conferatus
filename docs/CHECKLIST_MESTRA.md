@@ -737,3 +737,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] O Gerenciamento Deliberativo passou a declarar explicitamente junto aos controles que edição e rebaixamento são operações sobre dados **fictícios deste navegador**, sem modificar cadastros Academy. A estrutura de botões, hierarquia e ações de demonstração permanecem preservadas.
 - [x] O teste de divulgação também percorre, no modo normal, histórico geral → gerenciamento, verifica o aviso acessível e garante que o painel avançado de desenvolvimento não aparece sem `?demo=1`.
 - [ ] Confirmar o gate completo da branch antes de declarar este lote validado; não implica autorização de um diretor real.
+
+## Código humano — remoção de função não utilizada (03/11/2026)
+
+- [x] Auditoria simples das funções locais encontrou apenas `resetDemoState()` sem chamada. A função morta foi removida, sem criar novo controle ou nova dependência.
+- [x] **Preservado** o snapshot `initialMembers`, que é usado pela ação funcional `reset-admin` na prévia. A limpeza não altera o comportamento de desfazer nem de restaurar os dados administrativos fictícios.
+- [ ] Confirmar build e regressões após a remoção deste protótipo.
