@@ -475,3 +475,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] Login, sessão, vinculação real de cadastro, API da Academy e autorização no servidor requerem a equipe responsável e aprovação explícita. D1–D6 da Megalos permanecem pendentes.
 
 **Contagens após v0.10.50:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; **05=2/4**; 06=0/5; 07=7/12. Sem alteração da `main` ou da produção.
+
+## Etapa 03/04 — navegação de registros locais, prévia v0.10.51 (02/11/2026)
+
+- [x] Vínculos **de sessão** bidirecionais: proposição concluída ou perfil da autora fictícia → programação ativa (seleciona dia e expande a programação); programação vinculada → perfil da autoria demonstrativa (aba de proposições); programação → proposição original permanece operante. Reaproveitados IDs locais existentes, sem alterar esquemas, autenticação, API ou regras.
+- [x] Teste de quatro viewports reproduziu ausência do botão de autoria **antes** e percorreu ida/volta completa **depois**, incluindo cancelamento e isolamento de registros dos demais membros fictícios. TypeScript/build **23/23 Node**, perfil/proposições, retorno calendário, navegação, ACDM ID, smoke e reflow **63/63** passaram. Capturas 390 px revisadas. Checkpoint `docs/CHECKPOINT_V061_2026-11-02.md`.
+- [ ] **Não concluir 03.05/04:** somente a primeira autora sintética da sessão dispõe dessa lista; autoria real multiusuário, colaboração Socii, agendamento institucional, integridade de permissões e aceite Megalos não estão disponíveis. A 07.10 continua aberta; testes físicos também pendentes.
+
+**Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**. A `main` e produção não foram alteradas. Próximo desenvolvimento pode ampliar vínculos dentro da prévia sem inventar identidade ou preferências da Megalos.

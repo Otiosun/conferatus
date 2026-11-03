@@ -11,7 +11,7 @@ Endereço técnico existente: **https://conferatus.pages.dev** (domínio legado,
 - Fluxo demonstrativo de votação e registros, sem integração institucional.
 - Elaboração de proposições, salvamento de rascunhos na sessão quando disponível e confirmação de redação.
 - Socii com participantes de demonstração e progresso de conclusão; não envia convites reais.
-- Calendário mensal, seleção de dias, agendamento demonstrativo e acesso à proposição associada.
+- Calendário mensal, seleção de dias, agendamento demonstrativo e acesso à proposição associada. Na sessão fictícia, também é possível navegar da programação ao perfil da autora demonstrativa e do perfil/proposição à programação ativa; itens cancelados deixam de aparecer como ativos.
 
 **Não é um sistema de votação real:** não há autenticação Academy, banco de dados compartilhado, cadastro institucional nem colaboração entre contas. Os dados de exemplo são sintéticos. As alterações ficam apenas no navegador e podem desaparecer ao encerrar a sessão. O ACDM ID na interface não comprova identidade.
 

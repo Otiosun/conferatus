@@ -224,7 +224,7 @@ function profilePage() {
  const activeTab: Tab = personalVotingHistory ? profileTab : 'proposicoes';
  const relevant=activities.filter(a=>a.memberId===member.id && a.type===(activeTab==='votos'?'voto':'proposicao'));
  const local=member.id===members[0]?.id && activeTab==='proposicoes'
-  ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button></article>`).join('') : '';
+  ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button>${linkedScheduleButtons(d)}</article>`).join('') : '';
  return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
  ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}<h2 class="session-proposals-heading">Histórico demonstrativo</h2>`:''}
  ${relevant.length?relevant.map(activityItem).join(''):'<p class="status-line">Nenhum registro encontrado.</p>'}</section>`;
@@ -393,11 +393,17 @@ function selectOptions(selected:string,items:{id:string;name:string}[]){return i
 function draftReady(d:Draft){return d.authorComplete&&d.partners.every(p=>p.complete);}
 function draftStatusLabel(d:Draft){return d.status==='concluida'?'Concluída':d.status==='revisao'?(d.authorComplete?'Aguardando Socii':'Aguardando autoria'):'Em redação';}
 function friendlyStamp(date:string){const parsed=new Date(date);return Number.isNaN(parsed.getTime())?'Data não definida':parsed.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});}
+// Session proposals are authored by the preview's lead fixture member, NOT by
+// an authenticated Academy account. Show only active, already-linked schedules.
+function linkedScheduleButtons(d:Draft) {
+ const linked=schedule.filter(item=>item.proposalId===d.id&&item.status==='programada');
+ return linked.length?`<div class="session-schedule-links" role="group" aria-label="Programações locais desta proposição">${linked.map(item=>`<button type="button" class="session-schedule-link" data-linked-schedule="${escapeHTML(item.id)}">Programação: ${escapeHTML(item.title)} · ${friendlyStamp(item.start)} (prévia local)</button>`).join('')}</div>`:'';
+}
 function proposalsPage(){
  const author=members[0];
  const examples=activities.filter(a=>a.type==='proposicao' && a.memberId===author?.id).slice(0,4);
  return `${header(undefined,undefined,false)}<div class="workflow-profile">${author?memberHeader(author,'proposicoes',false):''}<div class="tabs workflow-tabs" role="group" aria-label="Histórico do membro"><button class="tab" type="button" data-route="profile" aria-label="Consultar histórico de votação">Histórico de votações</button><span class="tab" aria-current="page">Proposições e Socii</span></div></div>
-  <div class="workflow-layout workflow-proposals-layout">${savedRecordNotice()}${drafts.length?'<h2 class="workflow-record-heading">Proposições desta sessão</h2>':''}${drafts.length?drafts.map(d=>`<article class="workflow-record"><button data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${d.partners.length?`<p class="workflow-partners"><strong>Concluíram ${Number(d.authorComplete)+d.partners.filter(p=>p.complete).length} de ${d.partners.length+1}</strong><span>Autoria: ${d.authorComplete?'concluída':'pendente'} · Socii: ${d.partners.map(p=>`${escapeHTML(members.find(m=>m.id===p.id)?.name??'Membro')} (${p.complete?'concluiu':'pendente'})`).join(', ')}</span></p>`:''}${advancedPreview&&d.partners.some(p=>!p.complete)?d.partners.filter(p=>!p.complete).map(p=>`<button class="workflow-demo-confirm" data-confirm-partner="${escapeHTML(d.id)}:${escapeHTML(p.id)}">Simular conclusão de ${escapeHTML(members.find(m=>m.id===p.id)?.name??'participante')}</button>`).join(''):''}</article>`).join(''):''}
+  <div class="workflow-layout workflow-proposals-layout">${savedRecordNotice()}${drafts.length?'<h2 class="workflow-record-heading">Proposições desta sessão</h2>':''}${drafts.length?drafts.map(d=>`<article class="workflow-record"><button data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${linkedScheduleButtons(d)}${d.partners.length?`<p class="workflow-partners"><strong>Concluíram ${Number(d.authorComplete)+d.partners.filter(p=>p.complete).length} de ${d.partners.length+1}</strong><span>Autoria: ${d.authorComplete?'concluída':'pendente'} · Socii: ${d.partners.map(p=>`${escapeHTML(members.find(m=>m.id===p.id)?.name??'Membro')} (${p.complete?'concluiu':'pendente'})`).join(', ')}</span></p>`:''}${advancedPreview&&d.partners.some(p=>!p.complete)?d.partners.filter(p=>!p.complete).map(p=>`<button class="workflow-demo-confirm" data-confirm-partner="${escapeHTML(d.id)}:${escapeHTML(p.id)}">Simular conclusão de ${escapeHTML(members.find(m=>m.id===p.id)?.name??'participante')}</button>`).join(''):''}</article>`).join(''):''}
  ${examples.length?'<h2 class="workflow-record-heading">Histórico demonstrativo</h2>':''}${examples.map(activityItem).join('')}
  </div><div class="workflow-actions"><button type="button" class="workflow-outline" data-action="invite-socii" aria-expanded="${inviteOpen}" ${inviteOpen?'aria-controls="invite-socii-form"':''}>Convidar para Socii</button>${inviteOpen?`<form id="invite-socii-form" class="workflow-inline" aria-label="Adicionar participante Socii (prévia local)"><label>Proposição<select name="draftId" required>${drafts.filter(d=>d.status!=='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label><label>Participante<select name="memberId" required><option value="" selected disabled>Selecione uma pessoa</option>${selectOptions('',members.slice(1))}</select></label><button class="workflow-primary" ${!drafts.some(d=>d.status!=='concluida')?'disabled':''}>Adicionar participante</button></form>`:''}
  <button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>
@@ -424,7 +430,7 @@ function composePage(){
 }
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
- if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p><button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':'Voltar às proposições'}</button></div></div>`;
+ if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':'Voltar às proposições'}</button></div></div>`;
  return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
  <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
@@ -458,7 +464,7 @@ function calendarPage(){
  <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
  ${workflowNotice?`<p class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
- ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
+ ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria (prévia local)</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -645,6 +651,22 @@ document.addEventListener('click',(event)=>{
  }
  const dayEl=target.closest<HTMLElement>('[data-calendar-day]');
  if(dayEl?.dataset.calendarDay){selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();announceCalendarView();return;}
+ const linkedScheduleEl=target.closest<HTMLElement>('[data-linked-schedule]');
+ if(linkedScheduleEl?.dataset.linkedSchedule){
+  const linked=schedule.find(item=>item.id===linkedScheduleEl.dataset.linkedSchedule&&item.status==='programada'&&drafts.some(d=>d.id===item.proposalId));
+  if(linked){
+   const day=new Date(`${linked.start.slice(0,10)}T12:00:00`);
+   calendarYear=day.getFullYear();calendarMonth=day.getMonth();
+   selectedCalendarDay=linked.start.slice(0,10);expandedSchedule=linked.id;
+   navigate('calendar');
+  }
+  return;
+ }
+ if(target.closest('[data-open-proposal-author]')){
+  const author=members[0];
+  if(author){currentMember=author.id;profileTab='proposicoes';navigate('profile',author.id);}
+  return;
+ }
  const draftEl=target.closest<HTMLElement>('[data-draft]');
  if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo='proposals';draftForm={title:d.title,body:d.body};composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
  const scheduleEl=target.closest<HTMLElement>('[data-schedule]');

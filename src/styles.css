@@ -998,3 +998,14 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .profile-identity .profile-reference {font-size:12px;line-height:1.4;overflow-wrap:anywhere;}
 .profile-reference-link {color:#4754b2;text-decoration:underline;text-underline-offset:2px;display:inline-flex;align-items:center;min-height:44px;}
 .profile-reference-link:focus-visible {outline:2px solid #34419e;outline-offset:3px;}
+
+
+/* Preview-only record navigation: visible separate from historical fixtures. */
+.session-schedule-links {display:flex;flex-direction:column;gap:4px;margin:6px 0 9px;min-width:0;}
+.session-schedule-link {display:flex;align-items:center;justify-content:flex-start;width:100%;min-height:44px;padding:9px 12px;text-align:left;border:1px solid #c3cae8;border-radius:8px;background:#eef0fb;color:#36468c;font:inherit;font-size:12px;line-height:1.5;overflow-wrap:anywhere;cursor:pointer;}
+.session-schedule-link:hover {background:#e2e7fa;}
+.session-schedule-link:focus-visible {outline:2px solid #34419e;outline-offset:2px;}
+/* Profile cards also use .activity-proposal; override that older generic button
+   style so the secondary schedule action stays secondary, not a blue CTA. */
+.session-proposal .session-schedule-link {margin:0;background:#eef0fb;color:#36468c;border:1px solid #c3cae8;border-radius:8px;padding:9px 12px;font-size:12px;}
+.session-proposal .session-schedule-link:hover {background:#e2e7fa;}
