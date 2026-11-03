@@ -39,8 +39,12 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f experimental/postgres/001_vote_lab.sql
       - name: Six methods, permissions, idempotency and audit tests
         run: psql -X -v ON_ERROR_STOP=1 -f tests/postgres/voting_lab.sql
+      - name: Adversarial JSON, numerical overflow and option-integrity rejection
+        run: psql -X -v ON_ERROR_STOP=1 -f tests/postgres/adversarial.sql
       - name: Concurrent inserts, role denial and transaction integrity
         run: bash tests/postgres/concurrency.sh
+      - name: Audit fault injection and full rollback check
+        run: psql -X -v ON_ERROR_STOP=1 -f tests/postgres/atomicity.sql
   validate:
     needs: postgres-lab
     runs-on: ubuntu-24.04

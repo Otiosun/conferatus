@@ -13,6 +13,17 @@ if query 'SET ROLE conffratus_lab_gateway; SELECT count(*) FROM conffratus_vote_
   echo "FAIL: gateway unexpectedly has direct vote-table access" >&2
   exit 1
 fi
+if query "SET ROLE conffratus_lab_guest; SELECT conffratus_vote_lab.record_fixture_vote(
+  '$ballot','race_one','$request','{\"selected\":\"a\"}'::jsonb
+)->>'status';" >"$temp_dir/guest.out" 2>"$temp_dir/guest.err"; then
+  echo "FAIL: unprivileged test role invoked voting gateway" >&2
+  exit 1
+fi
+if ! grep -qi "permission denied" "$temp_dir/guest.err"; then
+  echo "FAIL: guest denial had unexpected error" >&2
+  cat "$temp_dir/guest.err" >&2
+  exit 1
+fi
 if ! grep -qi "permission denied" "$temp_dir/denied.err"; then
   echo "FAIL: expected permission error" >&2
   cat "$temp_dir/denied.err" >&2

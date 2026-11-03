@@ -620,3 +620,12 @@ Contagens canônicas inalteradas: 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0
 - [ ] Resultados do job postgres-lab precisam ser lidos e eventuais erros corrigidos antes de afirmar validação final.
 
 **Contagem institucional mantida:** Etapa 02 0/4. Não tocar main, produção, banco ativo ou identidades reais.
+
+## SQL experimental — fortalecimento de testes (03/11/2026)
+
+- [x] Acrescentados casos adversariais para JSON com campos ausentes, arrays de tipos incorretos, alternativas duplicadas, modalidade binária incompatível, escala fora do limite, quota cumulativa negativa/fracionária/excessiva, números enormes e identificador malformado. Falhas não podem inserir votos nem registros de auditoria.
+- [x] Adicionada injeção de falha controlada depois da inserção do voto e durante a escrita de auditoria; a transação deve reverter completamente. A repetição posterior com nova chave deve ser aceita. Uso exclusivo em PostgreSQL descartável.
+- [x] A verificação SQL agora condiciona o job de compilação e navegação; o banco do CI é destruído após a execução. Nenhuma credencial institucional existe nos testes.
+- [ ] Executar, inspecionar logs e corrigir antes de chamar este lote de validado.
+
+Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branch main.
