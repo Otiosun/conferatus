@@ -6,6 +6,8 @@ import { exportWorkflowArchive, parseWorkflowArchive, WORKFLOW_ARCHIVE_MAX_BYTES
 import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight, PREVIEW_BINARY_OPTIONS, PREVIEW_LIST_OPTIONS, validatePreviewVote, summarizePreviewVotes } from './domain/rules.js';
 import type { PreviewVote } from './domain/rules.js';
 import { createPreviewSampleLedger } from './domain/preview-ledger.js';
+import { isValidPreviewChoices, isSavedDraft, cleanDraftRecord, cleanScheduleRecord, isRestorableSchedule, uniqueSavedRecords, nextLocalRecordId } from './domain/workflow-records.js';
+import type { ProposalType, Draft, PreviewChoice, Deliberation } from './domain/workflow-records.js';
 import type { Activity, Member, DeliberationMethod } from './domain/types.js';
 
 type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance' | 'calendar' | 'proposals' | 'compose' | 'review';
@@ -385,21 +387,6 @@ function governancePage() {
 }
 
 // Only the preview data changes here. Authentication and shared records remain external.
-type ProposalType = 'PDR' | 'PR' | 'Ofício';
-type Draft = {id:string;title:string;body:string;sectionId:string;type:ProposalType;authorComplete:boolean;partners:{id:string;complete:boolean}[];status:'redacao'|'revisao'|'concluida'};
-type PreviewChoice = {id:string;label:string};
-type Deliberation = {id:string;title:string;objective:string;proposalId:string;sectionId:string;start:string;end:string;type:string;method?:DeliberationMethod;choices?:PreviewChoice[];status:'programada'|'cancelada'};
-function isValidPreviewChoices(value:unknown):value is PreviewChoice[] {
- if(!Array.isArray(value)||value.length<2||value.length>8)return false;
- const labels=new Set<string>();
- return value.every((choice,index)=>{
-  if(!choice||typeof choice!=='object'||Array.isArray(choice))return false;
-  const item=choice as Record<string,unknown>;
-  if(item.id!==`opt-${index+1}`||typeof item.label!=='string'||!item.label.trim()||item.label!==item.label.trim()||item.label.length>80)return false;
-  const key=searchKey(item.label);if(labels.has(key))return false;
-  labels.add(key);return true;
- });
-}
 const draftKey='conferatus:proposals-v010';
 const deliberationKey='conferatus:deliberations-v010';
 // Keep the original bytes of a legacy entry that cannot be interpreted as an array.
@@ -413,86 +400,22 @@ function readSessionRecords(key:string):{records:unknown[];unreadableRaw:string|
   return Array.isArray(parsed)?{records:parsed,unreadableRaw:null}:{records:[],unreadableRaw:raw};
  }catch{return {records:[],unreadableRaw:raw};}
 }
-// Session storage is untrusted input, including incomplete records from older previews.
-// Reuse the same selectable sections as the existing review/scheduling forms.
-// This is a reference check for the local fixture, not an authorization rule.
-function knownDeliberativeSection(id:unknown):boolean{
- return typeof id==='string'&&sections.some(s=>s.id===id&&s.category==='deliberativa');
-}
-// Keep good records usable instead of letting a single malformed entry break a whole view.
-function isSavedDraft(value:unknown):value is Draft{
- if(!value||typeof value!=='object'||Array.isArray(value))return false;
- const d=value as Record<string,unknown>;
- return typeof d.id==='string'&&!!d.id&&typeof d.title==='string'&&typeof d.body==='string'&&
-  typeof d.sectionId==='string'&&['PDR','PR','Ofício'].includes(String(d.type))&&
-  typeof d.authorComplete==='boolean'&&['redacao','revisao','concluida'].includes(String(d.status))&&
-  Array.isArray(d.partners)&&d.partners.every((p:unknown)=>{
-   if(!p||typeof p!=='object'||Array.isArray(p))return false;
-   const partner=p as Record<string,unknown>;
-   return typeof partner.id==='string'&&members.some(m=>m.id===partner.id)&&
-    typeof partner.complete==='boolean';
-  })&&new Set((d.partners as {id:string}[]).map(p=>p.id)).size===d.partners.length&&
-  // Apply the preview's existing author/participant distinction to restored data too.
-  // A local author cannot sign twice by also appearing as their own Socii.
-  !(d.partners as {id:string}[]).some(p=>p.id===members[0]?.id)&&
-  // Keep legitimate partial drafts, but review/completion must satisfy the
-  // same title/body limits enforced when leaving the editor.
-  (d.status==='redacao'||(d.title.trim().length>=3&&d.body.trim().length>=20&&
-    knownDeliberativeSection(d.sectionId)))&&
-  // A legacy or damaged record must not claim completion without every signoff.
-  !(d.status==='concluida'&&(!d.authorComplete||(d.partners as {complete:boolean}[]).some(p=>!p.complete)));
-}
-// Export/import only the documented synthetic fields, even if a legacy local
-// storage object contains unrelated properties. Never include tokens, votes or
-// administrative simulation state in a downloaded workflow file.
-function cleanDraftRecord(d:Draft):Draft{
- return {id:d.id,title:d.title,body:d.body,sectionId:d.sectionId,type:d.type,
-  authorComplete:d.authorComplete,partners:d.partners.map(p=>({id:p.id,complete:p.complete})),status:d.status};
-}
-function cleanScheduleRecord(s:Deliberation):Deliberation{
- return {id:s.id,title:s.title,objective:s.objective,proposalId:s.proposalId,
-  sectionId:s.sectionId,start:s.start,end:s.end,type:s.type,...(s.method?{method:s.method}:{}),
-  ...(s.choices?{choices:s.choices.map(c=>({id:c.id,label:c.label}))}:{}),status:s.status};
-}
-function isSavedSchedule(value:unknown):value is Deliberation{
- if(!value||typeof value!=='object'||Array.isArray(value))return false;
- const item=value as Record<string,unknown>;
- return typeof item.id==='string'&&!!item.id&&typeof item.title==='string'&&
-  typeof item.objective==='string'&&typeof item.proposalId==='string'&&typeof item.sectionId==='string'&&
-  typeof item.start==='string'&&typeof item.end==='string'&&
-  !Number.isNaN(Date.parse(item.start))&&!Number.isNaN(Date.parse(item.end))&&
-  Date.parse(item.start)<Date.parse(item.end)&&
-  ['PDR','PR','Ofício'].includes(String(item.type))&&
-   (item.method===undefined||isDeliberationMethod(item.method))&&
-   (item.choices===undefined||isValidPreviewChoices(item.choices))&&
-   (item.choices===undefined||item.method!=='binaria')&&
-   ['programada','cancelada'].includes(String(item.status));
-}
+// The fixture references are stable; membership changes never create new identities.
+const workflowValidation = {
+ memberIds: new Set(members.map(member => member.id)),
+ deliberativeSectionIds: new Set(sections.filter(section => section.category === 'deliberativa').map(section => section.id)),
+ authorId: members[0]?.id
+};
+const isSavedLocalDraft = (value: unknown): value is Draft => isSavedDraft(value, workflowValidation);
 const draftRestore=readSessionRecords(draftKey);
 const scheduleRestore=readSessionRecords(deliberationKey);
 const savedDrafts=draftRestore.records;
 const savedSchedule=scheduleRestore.records;
-// A duplicated ID can misdirect an action to another record. Keep the first valid
-// occurrence, quarantine later ones, and preserve their original content before saving.
-function uniqueSavedRecords<T extends {id:string}>(items:unknown[],valid:(value:unknown)=>value is T){
- const seen=new Set<string>(),accepted:T[]=[],rejected:unknown[]=[];
- for(const item of items){
-  if(valid(item)&&!seen.has(item.id)){seen.add(item.id);accepted.push(item);}
-  else rejected.push(item);
- }
- return {accepted,rejected};
-}
-const restoredDrafts=uniqueSavedRecords(savedDrafts,isSavedDraft);
+const restoredDrafts=uniqueSavedRecords(savedDrafts,isSavedLocalDraft);
 const drafts:Draft[]=restoredDrafts.accepted;
-// An active local schedule cannot point at a draft that still needs approval,
-// or at a section unavailable in the same demo. Keep cancelled history intact.
-// An unavailable older proposal is retained and shown explicitly as missing.
-function isRestorableSchedule(value:unknown, candidateDrafts:readonly Draft[]=drafts):value is Deliberation{
- return isSavedSchedule(value)&&(value.status==='cancelada'||
-  (knownDeliberativeSection(value.sectionId)&&
-   !candidateDrafts.some(d=>d.id===value.proposalId&&d.status!=='concluida')));
-}
-const restoredSchedule=uniqueSavedRecords(savedSchedule,isRestorableSchedule);
+const isRestorableLocalSchedule = (value: unknown, candidateDrafts: readonly Draft[] = drafts): value is Deliberation =>
+ isRestorableSchedule(value, candidateDrafts, workflowValidation.deliberativeSectionIds);
+const restoredSchedule=uniqueSavedRecords(savedSchedule,isRestorableLocalSchedule);
 const schedule:Deliberation[]=restoredSchedule.accepted;
 // A failed cancellation is kept in this tab, but must never be presented as saved.
 const cancellationSaveWarning='Programação cancelada somente nesta aba: não foi possível salvar. Ao recarregar, a programação poderá reaparecer.';
@@ -507,15 +430,6 @@ const ignoredRecordsBackup={drafts:restoredDrafts.rejected,schedule:restoredSche
 const ignoredSavedRecords=ignoredRecordsBackup.drafts.length>0||ignoredRecordsBackup.schedule.length>0||
  draftRestore.unreadableRaw!==null||scheduleRestore.unreadableRaw!==null;
 function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos ou repetidos desta prévia local não foram carregados.</p>':'';}
-// IDs are local opaque references. A clock tick alone is not unique: two
-// actions can occur in the same millisecond (or the clock can move backwards).
-// Check the records already in this session before using an ID for a new link.
-function nextLocalRecordId(prefix:'draft'|'sched', records:{id:string}[]):string {
- const base=`${prefix}-${Date.now().toString(36)}`;
- let candidate=base, suffix=1;
- while(records.some(record=>record.id===candidate))candidate=`${base}-${suffix++}`;
- return candidate;
-}
 const blankDraft=()=>({title:'',body:''});
 let draftForm=blankDraft();
 let currentDraftId='';
@@ -1051,9 +965,9 @@ document.addEventListener('change',async event=>{
  try{text=await file.text();}catch{report('Não foi possível ler o arquivo selecionado.');return;}
  const parsed=parseWorkflowArchive(text);
  if(!parsed.ok){report(parsed.error);return;}
- const items=uniqueSavedRecords(parsed.archive.drafts,isSavedDraft);
+ const items=uniqueSavedRecords(parsed.archive.drafts,isSavedLocalDraft);
  const validatedDrafts=items.accepted.map(cleanDraftRecord);
- const appointments=uniqueSavedRecords(parsed.archive.schedule,(value):value is Deliberation=>isRestorableSchedule(value,validatedDrafts));
+ const appointments=uniqueSavedRecords(parsed.archive.schedule,(value):value is Deliberation=>isRestorableLocalSchedule(value,validatedDrafts));
  if(items.rejected.length||appointments.rejected.length){
   report('A cópia contém registros inválidos ou IDs repetidos. Nada foi substituído.');return;
  }

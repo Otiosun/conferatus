@@ -657,3 +657,12 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Cancelar uma programação local ativa invalida as amostras e o contexto de votação associados a ela, sem afetar outros contextos. Uma restauração de arquivo **bem-sucedida** limpa recibos e amostras anteriores, pois os IDs/alternativas importados podem ser diferentes. Restaurações recusadas ou revertidas preservam o estado anterior.
 - [x] Regressões Chromium adicionadas às jornadas de calendário e backup/restauração em 4 e 5 larguras, respectivamente. Confirmar resultado de execução no CI antes de aprovar este checkpoint.
 - [ ] As operações são locais; nenhuma regra institucional de cancelamento ou apuração foi presumida.
+
+## Código humano / preguiça inteligente — validação de registros locais (03/11/2026)
+
+- [x] Validação, limpeza de arquivos locais, detecção de IDs duplicados e geração de IDs extraídas do `src/main.ts` para `src/domain/workflow-records.ts`, com nomes explícitos e nenhuma dependência nova. O frontend continua em TypeScript/HTML/CSS puro.
+- [x] O contexto de validação da prévia é passado explicitamente: IDs de membros sintéticos, seções deliberativas e autoria local. Não há autorização Academy implícita.
+- [x] Testes Node adicionados para assinaturas, estados, opções personalizadas, propostas e programações restauradas, cópias limpas, duplicatas e colisões de ID. Build/Chromium do checkpoint ainda precisam ser verificados.
+- [ ] A reorganização não é reescrita integral da UI: outros trechos extensos do `src/main.ts` merecem refinamento pontual **somente** quando houver melhoria de legibilidade ou defeito demonstrado. Nada de novos frameworks, microserviços ou infraestrutura sem necessidade.
+
+**Contagens canônicas preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Sem alteração da `main`.
