@@ -675,3 +675,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [ ] A vinculação multiusuário real continua fora do escopo desta prévia e dependerá da Academy.
 
 **Contagens oficiais ainda não são alteradas por esta correção de coerência da prévia.**
+
+## Qualidade de entrega — ampliação do teste contínuo (03/11/2026)
+
+- [x] A CI passou a executar também as jornadas de perfis/proposições, navegação por autoria, Socii, integridade da revisão, falhas de gravação, foco do teclado e stress de reflow/zoom sintético. Total: 12 suítes Chromium, além dos testes Node e PostgreSQL.
+- [ ] As sete suítes extras só serão tratadas como aprovadas depois de execução completa na branch de prévia; nenhum motor/dispositivo real adicional foi simulado.
+- [ ] Não equivale a conformidade integral WCAG nem aceite visual da Megalos; a matriz objetiva será ampliada sem inventar aprovação das regras institucionais.

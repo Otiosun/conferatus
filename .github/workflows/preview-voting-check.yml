@@ -76,7 +76,14 @@ jobs:
             tests/browser_calendar_return_v0120.py \
             tests/browser_stage7_advanced_controls_v0132.py \
             tests/browser_restored_links_integrity_v0157.py \
-            tests/browser_local_archive_v0158.py; do
+            tests/browser_local_archive_v0158.py \
+            tests/browser_profile_proposals_v013.py \
+            tests/browser_local_author_schedule_links_v0151.py \
+            tests/browser_socii_explicit_choice_v0122.py \
+            tests/browser_review_metadata_integrity_v0119.py \
+            tests/browser_workflow_save_failures_v0155.py \
+            tests/browser_stage7_keyboard_focus_v0139.py \
+            tests/browser_stage7_zoom_reflow_v0135.py; do
             echo "Checking $script"
             python "$script" || failed=1
           done
