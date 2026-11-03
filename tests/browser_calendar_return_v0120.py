@@ -49,8 +49,10 @@ with sync_playwright() as p:
         assert 'Não alteram os indicadores' in page.locator('.overview-local-disclosure').inner_text(),width
         local.locator('[data-linked-schedule]').click()
         assert page.evaluate('location.hash')=='#/calendar',width
-        item=page.locator('.calendar-item').filter(has_text='Programação ligada à proposição')
-        if not item.locator('[data-preview-schedule]').is_visible(): item.locator('[data-schedule]').click()
+        # Hash navigation rerenders asynchronously. Wait for the expanded item
+        # rather than clicking its toggle before the route has rendered.
+        page.locator('.calendar-item--expanded').filter(has_text='Programação ligada à proposição').wait_for(state='visible')
+        item=page.locator('.calendar-item--expanded').filter(has_text='Programação ligada à proposição')
         item.locator('[data-preview-schedule]').click()
         assert page.evaluate('location.hash') == '#/ballot', (width,'did not navigate to linked sandbox ballot')
         assert page.locator('#preview-vote-method').input_value() == 'nominal', width

@@ -21,7 +21,7 @@
 - [x] **07.04 — Tipografia legível e conteúdo extremo:** textos muito longos, palavras sem separação, nomes extensos, dados ausentes, erros e validação, quebra sem sobreposição; evitar microtipografia em telas compactas.
 - [ ] **07.05 — Zoom/reflow acessível:** 200% de texto e 400% de zoom onde aplicável, equivalência a viewport CSS de 320 px conforme WCAG; nenhuma perda funcional ou scroll bidirecional indevido.
 - [ ] **07.06 — Telas compactas completas:** 280/320/360/390 px, orientação, altura curta, teclado virtual e safe-area; testar fluxos inteiros em vez de só página inicial.
-- [ ] **07.07 — Tablets 600–1024 px:** retrato, paisagem, distribuição de colunas e densidade; evitar interface apenas de celular aumentada.
+- [x] **07.07 — Tablets 600–1024 px:** retrato, paisagem, distribuição de colunas e densidade; evitar interface apenas de celular aumentada.
 - [x] **07.08 — Desktop largo 1280–1920 px:** composição intencional e leitura confortável, foco/hover coerentes, sem esticar o mockup nem desperdiçar a área de forma acidental.
 - [x] **07.09 — Teclado e foco (prévia Chromium offline):** Tab/Shift+Tab, Enter, Escape, menus, formulários, revisão, seleção e retorno do foco; 114/114 verificações de regressão. Outros motores/leitores de tela/hardware real permanecem sob 07.10 e 07.12.
 - [ ] **07.10 — Acessibilidade e legibilidade:** contraste, rótulos, semântica, mensagens de erro/estado, leitores de tela, reduced motion e WCAG 2.2 AA nos critérios aplicáveis, com evidência e exceções.

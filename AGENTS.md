@@ -28,20 +28,33 @@ Versão 1.0 — 28/10/2026. Este arquivo foi preparado para virar `AGENTS.md` na
 19. **Sem sobreengenharia em antecipação.** Pontos de extensão pequenos e reais; não criar plugins, eventos distribuídos, abstrações de banco e escalabilidade imaginária para cenários hipotéticos.
 20. **Qualidade proporcional ao risco.** Desenhos experimentais podem ser protótipos; voto, autenticação, permissão, cargo e dados pessoais nunca são protótipos disfarçados de produção.
 
-## Stack de partida
-- TypeScript strict, React, Vite, React Router (modo simples), Tailwind.
-- shadcn/ui somente onde poupar trabalho e puder ser restilizado fielmente.
-- TanStack Query quando houver sincronização de dados assíncronos.
-- Supabase/PostgreSQL para dados próprios do CONFFRATUS, provisoriamente; compatibilidade com cadastro institucional via `MemberProvider`.
-- Operações críticas por função transacional no Postgres ou endpoint de servidor; nunca implementação exclusiva no cliente.
-- Vitest para lógica e Playwright para jornadas mobile, visual regression e autorizações.
-- Publicação de preview como frontend estático; hospedar produção apenas após revisão de requisitos e custos.
+## Stack vigente e escopo de entrega
+
+- Aplicação HTML, CSS e TypeScript strict, sem framework. Reutilizar módulos, estilos e controles que já funcionam.
+- Testes Node nativos, Playwright e GitHub Actions. PostgreSQL é um **laboratório descartável** de CI, não um serviço da aplicação pública.
+- O entregável da nossa equipe é a experiência CONFFRATUS coerente e integralmente testada com dados sintéticos: telas, calendário, proposições, Socii, históricos e seis formulários demonstrativos de voto.
+- Autenticação Academy, contas, identidades reais, autorização institucional, banco compartilhado e integração efetiva **pertencem à equipe responsável da Academy**, não devem virar bloqueio artificial para finalizar nossa prévia.
+- Preparar contratos claros de integração, mas **não desenvolver outro login, gateways de produção, infra redundante nem políticas eleitorais não aprovadas**.
+- A prévia pode ser homologada como produto demonstrativo; nunca chamar de sistema institucional integrado ou pronto para registrar votos reais.
+
+## Gates operacionais das 20 leis
+
+1. **Código humano:** preferir funções pequenas, nomes claros e fluxo previsível. Nunca minificar a fonte ou comprimir várias decisões de negócio numa linha para economizar espaço. Separar validação pura da renderização quando isso realmente reduzir acoplamento. Não reescrever a aplicação por estética arquitetural.
+2. **Preguiça inteligente:** antes de adicionar arquivo, dependência ou camada, demonstrar por que uma função ou componente existente não resolve. Manter zero dependências de runtime enquanto a prévia puder usar APIs nativas.
+3. **Fidelidade com evidência:** não alterar a composição do material Megalos para agradar gosto pessoal. Mudanças de comportamento/identidade aguardam D1–D6; correções objetivas de bugs e acessibilidade podem avançar com regressão.
+4. **Integridade de sessão:** todo estado criado pelo usuário deve sobreviver a navegação e falhas tratáveis; rejeitar importações inválidas; alterações locais que não puderem ser persistidas devem dizer a verdade e permitir recuperação. Nunca misturar amostras de voto com registros históricos fictícios.
+5. **Sem funcionalidade cenográfica:** botão sem efeito, texto que finge autenticação, confirmação de Socii real ou resultado de votação institucional são defeitos. A ação deve funcionar ou estar claramente indisponível.
+6. **Acessibilidade verificável:** validar teclado e foco após atualizações do DOM, tela estreita, zoom e textos longos, rótulos, mensagens de erro e contraste. Não afirmar certificação WCAG sem auditoria e hardware.
+7. **Privacidade e segurança:** fixture sempre sintética; nenhuma chave real, dado Academy, arquivo original privado ou log sensível no bundle. Fronteiras externas negam acesso até autenticação e autorização confirmadas pelos responsáveis.
+8. **Sem progresso inventado:** todo item concluído exige teste verificável e rastreável; contagens da checklist devem bater com os marcadores [x]. Diferenciar **implementado**, **CI aprovada**, **homologado pela Megalos** e **publicado**.
+9. **Custo/produção:** mudanças somente na branch de prévia e CI isolada; nunca mesclar, publicar, alterar PM2, banco ativo, Cloudflare ou identidade Academy por iniciativa própria.
+10. **Entrega responsável:** priorizar defeitos reais, fluxos incompletos e documentação de handoff. Experimentos técnicos sem relação direta com a entrega não passam à frente do produto.
 
 ## Processo obrigatório por tarefa
 1. Ler plano, materiais e o código existente. Distinguir **confirmado**, **hipótese** e **pendente**.
 2. Explicar em 3–6 linhas o objetivo, os arquivos impactados e como verificar.
 3. Implementar a menor alteração coerente; reutilizar componentes e modelos públicos.
-4. Executar typecheck, lint, testes relevantes e, quando UI, screenshot de celular comparado com a referência.
+4. Executar `npm run build` (TypeScript + testes Node), suítes Playwright pertinentes e, quando UI, capturas de tela comparadas com as referências disponíveis. Não declarar lint executado sem script de lint.
 5. Revisar acesso a dados, erros e regressões; reportar falhas reais sem esconder.
 6. Commit pequeno com descrição, checklist de aceite e links para evidências.
 

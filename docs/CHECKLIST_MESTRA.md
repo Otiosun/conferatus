@@ -1,6 +1,6 @@
 # CONFFRATUS — Checklist-mestra de execução
 
-Atualização de referência: 01/11/2026
+Atualização de referência: 03/11/2026
 Responsável pelo acompanhamento: desenvolvimento CONFFRATUS
 Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alterações de produção. Última prévia funcional confirmada remotamente antes desta rodada: `preview/v0.10.22-socii-explicit-choice` (`8023643`, Cloudflare `completed/success`). A v0.10.20 restaurou o retorno contextual do calendário. A v0.10.21 corrigiu gravação local parcial por reversão de melhor esforço. A v0.10.22 corrige a seleção implícita do primeiro participante na inclusão do Socii; agora o campo exige escolha explícita via validação HTML nativa. A v0.10.23 é **somente documentação de validação Megalos**: seis capturas comparadas às seis imagens originais, PDF de 7 páginas e decisões D1-D6; nenhum código de produto alterado, nenhum aceite presumido. A v0.10.24 acrescenta auditoria temporal de 54,66 s do vídeo original, sem modificar o produto: a faixa Socii aparece também na revisão, há duas variantes visíveis de confirmação sem regra conhecida, e Ofício já está contemplado na prévia. Nenhuma regra institucional ou integração foi inventada. A Etapa 04 continua ativa (17/22 subitens), com cinco critérios centrais pendentes; votação, Academy e Socii continuam exclusivamente demonstrativos.
 
@@ -86,17 +86,17 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [x] **07.01** Reflow inicial: 7 rotas × 9 larguras 280–1440px, 63/63 sem rolagem horizontal/clipping (Chromium offline; não todos os estados).
 - [x] **07.02** Alvo de toque Buscar: reproduzido com 18px de altura; corrigido para 44px em 280–540px sem cobrir a primeira linha, toque e filtro testados em 5 larguras.
 - [x] **07.03** Auditoria da prévia offline: inventário dos controles mapeados, dimensões e estados dinâmicos; 19 estados × 9 larguras, 2.769 observações, com exceções documentadas dos dias de calendário. Evidência V042.
-- [ ] **07.04** Corrigir legibilidade tipográfica, microtextos, nomes extensos, erros e conteúdo de tamanho extremo.
+- [x] **07.04** Corrigir legibilidade tipográfica, microtextos, nomes extensos, erros e conteúdo de tamanho extremo.
 - [ ] **07.05** Testar zoom 200%/400% e reflow de 320 CSS px sem perda de conteúdo/ação.
 - [ ] **07.06** Testar todas as jornadas em celulares compactos, alturas curtas, rotação, teclado virtual e safe areas.
-- [ ] **07.07** Validar composição de tablets (600–1024px; retrato e paisagem).
-- [ ] **07.08** Validar composição desktop 1280–1920px, hierarquia e aproveitamento consciente da área.
-- [ ] **07.09** Revisar ordem de Tab/Shift+Tab, Escape, foco e navegação do teclado por fluxo.
+- [x] **07.07** Validar composição de tablets (600–1024px; retrato e paisagem).
+- [x] **07.08** Validar composição desktop 1280–1920px, hierarquia e aproveitamento consciente da área.
+- [x] **07.09** Revisar ordem de Tab/Shift+Tab, Escape, foco e navegação do teclado por fluxo.
 - [ ] **07.10** Auditar contraste, semântica, rótulos e leitor de tela contra critérios aplicáveis WCAG 2.2 AA.
 - [ ] **07.11** Manter diffs visuais reproduzíveis e obter aceite Megalos de D1–D6 antes de declarar fidelidade.
 - [ ] **07.12** Rodar matriz final em Chromium/Firefox/WebKit quando disponíveis e aparelhos reais, documentando limites.
 
-**Estado da Etapa 07: 3/12.** Início v0.10.26, com `npm run build` **18/18 Node**, `tests/browser_frontend_touch_target_v0126.py` **5/5 larguras**, `tests/browser_frontend_reflow_v0126.py` **63/63 estados-larguras**, regressões direcionadas **13/13 suítes Playwright**. Nenhuma dessas medições é certificação de responsividade absoluta ou substitui testes em dispositivos reais. A marca da prévia permanece **CONFFRATUS**; `main` intocada.
+**Estado da Etapa 07: 7/12.** Início v0.10.26, com `npm run build` **18/18 Node**, `tests/browser_frontend_touch_target_v0126.py` **5/5 larguras**, `tests/browser_frontend_reflow_v0126.py` **63/63 estados-larguras**, regressões direcionadas **13/13 suítes Playwright**. Nenhuma dessas medições é certificação de responsividade absoluta ou substitui testes em dispositivos reais. A marca da prévia permanece **CONFFRATUS**; `main` intocada.
 
 ## Leis permanentes
 1. **Código humano:** legível, direto, com comentários úteis e sem abstrações artificiais; não falsificar autoria.
@@ -681,3 +681,16 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] A CI passou a executar também as jornadas de perfis/proposições, navegação por autoria, Socii, integridade da revisão, falhas de gravação, foco do teclado e stress de reflow/zoom sintético. Total: 12 suítes Chromium, além dos testes Node e PostgreSQL.
 - [ ] As sete suítes extras só serão tratadas como aprovadas depois de execução completa na branch de prévia; nenhum motor/dispositivo real adicional foi simulado.
 - [ ] Não equivale a conformidade integral WCAG nem aceite visual da Megalos; a matriz objetiva será ampliada sem inventar aprovação das regras institucionais.
+
+## Governança das regras máximas — revisão da checklist (03/11/2026)
+
+- [x] Harmonizado o quadro-resumo de 07.04, 07.07, 07.08 e 07.09 com os fechamentos de seus próprios checkpoints e com a checklist específica da Etapa 07. **07=7/12**, sem concluir 07.05, 07.06, 07.10, 07.11 ou 07.12.
+- [x] Atualizadas as leis de trabalho para deixar inequívocos código legível, preguiça inteligente, fronteiras com Academy, integridade local, testes e limites de publicação. Sem mudança de regras institucionais.
+- [x] Criado teste automatizado que confere se os marcadores de conclusão correspondem à contagem anunciada no resumo e na Etapa 07. Qualquer divergência futura falha no build.
+
+## Regressões reveladas pela CI ampliada (03/11/2026)
+
+- [x] Dois testes antigos de agendamento agora preenchem explicitamente a modalidade binária obrigatória antes de enviar o formulário. O comportamento do produto não foi relaxado para satisfazer testes defasados.
+- [x] Teste de retorno do histórico aguarda a atualização assíncrona da rota antes de interagir com a programação; clicar no controle durante um render anterior fechava a expansão indevidamente.
+- [x] Corrigido o foco após «Registrar outra amostra»: se a modalidade contextual está bloqueada para edição, o primeiro campo real da votação recebe foco, e não o seletor desabilitado. Teste funcional de teclado adicionado.
+- [ ] Confirmar nova execução integral das 12 suítes antes de marcar o gate de qualidade como aprovado.

@@ -766,7 +766,11 @@ document.addEventListener('click',(event)=>{
   document.querySelector<HTMLElement>('#preview-vote-form')?.querySelector<HTMLElement>('input,select')?.focus({preventScroll:true});return;
  }
  if(advancedPreview && actionEl?.dataset.action==='reset-preview-vote'){
-  previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
+  previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
+  const method=document.querySelector<HTMLSelectElement>('#preview-vote-method');
+  const firstChoice=document.querySelector<HTMLElement>('#preview-vote-form input:not(:disabled), #preview-vote-form select:not(:disabled)');
+  (method&&!method.disabled?method:firstChoice)?.focus({preventScroll:true});
+  return;
  }
  if(actionEl?.dataset.action==='undo'&&lastChange){
   const member=members.find(m=>m.id===lastChange?.memberId);

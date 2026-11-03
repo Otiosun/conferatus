@@ -33,6 +33,7 @@ with sync_playwright() as p:
         form.locator('[name="title"]').fill('Programação do vínculo local')
         form.locator('[name="objective"]').fill('Vincular proposta e calendário sem criar atividade institucional.')
         form.locator('[name="proposalId"]').select_option(index=1)
+        form.locator('[name="method"]').select_option('binaria')
         form.locator('[name="start"]').fill('2026-12-12T09:00')
         form.locator('[name="end"]').fill('2026-12-12T12:00')
         form.locator('button[type=submit]').click()

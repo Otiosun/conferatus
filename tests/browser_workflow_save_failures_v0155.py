@@ -78,6 +78,7 @@ with sync_playwright() as pw:
                 form.locator('[name="title"]').fill('Programação fictícia não salva')
                 form.locator('[name="objective"]').fill('Descrição fictícia para testar recuperação de gravação de agenda.')
                 form.locator('[name="proposalId"]').select_option(index=1)
+                form.locator('[name="method"]').select_option('binaria')
                 form.locator('[name="start"]').fill('2026-12-21T09:00')
                 form.locator('[name="end"]').fill('2026-12-21T11:00')
                 page.evaluate('window.__failSaves(1)')
