@@ -90,6 +90,7 @@ with sync_playwright() as p:
         form.locator('[name=title]').fill('Nova programação local')
         form.locator('[name=objective]').fill('Uma descrição suficientemente longa para conferir a recuperação.')
         form.locator('[name=proposalId]').select_option('valid-draft')
+        form.locator('[name=method]').select_option('cumulativa')
         form.locator('[name=start]').fill('2026-12-21T09:00')
         form.locator('[name=end]').fill('2026-12-21T10:00')
         form.locator('button[type=submit]').click()
