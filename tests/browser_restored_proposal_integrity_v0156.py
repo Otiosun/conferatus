@@ -53,6 +53,7 @@ with sync_playwright() as p:
         page.locator('#schedule-deliberation-form [name="objective"]').fill('Programação demonstrativa para testar se o registro rejeitado fica preservado.')
         select.select_option('valid-concluded')
         page.locator('#schedule-deliberation-form [name="method"]').select_option('escalar')
+        page.locator('#schedule-deliberation-form [name=choices]').fill('Trabalho remoto\nTrabalho presencial')
         page.locator('#schedule-deliberation-form [name="start"]').fill('2026-12-12T09:00')
         page.locator('#schedule-deliberation-form [name="end"]').fill('2026-12-12T10:00')
         page.locator('#schedule-deliberation-form button[type="submit"]').click()
