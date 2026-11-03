@@ -492,3 +492,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] Não equivale a histórico institucional ou persistência multiusuário: esses critérios dependem de backend, identidade/autorizações da Academy e decisões Megalos.
 
 **Contagens não infladas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**. `main` e produção intocadas. Próximo: examinar preservação/consulta de histórico de cancelamentos fictícios sem inventar política institucional.
+
+## Entrega funcional v0.10.53 — Histórico local de programações canceladas (02/11/2026)
+
+- [x] Corrigida a **invisibilidade dos cancelamentos já persistidos**: seção somente de leitura no calendário, oculta até haver registros cancelados e expansível por teclado, sem restaurar eventos ao calendário ativo ou inventar instante de cancelamento. Preservados vínculos locais e o símbolo oficial da Academy.
+- [x] Teste novo falhou ANTES (`no cancelled history disclosure` em 280px), passou DEPOIS em quatro larguras incluindo restauração e segregação dos estados. `npm run build` **23/23 Node**, **6/6 regressões** de calendário, vínculos, integridade de IDs, reflow **63/63** e emblema oficial; screenshot 390px revisada. Veja `docs/CHECKPOINT_V063_2026-11-02.md`.
+- [ ] **Histórico institucional real ainda pendente**: esta consulta usa apenas `sessionStorage`, sem identidade autenticada, timestamp do cancelamento, autorização de servidor ou trilha transacional. Não inflar as Etapas 03/04.
+
+**Contagem canônica preservada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. `main`/produção intactas; D1–D6 Megalos pendentes.

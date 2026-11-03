@@ -339,6 +339,7 @@ let workflowNotice='';
 let composeError='';
 let scheduleFormOpen=false;
 let expandedSchedule='sample-1';
+let cancelledHistoryOpen=false;
 let inviteOpen=false;
 // The calendar is a view over the local demo schedule, never a separate data store.
 const today=new Date();
@@ -460,6 +461,15 @@ function calendarPage(){
  const all=[...sample,...schedule.filter(s=>s.status==='programada')]
   .sort((a,b)=>a.start.localeCompare(b.start));
  const visible=selectedCalendarDay?all.filter(item=>item.start.slice(0,10)<=selectedCalendarDay&&item.end.slice(0,10)>=selectedCalendarDay):all;
+ // Cancelled entries remain in the session's original schedule array. Keep them
+ // separate from active calendar markers, date filters and scheduling controls.
+ const cancelled=schedule.filter(item=>item.status==='cancelada');
+ const cancelledHistory=cancelled.length?`<section class="calendar-history" aria-label="Histórico de cancelamentos da prévia local">
+ <button type="button" class="calendar-history-toggle" data-action="toggle-cancelled-history" aria-expanded="${cancelledHistoryOpen}" ${cancelledHistoryOpen?'aria-controls="cancelled-schedule-history"':''}>Histórico de cancelamentos da prévia (${cancelled.length})</button>
+ ${cancelledHistoryOpen?`<div id="cancelled-schedule-history" role="region" aria-label="Programações canceladas da sessão"><p class="calendar-history-note">Registros da sessão, somente para consulta. Cancelamento não é uma deliberação ativa.</p>${cancelled.map(item=>{
+   const linked=drafts.find(d=>d.id===item.proposalId);
+   return `<article class="calendar-cancelled-record"><h3>${escapeHTML(item.title)}</h3><p><strong>Cancelada</strong> · ${escapeHTML(item.type)}</p><p>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</p><p>Seção: ${escapeHTML(sections.find(section=>section.id===item.sectionId)?.name??'Não disponível')}</p><p>Proposição: ${linked?escapeHTML(linked.title):'Proposição associada indisponível nesta sessão'}</p><p>${escapeHTML(item.objective)}</p></article>`;
+  }).join('')}</div>`:''}</section>`:'';
  return `<div class="workflow-layout">${savedRecordNotice()}${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}" ${scheduleFormOpen?'aria-controls="schedule-deliberation-form"':''}>${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
  <p class="calendar-preview-disclosure" role="note">Esta prévia apenas programa uma deliberação; não inicia uma votação real.</p>
  ${scheduleFormOpen?`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
@@ -473,7 +483,7 @@ function calendarPage(){
  <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
  ${workflowNotice?`<p class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
- ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria (prévia local)</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div></div>`;
+ ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria (prévia local)</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -649,6 +659,7 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
  if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;workflowNotice='';render();return;}
+ if(actionEl?.dataset.action==='toggle-cancelled-history'){cancelledHistoryOpen=!cancelledHistoryOpen;render();return;}
  if(actionEl?.dataset.action==='calendar-prev'){calendarShift(-1);render();announceCalendarView();return;}
  if(actionEl?.dataset.action==='calendar-next'){calendarShift(1);render();announceCalendarView();return;}
  if(actionEl?.dataset.action==='calendar-today'){const currentDay=new Date();calendarYear=currentDay.getFullYear();calendarMonth=currentDay.getMonth();selectedCalendarDay=isoDay(currentDay);render();announceCalendarView();return;}
