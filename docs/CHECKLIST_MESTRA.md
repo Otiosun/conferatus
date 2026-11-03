@@ -565,3 +565,15 @@ No formulário de agendamento, novas programações exigem uma das seis modalida
 **Dependências que NÃO podem ser inventadas:** unidade/escopo do peso cumulativo (por membro, seção ou deliberação), quando ele é recalculado, distribuição parcial ou total dos votos, política de elegibilidade, quórum, abstenção, anonimato, alteração de voto, desempate, fórmula de apuração ordenada, escalar e por aprovação, auditabilidade, autenticação/autorizações Academy e voto transacional no servidor.
 
 **Contagens permanecem:** 01=4/5; 02=0/4 (modelo ainda não consolidado para apuração institucional), 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Nenhuma promoção da branch de prévia para `main`/produção.
+
+
+## Continuidade funcional — v0.10.60, formulários das seis modalidades (03/11/2026)
+
+- [x] As seis modalidades aprovadas na mensagem da Megalos têm controles **interativos de demonstração** isolados em `?demo=1`: binária (Sim/Não), nominal (escolha única), ordenada (permutação completa), por aprovação (várias alternativas), escalar (1–10 por opção) e cumulativa (distribuição sem ultrapassar a cota configurada de um membro fictício deliberativo).
+- [x] Um validador tipado e independente da UI rejeita votos vazios, opções desconhecidas, posições duplicadas/ausentes, notas fora da escala, alocações negativas/fracionárias, ausência de cota e distribuição cumulativa acima do limite. A confirmação produz apenas **comprovante visual de simulação nesta aba**, sem somar votos ao resultado da votação anterior, salvar votos ou declarar vencedores.
+- [x] Formulários em mobile e desktop com labels, campos de no mínimo 44px, erro visível e controle de correção. Cota cumulativa segue a edição/vinculação demonstrativa introduzida na v0.10.59; sem peso fictício automático.
+- [x] Casos de teste **escritos** para validador Node (seis modalidades e rejeições), smoke Chromium (cinco modalidades, bloqueio cumulativo sem cota) e regressão de controles avançados (alocação acima da cota, distribuição válida e isolamento do resultado antigo). **Ainda não afirmar testes aprovados:** compilação e regressões da nova branch não foram executadas/confirmadas.
+- [ ] Não é ainda a Etapa 02 completa: os votos são somente simulados em memória, as alternativas são fixas para avaliação de interface, não há voto vinculado a uma programação/proposição real, nem apuração institucional, persistência transacional, autenticação, quórum, elegibilidade ou registro auditável.
+- [ ] A Megalos ainda precisa definir desempate, métodos de apuração ordenada/aprovação/escalar, uso parcial ou obrigatório da cota cumulativa, histórico, sigilo, alteração e encerramento. O uso parcial é **comportamento somente do laboratório**, não regra Academy.
+
+**Contagens canônicas mantidas sem inflação:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Trabalho restrito à branch `preview/v0.10.60-six-vote-forms`, sem merge/deploy em produção.
