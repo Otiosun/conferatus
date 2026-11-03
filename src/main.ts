@@ -3,8 +3,8 @@ import { FixtureMemberProvider } from './domain/providers.js';
 import { UnconnectedAcademyIdentityProvider } from './domain/academy-identity.js';
 import { resolveMemberReference } from './domain/member-reference.js';
 import { exportWorkflowArchive, parseWorkflowArchive, WORKFLOW_ARCHIVE_MAX_BYTES } from './domain/workflow-archive.js';
-import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory } from './domain/rules.js';
-import type { Activity, Member } from './domain/types.js';
+import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight } from './domain/rules.js';
+import type { Activity, Member, DeliberationMethod } from './domain/types.js';
 
 type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance' | 'calendar' | 'proposals' | 'compose' | 'review';
 type Tab = 'votos' | 'proposicoes';
@@ -33,6 +33,7 @@ let expandedSection = '';
 let editingMemberId: string | null = null;
 let notice = '';
 let editError = '';
+let editErrorField: 'acdmId' | 'cumulativeVoteWeight' = 'acdmId';
 let filter = '';
 let searchExpanded = false;
 let directoryExpanded = false;
@@ -40,13 +41,13 @@ let expandedActivity = '';
 let rolePreview: 'diretor' | 'membro' = 'diretor';
 let demoToolsOpen = false;
 const advancedPreview = new URLSearchParams(location.search).get('demo') === '1';
-let lastChange: {memberId: string; acdmId: string | undefined; sectionIds: string[]; role: Member['role']; hadDeliberativeHistory?: boolean} | null = null;
-const initialMembers = new Map(members.map(m=>[m.id,{name:m.name,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory}]));
+let lastChange: {memberId: string; acdmId: string | undefined; sectionIds: string[]; role: Member['role']; hadDeliberativeHistory?: boolean; cumulativeVoteWeight?: number} | null = null;
+const initialMembers = new Map(members.map(m=>[m.id,{name:m.name,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory,cumulativeVoteWeight:m.cumulativeVoteWeight}]));
 const demoMembersKey = 'conferatus:demo-members-v07';
 function resetDemoState() {
   for (const member of members) {
     const original = initialMembers.get(member.id);
-    if (original) { member.name=original.name; member.acdmId=original.acdmId; member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory; }
+    if (original) { member.name=original.name; member.acdmId=original.acdmId; member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory;member.cumulativeVoteWeight=original.cumulativeVoteWeight; }
   }
   demoVoteId=null; demoExpanded=false; editingMemberId=null; editError=''; lastChange=null;
   rolePreview='diretor'; demoToolsOpen=false; expandedSection=''; expandedActivity='';
@@ -56,11 +57,11 @@ function resetDemoState() {
 
 function saveDemoMembers() {
   try {
-    sessionStorage.setItem(demoMembersKey, JSON.stringify(members.map(m=>({id:m.id, acdmId:m.acdmId, sectionIds:m.sectionIds,role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory}))));
+    sessionStorage.setItem(demoMembersKey, JSON.stringify(members.map(m=>({id:m.id, acdmId:m.acdmId, sectionIds:m.sectionIds,role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory,cumulativeVoteWeight:m.cumulativeVoteWeight}))));
   } catch { /* Preview still works with session storage disabled. */ }
 }
 function rememberChange(m: Member) {
-  lastChange={memberId:m.id,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory};
+  lastChange={memberId:m.id,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory,cumulativeVoteWeight:m.cumulativeVoteWeight};
 }
 try {
   restoreDemoMembers(members, sections.map(s => s.id), JSON.parse(sessionStorage.getItem(demoMembersKey) ?? 'null'));
@@ -252,7 +253,7 @@ function governancePage() {
  ${rolePreview==='membro'?'<p class="status-line" role="status">O gerenciamento das seções é exclusivo da diretoria.</p>':
  `<div class="governance-list">${sections.map(s=>`${s.category==='comum'?'<h2 class="governance-group-heading">Membros da Academy</h2>':''}<div><button type="button" class="section-toggle" data-section="${s.id}" aria-expanded="${expandedSection===s.id}" ${expandedSection===s.id?`aria-controls="section-members-${escapeHTML(s.id)}"`: ''}><span>${escapeHTML(s.name)}${s.places ? `<small class="section-capacity">${s.places} integrantes previstos</small>` : ''}</span><span class="section-chevron" aria-hidden="true">${expandedSection===s.id?'▾':'▸'}</span></button>
  ${expandedSection===s.id?`<div id="section-members-${escapeHTML(s.id)}">${members.filter(m=>m.sectionIds.includes(s.id)).map(m=>`<div class="section-member"><div class="avatar" aria-hidden="true"></div><button class="section-member-name" type="button" data-edit="${m.id}" title="Editar ${escapeHTML(m.name)}">${escapeHTML(m.name)}</button><button class="icon-button icon-button--edit" type="button" data-edit="${m.id}" aria-label="Editar identificador de ${escapeHTML(m.name)}"><img src="./assets/editar.png" alt=""></button>${s.id==='membros'?'':`<button class="icon-button" type="button" data-demote="${m.id}" aria-label="Rebaixar ${escapeHTML(m.name)} para membro comum"><img src="./assets/rebaixamento.png" alt=""></button>`}</div>
- ${editingMemberId===m.id?`<form class="edit-form" id="edit-member-form" novalidate><label for="member-acdm-id">ACDM ID</label><input id="member-acdm-id" name="acdmId" value="${escapeHTML(m.acdmId ?? '')}" placeholder="DEMO-0001" required minlength="3" maxlength="40" pattern="[A-Za-z0-9_-]+" autocomplete="off" ${editError?'aria-invalid="true" aria-describedby="edit-error"':''}><input type="hidden" name="memberId" value="${m.id}"><button type="submit" class="small-action">Salvar</button>${editError?`<p id="edit-error" class="edit-error" role="alert">${escapeHTML(editError)}</p>`:''}</form>`:''}`).join('')}
+ ${editingMemberId===m.id?`<form class="edit-form" id="edit-member-form" novalidate><label for="member-acdm-id">ACDM ID</label><input id="member-acdm-id" name="acdmId" value="${escapeHTML(m.acdmId ?? '')}" placeholder="DEMO-0001" required minlength="3" maxlength="40" pattern="[A-Za-z0-9_-]+" autocomplete="off" ${editError&&editErrorField==='acdmId'?'aria-invalid="true" aria-describedby="edit-error"':''}><label for="member-cumulative-weight">Proporção de voto cumulativo (opcional)</label><input id="member-cumulative-weight" name="cumulativeVoteWeight" type="number" min="1" step="1" inputmode="numeric" placeholder="Não definida" value="${m.cumulativeVoteWeight??''}" ${editError&&editErrorField==='cumulativeVoteWeight'?'aria-invalid="true" aria-describedby="edit-error"':''}><input type="hidden" name="memberId" value="${m.id}"><button type="submit" class="small-action">Salvar</button>${editError?`<p id="edit-error" class="edit-error" role="alert">${escapeHTML(editError)}</p>`:''}</form>`:''}`).join('')}
  ${members.every(m=>!m.sectionIds.includes(s.id))?'<p class="section-empty">Nenhum membro nesta seção.</p>':''}</div>`:''}</div>`).join('')}</div>`}
  ${notice?`<p class="status-line" role="status">${escapeHTML(notice)} ${lastChange?'<button type="button" class="undo-action" data-action="undo">Desfazer</button>':''}</p>`:''}`;
 }
@@ -260,7 +261,7 @@ function governancePage() {
 // Only the preview data changes here. Authentication and shared records remain external.
 type ProposalType = 'PDR' | 'PR' | 'Ofício';
 type Draft = {id:string;title:string;body:string;sectionId:string;type:ProposalType;authorComplete:boolean;partners:{id:string;complete:boolean}[];status:'redacao'|'revisao'|'concluida'};
-type Deliberation = {id:string;title:string;objective:string;proposalId:string;sectionId:string;start:string;end:string;type:string;status:'programada'|'cancelada'};
+type Deliberation = {id:string;title:string;objective:string;proposalId:string;sectionId:string;start:string;end:string;type:string;method?:DeliberationMethod;status:'programada'|'cancelada'};
 const draftKey='conferatus:proposals-v010';
 const deliberationKey='conferatus:deliberations-v010';
 // Keep the original bytes of a legacy entry that cannot be interpreted as an array.
@@ -312,7 +313,7 @@ function cleanDraftRecord(d:Draft):Draft{
 }
 function cleanScheduleRecord(s:Deliberation):Deliberation{
  return {id:s.id,title:s.title,objective:s.objective,proposalId:s.proposalId,
-  sectionId:s.sectionId,start:s.start,end:s.end,type:s.type,status:s.status};
+  sectionId:s.sectionId,start:s.start,end:s.end,type:s.type,...(s.method?{method:s.method}:{}),status:s.status};
 }
 function isSavedSchedule(value:unknown):value is Deliberation{
  if(!value||typeof value!=='object'||Array.isArray(value))return false;
@@ -322,7 +323,9 @@ function isSavedSchedule(value:unknown):value is Deliberation{
   typeof item.start==='string'&&typeof item.end==='string'&&
   !Number.isNaN(Date.parse(item.start))&&!Number.isNaN(Date.parse(item.end))&&
   Date.parse(item.start)<Date.parse(item.end)&&
-  ['PDR','PR','Ofício'].includes(String(item.type))&&['programada','cancelada'].includes(String(item.status));
+  ['PDR','PR','Ofício'].includes(String(item.type))&&
+   (item.method===undefined||isDeliberationMethod(item.method))&&
+   ['programada','cancelada'].includes(String(item.status));
 }
 const draftRestore=readSessionRecords(draftKey);
 const scheduleRestore=readSessionRecords(deliberationKey);
@@ -517,7 +520,7 @@ function calendarPage(){
  <button type="button" class="calendar-history-toggle" data-action="toggle-cancelled-history" aria-expanded="${cancelledHistoryOpen}" ${cancelledHistoryOpen?'aria-controls="cancelled-schedule-history"':''}>Histórico de cancelamentos da prévia (${cancelled.length})</button>
  ${cancelledHistoryOpen?`<div id="cancelled-schedule-history" role="region" aria-label="Programações canceladas da sessão"><p class="calendar-history-note">Registros da sessão, somente para consulta. Cancelamento não é uma deliberação ativa.</p>${cancelled.map(item=>{
    const linked=drafts.find(d=>d.id===item.proposalId);
-   return `<article class="calendar-cancelled-record"><h3>${escapeHTML(item.title)}</h3><p><strong>Cancelada</strong> · ${escapeHTML(item.type)}</p><p>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</p><p>Seção: ${escapeHTML(sections.find(section=>section.id===item.sectionId)?.name??'Não disponível')}</p><p>Proposição: ${linked?escapeHTML(linked.title):'Proposição associada indisponível nesta sessão'}</p><p>${escapeHTML(item.objective)}</p></article>`;
+   return `<article class="calendar-cancelled-record"><h3>${escapeHTML(item.title)}</h3><p><strong>Cancelada</strong> · ${escapeHTML(item.type)}</p><p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(m=>m.id===item.method)?.label??'Não informada (registro anterior)')}</p><p>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</p><p>Seção: ${escapeHTML(sections.find(section=>section.id===item.sectionId)?.name??'Não disponível')}</p><p>Proposição: ${linked?escapeHTML(linked.title):'Proposição associada indisponível nesta sessão'}</p><p>${escapeHTML(item.objective)}</p></article>`;
   }).join('')}</div>`:''}</section>`:'';
  return `<div class="workflow-layout">${savedRecordNotice()}${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}" ${scheduleFormOpen?'aria-controls="schedule-deliberation-form"':''}>${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
  <p class="calendar-preview-disclosure" role="note">Esta prévia apenas programa uma deliberação; não inicia uma votação real.</p>
@@ -528,12 +531,14 @@ function calendarPage(){
  <label>Selecione a proposição<select name="proposalId" required ${!drafts.some(d=>d.status==='concluida')?'disabled':''}><option value="">Selecione</option>${drafts.filter(d=>d.status==='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label>
  <label>Seção deliberativa<select name="sectionId" required>${selectOptions('integridade',sections.filter(s=>s.category==='deliberativa'))}</select></label>
  <div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
- <label>Tipo de deliberação<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
+ <label>Tipo de proposição<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
+  <label>Modalidade de votação<select name="method" required><option value="">Selecione a modalidade</option>${DELIBERATION_METHODS.map(mode=>`<option value="${mode.id}">${escapeHTML(mode.label)} — ${escapeHTML(mode.detail)}</option>`).join('')}</select></label>
+  <p class="workflow-help">A modalidade descreve como os membros votariam. A prévia não contabiliza votos institucionais.</p>
  <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
  ${cancellationSaveFailed||workflowNotice?`<p class="workflow-status">${escapeHTML(cancellationSaveFailed?cancellationSaveWarning:workflowNotice)}</p>`:''}
  ${cancellationSaveFailed?'<button type="button" class="calendar-save-retry" data-action="retry-cancellation-save">Tentar salvar cancelamento nesta sessão</button>':''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
- ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria (prévia local)</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
+ ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p><p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(mode=>mode.id===item.method)?.label??'Não informada (registro anterior)')}</p>${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria (prévia local)</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -669,7 +674,7 @@ document.addEventListener('click',(event)=>{
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
  if(actionEl?.dataset.action==='undo'&&lastChange){
   const member=members.find(m=>m.id===lastChange?.memberId);
-  if(member){member.acdmId=lastChange.acdmId;member.sectionIds=[...lastChange.sectionIds];member.role=lastChange.role;member.hadDeliberativeHistory=lastChange.hadDeliberativeHistory;saveDemoMembers();}
+  if(member){member.acdmId=lastChange.acdmId;member.sectionIds=[...lastChange.sectionIds];member.role=lastChange.role;member.hadDeliberativeHistory=lastChange.hadDeliberativeHistory;member.cumulativeVoteWeight=lastChange.cumulativeVoteWeight;saveDemoMembers();}
   const affectedId=lastChange.memberId;
   lastChange=null;notice='Alteração desfeita.';render();
   // Undo removes its own button: return focus to the affected member's editor.
@@ -798,7 +803,7 @@ document.addEventListener('click',(event)=>{
  if (memberEl?.dataset.member) {currentMember=memberEl.dataset.member;profileTab='votos';navigate('profile', currentMember);return;}
  if (tabEl) {if (tabEl.dataset.overviewTab){overviewTab=tabEl.dataset.overviewTab as Tab;overviewExpanded=false;expandedActivity='';} else profileTab=tabEl.dataset.tab as Tab; if(routeFromHash()==='members'){currentMember=members[0]?.id??'m01';navigate('profile', currentMember);}else{render();}return;}
  if (sectionEl?.dataset.section) {expandedSection=expandedSection===sectionEl.dataset.section?'':sectionEl.dataset.section;editingMemberId=null;editError='';notice='';lastChange=null;demoToolsOpen=false;render();return;}
- if (editEl?.dataset.edit) {editingMemberId=editingMemberId===editEl.dataset.edit?null:editEl.dataset.edit;editError='';render();if(editingMemberId)document.querySelector<HTMLInputElement>('#member-acdm-id')?.focus();return;}
+ if (editEl?.dataset.edit) {editingMemberId=editingMemberId===editEl.dataset.edit?null:editEl.dataset.edit;editError='';editErrorField='acdmId';render();if(editingMemberId)document.querySelector<HTMLInputElement>('#member-acdm-id')?.focus();return;}
  if (demoteEl?.dataset.demote) {
   const m=members.find(x=>x.id===demoteEl.dataset.demote);
   if (m&&expandedSection && expandedSection!=='membros' && m.sectionIds.includes(expandedSection)) {
@@ -961,7 +966,11 @@ document.addEventListener('submit',(event)=>{
    showScheduleFormError(form,'Selecione uma proposição concluída.','proposalId');
    return;
   }
-  const item:Deliberation={id:nextLocalRecordId('sched',schedule),title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),status:'programada'};
+  const method=data.get('method');
+   if(!isDeliberationMethod(method)){
+    showScheduleFormError(form,'Selecione uma das seis modalidades de votação.','method');return;
+   }
+   const item:Deliberation={id:nextLocalRecordId('sched',schedule),title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),method,status:'programada'};
   schedule.unshift(item);const stored=saveWorkflows();workflowNotice=stored?'Deliberação programada nesta demonstração.':'Programação mantida somente enquanto a página estiver aberta.';scheduleFormOpen=false;expandedSchedule=item.id;
   const date=new Date(`${start.slice(0,10)}T12:00:00`);calendarYear=date.getFullYear();calendarMonth=date.getMonth();selectedCalendarDay=start.slice(0,10);
   render();
@@ -978,17 +987,23 @@ document.addEventListener('submit',(event)=>{
  const acdmId=String(data.get('acdmId')??'').trim().toUpperCase();
  if(!member) return;
  if(!/^[A-Z0-9_-]{3,40}$/.test(acdmId)) {
-  editError='Use de 3 a 40 caracteres: letras, números, hífen ou sublinhado.';
+  editErrorField='acdmId';editError='Use de 3 a 40 caracteres: letras, números, hífen ou sublinhado.';
   notice='';render();
   document.querySelector<HTMLInputElement>('#member-acdm-id')?.focus({preventScroll:true});
   return;
  }
  if(members.some(m=>m.id!==member.id && m.acdmId===acdmId)){
-  editError='Este identificador já pertence a outro membro.';notice='';render();
+  editErrorField='acdmId';editError='Este identificador já pertence a outro membro.';notice='';render();
   const field=document.querySelector<HTMLInputElement>('#member-acdm-id');field?.focus({preventScroll:true});field?.select();return;
  }
- editError='';rememberChange(member);member.acdmId=acdmId;saveDemoMembers();
- notice=`Identificador de ${member.name} atualizado.`;
+ const weightText=String(data.get('cumulativeVoteWeight')??'').trim();
+ const voteWeight=weightText===''?undefined:Number(weightText);
+ if(weightText!==''&&!isPositiveCumulativeVoteWeight(voteWeight)){
+  editErrorField='cumulativeVoteWeight';editError='Informe uma quantidade inteira e positiva de votos, ou deixe o campo vazio.';
+  notice='';render();document.querySelector<HTMLInputElement>('#member-cumulative-weight')?.focus({preventScroll:true});return;
+ }
+ editError='';rememberChange(member);member.acdmId=acdmId;member.cumulativeVoteWeight=voteWeight;saveDemoMembers();
+ notice=`Cadastro demonstrativo de ${member.name} atualizado.`;
  editingMemberId=null;render();
  document.querySelector<HTMLButtonElement>('[data-action=undo]')?.focus({preventScroll:true});
 });
