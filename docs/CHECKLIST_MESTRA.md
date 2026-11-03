@@ -65,7 +65,7 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 **Avanço v0.10.2:** compilação TypeScript, 18 testes Node e fluxos Playwright locais aprovados em 320/390/740/1280 px. Preview remoto em avaliação; sem alteração automática em produção.
 
 ## 05 — Integração posterior à Academy
-- [ ] Definir uma interface simples para receber a identidade institucional.
+- [x] Definir interface de identidade da Academy sem criar login próprio (v0.10.49; contrato tipado, adaptador sem sessão e testes locais).
 - [ ] Usar o ACDM ID para referência de cadastro, sem criar cadastro independente.
 - [ ] Deixar a integração do login para o responsável da Academy, conforme acordado.
 - [ ] Validar os fluxos integrados quando a equipe fornecer a interface correspondente.
@@ -456,3 +456,13 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 permanece ABERTA**: verificação com leitores de tela reais, auditoria manual ampla WCAG, outros motores, mídia/gradientes e hardware. 07.05/07.06, 07.11 (D1–D6) e 07.12 continuam abertas.
 
 **Contagem canônica sem alteração:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. `main`/produção preservadas.
+
+
+## Etapa 05 — primeira fronteira de identidade, prévia v0.10.49 (02/11/2026)
+
+- [x] Contrato TypeScript `AcademyIdentityProvider` e resposta discriminada `unavailable`/`identified`, com `acdmId` como referência somente, **sem papel, permissão, token ou voto autorizado**. `UnconnectedAcademyIdentityProvider` retorna sempre indisponível; substituição futura depende do responsável pelo login da Academy.
+- [x] Prévia e HTML offline realmente usam o adaptador. Em `?demo=1`, o painel informa que a identidade Academy não está conectada e que os perfis são simulações. Experiência normal, dados fictícios e chaves técnicas preservados.
+- [x] Compilação TypeScript, bundle offline, 20/20 testes Node, smoke Chromium 4 viewports, painel avançado 9 larguras/45 alvos, novo teste de interface 4 larguras (sem login nem permissões falsas) aprovados. Detalhes: `docs/CHECKPOINT_V059_2026-11-02.md`.
+- [ ] Nenhuma autenticação, autorização, sessão, banco institucional ou permissão real foi implementada. A equipe Academy continua responsável pela integração, que requer contrato real, verificações server-side e autorização explícita.
+
+**Contagens oficiais desta rodada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; **05=1/4**; 06=0/5; 07=7/12. Etapas 04 e 07 mantêm suas pendências e a Megalos não aprovou D1–D6. `main` e produção intocadas.

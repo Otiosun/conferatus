@@ -1,5 +1,6 @@
 import { activities, ballots } from './data/fixtures.js';
 import { FixtureMemberProvider } from './domain/providers.js';
+import { UnconnectedAcademyIdentityProvider } from './domain/academy-identity.js';
 import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory } from './domain/rules.js';
 import type { Activity, Member } from './domain/types.js';
 
@@ -16,6 +17,7 @@ workflowAnnouncer.setAttribute('role', 'status');
 workflowAnnouncer.setAttribute('aria-atomic', 'true');
 root.insertAdjacentElement('afterend', workflowAnnouncer);
 let announcedWorkflowNotice = '';
+const academyIdentity = await new UnconnectedAcademyIdentityProvider().currentIdentity();
 const memberProvider = new FixtureMemberProvider();
 const [members, sections] = await Promise.all([memberProvider.listMembers(), memberProvider.listSections()]);
 let currentMember = members[0]?.id ?? 'm01';
@@ -108,7 +110,7 @@ function header(title?: string, subtitle?: string, tall=false) {
    ${advancedPreview?`<button type="button" class="panel-button" data-action="toggle-tools" aria-label="Opções de teste" aria-expanded="${demoToolsOpen}" ${demoToolsOpen?'aria-controls="demo-tools-panel"':''}><img src="./assets/painel.png" alt=""></button>`:`<img class="panel-mark" src="./assets/painel.png" alt="">`}
    <h1>${escapeHTML(title)}</h1>${subtitle?`<p>${escapeHTML(subtitle)}</p>`:''}
    ${advancedPreview && demoToolsOpen?`<aside id="demo-tools-panel" class="demo-tools" aria-label="Ferramentas de demonstração">
-     <strong>Opções de visualização</strong><p>Selecione um perfil para visualizar as permissões.</p>
+     <strong>Opções de visualização</strong><p>Identidade Academy: ${academyIdentity.state==='unavailable'?'não conectada':'identificada, sem autorização nesta prévia'}. Os perfis abaixo são simulações, não permissões reais.</p>
      <label for="role-mode">Visualizar como</label><select id="role-mode" aria-label="Simular perfil"><option value="diretor" ${rolePreview==='diretor'?'selected':''}>Diretor</option><option value="membro" ${rolePreview==='membro'?'selected':''}>Membro comum</option></select>
      ${expandedSection&&rolePreview==='diretor'?`<div class="tools-divider"><label for="add-member">Vincular à seção aberta</label><div class="tools-add"><select id="add-member"><option value="">Selecione um membro…</option>${members.filter(m=>!m.sectionIds.includes(expandedSection)).map(m=>`<option value="${m.id}">${escapeHTML(m.name)}</option>`).join('')}</select><button type="button" class="small-action" data-action="add-member">Vincular</button></div></div>`:''}
      <button type="button" class="reset-tools" data-action="reset-admin">Reiniciar alterações administrativas</button>

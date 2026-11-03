@@ -54,3 +54,8 @@ Não existem segredos de autenticação para a prévia estática. Testar primeir
 - **`docs/CHECKPOINT_V012_2026-11-01.md`**, **`docs/CHECKPOINT_V013_2026-11-01.md`** e **`docs/CHECKPOINT_V014_2026-11-01.md`**: registros recentes dos fluxos testados.
 
 O sistema de login já pertence à Academy. O responsável por ele poderá integrar a identidade e os acessos posteriormente. Não criar outro login independente sem decisão explícita. Regras institucionais de deliberação e registro permanecem sujeitas à definição da Megalos.
+## Fronteira de identidade Academy (prévia v0.10.49)
+
+O arquivo `src/domain/academy-identity.ts` define `AcademyIdentityProvider`, uma interface assíncrona para **consultar uma referência institucional já autenticada pelo sistema da Academy**. A prévia usa `UnconnectedAcademyIdentityProvider`, que retorna `unavailable`: não há login, token, sessão nem permissão real. O ACDM ID é apenas referência, **nunca autorização**.
+
+O painel `?demo=1` exibe o estado indisponível e distingue as permissões demonstrativas. A integração futura exige um adaptador de responsabilidade da Academy e autorização **verificada no servidor**, sob contrato aprovado. Nenhuma consulta a serviço real ou dado de produção ocorre nesta prévia.
