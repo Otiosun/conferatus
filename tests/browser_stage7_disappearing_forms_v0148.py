@@ -50,6 +50,7 @@ with sync_playwright() as pw:
         schedule_form.locator('[name=objective]').fill('Descrição suficiente para criar uma programação de demonstração e revisar o foco.')
         schedule_form.locator('[name=proposalId]').select_option(index=1)
         schedule_form.locator('[name=method]').select_option('ordenada')
+        schedule_form.locator('[name=choices]').fill('Prioridade alta\nPrioridade média\nPrioridade baixa')
         schedule_form.locator('[name=start]').fill('2026-12-12T09:00')
         schedule_form.locator('[name=end]').fill('2026-12-12T12:00')
         schedule_form.get_by_role('button', name='Confirmar programação').focus()
