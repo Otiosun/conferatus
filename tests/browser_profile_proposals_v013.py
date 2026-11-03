@@ -22,6 +22,10 @@ with sync_playwright() as p:
   page.locator('.session-proposal-link').click()
   assert page.locator('#draft-title').input_value()=='Rascunho de comunicação'
   assert page.locator('#draft-body').input_value()=='Primeiro parágrafo ainda incompleto.'
+  page.locator('#compose-proposal-form [data-route=profile]').click()
+  assert page.evaluate('location.hash')=='#/profile/m01',width
+  assert page.locator('.session-proposal-link').count()==1,width
+  page.locator('.session-proposal-link').click()
   page.locator('#draft-body').fill('Esta é a versão final consolidada do documento para consulta e revisão institucional.')
   page.locator('#compose-proposal-form [value=conclude]').click()
   page.locator('#confirm-proposal-form button[type=submit]').click()
@@ -30,6 +34,14 @@ with sync_playwright() as p:
   page.locator('.session-proposal-link').click()
   page.get_by_text('Proposição concluída',exact=True).wait_for()
   assert page.locator('#confirm-proposal-form').count()==0
+  page.locator('.workflow-finished [data-route=profile]').click()
+  assert page.evaluate('location.hash')=='#/profile/m01',width
+  assert page.locator('.session-proposal-link').count()==1,width
+  page.locator('.footer-nav').click();page.locator('[data-route=members]').first.click()
+  page.locator('.member-item[data-member="m04"]').click()
+  page.locator('.footer-nav').click();page.locator('[data-route=proposals]').first.click()
+  page.locator('.workflow-tabs button[data-route=profile]').click()
+  assert page.evaluate('location.hash')=='#/profile/m01',(width,'wrong member selected for author history')
   assert not errors,(width,errors)
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
   page.close()

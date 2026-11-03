@@ -711,3 +711,10 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Reutilizadas **13 suítes Playwright já presentes** no repositório, somadas às 12 executadas anteriormente: navegação, rascunhos, Socii, assinaturas, recuperação e duplicatas, colisão de IDs, programação/cancelamento, integridade de importação e controles de formulário. Não foi instalada nenhuma dependência.
 - [x] Ajustado um teste de cancelamento antigo para informar a modalidade binária obrigatória e corrigido um erro de indentação em um script antigo; nenhuma validação foi removida do produto.
 - [ ] O novo gate deve concluir integralmente em Chromium antes de registrar 25/25. Homologação Megalos, WCAG global e outras engines/dispositivos seguem pendentes.
+
+## Navegação contextual de perfil e autoria — correção funcional (03/11/2026)
+
+- [x] Uma proposição aberta a partir do perfil do autor passa a preservar a origem tanto no editor de rascunhos quanto no detalhe de proposição concluída; «Voltar ao perfil» regressa à aba Proposições do autor fictício.
+- [x] O atalho de histórico no fluxo de elaboração aponta para o autor daquele fluxo (dados fictícios), não para outro membro que tenha sido selecionado previamente no diretório.
+- [x] Regressão Chromium estendida em 320, 390, 740 e 1280 px, incluindo troca de membro anterior. Validar na CI antes de aprovar o checkpoint.
+- [ ] A atribuição e a navegação aqui representam o autor sintético da prévia; não são identidade Academy.
