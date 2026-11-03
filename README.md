@@ -74,3 +74,9 @@ As proposições, confirmações de autoria e Socii e programações usam exclus
 Na tela **Proposições e Socii**, abra a prévia com `?demo=1` para usar **Baixar cópia JSON** e **Restaurar cópia JSON**. O arquivo contém exclusivamente proposições, participantes Socii sintéticos e programações desta aba; não contém login, votos, tokens ou permissões da Academy. O arquivo **pode conter textos que você escreveu** e não é criptografado — não o compartilhe inadvertidamente.
 
 A restauração exige confirmação e **substitui**, não mescla, os fluxos locais atuais. Antes de restaurar, exporte uma cópia do estado atual. Arquivos incompatíveis, duplicados ou com registros inválidos são recusados sem mudar o estado. Se a gravação da sessão falhar, os registros anteriores permanecem na aba. Não há servidor, sincronização entre contas nem recuperação automática de arquivos perdidos.
+
+## Modalidades de deliberação (prévia v0.10.59)
+
+A Megalos definiu em 03/11/2026 seis modalidades de votação: **Binária (Sim/Não), Nominal (escolha única), Ordenada (ranqueamento), Por aprovação (múltiplas opções), Escalar (1–10 por alternativa) e Cumulativa (cota proporcional de votos distribuídos)**. Na prévia, essa modalidade é escolhida ao programar deliberações e é armazenada com a agenda fictícia. Não substituir PDR/PR/Ofício, que classificam a proposição.
+
+Em Gerenciamento Deliberativo, é possível informar uma quantidade positiva e inteira de votos cumulativos por membro sintético ao editar ou vincular um registro. Nenhum valor é atribuído automaticamente. Ainda não é cadastro real de usuários Academy nem voto compartilhado; apuração, elegibilidade, pesos institucionais, quórum e empates dependem de definição e integração seguras.
