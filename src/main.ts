@@ -286,6 +286,12 @@ function isSavedDraft(value:unknown):value is Draft{
    const partner=p as Record<string,unknown>;
    return typeof partner.id==='string'&&!!partner.id&&typeof partner.complete==='boolean';
   })&&new Set((d.partners as {id:string}[]).map(p=>p.id)).size===d.partners.length&&
+  // Apply the preview's existing author/participant distinction to restored data too.
+  // A local author cannot sign twice by also appearing as their own Socii.
+  !(d.partners as {id:string}[]).some(p=>p.id===members[0]?.id)&&
+  // Keep legitimate partial drafts, but review/completion must satisfy the
+  // same title/body limits enforced when leaving the editor.
+  (d.status==='redacao'||(d.title.trim().length>=3&&d.body.trim().length>=20))&&
   // A legacy or damaged record must not claim completion without every signoff.
   !(d.status==='concluida'&&(!d.authorComplete||(d.partners as {complete:boolean}[]).some(p=>!p.complete)));
 }

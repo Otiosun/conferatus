@@ -518,3 +518,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **Permanecem pendentes**: integração real, sessão compartilhada/autenticação, autorizações e auditoria institucional, regras Megalos D1–D6, telas/zoom reais e WCAG completa. Nenhuma promoção à `main`.
 
 **Contagem oficial inalterada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**.
+
+## Integridade de proposições restauradas — V066 / v0.10.56 (02/11/2026)
+
+- [x] **Falha reproduzida e corrigida na prévia de sessão:** registros importados podiam declarar `revisao`/`concluida` com conteúdo inferior aos limites existentes no editor, ou declarar a própria autoria como seu Socii. Ajuste mínimo de `isSavedDraft`, sem novos direitos institucionais. Novos registros impossíveis ficam fora da lista válida e do agendamento; backups/quarentena existentes preservam a origem e rascunhos incompletos legítimos continuam utilizáveis.
+- [x] Novo teste Chromium `browser_restored_proposal_integrity_v0156.py` **4/4 larguras** após reprovação antes do patch. Build TypeScript/offline **23/23 Node**, **14 suítes Playwright** concluídas (incluindo integridade de assinaturas, IDs, Socii, rascunhos, revisão, recuperação, perfil, calendário, reflow 63/63 e smoke quatro viewports). Uma execução agrupada teve timeout; os dois testes finais foram repetidos isoladamente com aprovação. Evidências em `docs/CHECKPOINT_V066_2026-11-02.md`.
+- [ ] **Não é conclusão das Etapas 03 ou 04:** integrações de autoria, regras reais de colaboração e aceite Megalos permanecem pendentes. Nenhuma contagem avançou, nenhuma mudança em `main`, produção, login ou dados reais.
+
+**Contagem canônica:** 01 4/5; 02 0/4; 03 1/5; 04 17/22; 05 2/4; 06 0/5; 07 7/12.
