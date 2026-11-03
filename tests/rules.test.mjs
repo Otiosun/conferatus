@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { totalVotes, resultPercentage, updateSectionAssignment, demoteToCommonMember, canRecordVote, escapeHTML, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight } from '../dist/domain/rules.js';
+import { totalVotes, resultPercentage, updateSectionAssignment, demoteToCommonMember, canRecordVote, escapeHTML, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight, PREVIEW_BINARY_OPTIONS, PREVIEW_LIST_OPTIONS, validatePreviewVote } from '../dist/domain/rules.js';
 import { members as fixtures } from '../dist/data/fixtures.js';
 
 test('count results from options and never hard-code them', () => {
@@ -156,4 +156,62 @@ test('cumulative weight is an optional explicit positive integer, never a defaul
  assert.equal(m.cumulativeVoteWeight,4,'malformed stored weight must not overwrite a valid one');
  restoreDemoMembers([m],['coordenacao'],[{id:m.id,cumulativeVoteWeight:'900'}]);
  assert.equal(m.cumulativeVoteWeight,4,'untrusted storage cannot coerce strings into weights');
+});
+
+
+test('six preview modes expose only fixture choices and never institutional records', () => {
+ assert.deepEqual(PREVIEW_BINARY_OPTIONS.map(x=>x.id),['sim','nao']);
+ assert.deepEqual(PREVIEW_LIST_OPTIONS.map(x=>x.id),['a','b','c']);
+ assert.equal(validatePreviewVote('binaria',{selected:'sim'}).ok,true);
+ assert.equal(validatePreviewVote('binaria',{selected:'nao'}).ok,true);
+ assert.equal(validatePreviewVote('binaria',{selected:'a'}).ok,false);
+ assert.equal(validatePreviewVote('binaria',{selected:null}).ok,false);
+ assert.equal(validatePreviewVote('nominal',{selected:'c'}).ok,true);
+ assert.equal(validatePreviewVote('nominal',{selected:'sim'}).ok,false);
+ assert.equal(validatePreviewVote('nominal',{selected:['a','b']}).ok,false);
+ assert.equal(validatePreviewVote('nominal',null).ok,false);
+ assert.equal(validatePreviewVote('unknown',{selected:'a'}).ok,false);
+});
+
+test('ordered voting requires a complete permutation without omissions or duplicates', () => {
+ const accepted=validatePreviewVote('ordenada',{ranking:['c','a','b']});
+ assert.equal(accepted.ok,true);
+ if(accepted.ok)assert.deepEqual(accepted.vote.ranking,['c','a','b']);
+ for(const ranking of [['a','a','c'],['a','b'],['a','b','x'],[],['a','b','c','a']])
+  assert.equal(validatePreviewVote('ordenada',{ranking}).ok,false,JSON.stringify(ranking));
+});
+
+test('approval voting supports multiple distinct selections but never a blank ballot', () => {
+ const accepted=validatePreviewVote('aprovacao',{approved:['a','c']});
+ assert.equal(accepted.ok,true);
+ if(accepted.ok)assert.deepEqual(accepted.vote.approved,['a','c']);
+ for(const approved of [[],['a','a'],['x'],['a','unknown'],'a'])
+  assert.equal(validatePreviewVote('aprovacao',{approved}).ok,false,JSON.stringify(approved));
+});
+
+test('scalar voting requires integer ratings 1 through 10 for every option', () => {
+ const sample={a:1,b:10,c:5};
+ assert.equal(validatePreviewVote('escalar',{scores:sample}).ok,true);
+ for(const scores of [
+  {a:0,b:10,c:5},{a:1,b:11,c:5},{a:1,b:4.5,c:5},
+  {a:1,b:2},{a:1,b:2,c:'3'},{a:1,b:2,c:3,d:4},
+  {a:1,b:2,c:Infinity},[]
+ ])assert.equal(validatePreviewVote('escalar',{scores}).ok,false,JSON.stringify(scores));
+});
+
+test('cumulative voting requires configured weight, eligibility, nonnegative integers and bounded sums', () => {
+ const distribution={a:2,b:1,c:0};
+ const accepted=validatePreviewVote('cumulativa',{allocation:distribution},4);
+ assert.equal(accepted.ok,true);
+ if(accepted.ok)assert.equal(accepted.vote.weight,4);
+ assert.equal(validatePreviewVote('cumulativa',{allocation:distribution}).ok,false);
+ assert.equal(validatePreviewVote('cumulativa',{allocation:distribution},0).ok,false);
+ for(const allocation of [
+  {a:0,b:0,c:0},{a:5,b:0,c:0},{a:2,b:2,c:1},
+  {a:-1,b:2,c:0},{a:1.5,b:1,c:0},{a:2,b:1},
+  {a:2,b:1,c:'0'},{a:2,b:1,c:0,x:0}
+ ])assert.equal(validatePreviewVote('cumulativa',{allocation},4).ok,false,JSON.stringify(allocation));
+ assert.equal(validatePreviewVote('cumulativa',{allocation:{a:4,b:0,c:0}},4).ok,true);
+ // This is a sandbox-only decision, not an unapproved institutional counting policy.
+ assert.equal(validatePreviewVote('cumulativa',{allocation:{a:1,b:0,c:0}},4).ok,true);
 });
