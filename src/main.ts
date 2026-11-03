@@ -1139,12 +1139,13 @@ document.addEventListener('submit',(event)=>{
  if(!(form instanceof HTMLFormElement)||form.id!=='preview-vote-form'||!advancedPreview)return;
  event.preventDefault();
  const data=new FormData(form);
+ const integer=(value:FormDataEntryValue|null):number=>typeof value==='string'&&/^(0|[1-9][0-9]*)$/.test(value)?Number(value):NaN;
  let payload:unknown;
  if(previewMode==='binaria'||previewMode==='nominal')payload={selected:data.get('selected')};
  else if(previewMode==='ordenada')payload={ranking:previewVoteChoices().map((_,index)=>data.get('rank-'+String(index)))};
  else if(previewMode==='aprovacao')payload={approved:data.getAll('approved')};
- else if(previewMode==='escalar')payload={scores:Object.fromEntries(previewVoteChoices().map(option=>[option.id,Number(data.get('score-'+option.id))]))};
- else payload={allocation:Object.fromEntries(previewVoteChoices().map(option=>[option.id,Number(data.get('alloc-'+option.id))]))};
+ else if(previewMode==='escalar')payload={scores:Object.fromEntries(previewVoteChoices().map(option=>[option.id,integer(data.get('score-'+option.id))]))};
+ else payload={allocation:Object.fromEntries(previewVoteChoices().map(option=>[option.id,integer(data.get('alloc-'+option.id))]))};
  const selectedMember=members.find(member=>member.id===previewVoteMemberId&&isDeliberativeMember(member,sections));
  const result=validatePreviewVote(previewMode,payload,selectedMember?.cumulativeVoteWeight,previewVoteChoices().map(option=>option.id));
  if(!result.ok){previewVoteError=result.error;render();document.querySelector<HTMLElement>('#preview-vote-error')?.focus({preventScroll:true});return;}
