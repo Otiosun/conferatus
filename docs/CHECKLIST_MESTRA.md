@@ -651,3 +651,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [ ] Aplicação institucional: não autorizar por ID fornecido pelo cliente. Acesso real depende de gateway autenticado Academy, regras aprovadas pela Megalos, autorização transacional no servidor, política de quórum/resultado, privacidade e homologação.
 
 **Contagens sem inflação:** Etapa 01 = 4/5; 02 = 0/4; 03 = 1/5; 04 = 17/22; 05 = 2/4; 06 = 0/5; 07 = 7/12. O laboratório SQL não equivale à aprovação da Etapa 02.
+
+## Integridade da prévia — programação cancelada e restauração (03/11/2026)
+
+- [x] Cancelar uma programação local ativa invalida as amostras e o contexto de votação associados a ela, sem afetar outros contextos. Uma restauração de arquivo **bem-sucedida** limpa recibos e amostras anteriores, pois os IDs/alternativas importados podem ser diferentes. Restaurações recusadas ou revertidas preservam o estado anterior.
+- [x] Regressões Chromium adicionadas às jornadas de calendário e backup/restauração em 4 e 5 larguras, respectivamente. Confirmar resultado de execução no CI antes de aprovar este checkpoint.
+- [ ] As operações são locais; nenhuma regra institucional de cancelamento ou apuração foi presumida.

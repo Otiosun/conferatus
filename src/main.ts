@@ -972,8 +972,15 @@ document.addEventListener('click',(event)=>{
   return;
  }
  const cancelEl=target.closest<HTMLElement>('[data-cancel-schedule]');
- if(cancelEl?.dataset.cancelSchedule){const item=schedule.find(x=>x.id===cancelEl.dataset.cancelSchedule);if(item){
-  item.status='cancelada';const saved=saveWorkflows();cancellationSaveFailed=!saved;
+ if(cancelEl?.dataset.cancelSchedule){const item=schedule.find(x=>x.id===cancelEl.dataset.cancelSchedule);if(item&&item.status==='programada'){
+  item.status='cancelada';
+  // A cancelled schedule must not leave a vote sandbox bound to its old alternatives.
+  previewSampleLedger.clear(`schedule:${item.id}`);
+  if(previewScheduleId===item.id){
+   previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;
+   previewVoteError='';previewVoteMemberId='';
+  }
+  const saved=saveWorkflows();cancellationSaveFailed=!saved;
   workflowNotice=saved?'Programação cancelada e salva nesta sessão.':cancellationSaveWarning;
   render();
   const heading=document.querySelector<HTMLElement>('.calendar-list-head h2');
@@ -1064,6 +1071,10 @@ document.addEventListener('change',async event=>{
   report('Não foi possível salvar a cópia restaurada. Os registros anteriores permanecem nesta aba.');
   return;
  }
+ // Imported workflows replace the old sandbox contexts. Never reuse stale receipts or samples.
+ previewSampleLedger.clearAll();
+ previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;
+ previewVoteError='';previewVoteMemberId='';
  currentDraftId='';draftForm=blankDraft();inviteOpen=false;expandedSchedule='';
  archiveMessage=`Cópia restaurada nesta sessão: ${drafts.length} proposição(ões) e ${schedule.length} programação(ões).`;
  archiveIsError=false;render();

@@ -65,6 +65,12 @@ with sync_playwright() as p:
         assert page.evaluate('location.hash') == '#/calendar', width
         assert page.locator('[data-calendar-day="2026-12-12"]').get_attribute('aria-pressed') == 'true', width
         assert page.locator('.calendar-item--expanded').filter(has_text='Programação ligada à proposição').count() == 1, width
+        page.locator('.calendar-item--expanded').filter(has_text='Programação ligada à proposição').locator('[data-cancel-schedule]').click()
+        assert page.locator('.calendar-item').filter(has_text='Programação ligada à proposição').count()==0,width
+        page.locator('.footer-home').click()
+        assert page.locator('.preview-vote-summary').count()==0,(width,'cancelled schedule leaked a sample into the fixture ballot')
+        assert page.locator('#preview-vote-method').is_enabled(),width
+        assert page.locator('.preview-vote-context').count()==0,width
         if width in (390, 740):
             page.screenshot(path=f'/mnt/data/conferatus_v0120_calendar_return_{width}.png', full_page=True)
         assert not errors, (width, errors)

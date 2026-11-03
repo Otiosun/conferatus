@@ -87,6 +87,13 @@ with sync_playwright() as pw:
   assert page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:proposals-v010"))')[0]['id']=='draft-existing',width
   assert page.locator('.workflow-record').filter(has_text='Proposta atual de demonstração').count()==1,width
 
+  # Create a fictitious sample before restoring; a new archive must invalidate it.
+  page.locator('.footer-home').click()
+  page.locator('#preview-vote-method').select_option('nominal')
+  page.locator('#preview-vote-form [name=selected][value=a]').check()
+  page.locator('.preview-vote-submit').click()
+  assert 'amostras nesta aba (1)' in page.locator('.preview-vote-summary').inner_text(),width
+  menu(page)
   page.once('dialog',lambda dialog:dialog.accept())
   upload(page,archive([{**NEW,'authToken':'should-never-import'}],[{**CANCEL,'secret':'should-never-import'},ACTIVE]))
   assert 'should-never-import' not in page.evaluate('sessionStorage.getItem("conferatus:proposals-v010")'),width
@@ -94,6 +101,8 @@ with sync_playwright() as pw:
   assert 'restaurada' in message(page).lower(),(width,message(page))
   assert page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:proposals-v010"))')[0]['id']=='draft-imported',width
   assert sorted(x['status'] for x in page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:deliberations-v010"))'))==['cancelada','programada'],width
+  page.locator('.footer-home').click()
+  assert page.locator('.preview-vote-summary').count()==0,(width,'restored archive retained stale vote samples')
   if width==390:
    page.screenshot(path=str(ROOT/'dist/local_workflow_archive_controls_390.png'),full_page=True)
   page.set_content(HTML)
