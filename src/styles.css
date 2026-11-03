@@ -1087,3 +1087,15 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .preview-schedule-open:focus-visible{outline:3px solid #273f9d;outline-offset:2px;}
 .preview-vote-context{background:#eceffa;border-left:3px solid #515dc7;padding:10px 12px;border-radius:5px;color:#2e365d;}
 .preview-vote-context span{display:block;margin-top:3px;font-size:12px;}
+
+
+/* Descriptive preview counts, never mixed with the legacy institutional-looking result bars. */
+.preview-vote-summary{margin-top:16px;padding-top:14px;border-top:1px solid #cbd2e4;}
+.preview-vote-summary h3{font-size:15px;line-height:1.4;margin:0 0 8px;color:#354273;}
+.preview-vote-summary p{font-size:12px;line-height:1.5;margin:7px 0;}
+.preview-vote-summary .preview-vote-unit{font-weight:700;color:#4b5781;}
+.preview-vote-summary-rows{display:grid;gap:7px;margin:10px 0 14px;}
+.preview-vote-summary-row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;align-items:center;padding:10px 12px;border:1px solid #d2d8e8;background:#fff;border-radius:8px;min-width:0;}
+.preview-vote-summary-row span{overflow-wrap:anywhere;}
+.preview-vote-summary-row strong{font-size:16px;font-variant-numeric:tabular-nums;}
+.preview-vote-summary-row small{grid-column:1/-1;font-size:11px;color:#515c77;overflow-wrap:anywhere;line-height:1.5;}

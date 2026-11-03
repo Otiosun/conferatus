@@ -50,6 +50,7 @@ with sync_playwright() as p:
         page.locator('#preview-vote-form [name=selected][value=opt-2]').check()
         page.locator('.preview-vote-submit').click()
         assert 'Calendário quinzenal' in page.locator('.preview-vote-receipt').inner_text(), width
+        assert 'amostras nesta aba (1)' in page.locator('.preview-vote-summary').inner_text(),width
         assert page.locator('.result-row--chosen').count()==0, (width,'sample altered legacy voting results')
         page.locator('.footer-nav').click()
         page.locator('.menu-item[data-route=calendar]').click()

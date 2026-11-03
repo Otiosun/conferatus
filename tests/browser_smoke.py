@@ -36,7 +36,19 @@ with sync_playwright() as p:
         page.locator('[name=selected][value=sim]').check()
         page.locator('.preview-vote-submit').click()
         assert 'Escolha: Sim' in page.locator('.preview-vote-receipt').inner_text(),width
+        assert 'amostras nesta aba (1)' in page.locator('.preview-vote-summary').inner_text(),width
+        assert page.locator('.preview-vote-summary-row').count()==2,width
         page.locator('[data-action=reset-preview-vote]').click()
+        assert page.locator('.preview-vote-summary-row').count()==2,width
+        page.locator('[name=selected][value=nao]').check()
+        page.locator('.preview-vote-submit').click()
+        assert 'amostras nesta aba (2)' in page.locator('.preview-vote-summary').inner_text(),width
+        page.once('dialog',lambda dialog: dialog.dismiss())
+        page.locator('[data-action=clear-preview-samples]').click()
+        assert page.locator('.preview-vote-summary').count()==1,width
+        page.once('dialog',lambda dialog: dialog.accept())
+        page.locator('[data-action=clear-preview-samples]').click()
+        assert page.locator('.preview-vote-summary').count()==0,width
 
         modes.select_option('nominal')
         page.locator('[name=selected][value=b]').check()
@@ -58,12 +70,14 @@ with sync_playwright() as p:
         page.locator('[name=approved][value=c]').check()
         page.locator('.preview-vote-submit').click()
         assert 'Alternativa A, Alternativa C' in page.locator('.preview-vote-receipt').inner_text(),width
+        assert 'aprovações por alternativa' in page.locator('.preview-vote-summary').inner_text(),width
 
         modes.select_option('escalar')
         for option,value in (('a','1'),('b','7'),('c','10')):
             page.locator(f'[name=score-{option}]').select_option(value)
         page.locator('.preview-vote-submit').click()
         assert 'Alternativa C: 10/10' in page.locator('.preview-vote-receipt').inner_text(),width
+        assert 'Distribuição de notas 1 a 10' in page.locator('.preview-vote-summary').inner_text(),width
 
         modes.select_option('cumulativa')
         assert 'Nenhum membro deliberativo fictício' in page.locator('.preview-vote-fieldset').inner_text(),width

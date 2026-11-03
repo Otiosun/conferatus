@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { totalVotes, resultPercentage, updateSectionAssignment, demoteToCommonMember, canRecordVote, escapeHTML, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight, PREVIEW_BINARY_OPTIONS, PREVIEW_LIST_OPTIONS, validatePreviewVote } from '../dist/domain/rules.js';
+import { totalVotes, resultPercentage, updateSectionAssignment, demoteToCommonMember, canRecordVote, escapeHTML, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight, PREVIEW_BINARY_OPTIONS, PREVIEW_LIST_OPTIONS, validatePreviewVote, summarizePreviewVotes } from '../dist/domain/rules.js';
 import { members as fixtures } from '../dist/data/fixtures.js';
 
 test('count results from options and never hard-code them', () => {
@@ -228,4 +228,68 @@ test('scheduled custom option IDs are respected for nominal, ranked, scalar and 
  for(const bad of [[],['opt-1'],['opt-1','opt-1'],['a','bad/option'],Array(9).fill('opt-1')])
   assert.equal(validatePreviewVote('nominal',{selected:'opt-1'},undefined,bad).ok,false);
  assert.equal(validatePreviewVote('binaria',{selected:'sim'},undefined,['opt-1','opt-2']).ok,false);
+});
+
+
+test('descriptive summary counts binary and nominal choices, never names a winner',()=>{
+ const bin=[{id:'sim',label:'Sim'},{id:'nao',label:'Não'}];
+ const votes=[{method:'binaria',selected:'sim'},{method:'binaria',selected:'nao'},{method:'binaria',selected:'sim'}];
+ const result=summarizePreviewVotes('binaria',bin,votes);
+ assert.equal(result.samples,3);
+ assert.deepEqual(result.rows.map(x=>x.total),['2','1']);
+ assert.equal(Object.hasOwn(result,'winner'),false);
+ const nominal=[{id:'a',label:'A'},{id:'b',label:'B'},{id:'c',label:'C'}];
+ const named=summarizePreviewVotes('nominal',nominal,[{method:'nominal',selected:'b'},{method:'nominal',selected:'c'},{method:'nominal',selected:'b'}]);
+ assert.deepEqual(named.rows.map(x=>x.total),['0','2','1']);
+ assert.equal(summarizePreviewVotes('nominal',nominal,[]).samples,0);
+});
+
+test('ordered and scalar summary expose distributions without unapproved score rules',()=>{
+ const options=[{id:'a',label:'A'},{id:'b',label:'B'},{id:'c',label:'C'}];
+ const ordered=summarizePreviewVotes('ordenada',options,[
+  {method:'ordenada',ranking:['b','a','c']},
+  {method:'ordenada',ranking:['a','b','c']},
+  {method:'ordenada',ranking:['b','c','a']}
+ ]);
+ assert.deepEqual(ordered.rows.map(x=>x.total),['1','2','0']);
+ assert.match(ordered.rows[0].detail,/1, 1, 1/);
+ assert.match(ordered.rows[1].detail,/2, 1, 0/);
+ const scalar=summarizePreviewVotes('escalar',options,[
+  {method:'escalar',scores:{a:1,b:10,c:5}},
+  {method:'escalar',scores:{a:10,b:10,c:4}}
+ ]);
+ assert.equal(scalar.samples,2);
+ assert.deepEqual(scalar.rows.map(x=>x.total),['2','2','2']);
+ assert.match(scalar.rows[1].detail,/0, 0, 0, 0, 0, 0, 0, 0, 0, 2/);
+ assert.equal(Object.hasOwn(scalar.rows[0],'average'),false);
+});
+
+test('approval counts multi-option marks and cumulative counts allocated units exactly',()=>{
+ const options=[{id:'a',label:'A'},{id:'b',label:'B'},{id:'c',label:'C'}];
+ const approval=summarizePreviewVotes('aprovacao',options,[
+  {method:'aprovacao',approved:['a','b']},{method:'aprovacao',approved:['a','c']}
+ ]);
+ assert.equal(approval.samples,2);
+ assert.deepEqual(approval.rows.map(x=>x.total),['2','1','1']);
+ const weighted=summarizePreviewVotes('cumulativa',options,[
+  {method:'cumulativa',allocation:{a:2,b:1,c:0},weight:4},
+  {method:'cumulativa',allocation:{a:3,b:0,c:1},weight:4}
+ ]);
+ assert.deepEqual(weighted.rows.map(x=>x.total),['5','1','1']);
+ const huge=Number.MAX_SAFE_INTEGER;
+ const large=summarizePreviewVotes('cumulativa',options,[
+  {method:'cumulativa',allocation:{a:huge,b:0,c:0},weight:huge},
+  {method:'cumulativa',allocation:{a:huge,b:0,c:0},weight:huge}
+ ]);
+ assert.equal(large.rows[0].total,'18014398509481982');
+});
+
+test('descriptive sample summary rejects unknown options and unrelated voting methods',()=>{
+ const choices=[{id:'opt-1',label:'Um'},{id:'opt-2',label:'Dois'}];
+ const ballots=[{method:'nominal',selected:'opt-1'},{method:'nominal',selected:'a'},{method:'binaria',selected:'sim'}];
+ const before=JSON.stringify(ballots);
+ const result=summarizePreviewVotes('nominal',choices,ballots);
+ assert.equal(result.samples,1);
+ assert.deepEqual(result.rows.map(x=>x.total),['1','0']);
+ assert.equal(JSON.stringify(ballots),before);
 });

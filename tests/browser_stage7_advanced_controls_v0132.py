@@ -84,6 +84,8 @@ with sync_playwright() as p:
   page.locator('[name=alloc-b]').fill('2')
   page.locator('.preview-vote-submit').click()
   assert 'distribuídos 4 de 4' in page.locator('.preview-vote-receipt').inner_text(),(width,'cumulative receipt missing')
+  assert 'amostras nesta aba (1)' in page.locator('.preview-vote-summary').inner_text(),(width,'cumulative summary missing')
+  assert 'votos fictícios distribuídos' in page.locator('.preview-vote-summary').inner_text(),width
   assert page.locator('.result-row--chosen').count()==0,(width,'sandbox receipt polluted legacy ballot')
 
   # The member search is interactive and should preserve the typed filter.

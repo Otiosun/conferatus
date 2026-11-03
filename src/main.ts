@@ -3,7 +3,7 @@ import { FixtureMemberProvider } from './domain/providers.js';
 import { UnconnectedAcademyIdentityProvider } from './domain/academy-identity.js';
 import { resolveMemberReference } from './domain/member-reference.js';
 import { exportWorkflowArchive, parseWorkflowArchive, WORKFLOW_ARCHIVE_MAX_BYTES } from './domain/workflow-archive.js';
-import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight, PREVIEW_BINARY_OPTIONS, PREVIEW_LIST_OPTIONS, validatePreviewVote } from './domain/rules.js';
+import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight, PREVIEW_BINARY_OPTIONS, PREVIEW_LIST_OPTIONS, validatePreviewVote, summarizePreviewVotes } from './domain/rules.js';
 import type { PreviewVote } from './domain/rules.js';
 import type { Activity, Member, DeliberationMethod } from './domain/types.js';
 
@@ -51,7 +51,7 @@ function resetDemoState() {
     if (original) { member.name=original.name; member.acdmId=original.acdmId; member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory;member.cumulativeVoteWeight=original.cumulativeVoteWeight; }
   }
   demoVoteId=null; demoExpanded=false; editingMemberId=null; editError=''; lastChange=null;
-  previewMode='binaria';previewVoteError='';previewVoteReceipt=null;previewVoteMemberId='';previewScheduleId=null;scheduleMethod=null;
+  previewMode='binaria';previewVoteError='';previewVoteReceipt=null;previewVoteMemberId='';previewScheduleId=null;scheduleMethod=null;previewSamples.splice(0);
   rolePreview='diretor'; demoToolsOpen=false; expandedSection=''; expandedActivity='';
   profileTab='votos'; overviewTab='votos'; overviewExpanded=false; searchExpanded=false; directoryExpanded=false; filter='';
   try { sessionStorage.removeItem(demoMembersKey); sessionStorage.removeItem('conferatus:demo-vote'); } catch {}
@@ -75,6 +75,13 @@ let previewMode: DeliberationMethod = 'binaria';
 let previewVoteError = '';
 let previewVoteReceipt: PreviewVote | null = null;
 let previewVoteMemberId = '';
+// Deliberately memory-only; never part of the session archive or legacy ballot totals.
+const previewSamples: {scope:string;vote:PreviewVote}[] = [];
+const PREVIEW_SAMPLE_LIMIT=100;
+function previewSampleScope():string {
+ const scheduled=previewSelectedSchedule();
+ return scheduled?`schedule:${scheduled.id}`:`fixture:${previewMode}`;
+}
 let previewScheduleId: string | null = null;
 let scheduleMethod: DeliberationMethod | null = null;
 try {
@@ -218,6 +225,23 @@ function previewVoteReceiptText(vote:PreviewVote):string {
  return previewVoteChoices().map(option=>label(option.id)+': '+String(vote.allocation[option.id])).join(' · ')+
   ' (distribuídos '+String(used)+' de '+String(vote.weight)+')';
 }
+
+function previewVoteSummary():string {
+ const scope=previewSampleScope();
+ const summary=summarizePreviewVotes(previewMode,previewVoteChoices(),
+   previewSamples.filter(sample=>sample.scope===scope).map(sample=>sample.vote));
+ if(!summary.samples)return '';
+ return '<section class="preview-vote-summary" aria-labelledby="preview-vote-summary-title">'+
+  '<h3 id="preview-vote-summary-title">Distribuição das amostras nesta aba ('+String(summary.samples)+')</h3>'+
+  '<p>Resumo descritivo, não apuração institucional. Nenhuma alternativa é declarada vencedora.</p>'+
+  '<p class="preview-vote-unit">'+escapeHTML(summary.unit)+'</p>'+
+  '<div class="preview-vote-summary-rows">'+summary.rows.map(row=>
+   '<div class="preview-vote-summary-row"><span>'+escapeHTML(row.label)+'</span><strong>'+escapeHTML(row.total)+'</strong>'+
+   (row.detail?'<small>'+escapeHTML(row.detail)+'</small>':'')+'</div>').join('')+'</div>'+
+  '<button type="button" class="preview-vote-secondary" data-action="clear-preview-samples">Limpar amostras desta simulação</button>'+
+  '</section>';
+}
+
 function previewVoteLab():string {
  const method=DELIBERATION_METHODS.find(entry=>entry.id===previewMode);
  const contextual=previewSelectedSchedule();
@@ -234,13 +258,14 @@ function previewVoteLab():string {
   (contextual?'<button type="button" class="preview-vote-secondary" data-action="exit-preview-schedule">Voltar às alternativas de teste</button>':'')+
   (receipt?'<div class="preview-vote-receipt" role="status"><strong>Voto simulado conferido nesta aba</strong>'+
    '<p>'+previewVoteReceiptText(receipt)+'</p>'+
-   '<button type="button" class="preview-vote-secondary" data-action="reset-preview-vote">Alterar simulação</button></div>':
+   '<button type="button" class="preview-vote-secondary" data-action="reset-preview-vote">Registrar outra amostra</button></div>':
    '<form id="preview-vote-form" data-mode="'+previewMode+'" data-preview-member="'+previewVoteMemberId+'" novalidate>'+previewVoteFieldset()+
    (previewVoteError?'<p class="preview-vote-error" role="alert" id="preview-vote-error" tabindex="-1">'+escapeHTML(previewVoteError)+'</p>':'')+
    '<button type="submit" class="preview-vote-submit"'+
     (previewMode==='cumulativa' && !members.some(m=>isDeliberativeMember(m,sections)&&
      isPositiveCumulativeVoteWeight(m.cumulativeVoteWeight))?' disabled':'')+
    '>Conferir voto fictício</button></form>')+
+  previewVoteSummary()+
   '</section>';
 }
 
@@ -814,6 +839,13 @@ document.addEventListener('click',(event)=>{
   previewScheduleId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
   document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
  }
+ if(advancedPreview && actionEl?.dataset.action==='clear-preview-samples'){
+  const scope=previewSampleScope();
+  if(!window.confirm('Limpar apenas as amostras desta simulação?'))return;
+  for(let index=previewSamples.length-1;index>=0;index--){if(previewSamples[index]?.scope===scope)previewSamples.splice(index,1);}
+  previewVoteReceipt=null;previewVoteError='';render();
+  document.querySelector<HTMLElement>('#preview-vote-form')?.querySelector<HTMLElement>('input,select')?.focus({preventScroll:true});return;
+ }
  if(advancedPreview && actionEl?.dataset.action==='reset-preview-vote'){
   previewVoteReceipt=null;previewVoteError='';render();document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
  }
@@ -1151,6 +1183,11 @@ document.addEventListener('submit',(event)=>{
  const selectedMember=members.find(member=>member.id===previewVoteMemberId&&isDeliberativeMember(member,sections));
  const result=validatePreviewVote(previewMode,payload,selectedMember?.cumulativeVoteWeight,previewVoteChoices().map(option=>option.id));
  if(!result.ok){previewVoteError=result.error;render();document.querySelector<HTMLElement>('#preview-vote-error')?.focus({preventScroll:true});return;}
+ const scope=previewSampleScope();
+ if(previewSamples.filter(sample=>sample.scope===scope).length>=PREVIEW_SAMPLE_LIMIT){
+  previewVoteError='Esta simulação atingiu o limite de 100 amostras. Limpe-as para reiniciar.';render();return;
+ }
+ previewSamples.push({scope,vote:result.vote});
  previewVoteError='';previewVoteReceipt=result.vote;render();
  const receipt=document.querySelector<HTMLElement>('.preview-vote-receipt');
  if(receipt){receipt.tabIndex=-1;receipt.focus({preventScroll:true});}

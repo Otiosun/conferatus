@@ -196,3 +196,53 @@ export function validatePreviewVote(method: DeliberationMethod, payload: unknown
   // Partial use of the quota is allowed ONLY in this sandbox; Academy policy remains undefined.
   return {ok:true,vote:{method:'cumulativa',allocation:{...data.allocation},weight:cumulativeWeight}};
 }
+
+
+/** Descriptive tab-only counts. This is NOT a rule for approval, winning or institutional tally. */
+export type PreviewVoteSummary = {
+  samples: number;
+  unit: string;
+  rows: {id:string;label:string;total:string;detail:string}[];
+};
+
+export function summarizePreviewVotes(
+  method: DeliberationMethod,
+  options: readonly {id:string;label:string}[],
+  votes: readonly PreviewVote[],
+): PreviewVoteSummary {
+  const ids=options.map(option=>option.id);
+  const accepted=votes.filter(vote=>{
+    if(!vote||vote.method!==method)return false;
+    const payload=vote.method==='binaria'||vote.method==='nominal'?{selected:vote.selected}
+      :vote.method==='ordenada'?{ranking:vote.ranking}
+      :vote.method==='aprovacao'?{approved:vote.approved}
+      :vote.method==='escalar'?{scores:vote.scores}
+      :{allocation:vote.allocation};
+    return validatePreviewVote(method,payload,vote.method==='cumulativa'?vote.weight:undefined,ids).ok;
+  });
+  const units:Record<DeliberationMethod,string>={
+    binaria:'escolhas por resposta',nominal:'escolhas por alternativa',
+    ordenada:'indicações em primeiro lugar',aprovacao:'aprovações por alternativa',
+    escalar:'notas atribuídas',cumulativa:'votos fictícios distribuídos',
+  };
+  const rows=options.map(option=>{
+    let total=0n;
+    const distribution=method==='ordenada'?Array<number>(ids.length).fill(0)
+      :method==='escalar'?Array<number>(10).fill(0):[];
+    for(const vote of accepted){
+      if((vote.method==='binaria'||vote.method==='nominal')&&vote.selected===option.id)total++;
+      else if(vote.method==='ordenada'){
+        const rank=vote.ranking.indexOf(option.id);
+        if(rank>=0){distribution[rank]=(distribution[rank]??0)+1;if(rank===0)total++;}
+      }else if(vote.method==='aprovacao'&&vote.approved.includes(option.id))total++;
+      else if(vote.method==='escalar'){
+        const score=vote.scores[option.id];
+        if(score!==undefined){total++;distribution[score-1]=(distribution[score-1]??0)+1;}
+      }else if(vote.method==='cumulativa')total+=BigInt(vote.allocation[option.id]??0);
+    }
+    const detail=method==='ordenada'?'Distribuição das posições 1º a '+ids.length+'º: '+distribution.join(', ')
+      :method==='escalar'?'Distribuição de notas 1 a 10: '+distribution.join(', '):'';
+    return {id:option.id,label:option.label,total:String(total),detail};
+  });
+  return {samples:accepted.length,unit:units[method],rows};
+}

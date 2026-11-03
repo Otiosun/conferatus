@@ -587,3 +587,14 @@ No formulário de agendamento, novas programações exigem uma das seis modalida
 - [ ] A aprovação da compilação e dos testes do commit final será comprovada pelo workflow `Preview voting checks`; nunca marcar a Etapa 02 como encerrada com base nesta prévia.
 
 **Contagens canônicas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Branch de prévia isolada, sem promoção à `main` ou produção.
+
+
+## Etapa 02 — contagens descritivas de amostras na prévia (03/11/2026)
+
+- [x] O laboratório demonstrativo permite acumular até 100 amostras por modalidade ou programação, exclusivamente em memória da aba. Cada confirmação produz uma amostra; a próxima ação é Registrar outra amostra. Não há armazenamento em sessionStorage, exportação em backups nem associação com contas reais da Academy.
+- [x] Seis resumos: Binária/Nominal registram escolhas; Ordenada mostra posições, incluindo primeiros lugares; Aprovação mostra marcações; Escalar mostra histogramas de notas 1 a 10; Cumulativa soma unidades fictícias sem perda de precisão. Nenhum destes resumos elege vencedor, aprova proposta, desempata ou estabelece quórum.
+- [x] Limpeza das amostras da simulação atual exige confirmação e preserva outros contextos. Recarregar a página elimina amostras; a limpeza global da demonstração também.
+- [x] Testes Node para as seis contagens e isolamento, e testes Chromium de múltiplas amostras, limpeza e programação contextual foram escritos. O resultado de execução desta alteração deve ser conferido no workflow antes de chamar de validado.
+- [ ] Registro transacional, autenticação Academy, elegibilidade, sigilo, quórum, política de apuração, alterações de voto e encerramento permanecem indefinidos e não foram implementados.
+
+**Checklist canônico inalterado:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Main/produção não modificadas.
