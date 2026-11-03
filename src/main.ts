@@ -235,7 +235,7 @@ function previewVoteLab():string {
   (receipt?'<div class="preview-vote-receipt" role="status"><strong>Voto simulado conferido nesta aba</strong>'+
    '<p>'+previewVoteReceiptText(receipt)+'</p>'+
    '<button type="button" class="preview-vote-secondary" data-action="reset-preview-vote">Alterar simulação</button></div>':
-   '<form id="preview-vote-form" data-mode="'+previewMode+'" data-member="'+previewVoteMemberId+'" novalidate>'+previewVoteFieldset()+
+   '<form id="preview-vote-form" data-mode="'+previewMode+'" data-preview-member="'+previewVoteMemberId+'" novalidate>'+previewVoteFieldset()+
    (previewVoteError?'<p class="preview-vote-error" role="alert" id="preview-vote-error" tabindex="-1">'+escapeHTML(previewVoteError)+'</p>':'')+
    '<button type="submit" class="preview-vote-submit"'+
     (previewMode==='cumulativa' && !members.some(m=>isDeliberativeMember(m,sections)&&
@@ -664,9 +664,10 @@ function render() {
  // Preserve local scheduling inputs while browsing days and months.
  const scheduleForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
  const scheduleValues = scheduleForm ? new FormData(scheduleForm) : null;
+ // Never use data-member here: it triggers the global profile-navigation click handler.
  // Preserve checked values on ballot validation errors, not across distinct methods.
  const priorVoteForm=root.querySelector<HTMLFormElement>('#preview-vote-form');
- const voteFields=priorVoteForm?.dataset.mode===previewMode&&priorVoteForm?.dataset.member===previewVoteMemberId
+ const voteFields=priorVoteForm?.dataset.mode===previewMode&&priorVoteForm?.dataset.previewMember===previewVoteMemberId
   ? Array.from(priorVoteForm.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input,select')).map(field=>({name:field.name,value:field.value,checked:field instanceof HTMLInputElement?field.checked:undefined})) : null;
  const preserveScroll = location.hash === lastRenderedHash;
  lastRenderedHash = location.hash;

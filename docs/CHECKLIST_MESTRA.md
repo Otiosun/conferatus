@@ -577,3 +577,13 @@ No formulário de agendamento, novas programações exigem uma das seis modalida
 - [ ] A Megalos ainda precisa definir desempate, métodos de apuração ordenada/aprovação/escalar, uso parcial ou obrigatório da cota cumulativa, histórico, sigilo, alteração e encerramento. O uso parcial é **comportamento somente do laboratório**, não regra Academy.
 
 **Contagens canônicas mantidas sem inflação:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Trabalho restrito à branch `preview/v0.10.60-six-vote-forms`, sem merge/deploy em produção.
+
+## Prévia v0.10.60 — vínculo das modalidades à programação (03/11/2026)
+
+- [x] Programações novas com modalidade não binária exigem 2–8 alternativas distintas, fornecidas por quem agenda. Os IDs estáveis e rótulos são validados e preservados em arquivo local; programações antigas sem alternativas continuam legíveis, sem inventar opções.
+- [x] No modo `?demo=1`, uma programação com modalidade definida pode abrir um **voto fictício contextual**, mostrando as alternativas cadastradas e a proposição vinculada. Não existe voto institucional, apuração, persistência de votos ou autorização Academy nesta prévia.
+- [x] A navegação de perfil usa `data-member`; os formulários do laboratório usam `data-preview-member` para impedir que um clique de votação abra acidentalmente o perfil. Regressão Chromium específica adicionada.
+- [ ] O intervalo de 2–8 alternativas e a permissão de cota cumulativa parcial são limites **somente do laboratório**, não regras institucionais aprovadas. Fórmulas de apuração, desempates, autorizações e votos transacionais continuam pendentes.
+- [ ] A aprovação da compilação e dos testes do commit final será comprovada pelo workflow `Preview voting checks`; nunca marcar a Etapa 02 como encerrada com base nesta prévia.
+
+**Contagens canônicas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Branch de prévia isolada, sem promoção à `main` ou produção.
