@@ -10,19 +10,30 @@ with sync_playwright() as p:
         page.set_default_timeout(5000)
         errors=[]
         page.on('pageerror',lambda error: errors.append(str(error)))
+        # The initial about:blank document has an opaque origin in Chromium.
+        # Provide an isolated sessionStorage spy rather than reading inaccessible storage.
+        page.evaluate("""() => {
+          const writes = [];
+          Object.defineProperty(window, 'sessionStorage', {configurable: true, value: {
+            getItem: () => null,
+            setItem: key => writes.push(key),
+            removeItem: () => {}
+          }});
+          window.__previewStorageWrites = writes;
+        }""")
         page.set_content(html)
         # The normal preview must never present a simulated choice as an official vote.
         assert page.locator('.preview-vote-lab').count() == 0, width
         note = page.locator('.ballot-preview-disclosure[role="note"]')
         assert note.is_visible(), width
         assert 'nenhum voto é enviado à Academy' in note.inner_text(), width
-        before = page.evaluate("Object.keys(sessionStorage).sort()")
+        before = page.evaluate("window.__previewStorageWrites.length")
         page.locator('[data-action="toggle-demo"]').click()
         assert 'Votação fictícia aberta' in page.locator('.demo-ballot').inner_text(), width
         page.locator('[data-vote]').first.click()
         assert 'Nenhum voto foi enviado' in page.locator('.vote-feedback').inner_text(), width
         assert 'Escolha simulada' in page.locator('.result-row--chosen').inner_text(), width
-        assert page.evaluate("Object.keys(sessionStorage).sort()") == before, width
+        assert page.evaluate("window.__previewStorageWrites.length") == before, width
         page.locator('[data-action="reset-vote"]').click()
         assert page.locator('.result-row--chosen').count() == 0, width
         page.locator('.footer-nav').click()
