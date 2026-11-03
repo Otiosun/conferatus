@@ -148,8 +148,8 @@ export function validatePreviewVote(method: DeliberationMethod, payload: unknown
   if(!isDeliberationMethod(method) || !payload || typeof payload!=='object' || Array.isArray(payload))
     return {ok:false,error:'Preencha um voto de demonstração válido.'};
   const data=payload as Record<string,unknown>;
-  const choices=method==='binaria'?PREVIEW_BINARY_OPTIONS:PREVIEW_LIST_OPTIONS;
-  const ids=choices.map(option=>option.id);
+  const choices: readonly {id:string;label:string}[]=method==='binaria'?PREVIEW_BINARY_OPTIONS:PREVIEW_LIST_OPTIONS;
+  const ids:string[]=choices.map(option=>option.id);
   const validId=(id:unknown):id is string=>typeof id==='string'&&ids.includes(id);
   const exactList=(items:unknown):items is string[]=>Array.isArray(items)&&
     items.every(validId)&&new Set(items).size===items.length;
