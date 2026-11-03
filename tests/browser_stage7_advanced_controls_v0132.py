@@ -47,13 +47,26 @@ with sync_playwright() as p:
   assert panel.is_visible(),(width,'advanced tools not expanded')
   measure('demo-role-select',panel.locator('#role-mode'))
   measure('demo-add-member-select',panel.locator('#add-member'))
+  measure('cumulative-weight-input',panel.locator('#link-cumulative-weight'))
   measure('demo-link-member-button',panel.locator('[data-action="add-member"]'))
   if width in (280,390,740) and FIXED:
    page.screenshot(path=str(ROOT/f'dist/stage7_advanced_panel_{width}.png'),full_page=True)
   panel.locator('#add-member').select_option(index=1)
+  chosen=panel.locator('#add-member').input_value()
+  panel.locator('#link-cumulative-weight').fill('4')
   panel.locator('[data-action="add-member"]').click()
   assert not page.locator('.demo-tools').count(),(width,'linking did not close panel')
   assert 'adicionado à seção' in page.locator('.status-line').inner_text(),(width,'linking did not update preview')
+  def weight():
+   return next(m.get('cumulativeVoteWeight') for m in page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:demo-members-v07"))') if m['id']==chosen)
+  assert weight()==4,(width,'member cumulative weight not saved')
+  page.locator(f'[data-edit="{chosen}"]').first.click()
+  edit=page.locator('#edit-member-form')
+  edit.locator('[name=cumulativeVoteWeight]').fill('6')
+  edit.locator('button[type=submit]').click()
+  assert weight()==6,(width,'edited cumulative weight not saved')
+  page.locator('[data-action=undo]').click()
+  assert weight()==4,(width,'cumulative weight undo failed')
 
   # The member search is interactive and should preserve the typed filter.
   page.locator('.footer-nav').click()
