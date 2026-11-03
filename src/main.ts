@@ -356,8 +356,8 @@ function profilePage() {
  const local=member.id===members[0]?.id && activeTab==='proposicoes'
   ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button>${linkedScheduleButtons(d)}</article>`).join('') : '';
  return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
- ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}<h2 class="session-proposals-heading">Histórico demonstrativo</h2>`:''}
- ${relevant.length?relevant.map(activityItem).join(''):'<p class="status-line">Nenhum registro encontrado.</p>'}</section>`;
+ ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}${relevant.length?'<h2 class="session-proposals-heading">Histórico demonstrativo</h2>':''}`:''}
+ ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>`;
 }
 function overviewPage() {
  const votes=activities.filter(a=>a.type==='voto');
@@ -366,12 +366,15 @@ function overviewPage() {
  const relevant=overviewTab==='votos'?votes:proposals;
  const visible=overviewExpanded?relevant:relevant.slice(0,6);
  const remaining=relevant.length-visible.length;
+ // New drafts belong to this browser session. They never change fixture totals.
+ const localHistory=overviewTab==='proposicoes'&&drafts.length
+  ? `<section class="overview-local-history" aria-label="Proposições desta sessão"><h2 class="session-proposals-heading">Proposições desta sessão</h2><p class="overview-local-disclosure">Registros locais de demonstração. Não alteram os indicadores fictícios acima.</p>${drafts.map(d=>`<article class="workflow-record overview-local-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${linkedScheduleButtons(d)}</article>`).join('')}</section>` : '';
  return `${header(undefined,undefined,false)}<div class="overview-stats" role="group" aria-label="Indicadores institucionais">
   <span class="stat-chip">${accepted} Aprovados</span><span class="stat-chip">${proposals.length-accepted} Arquivados</span>
   <span class="stat-figure">${votes.reduce((n,a)=>n+a.votes,0)} Votos</span>
   <span class="stat-figure">${proposals.length} PDR</span><span class="stat-figure">${String(accepted).padStart(2,'0')} PR</span>
   </div><div class="tabs overview-tabs" role="group" aria-label="Histórico institucional"><button class="tab" data-overview-tab="votos" aria-pressed="${overviewTab==='votos'}">Histórico de votações</button><button class="tab" data-overview-tab="proposicoes" aria-pressed="${overviewTab==='proposicoes'}">Proposições</button></div>
-  <section class="section-body overview-content">${visible.length?visible.map(activityItem).join(''):'<p class="status-line">Nenhum registro encontrado.</p>'}
+  <section class="section-body overview-content">${localHistory}${visible.length?visible.map(activityItem).join(''):localHistory?'':'<p class="status-line">Nenhum registro encontrado.</p>'}
    ${remaining>0?`<button class="overview-more" type="button" data-action="show-more-history">Ver mais ${remaining} ${overviewTab==='votos'?'votações':'proposições'}</button>`:''}
   </section>`;
 }

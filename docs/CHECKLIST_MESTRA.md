@@ -666,3 +666,12 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [ ] A reorganização não é reescrita integral da UI: outros trechos extensos do `src/main.ts` merecem refinamento pontual **somente** quando houver melhoria de legibilidade ou defeito demonstrado. Nada de novos frameworks, microserviços ou infraestrutura sem necessidade.
 
 **Contagens canônicas preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Sem alteração da `main`.
+
+## Etapa 03 — histórico local em visão geral (03/11/2026)
+
+- [x] As proposições criadas nesta sessão agora também aparecem na guia Proposições do histórico geral, com status, trecho do documento e acesso à programação local associada. Não são confundidas com dados Academy, não alteram os indicadores históricos fictícios e não aparecem na guia de votos.
+- [x] Perfil do autor não exibe mais o estado vazio enganoso quando há proposições locais mas nenhum registro antigo da mesma categoria.
+- [x] Jornada Chromium adicionada: concluir proposição → programar deliberação → histórico geral → programação → votação fictícia. O resultado do CI deve ser confirmado antes de aprovar a execução.
+- [ ] A vinculação multiusuário real continua fora do escopo desta prévia e dependerá da Academy.
+
+**Contagens oficiais ainda não são alteradas por esta correção de coerência da prévia.**
