@@ -2,6 +2,8 @@ export type MemberId = string;
 export type SectionId = string;
 export type Role = 'diretor' | 'membro';
 export type BallotStatus = 'aberta' | 'encerrada';
+/** Voting mode is independent from PDR/PR/Ofício proposal classification. */
+export type DeliberationMethod = 'binaria' | 'nominal' | 'ordenada' | 'aprovacao' | 'escalar' | 'cumulativa';
 export interface Member {
   id: MemberId;
   name: string;
@@ -14,6 +16,8 @@ export interface Member {
   collaborations: number;
   sectionIds: SectionId[];
   role: Role;
+  /** Quantity assigned for cumulative voting; absent until explicitly configured. */
+  cumulativeVoteWeight?: number;
   /** Previous deliberative participation remains on record after a demotion. */
   hadDeliberativeHistory?: boolean;
 }
