@@ -152,3 +152,9 @@ O botão que abria/fechava o formulário de convite demonstrativo Socii omitia `
 ## 07.10 — Lote 9 (v0.10.48) — retorno do foco após ações que desaparecem
 
 No frontend offline, o `render()` após salvar um convite fictício, agendar, cancelar programação ou desfazer um identificador removia o botão acionado, podendo devolver o foco ao `body`. Teste de reprodução falhou em 280px para Socii; exploração isolada confirmou Desfazer. Somente `src/main.ts` recebeu destinos de foco existentes, sem novas operações, arte ou mudanças em modelos institucionais. Teste permanente `tests/browser_stage7_disappearing_forms_v0148.py` passou **28/28** em sete larguras; build Node **18/18**, teclado 76/76, ARIA 28/28, Socii 36/36 e reflow 63/63 reexecutados. Outras evidências, limites e ressalvas em `docs/CHECKPOINT_V058_2026-11-02.md`. **07.10 ainda [ ]; etapa 07 = 7/12**. Testes de leitores de tela reais permanecem pendentes.
+
+## 07.10 — lote 9, ações que removem formulários e foco de teclado (v0.10.48)
+
+Após reproduzir a perda de foco no `<body>` ao incluir Socii, confirmar/cancelar uma programação e desfazer uma alteração de membro, somente `src/main.ts` foi ajustado para retornar a destinos semânticos e estáveis. Novo teste `tests/browser_stage7_disappearing_forms_v0148.py`: **28/28** Enter/foco em sete larguras, sem erros JS ou overflow. Build TypeScript/Node 18/18 e regressões pertinentes concluídas, inclusive teclado, DOM/ARIA, contrastes, reflow e Society. Não houve mudança de CSS, layout, marca, regras, dados reais ou aprovação D1–D6. Checkpoint `docs/CHECKPOINT_V058_2026-11-02.md`.
+
+**07.10 segue [ ] e Etapa 07=7/12.** Validação com leitor de tela real, WCAG global, zoom nativo, dispositivo e navegador adicionais permanecem para gates próprios; não supor certificação pela árvore AX Chromium.

@@ -448,3 +448,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **07.10 continua ABERTA**: leitores de tela reais, contraste imagem/gradiente, WCAG integral e outros dispositivos/motores; D1–D6 dependem de Megalos.
 
 **Contagens oficiais preservadas:** 01 4/5, 02 0/4, 03 1/5, 04 17/22, 05 0/4, 06 0/5, **07 7/12**. Sem merge, deploy ou mudança em `main`.
+
+## Etapa 07.10 — lote 9, v0.10.48 — foco após formulários que desaparecem (02/11/2026)
+
+- [x] Reproduzida perda de foco ao usar Enter para adicionar Socii, confirmar/cancelar programação e desfazer alteração fictícia; o botão acionado desaparecia após `render()` e o foco podia cair no `<body>`. O teste `browser_stage7_disappearing_forms_v0148.py` falhou na versão original de 280px. Corrigido **somente `src/main.ts`**, devolvendo foco a botão do convite, programação criada, título da lista e editor do membro, respectivamente. **28/28 PASS** depois, em sete larguras, sem mudança visual ou institucional.
+- [x] Build 18/18 Node, regressões isoladas: teclado 76/76, revisão por teclado 24/24, ações removidas 14/14, Socii 36/36, anúncios 12/12, ARIA 28/28, erros 12/12 + 24/24, reflow 63/63, controles 2543, zoom simulado 70/70, contraste 87/87 + 40/40 + 2464/2464, calendário 36/36, Academy, tablet, desktop, fluxos de erro, editor Socii e retorno de calendário. Consultar `docs/CHECKPOINT_V058_2026-11-02.md` e logs; não contar execução conjunta expirada como aprovada.
+- [ ] **07.10 permanece ABERTA**: verificação com leitores de tela reais, auditoria manual ampla WCAG, outros motores, mídia/gradientes e hardware. 07.05/07.06, 07.11 (D1–D6) e 07.12 continuam abertas.
+
+**Contagem canônica sem alteração:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=0/4; 06=0/5; **07=7/12**. `main`/produção preservadas.
