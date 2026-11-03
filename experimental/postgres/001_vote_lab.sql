@@ -82,7 +82,7 @@ CREATE OR REPLACE FUNCTION conffratus_vote_lab.record_fixture_vote(
   p_ballot_id uuid, p_actor_ref text, p_request_id uuid, p_payload jsonb
 ) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER
-SET search_path = pg_catalog, conffratus_vote_lab
+SET search_path = pg_catalog, conffratus_vote_lab, pg_temp
 AS $body$
 DECLARE
   b record;
@@ -101,6 +101,11 @@ BEGIN
   IF p_ballot_id IS NULL OR p_request_id IS NULL
      OR p_actor_ref IS NULL OR p_actor_ref !~ '^[A-Za-z0-9_-]{1,64}$' THEN
     RETURN jsonb_build_object('status','invalid','reason','invalid_envelope');
+  END IF;
+
+  -- Keep the input boundary deliberately small even for the synthetic gateway.
+  IF p_payload IS NULL OR octet_length(p_payload::text) > 8192 THEN
+    RETURN jsonb_build_object('status','invalid','reason','payload_too_large');
   END IF;
 
   -- Serializes all writes to a ballot, including checks, insert and audit.

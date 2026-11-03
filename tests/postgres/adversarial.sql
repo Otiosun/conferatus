@@ -33,6 +33,10 @@ DECLARE
   scalar_id uuid := '55555555-5555-4555-8555-555555555555';
   cumulative_id uuid := '66666666-6666-4666-8666-666666666666';
 BEGIN
+  result:=conffratus_vote_lab.record_fixture_vote(rank_id,'rank_edge',gen_random_uuid(),
+   jsonb_build_object('ranking',jsonb_build_array('a','b','c'),'padding',repeat('x',9000)));
+  IF result->>'reason'<>'payload_too_large' THEN RAISE EXCEPTION 'Oversized payload accepted: %',result; END IF;
+
   result:=conffratus_vote_lab.record_fixture_vote(rank_id,'rank_edge',gen_random_uuid(),'{}');
   IF result->>'status'<>'invalid' THEN RAISE EXCEPTION 'Missing ranking accepted: %',result; END IF;
 

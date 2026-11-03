@@ -634,3 +634,5 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Teste de múltiplos atores fictícios em uma mesma votação: uma solicitação repetida não impede que outro ator cadastrado registre sua própria amostra com nova chave.
 - [x] Teste concorrente de encerramento: transação separada mantém bloqueio na linha da votação depois de alterar seu estado para closed; um voto solicitado enquanto a trava está ativa deve aguardar e ser recusado, sem escrita de voto ou auditoria.
 - [ ] Validar resultado desse novo teste no PostgreSQL descartável do workflow. Políticas reais de encerramento, sigilo e alteração seguem indefinidas.
+
+- [x] Defesa adicional no limite de entrada SQL: limite explícito de 8 KiB para o corpo JSON da amostra e search_path seguro com pg_temp por último; teste adversarial de payload grande adicionado. Não substitui limites nem autenticação na futura API institucional.
