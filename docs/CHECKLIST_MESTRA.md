@@ -483,3 +483,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] **Não concluir 03.05/04:** somente a primeira autora sintética da sessão dispõe dessa lista; autoria real multiusuário, colaboração Socii, agendamento institucional, integridade de permissões e aceite Megalos não estão disponíveis. A 07.10 continua aberta; testes físicos também pendentes.
 
 **Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**. A `main` e produção não foram alteradas. Próximo desenvolvimento pode ampliar vínculos dentro da prévia sem inventar identidade ou preferências da Megalos.
+
+## Integridade de vínculos locais — preview v0.10.52, V062 (02/11/2026)
+
+- [x] Defeito real reproduzido: `Date.now()` como único identificador gerou dois rascunhos distintos com o mesmo `draft-*` em relógio congelado, confundindo links e ações. Teste falhou antes da correção.
+- [x] Correção pequena em `src/main.ts`: gerar sufixo incremental apenas se o ID já existir nos rascunhos ou programações da sessão, sem migrar IDs anteriores nem alterar dados fictícios. Novo teste `browser_workflow_id_collision_v0152.py` **4/4 larguras PASS**: rascunhos e programações distintos, cancelamento isolado, vínculo restante ativo, estado salvo íntegro.
+- [x] Build TS/HTML + **23/23 Node**; regressões isoladas de quarentena/restauração, rollback parcial, assinaturas, navegação perfil-proposição-calendário, retorno, ACDM ID, reflow **63/63** e smoke quatro larguras PASS. Uma execução agrupada expirou; smoke foi repetido separadamente e aprovado. Ver `docs/CHECKPOINT_V062_2026-11-02.md`.
+- [ ] Não equivale a histórico institucional ou persistência multiusuário: esses critérios dependem de backend, identidade/autorizações da Academy e decisões Megalos.
+
+**Contagens não infladas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**. `main` e produção intocadas. Próximo: examinar preservação/consulta de histórico de cancelamentos fictícios sem inventar política institucional.

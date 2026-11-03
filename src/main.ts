@@ -322,6 +322,15 @@ const ignoredRecordsBackup={drafts:restoredDrafts.rejected,schedule:restoredSche
 const ignoredSavedRecords=ignoredRecordsBackup.drafts.length>0||ignoredRecordsBackup.schedule.length>0||
  draftRestore.unreadableRaw!==null||scheduleRestore.unreadableRaw!==null;
 function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos ou repetidos desta prévia local não foram carregados.</p>':'';}
+// IDs are local opaque references. A clock tick alone is not unique: two
+// actions can occur in the same millisecond (or the clock can move backwards).
+// Check the records already in this session before using an ID for a new link.
+function nextLocalRecordId(prefix:'draft'|'sched', records:{id:string}[]):string {
+ const base=`${prefix}-${Date.now().toString(36)}`;
+ let candidate=base, suffix=1;
+ while(records.some(record=>record.id===candidate))candidate=`${base}-${suffix++}`;
+ return candidate;
+}
 const blankDraft=()=>({title:'',body:''});
 let draftForm=blankDraft();
 let currentDraftId='';
@@ -751,7 +760,7 @@ document.addEventListener('submit',(event)=>{
   let d=drafts.find(x=>x.id===currentDraftId);
   let confirmationsReset=false;
   if(!d||d.status==='concluida'){
-   d={id:`draft-${Date.now().toString(36)}`,title,body,sectionId:'integridade',type:'PDR',authorComplete:false,partners:[],status:'redacao'};drafts.unshift(d);currentDraftId=d.id;
+   d={id:nextLocalRecordId('draft',drafts),title,body,sectionId:'integridade',type:'PDR',authorComplete:false,partners:[],status:'redacao'};drafts.unshift(d);currentDraftId=d.id;
   }else{
    // A confirmation of an earlier text cannot approve a changed version.
    if(d.title!==title||d.body!==body){
@@ -807,7 +816,7 @@ document.addEventListener('submit',(event)=>{
    showScheduleFormError(form,'Selecione uma proposição concluída.','proposalId');
    return;
   }
-  const item:Deliberation={id:`sched-${Date.now().toString(36)}`,title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),status:'programada'};
+  const item:Deliberation={id:nextLocalRecordId('sched',schedule),title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),status:'programada'};
   schedule.unshift(item);const stored=saveWorkflows();workflowNotice=stored?'Deliberação programada nesta demonstração.':'Programação mantida somente enquanto a página estiver aberta.';scheduleFormOpen=false;expandedSchedule=item.id;
   const date=new Date(`${start.slice(0,10)}T12:00:00`);calendarYear=date.getFullYear();calendarMonth=date.getMonth();selectedCalendarDay=start.slice(0,10);
   render();
