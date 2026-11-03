@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const files = ['data/fixtures.js', 'domain/rules.js', 'domain/providers.js', 'domain/academy-identity.js', 'main.js'];
+const files = ['data/fixtures.js', 'domain/rules.js', 'domain/providers.js', 'domain/academy-identity.js', 'domain/member-reference.js', 'main.js'];
 const sources = await Promise.all(files.map(async file => {
   const source = await readFile(path.join(cwd, 'dist', file), 'utf8');
   return source.replace(/^import .*?;\s*$/gm, '').replace(/^export /gm, '');
@@ -11,7 +11,8 @@ let js = `const __fixture = (()=>{${sources[0]}; return { members,sections,ballo
 const __rules = (()=>{${sources[1]};return {escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory};})();
 const __providers = (({members,sections})=>{${sources[2]};return {FixtureMemberProvider};})(__fixture);
 const __academyIdentity = (()=>{${sources[3]};return {UnconnectedAcademyIdentityProvider};})();
-await (async ({activities,ballots},{FixtureMemberProvider},{UnconnectedAcademyIdentityProvider},{escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory})=>{${sources[4]}})(__fixture,__providers,__academyIdentity,__rules);`;
+const __memberReference = (()=>{${sources[4]};return {resolveMemberReference};})();
+await (async ({activities,ballots},{FixtureMemberProvider},{UnconnectedAcademyIdentityProvider},{resolveMemberReference},{escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory})=>{${sources[5]}})(__fixture,__providers,__academyIdentity,__memberReference,__rules);`;
 for (const name of ['crest', 'editar', 'rebaixamento', 'painel']) {
   const asset = await readFile(path.join(cwd,'public','assets',`${name}.png`));
   js = js.replaceAll(`./assets/${name}.png`,`data:image/png;base64,${asset.toString('base64')}`);

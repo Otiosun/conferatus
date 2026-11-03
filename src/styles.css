@@ -992,3 +992,9 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
    Reuse the existing CONFFRATUS violet-blue palette; no new layout. */
 .overview-stats .stat-chip {background:#515dc7;}
 .workflow-actions .workflow-outline {background:#4754b2;color:#fff;}
+
+/* Academy reference on synthetic profiles: readable, unobtrusive and wrap-safe.
+   This is a directory link, never an authentication or permission control. */
+.profile-identity .profile-reference {font-size:12px;line-height:1.4;overflow-wrap:anywhere;}
+.profile-reference-link {color:#4754b2;text-decoration:underline;text-underline-offset:2px;display:inline-flex;align-items:center;min-height:44px;}
+.profile-reference-link:focus-visible {outline:2px solid #34419e;outline-offset:3px;}

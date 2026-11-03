@@ -7,6 +7,7 @@ Endereço técnico existente: **https://conferatus.pages.dev** (domínio legado,
 ## O que existe
 
 - Diretório e perfis de membros fictícios, seções deliberativas CINSTIA, histórico demonstrativo e ações administrativas simuladas.
+- Cada perfil fictício possui um link por ACDM ID sintético (`#/profile/acdm/DEMO-0002`), utilizado apenas como referência de cadastro na prévia. Um identificador não autentica ninguém nem concede permissão.
 - Fluxo demonstrativo de votação e registros, sem integração institucional.
 - Elaboração de proposições, salvamento de rascunhos na sessão quando disponível e confirmação de redação.
 - Socii com participantes de demonstração e progresso de conclusão; não envia convites reais.

@@ -66,7 +66,7 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 
 ## 05 — Integração posterior à Academy
 - [x] Definir interface de identidade da Academy sem criar login próprio (v0.10.49; contrato tipado, adaptador sem sessão e testes locais).
-- [ ] Usar o ACDM ID para referência de cadastro, sem criar cadastro independente.
+- [x] Usar o ACDM ID como referência de cadastro de demonstração, com links diretos para perfis e resolução única (v0.10.50; sem criar cadastro nem autenticar).
 - [ ] Deixar a integração do login para o responsável da Academy, conforme acordado.
 - [ ] Validar os fluxos integrados quando a equipe fornecer a interface correspondente.
 **Estado:** responsabilidade definida; integração externa pendente.
@@ -466,3 +466,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] Nenhuma autenticação, autorização, sessão, banco institucional ou permissão real foi implementada. A equipe Academy continua responsável pela integração, que requer contrato real, verificações server-side e autorização explícita.
 
 **Contagens oficiais desta rodada:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; **05=1/4**; 06=0/5; 07=7/12. Etapas 04 e 07 mantêm suas pendências e a Megalos não aprovou D1–D6. `main` e produção intocadas.
+
+## Etapa 05.02 — referência de membro Academy, v0.10.50 (02/11/2026)
+
+- [x] Perfil demonstrativo acessível por URL de referência `#/profile/acdm/DEMO-0002` ou pelo link ACDM ID no perfil; a navegação interna anterior `#/profile/m02` continua operante. A busca preexistente por ACDM ID foi reutilizada, não duplicada.
+- [x] Nova função pura `resolveMemberReference` resolve apenas referência exata e única da coleção fictícia; desconhecida, inválida ou duplicada não abre perfil. Sem inferência de autenticação, papel, participação institucional ou direito de voto.
+- [x] Build/Node **23/23**, teste novo de navegador quatro larguras (280/390/740/1280), regressões de perfil e navegação, reflow **63/63**, captura de 390px e área clicável de referência ≥44px. O inventário completo de controles foi interrompido no tempo máximo nesta rodada e não é contabilizado como aprovado.
+- [ ] Login, sessão, vinculação real de cadastro, API da Academy e autorização no servidor requerem a equipe responsável e aprovação explícita. D1–D6 da Megalos permanecem pendentes.
+
+**Contagens após v0.10.50:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; **05=2/4**; 06=0/5; 07=7/12. Sem alteração da `main` ou da produção.

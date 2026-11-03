@@ -1,6 +1,7 @@
 import { activities, ballots } from './data/fixtures.js';
 import { FixtureMemberProvider } from './domain/providers.js';
 import { UnconnectedAcademyIdentityProvider } from './domain/academy-identity.js';
+import { resolveMemberReference } from './domain/member-reference.js';
 import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory } from './domain/rules.js';
 import type { Activity, Member } from './domain/types.js';
 
@@ -140,7 +141,7 @@ function memberHeader(m:Member, tab:Tab, displayTabs=true) {
   : `<strong>${escapeHTML(m.name)}</strong>`;
  return `<div class="profile-head"><div class="profile-summary"><div class="avatar avatar--large" aria-hidden="true"></div>
    ${metricRow(m)}</div><div class="profile-identity"><div>${identity} <small>${m.role==='diretor'?'Diretoria':isDeliberativeMember(m, sections)?'Membro deliberativo':'Membro da Academy'}</small></div>
-   <p>${escapeHTML(m.subtitle)}</p></div>${displayTabs?tabBar(tab, hasPersonalVoteHistory(m, sections)):''}</div>`;
+   <p>${escapeHTML(m.subtitle)}</p>${routeFromHash()==='profile' && m.acdmId?`<p class="profile-reference"><a class="profile-reference-link" href="#/profile/acdm/${encodeURIComponent(m.acdmId)}" aria-label="Abrir link de referência demonstrativa ACDM ID ${escapeHTML(m.acdmId)}">ACDM ID: ${escapeHTML(m.acdmId)}</a><span> · prévia local</span></p>`:''}</div>${displayTabs?tabBar(tab, hasPersonalVoteHistory(m, sections)):''}</div>`;
 }
 function ballotPage() {
  const ballot=ballots[0]; if(!ballot) return '<p>Nenhuma votação disponível.</p>';
@@ -206,9 +207,18 @@ function activityItem(a:Activity) {
    <div class="activity-result"><span class="${a.approved?'':'no'}">⚑ OPÇÃO VOTADA</span><span>${a.votes} votos&nbsp;&nbsp; <strong>${a.percentage}%</strong></span></div></article>`;
 }
 function profilePage() {
- const directId=location.hash.replace(/^#\/profile\/?/, '').split('/')[0];
- const chosenId=directId || currentMember;
- const member=members.find(m=>m.id===chosenId);
+ const referencePath=location.hash.replace(/^#\/profile\/?/, '').split('/');
+ // A reference link resolves a PUBLIC DEMONSTRATION PROFILE only. It never
+ // authenticates the holder or grants voting/administrative permissions.
+ let member: Member | undefined;
+ if (referencePath[0] === 'acdm') {
+  let reference = '';
+  try { reference = decodeURIComponent(referencePath[1] ?? ''); } catch { /* Invalid URL: no member. */ }
+  const result = resolveMemberReference(members, reference);
+  member = result.state === 'found' ? result.member : undefined;
+ } else {
+  member = members.find(m=>m.id===(referencePath[0] || currentMember));
+ }
  if(!member) return `${header(undefined,undefined,false)}<section class="missing-profile" role="status"><strong>Perfil não encontrado</strong><p>Não encontramos um membro com esse identificador.</p><button type="button" data-route="members">Voltar aos membros</button></section>`;
  const personalVotingHistory = hasPersonalVoteHistory(member, sections);
  const activeTab: Tab = personalVotingHistory ? profileTab : 'proposicoes';
