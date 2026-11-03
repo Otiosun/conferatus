@@ -598,3 +598,13 @@ No formulário de agendamento, novas programações exigem uma das seis modalida
 - [ ] Registro transacional, autenticação Academy, elegibilidade, sigilo, quórum, política de apuração, alterações de voto e encerramento permanecem indefinidos e não foram implementados.
 
 **Checklist canônico inalterado:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Main/produção não modificadas.
+
+## Etapa 02 — guarda idempotente de amostras, sem persistência institucional (03/11/2026)
+
+- [x] Registrador exclusivo de amostras em memória em src/domain/preview-ledger.ts: recibos recorded/replayed, repetição idempotente por contexto e solicitação, conflito para conteúdo diferente e limite de 100 por contexto.
+- [x] Validação duplicada na fronteira de gravação, com snapshot de conteúdo e leitura defensiva; não associa votos a qualquer identidade institucional.
+- [x] Interface de demonstração integrada ao registrador: token novo por amostra, limpar somente contexto ativo ou reiniciar tudo. Nenhum armazenamento de votos em sessionStorage, backend ou banco.
+- [x] Testes específicos adicionados para seis modalidades, replay, conflito, limite, isolamento e imutabilidade. Resultados da CI pendentes antes de declarar conclusão técnica.
+- [ ] Registro transacional oficial, autenticação e autorização de servidor, concorrência, auditoria, elegibilidade, sigilo, alteração e contagem institucional dependem da Megalos e da Academy; este módulo NÃO os implementa.
+
+Contagens canônicas inalteradas: 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Main e produção não alteradas.

@@ -5,6 +5,7 @@ import { resolveMemberReference } from './domain/member-reference.js';
 import { exportWorkflowArchive, parseWorkflowArchive, WORKFLOW_ARCHIVE_MAX_BYTES } from './domain/workflow-archive.js';
 import { escapeHTML, resultPercentage, totalVotes, updateSectionAssignment, demoteToCommonMember, canRecordVote, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight, PREVIEW_BINARY_OPTIONS, PREVIEW_LIST_OPTIONS, validatePreviewVote, summarizePreviewVotes } from './domain/rules.js';
 import type { PreviewVote } from './domain/rules.js';
+import { createPreviewSampleLedger } from './domain/preview-ledger.js';
 import type { Activity, Member, DeliberationMethod } from './domain/types.js';
 
 type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance' | 'calendar' | 'proposals' | 'compose' | 'review';
@@ -51,7 +52,7 @@ function resetDemoState() {
     if (original) { member.name=original.name; member.acdmId=original.acdmId; member.sectionIds=[...original.sectionIds];member.role=original.role;member.hadDeliberativeHistory=original.hadDeliberativeHistory;member.cumulativeVoteWeight=original.cumulativeVoteWeight; }
   }
   demoVoteId=null; demoExpanded=false; editingMemberId=null; editError=''; lastChange=null;
-  previewMode='binaria';previewVoteError='';previewVoteReceipt=null;previewVoteMemberId='';previewScheduleId=null;scheduleMethod=null;previewSamples.splice(0);
+  previewMode='binaria';previewVoteError='';previewVoteReceipt=null;previewVoteMemberId='';previewScheduleId=null;scheduleMethod=null;previewSampleLedger.clearAll();previewRequestId=null;
   rolePreview='diretor'; demoToolsOpen=false; expandedSection=''; expandedActivity='';
   profileTab='votos'; overviewTab='votos'; overviewExpanded=false; searchExpanded=false; directoryExpanded=false; filter='';
   try { sessionStorage.removeItem(demoMembersKey); sessionStorage.removeItem('conferatus:demo-vote'); } catch {}
@@ -76,8 +77,9 @@ let previewVoteError = '';
 let previewVoteReceipt: PreviewVote | null = null;
 let previewVoteMemberId = '';
 // Deliberately memory-only; never part of the session archive or legacy ballot totals.
-const previewSamples: {scope:string;vote:PreviewVote}[] = [];
-const PREVIEW_SAMPLE_LIMIT=100;
+const previewSampleLedger=createPreviewSampleLedger(100);
+let previewRequestSequence=0;
+let previewRequestId:string|null=null;
 function previewSampleScope():string {
  const scheduled=previewSelectedSchedule();
  return scheduled?`schedule:${scheduled.id}`:`fixture:${previewMode}`;
@@ -229,7 +231,7 @@ function previewVoteReceiptText(vote:PreviewVote):string {
 function previewVoteSummary():string {
  const scope=previewSampleScope();
  const summary=summarizePreviewVotes(previewMode,previewVoteChoices(),
-   previewSamples.filter(sample=>sample.scope===scope).map(sample=>sample.vote));
+   previewSampleLedger.votes(scope));
  if(!summary.samples)return '';
  return '<section class="preview-vote-summary" aria-labelledby="preview-vote-summary-title">'+
   '<h3 id="preview-vote-summary-title">Distribuição das amostras nesta aba ('+String(summary.samples)+')</h3>'+
@@ -821,7 +823,7 @@ document.addEventListener('click',(event)=>{
  if(contextualVote?.dataset.previewSchedule){
   const item=schedule.find(s=>s.id===contextualVote.dataset.previewSchedule&&s.status==='programada');
   if(item?.method && (item.method==='binaria'||isValidPreviewChoices(item.choices))){
-   previewScheduleId=item.id;previewMode=item.method;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';
+   previewScheduleId=item.id;previewMode=item.method;previewRequestId=null;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';
    navigate('ballot');document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
   }return;
  }
@@ -836,18 +838,18 @@ document.addEventListener('click',(event)=>{
  const voteEl=target.closest<HTMLElement>('[data-vote]');
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
  if(advancedPreview && actionEl?.dataset.action==='exit-preview-schedule'){
-  previewScheduleId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
+  previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
   document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
  }
  if(advancedPreview && actionEl?.dataset.action==='clear-preview-samples'){
   const scope=previewSampleScope();
   if(!window.confirm('Limpar apenas as amostras desta simulação?'))return;
-  for(let index=previewSamples.length-1;index>=0;index--){if(previewSamples[index]?.scope===scope)previewSamples.splice(index,1);}
-  previewVoteReceipt=null;previewVoteError='';render();
+  previewSampleLedger.clear(scope);
+  previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
   document.querySelector<HTMLElement>('#preview-vote-form')?.querySelector<HTMLElement>('input,select')?.focus({preventScroll:true});return;
  }
  if(advancedPreview && actionEl?.dataset.action==='reset-preview-vote'){
-  previewVoteReceipt=null;previewVoteError='';render();document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
+  previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
  }
  if(actionEl?.dataset.action==='undo'&&lastChange){
   const member=members.find(m=>m.id===lastChange?.memberId);
@@ -1184,10 +1186,15 @@ document.addEventListener('submit',(event)=>{
  const result=validatePreviewVote(previewMode,payload,selectedMember?.cumulativeVoteWeight,previewVoteChoices().map(option=>option.id));
  if(!result.ok){previewVoteError=result.error;render();document.querySelector<HTMLElement>('#preview-vote-error')?.focus({preventScroll:true});return;}
  const scope=previewSampleScope();
- if(previewSamples.filter(sample=>sample.scope===scope).length>=PREVIEW_SAMPLE_LIMIT){
-  previewVoteError='Esta simulação atingiu o limite de 100 amostras. Limpe-as para reiniciar.';render();return;
+ if(previewRequestId===null)previewRequestId='sample-'+String(++previewRequestSequence);
+ const submitted=previewSampleLedger.submit({
+  scope,requestId:previewRequestId,method:previewMode,
+  options:previewVoteChoices(),vote:result.vote
+ });
+ if(!submitted.ok){
+  previewVoteError=submitted.message;render();
+  document.querySelector<HTMLElement>('#preview-vote-error')?.focus({preventScroll:true});return;
  }
- previewSamples.push({scope,vote:result.vote});
  previewVoteError='';previewVoteReceipt=result.vote;render();
  const receipt=document.querySelector<HTMLElement>('.preview-vote-receipt');
  if(receipt){receipt.tabIndex=-1;receipt.focus({preventScroll:true});}
@@ -1269,12 +1276,12 @@ document.addEventListener('change',(event)=>{
  }
  if(advancedPreview && target instanceof HTMLSelectElement && target.id==='preview-vote-method'){
   if(isDeliberationMethod(target.value)){
-   previewMode=target.value;previewScheduleId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
+   previewMode=target.value;previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
    document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});
   }return;
  }
  if(advancedPreview && target instanceof HTMLSelectElement && target.id==='preview-vote-member'){
-  previewVoteMemberId=target.value;previewVoteReceipt=null;previewVoteError='';render();
+  previewVoteMemberId=target.value;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
   document.querySelector<HTMLSelectElement>('#preview-vote-member')?.focus({preventScroll:true});return;
  }
  if(target instanceof HTMLSelectElement && target.name==='proposalId' && target.closest('#schedule-deliberation-form') && target.getAttribute('aria-invalid')==='true'){
