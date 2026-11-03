@@ -76,4 +76,13 @@ votes="$(query "SELECT count(*) FROM conffratus_vote_lab.votes WHERE ballot_id='
 audits="$(query "SELECT count(*) FROM conffratus_vote_lab.audit WHERE ballot_id='$ballot';")"
 [[ "$votes" == "1" && "$audits" == "1" ]] ||
   { echo "FAIL: expected one vote and one audit row; got $votes/$audits" >&2; exit 1; }
-echo "PostgreSQL concurrency PASS: 1 recorded; 11 replays; 6 blocked duplicates; audit atomic"
+second_actor="$(query "SET ROLE conffratus_lab_gateway; SELECT conffratus_vote_lab.record_fixture_vote(
+ '$ballot', 'race_two', gen_random_uuid(), '{\"selected\":\"b\"}'::jsonb
+)->>'status';")"
+[[ "$second_actor" == "recorded" ]] ||
+ { echo "FAIL: separate qualified fixture actor was blocked: $second_actor" >&2; exit 1; }
+votes="$(query "SELECT count(*) FROM conffratus_vote_lab.votes WHERE ballot_id='$ballot';")"
+audits="$(query "SELECT count(*) FROM conffratus_vote_lab.audit WHERE ballot_id='$ballot';")"
+[[ "$votes" == "2" && "$audits" == "2" ]] ||
+ { echo "FAIL: two independent actors should have two votes and two audit records" >&2; exit 1; }
+echo "PostgreSQL concurrency PASS: 1 recorded; 11 replays; 6 blocked duplicates; second actor accepted; audit atomic"

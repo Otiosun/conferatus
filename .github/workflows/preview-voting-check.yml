@@ -45,6 +45,8 @@ jobs:
         run: bash tests/postgres/concurrency.sh
       - name: Audit fault injection and full rollback check
         run: psql -X -v ON_ERROR_STOP=1 -f tests/postgres/atomicity.sql
+      - name: Closure versus new vote: transaction serialization
+        run: bash tests/postgres/close-race.sh
   validate:
     needs: postgres-lab
     runs-on: ubuntu-24.04

@@ -629,3 +629,8 @@ Contagens canônicas inalteradas: 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0
 - [ ] Executar, inspecionar logs e corrigir antes de chamar este lote de validado.
 
 Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branch main.
+## SQL experimental — encerramento e simultaneidade (03/11/2026)
+
+- [x] Teste de múltiplos atores fictícios em uma mesma votação: uma solicitação repetida não impede que outro ator cadastrado registre sua própria amostra com nova chave.
+- [x] Teste concorrente de encerramento: transação separada mantém bloqueio na linha da votação depois de alterar seu estado para closed; um voto solicitado enquanto a trava está ativa deve aguardar e ser recusado, sem escrita de voto ou auditoria.
+- [ ] Validar resultado desse novo teste no PostgreSQL descartável do workflow. Políticas reais de encerramento, sigilo e alteração seguem indefinidas.
