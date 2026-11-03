@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { totalVotes, resultPercentage, updateSectionAssignment, demoteToCommonMember, canRecordVote, escapeHTML, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory } from '../dist/domain/rules.js';
+import { totalVotes, resultPercentage, updateSectionAssignment, demoteToCommonMember, canRecordVote, escapeHTML, restoreDemoMembers, searchKey, isDeliberativeMember, hasPersonalVoteHistory, DELIBERATION_METHODS, isDeliberationMethod, isPositiveCumulativeVoteWeight } from '../dist/domain/rules.js';
 import { members as fixtures } from '../dist/data/fixtures.js';
 
 test('count results from options and never hard-code them', () => {
@@ -133,4 +133,27 @@ test('restoring demoted status preserves prior deliberative voting history', asy
  restoreDemoMembers([copy],sections.map(s=>s.id),[{id:after.id,sectionIds:after.sectionIds,role:after.role,hadDeliberativeHistory:after.hadDeliberativeHistory}]);
  assert.equal(copy.role,'membro');
  assert.equal(hasPersonalVoteHistory(copy,sections),true);
+});
+
+test('Megalos defined six distinct voting modalities independent of proposal types', () => {
+ const ids=DELIBERATION_METHODS.map(mode=>mode.id);
+ assert.deepEqual(ids,['binaria','nominal','ordenada','aprovacao','escalar','cumulativa']);
+ assert.ok(DELIBERATION_METHODS.every(mode=>mode.label.length>3 && mode.detail.length>10));
+ assert.ok(ids.every(isDeliberationMethod));
+ assert.equal(isDeliberationMethod('PDR'),false);
+ assert.equal(isDeliberationMethod('unlisted'),false);
+ assert.equal(isDeliberationMethod({id:'binaria'}),false);
+});
+
+test('cumulative weight is an optional explicit positive integer, never a default', () => {
+ for(const value of [1,4,100,Number.MAX_SAFE_INTEGER]) assert.equal(isPositiveCumulativeVoteWeight(value),true);
+ for(const value of [0,-1,1.5,NaN,Infinity,'4',null,undefined,Number.MAX_SAFE_INTEGER+1]) assert.equal(isPositiveCumulativeVoteWeight(value),false);
+ const m={...fixtures[0],sectionIds:[...fixtures[0].sectionIds]};
+ assert.equal(m.cumulativeVoteWeight,undefined);
+ restoreDemoMembers([m],['coordenacao'],[{id:m.id,cumulativeVoteWeight:4}]);
+ assert.equal(m.cumulativeVoteWeight,4);
+ restoreDemoMembers([m],['coordenacao'],[{id:m.id,cumulativeVoteWeight:0}]);
+ assert.equal(m.cumulativeVoteWeight,4,'malformed stored weight must not overwrite a valid one');
+ restoreDemoMembers([m],['coordenacao'],[{id:m.id,cumulativeVoteWeight:'900'}]);
+ assert.equal(m.cumulativeVoteWeight,4,'untrusted storage cannot coerce strings into weights');
 });
