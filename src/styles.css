@@ -219,7 +219,7 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .demo-tools strong {font-size:14px; color:#3945a9;}
 .demo-tools p {font-size:11px; color:#5e6175; margin:7px 0 13px; line-height:1.4; opacity:1;}
 .demo-tools label {display:block; font-size:11px; margin:9px 0 6px; font-weight:600;}
-.demo-tools select {width:100%; min-height:35px; border:1px solid #bfc7dc; background:#f8f9ff; border-radius:5px; padding:6px; font-size:12px;}
+.demo-tools select,.demo-tools input[type=number] {width:100%;box-sizing:border-box;min-height:44px;border:1px solid #bfc7dc;background:#f8f9ff;border-radius:5px;padding:8px;font-size:12px;}
 .tools-divider {border-top:1px solid #e2e5f0; margin-top:13px; padding-top:5px;}
 .tools-add {display:flex; gap:6px; align-items:center;}
 .tools-add select {min-width:0;}
@@ -239,6 +239,8 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .edit-form {padding:8px 13px 12px;grid-template-columns:minmax(0,1fr) auto;}
 .edit-form label {grid-column:1 / -1;margin:0;font-weight:600;}
 .edit-form .small-action{border-radius:6px;min-height:32px;}
+.edit-form input[type=number]{min-height:44px;border-radius:8px;}
+.edit-form input[aria-invalid=true]{outline:2px solid #ad3541;outline-offset:1px;}
 
 /* Proposals: compact rows with a whole-row detail action and a blue disclosure
    panel, matching the supplied proposal states without hard-coded coordinates. */
