@@ -8,12 +8,12 @@ const sources = await Promise.all(files.map(async file => {
   return source.replace(/^import .*?;\s*$/gm, '').replace(/^export /gm, '');
 }));
 let js = `const __fixture = (()=>{${sources[0]}; return { members,sections,ballots,activities };})();
-const __rules = (()=>{${sources[1]};return {escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory,DELIBERATION_METHODS,isDeliberationMethod,isPositiveCumulativeVoteWeight};})();
+const __rules = (()=>{${sources[1]};return {escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory,DELIBERATION_METHODS,isDeliberationMethod,isPositiveCumulativeVoteWeight,PREVIEW_BINARY_OPTIONS,PREVIEW_LIST_OPTIONS,validatePreviewVote};})();
 const __providers = (({members,sections})=>{${sources[2]};return {FixtureMemberProvider};})(__fixture);
 const __academyIdentity = (()=>{${sources[3]};return {UnconnectedAcademyIdentityProvider};})();
 const __memberReference = (()=>{${sources[4]};return {resolveMemberReference};})();
 const __workflowArchive = (()=>{${sources[5]};return {exportWorkflowArchive,parseWorkflowArchive,WORKFLOW_ARCHIVE_MAX_BYTES};})();
-await (async ({activities,ballots},{FixtureMemberProvider},{UnconnectedAcademyIdentityProvider},{resolveMemberReference},{exportWorkflowArchive,parseWorkflowArchive,WORKFLOW_ARCHIVE_MAX_BYTES},{escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory,DELIBERATION_METHODS,isDeliberationMethod,isPositiveCumulativeVoteWeight})=>{${sources[6]}})(__fixture,__providers,__academyIdentity,__memberReference,__workflowArchive,__rules);`;
+await (async ({activities,ballots},{FixtureMemberProvider},{UnconnectedAcademyIdentityProvider},{resolveMemberReference},{exportWorkflowArchive,parseWorkflowArchive,WORKFLOW_ARCHIVE_MAX_BYTES},{escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory,DELIBERATION_METHODS,isDeliberationMethod,isPositiveCumulativeVoteWeight,PREVIEW_BINARY_OPTIONS,PREVIEW_LIST_OPTIONS,validatePreviewVote})=>{${sources[6]}})(__fixture,__providers,__academyIdentity,__memberReference,__workflowArchive,__rules);`;
 for (const name of ['crest', 'editar', 'rebaixamento', 'painel']) {
   const asset = await readFile(path.join(cwd,'public','assets',`${name}.png`));
   js = js.replaceAll(`./assets/${name}.png`,`data:image/png;base64,${asset.toString('base64')}`);
