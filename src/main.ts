@@ -115,7 +115,7 @@ function header(title?: string, subtitle?: string, tall=false) {
    ${advancedPreview && demoToolsOpen?`<aside id="demo-tools-panel" class="demo-tools" aria-label="Ferramentas de demonstração">
      <strong>Opções de visualização</strong><p>Identidade Academy: ${academyIdentity.state==='unavailable'?'não conectada':'identificada, sem autorização nesta prévia'}. Os perfis abaixo são simulações, não permissões reais.</p>
      <label for="role-mode">Visualizar como</label><select id="role-mode" aria-label="Simular perfil"><option value="diretor" ${rolePreview==='diretor'?'selected':''}>Diretor</option><option value="membro" ${rolePreview==='membro'?'selected':''}>Membro comum</option></select>
-     ${expandedSection&&rolePreview==='diretor'?`<div class="tools-divider"><label for="add-member">Vincular à seção aberta</label><div class="tools-add"><select id="add-member"><option value="">Selecione um membro…</option>${members.filter(m=>!m.sectionIds.includes(expandedSection)).map(m=>`<option value="${m.id}">${escapeHTML(m.name)}</option>`).join('')}</select><button type="button" class="small-action" data-action="add-member">Vincular</button></div></div>`:''}
+     ${expandedSection&&rolePreview==='diretor'?`<div class="tools-divider"><label for="add-member">Vincular à seção aberta</label><div class="tools-add"><select id="add-member"><option value="">Selecione um membro…</option>${members.filter(m=>!m.sectionIds.includes(expandedSection)).map(m=>`<option value="${m.id}">${escapeHTML(m.name)}</option>`).join('')}</select><button type="button" class="small-action" data-action="add-member">Vincular</button></div><label for="link-cumulative-weight">Proporção cumulativa (opcional)</label><input id="link-cumulative-weight" type="number" min="1" step="1" inputmode="numeric" placeholder="Quantidade de votos"></div>`:''}
      <button type="button" class="reset-tools" data-action="reset-admin">Reiniciar alterações administrativas</button>
    </aside>`:''}
   </header>`;
@@ -824,7 +824,13 @@ document.addEventListener('click',(event)=>{
   const select=document.querySelector<HTMLSelectElement>('#add-member');
   const member=members.find(m=>m.id===select?.value);
   if(member){
+   const rawWeight=document.querySelector<HTMLInputElement>('#link-cumulative-weight')?.value.trim()??'';
+   const newWeight=rawWeight===''?undefined:Number(rawWeight);
+   if(rawWeight!==''&&!isPositiveCumulativeVoteWeight(newWeight)){
+    notice='A proporção cumulativa deve ser uma quantidade inteira positiva.';render();return;
+   }
    rememberChange(member);member.sectionIds=updateSectionAssignment(member,expandedSection,true).member.sectionIds;
+   if(newWeight!==undefined)member.cumulativeVoteWeight=newWeight;
    saveDemoMembers();notice=`${member.name} adicionado à seção.`;demoToolsOpen=false;render();
    document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus({preventScroll:true});
   }
