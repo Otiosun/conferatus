@@ -544,3 +544,24 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [ ] Não é backup seguro institucional, sincronização real ou solução de login. Dependências da Megalos, validação WCAG/hardware e integração Academy não foram concluídas.
 
 **Contagens preservadas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=0/5; **07=7/12**. `main` e produção intactas.
+
+## Nova definição recebida da Megalos — 03/11/2026, prévia v0.10.59
+
+**Origem:** mensagem da Megalos de 03/11/2026 às 08:38/08:41. Foram explicitamente definidas seis **modalidades de votação**, separadas das classificações de proposição PDR/PR/Ofício já utilizadas:
+
+1. **Binária:** Sim ou Não, para aprovar ou não aprovar a proposição.
+2. **Nominal:** escolha de uma opção; a mais votada vence (regras de empate ainda não informadas).
+3. **Ordenada:** cada participante classifica as alternativas 1º, 2º, 3º etc. Método de apuração ainda não informado.
+4. **Por aprovação:** participante pode aprovar múltiplas opções aceitáveis. Critérios de resultado ainda não informados.
+5. **Escalar:** valor inteiro de 1 a 10 por alternativa; forma de agregação ainda não informada.
+6. **Cumulativa:** membro distribui uma quantidade de votos proporcional à sua atribuição, definida por critérios específicos. A Diretoria de Projetos com quatro setores foi dada **como exemplo**, não como regra automática para todos os membros.
+
+A pedido da Megalos, a prévia agora permite informar a **proporção de voto cumulativo** ao editar um cadastro fictício de membro ou ao vinculá-lo a uma seção na ferramenta demonstrativa. Campo opcional, inteiro positivo, sem peso presumido e sem dedução a partir de cargo/setor. O cadastro institucional efetivo pertence à Academy e requer integração posterior. Undo, reinício e restauração de sessão preservam a mudança conforme o modelo local; valores inválidos do armazenamento são ignorados.
+
+No formulário de agendamento, novas programações exigem uma das seis modalidades. Classificação PDR/PR/Ofício permanece separada. Programações antigas sem modalidade continuam legíveis com indicação explícita de ausência; o novo campo participa das validações e da exportação/restauração local. Não se realizou contagem de votos real nem apuração de vencedor.
+
+**Testes adicionados/adequados:** regras Node das seis modalidades e do peso cumulativo; scripts de agendamento em Chromium adaptados ao novo campo; regressão de configuração, edição e desfazer do peso no cadastro demonstrativo. A execução e resultados da nova branch devem ser registrados separadamente; alteração de teste não equivale a teste executado.
+
+**Dependências que NÃO podem ser inventadas:** unidade/escopo do peso cumulativo (por membro, seção ou deliberação), quando ele é recalculado, distribuição parcial ou total dos votos, política de elegibilidade, quórum, abstenção, anonimato, alteração de voto, desempate, fórmula de apuração ordenada, escalar e por aprovação, auditabilidade, autenticação/autorizações Academy e voto transacional no servidor.
+
+**Contagens permanecem:** 01=4/5; 02=0/4 (modelo ainda não consolidado para apuração institucional), 03=1/5; 04=17/22; 05=2/4; 06=0/5; 07=7/12. Nenhuma promoção da branch de prévia para `main`/produção.
