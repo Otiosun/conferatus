@@ -663,6 +663,10 @@ function render() {
  // Preserve local scheduling inputs while browsing days and months.
  const scheduleForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
  const scheduleValues = scheduleForm ? new FormData(scheduleForm) : null;
+ // Preserve checked values on ballot validation errors, not across distinct methods.
+ const priorVoteForm=root.querySelector<HTMLFormElement>('#preview-vote-form');
+ const voteFields=priorVoteForm?.dataset.mode===previewMode&&priorVoteForm?.dataset.member===previewVoteMemberId
+  ? Array.from(priorVoteForm.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input,select')).map(field=>({name:field.name,value:field.value,checked:field instanceof HTMLInputElement?field.checked:undefined})) : null;
  const preserveScroll = location.hash === lastRenderedHash;
  lastRenderedHash = location.hash;
  // Keep keyboard focus on the same action after updating the preview DOM.
@@ -700,6 +704,13 @@ function render() {
    if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) field.value = String(value);
   }
  }
+ if(voteFields){
+  const fields=root.querySelector<HTMLFormElement>('#preview-vote-form')?.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input,select');
+  if(fields?.length===voteFields.length)fields.forEach((field,index)=>{
+   const previous=voteFields[index];
+   if(previous&&field.name===previous.name){field.value=previous.value;if(field instanceof HTMLInputElement&&previous.checked!==undefined)field.checked=previous.checked;}
+  });
+ }
  if (focusTarget) {
   const [attr,value]=focusTarget;
   [...root.querySelectorAll<HTMLElement>(`[${attr}]`)]
@@ -731,7 +742,10 @@ function syncRouteState() {
 // and screen-reader users instead of leaving it on the removed navigation button.
 window.addEventListener('hashchange',()=>{
   menuOpen=false;demoToolsOpen=false;syncRouteState();render();
-  document.querySelector<HTMLElement>('#main-content')?.focus({preventScroll:true});
+  if(routeFromHash()==='ballot'&&previewScheduleId){
+   const title=document.querySelector<HTMLElement>('#preview-vote-title');
+   if(title){title.tabIndex=-1;title.focus({preventScroll:true});title.scrollIntoView({block:'start'});}
+  }else document.querySelector<HTMLElement>('#main-content')?.focus({preventScroll:true});
 });
 // Megalos' interaction: swipe the CONFFRATUS name upwards to reveal navigation.
 // Keep the existing button as an accessible alternative.
@@ -973,7 +987,7 @@ function showScheduleFormError(form: HTMLFormElement,message:string,fieldName:st
  if(old)old.textContent=message;
  else form.insertAdjacentHTML('afterbegin',`<p id="schedule-form-error" class="workflow-form-error" role="alert">${escapeHTML(message)}</p>`);
  const field=form.elements.namedItem(fieldName);
- if(field instanceof HTMLInputElement || field instanceof HTMLSelectElement){
+ if(field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement){
   field.setAttribute('aria-invalid','true');
   field.setAttribute('aria-describedby','schedule-form-error');
   field.focus({preventScroll:true});
