@@ -41,6 +41,7 @@ with sync_playwright() as p:
         page.locator('[data-route="overview"]').first.click()
         page.locator('[data-route="governance"]').first.click()
         warning=page.locator('.governance-preview-disclosure[role="note"]')
+        warning.wait_for(state="visible",timeout=5000)
         assert warning.is_visible(),width
         assert 'Nenhum cadastro da Academy é modificado' in warning.inner_text(),width
         assert page.locator('[data-action="toggle-tools"]').count()==0,width
