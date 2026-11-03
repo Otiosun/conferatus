@@ -55,6 +55,7 @@ with sync_playwright() as playwright:
             form.locator('[name="title"]').fill(title)
             form.locator('[name="objective"]').fill('Programação demonstrativa com vínculo local íntegro e histórico preservado.')
             form.locator('[name="proposalId"]').select_option(index=1)
+            form.locator('[name="method"]').select_option('aprovacao')
             form.locator('[name="start"]').fill(start)
             form.locator('[name="end"]').fill(start[:11] + '14:00')
             form.locator('button[type=submit]').click()
