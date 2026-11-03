@@ -718,3 +718,10 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] O atalho de histórico no fluxo de elaboração aponta para o autor daquele fluxo (dados fictícios), não para outro membro que tenha sido selecionado previamente no diretório.
 - [x] Regressão Chromium estendida em 320, 390, 740 e 1280 px, incluindo troca de membro anterior. Validar na CI antes de aprovar o checkpoint.
 - [ ] A atribuição e a navegação aqui representam o autor sintético da prévia; não são identidade Academy.
+
+## Clareza dos votos fictícios na experiência padrão (03/11/2026)
+
+- [x] A seção de votação da prévia padrão informa, junto à descrição, que resultados e escolhas são fictícios e **nenhum voto é enviado à Academy**. A escolha exibida após clicar é chamada de **simulada**, não de registro oficial.
+- [x] Mantido o layout e o rótulo da ação original onde as referências Megalos ainda aguardam decisão; não inventadas regras institucionais.
+- [x] Reaproveitado o teste `browser_preview_disclosure_v0117.py`, estendido para verificar comportamento normal, reinicialização da escolha e ausência de escrita em `sessionStorage`, além da prévia de agendamento. Agora são 26 suítes selecionadas na CI.
+- [ ] Confirmar CI completa antes de marcar o lote como validado. Nenhuma interação implica voto remoto.
