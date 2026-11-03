@@ -144,12 +144,18 @@ export type PreviewVoteValidation =
   | {ok:false; error:string};
 
 /** Validate a single in-memory sample, not eligibility, authentication or an institutional tally. */
-export function validatePreviewVote(method: DeliberationMethod, payload: unknown, cumulativeWeight?: number): PreviewVoteValidation {
+export function validatePreviewVote(method: DeliberationMethod, payload: unknown, cumulativeWeight?: number, allowedOptions?: readonly string[]): PreviewVoteValidation {
   if(!isDeliberationMethod(method) || !payload || typeof payload!=='object' || Array.isArray(payload))
     return {ok:false,error:'Preencha um voto de demonstração válido.'};
   const data=payload as Record<string,unknown>;
   const choices: readonly {id:string;label:string}[]=method==='binaria'?PREVIEW_BINARY_OPTIONS:PREVIEW_LIST_OPTIONS;
-  const ids:string[]=choices.map(option=>option.id);
+  const defaults=choices.map(option=>option.id);
+  const ids:string[]=allowedOptions===undefined?[...defaults]:[...allowedOptions];
+  if(!ids.length||ids.length>8||new Set(ids).size!==ids.length||
+    ids.some(id=>typeof id!=='string'||!/^[a-z0-9_-]{1,40}$/i.test(id))||
+    (method==='binaria'&&(ids.length!==2||!ids.includes('sim')||!ids.includes('nao')))||
+    (method!=='binaria'&&ids.length<2))
+    return {ok:false,error:'As alternativas desta deliberação não são válidas.'};
   const validId=(id:unknown):id is string=>typeof id==='string'&&ids.includes(id);
   const exactList=(items:unknown):items is string[]=>Array.isArray(items)&&
     items.every(validId)&&new Set(items).size===items.length;
