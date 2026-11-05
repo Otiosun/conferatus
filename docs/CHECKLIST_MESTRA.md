@@ -838,3 +838,10 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] `tests/browser_preview_disclosure_v0117.py` estendido para cobrir, no modo normal, ocultação dos controles avançados em Proposições/Socii, botão Socii acessível e legenda preservada, em quatro larguras. O subitem 06 de separação dos controles de teste foi encerrado **no escopo demonstrativo**, sem alegar entrega institucional completa.
 - [x] Prova exploratória independente do fluxo de proposições com texto HTML não confiável em título e corpo, em 9 larguras 280–1440 CSS px: HTML/eventos JavaScript ficaram como texto literal na lista, editor e revisão, com zero execução de eventos e zero rolagem horizontal. O teste permanente `tests/browser_stage7_long_draft_v0133.py` passou a verificar esse caso sem alterar o produto, commit `d8245a77b4f65b54f360d604ae9f8194f24b6fa0`.
 - [ ] Confirmar a CI completa dos commits de testes antes de afirmar **29/29 scripts e 51/51 Node** na versão final da branch. A varredura sintética não equivale a pentest, leitor de tela, aparelhos reais, homologação Megalos, ou política de privacidade/sessão de produção.
+
+
+## Auditoria horizontal dos modelos Megalos — 05/11/2026
+
+- [x] Seis JPGs originais confrontados lado a lado com capturas do HTML da prévia. Os modelos 0221/0225/0226 centralizam o brasão e a marca no mesmo eixo; a versão anterior deslocava o emblema para x≈33 em viewport de 360px (erro ≈147px).
+- [x] Brasão agora central ao fechar e no alto da gaveta ao abrir; marca e botões com eixo horizontal comum, ícones preservados à esquerda sem deslocar os rótulos. O Menu mantém ancoragem que evita +231px de rolagem. Teste `browser_footer_drawer_v0162.py` ampliado com 8 formatos e asserts de alinhamento.
+- [ ] Gate da CI e avaliação em Android físico pendentes antes de promover à main. D1–D6 permanecem como diferenças reais de composição/posicionamento dependentes da revisão da Megalos, particularmente botões inferiores do perfil, local do agendamento e confirmação visual.

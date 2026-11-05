@@ -10,7 +10,7 @@ import json
 
 ROOT=Path(__file__).resolve().parents[1]
 HTML=(ROOT/'dist/CONFFRATUS_demo_offline.html').read_text(encoding='utf-8')
-SIZES=((280,600),(320,568),(360,760),(390,760),(740,700),(1280,900),(360,360))
+SIZES=((280,600),(320,568),(360,760),(390,760),(540,760),(740,700),(1280,900),(360,360))
 results=[]
 METRICS="""() => {
   const rect=selector=>{
@@ -68,10 +68,27 @@ with sync_playwright() as playwright:
         assert after['menu']['top']>=-1,(width,height,'drawer outside screen')
         assert not after['overflow'],(width,height,'horizontal overflow')
         assert page.locator('.footer-nav').get_attribute('aria-expanded')=='true'
+        center=page.evaluate("""() => {
+          const r=selector=>{
+            const el=document.querySelector(selector);
+            if(!el)return null;
+            const b=el.getBoundingClientRect();
+            return {cx:b.left+b.width/2,top:b.top};
+          };
+          return {logo:r('.drawer-crest'),title:r('.footer-home'),
+            items:[...document.querySelectorAll('.bottom-menu .menu-item')]
+              .map(el=>{const b=el.getBoundingClientRect();return b.left+b.width/2;})};
+        }""")
+        assert center['logo'] and abs(center['logo']['cx']-width/2)<=1,(width,'crest off axis')
+        assert abs(center['title']['cx']-width/2)<=1,(width,'brand off axis')
+        assert all(abs(cx-width/2)<=1 for cx in center['items']),(width,'item off axis')
+        assert center['logo']['top']>=-1,(width,'crest clipped')
         if (width,height) in ((320,568),(390,760)):
             page.screenshot(path=str(ROOT/'dist'/f'footer_drawer_{width}.png'))
         page.locator('.footer-nav').click()
         assert page.locator('.bottom-menu').count()==0
+        closed=page.locator('footer.app-footer > img').bounding_box()
+        assert closed and abs(closed['x']+closed['width']/2-width/2)<=1,(width,'closed crest off axis')
         page.locator('.footer-nav').focus()
         page.keyboard.press('Enter')
         assert page.locator('.menu-item').first.evaluate(
