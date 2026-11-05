@@ -31,6 +31,7 @@ def prepare_partner_review(page, title):
     assert bar.get_attribute('aria-label')=='Socii desta proposição, demonstração local',title
     assert 'Concluíram 1 de 2' in bar.inner_text(),(title,bar.inner_text())
     assert 'hora' not in bar.inner_text().casefold(),title
+    assert 'confirmou sua participação nesta prévia local' in page.locator('.workflow-review-sheet > p').inner_text(),title
     if title=='Classificação unchanged 390':
         page.screenshot(path=str(Path(__file__).resolve().parents[1]/'dist/socii_review_390.png'),full_page=True)
 
@@ -81,6 +82,7 @@ with sync_playwright() as p:
         page.locator('#compose-proposal-form [value=conclude]').click()
         page.locator('#confirm-proposal-form').wait_for(state='visible')
         assert page.locator('.workflow-socii-editor-bar').count()==0,width
+        assert page.locator('.workflow-review-sheet > p').inner_text()=='Confira os dados e a redação antes de confirmar a conclusão.',width
         assert not errors,(width,errors)
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
         page.close()

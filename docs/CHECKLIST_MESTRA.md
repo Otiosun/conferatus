@@ -785,3 +785,10 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 
 - [x] Artefatos da **CI #39** preservados no Drive Komekko: [HTML offline da versão corrigida](https://drive.google.com/file/d/1biAxLv4bH2rBgQiwx8uW8WmBMlXCW2O_/view) e [28 capturas automatizadas, incluindo Socii na revisão](https://drive.google.com/file/d/1VUjCkCjY9-TUiPt-QSYC9mHYqHZsDVOE/view).
 - [ ] A captura de Socii do teste automatizado contém o aviso de gravação local não disponível, relacionado ao ambiente de teste em `about:blank`. **Não usar essa captura isolada como aprovação visual final**. Não foi possível abrir origem HTTP ou `file://` no Chromium local restrito; mantenha validação visual em origem real como pendência de homologação, sem inferir defeito do produto a partir desse aviso.
+
+
+## Revisão Socii — aviso contextual de participante concluído (05/11/2026)
+
+- [x] A comparação visual da prévia corrigida com `1001930222.jpg` identificou uma diferença objetiva: a referência nomeia a pessoa que concluiu sua parte, mas a revisão da prévia apresentava apenas o texto genérico. Quando existe uma confirmação local, o texto agora identifica o primeiro participante concluído que já consta da sessão; sem confirmação mantém o aviso antigo. Esse fato é **somente demonstração local**, nunca confirmação institucional.
+- [x] O teste Playwright já existente `browser_review_metadata_integrity_v0119.py` valida a mensagem contextual e a ausência de mensagem fictícia em revisão sem Socii. Não altera dados, cargos, permissões, tela de rascunhos, modal de confirmação, conclusão final, regras de voto ou Academy.
+- [ ] Executar CI completa da branch para validar novo commit, e registrar resultado antes de declararmos esta alteração testada. Capturas visuais com armazenamento em memória são auxiliares e não substituem teste funcional em origem real.

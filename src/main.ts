@@ -540,10 +540,15 @@ function composePage(){
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
  if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar às proposições'}</button></div></div>`;
+ const confirmedPartner=d.partners.find(p=>p.complete);
+ const confirmedName=confirmedPartner?members.find(m=>m.id===confirmedPartner.id)?.name:undefined;
+ const reviewMessage=confirmedPartner
+  ? `${confirmedName?escapeHTML(confirmedName):'Um participante do Socii'} confirmou sua participação nesta prévia local. Confira os dados e a redação antes de confirmar a conclusão.`
+  : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
  <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
- <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>Confira os dados e a redação antes de confirmar a conclusão.</p>
+ <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>${reviewMessage}</p>
  <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>
  <label>Tipo de proposição<select name="type" required>${['PDR','PR','Ofício'].map(t=>`<option value="${t}" ${t===d.type?'selected':''}>${t}</option>`).join('')}</select></label>
  </div><div class="workflow-review-buttons"><button type="button" class="workflow-outline" data-route="compose" aria-label="Cancelar confirmação e voltar à redação">Cancelar</button><button class="workflow-primary" type="submit">Confirmar</button></div></form></div>`;
