@@ -41,6 +41,6 @@ Não possui login Academy, votos institucionais, envio remoto de convites Socii,
 
 ## Decisões visuais da Megalos ainda em aberto
 
-Consultar `docs/KIT_DECISOES_MEGALOS_V0123_2026-11-01.md` e `docs/AUDITORIA_VIDEO_V0124_2026-11-02.md`. **D1/D1b:** calendário e nome da ação; **D2:** posição do agendamento; **D3:** variantes Cancelar/Confirmar; **D4:** barra Socii e significado de duração; **D5:** salvar rascunho; **D6:** proporções e densidade do perfil. As seis imagens e o vídeo originais são referências, não material autorizado para publicação no repositório.
+Consultar `docs/KIT_DECISOES_MEGALOS_V0123_2026-11-01.md` e `docs/AUDITORIA_VIDEO_V0124_2026-11-02.md`. **D1/D1b:** calendário e nome da ação; **D2:** posição do agendamento; **D3:** variantes Cancelar/Confirmar; **D4:** barra Socii já exibida no editor e na revisão quando há participantes vinculados (CI #39); significado de duração ainda indefinido; **D5:** salvar rascunho; **D6:** proporções e densidade do perfil. As seis imagens e o vídeo originais são referências, não material autorizado para publicação no repositório.
 
-**Status de entrega:** prévia demonstrativa pronta para revisão funcional quando o último workflow estiver verde; **não homologada visualmente pela Megalos e não conectada à Academy**. Registre a aprovação de D1–D6 antes de modificar a composição que depende dessas decisões.
+**Status de entrega:** prévia demonstrativa com CI #39 aprovada, pronta para revisão funcional; **não homologada visualmente pela Megalos e não conectada à Academy**. Registre a aprovação de D1–D6 antes de modificar a composição que depende dessas decisões.

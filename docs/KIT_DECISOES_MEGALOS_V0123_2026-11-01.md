@@ -65,3 +65,8 @@ As imagens originais são de Megalos; as seis capturas foram produzidas no Chrom
 - **D6:** ~23,5–28,5 s reforçam a métrica Ofício no perfil e a hierarquia das abas.
 - **Ofício:** o texto direto da Megalos diz “Tipo (PDR, PR, Ofício)” (~04,1 s) e pede acrescentar Ofício às métricas (~18,4 s). A implementação atual já inclui `Ofício` na união `ProposalType`, na revisão, no agendamento, nos validadores e nas métricas do perfil. **Não criar ticket para reimplementar o que está presente**; isto não é homologação de regras para Ofícios.
 - **Natureza da fonte:** sequência mostrada em uma gravação de WhatsApp; ela evidencia aparência/ordem de telas, não prova funcionalidade institucional dos botões, compartilhamento, tempo real ou dados oficiais.
+
+
+## Adendo de 05/11/2026 — barra Socii da revisão corrigida na prévia
+
+As comparações e as observações acima registram corretamente a **versão histórica v0.10.22** e não devem ser reescritas como se já fossem a versão atual. Na branch `preview/v0.10.60-six-vote-forms`, o commit `77df922c6f07eaac950c9a04ae1a9f348eb57580` passou na [CI #39](https://github.com/Otiosun/conferatus/actions/runs/42050356493): a faixa Socii foi reaproveitada também na tela de revisão com parceiros, condicionada aos participantes da proposta, sem duração inventada. Propostas sem participantes não mostram a faixa. O campo de **127 horas** continua sem interpretação formal e não é uma tarefa automática a implementar. A captura Playwright de regressão traz um aviso de armazenamento típico da origem sintética do teste, portanto **não** equivale à homologação visual definitiva. D1–D3, D5–D6 e o significado da duração seguem sem aceite formal. A `main` e a Academy permanecem intocadas.
