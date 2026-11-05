@@ -21,6 +21,17 @@ with sync_playwright() as playwright:
         opts.update(executable_path="/usr/bin/chromium", args=["--no-sandbox"])
     browser = getattr(playwright, ENGINE).launch(**opts)
     for width, height in SIZES:
+        # In every engine, the normal view must not expose the advanced lab.
+        # Keep this distinct from the ?demo=1 workflow exercised below.
+        normal = browser.new_page(viewport={"width": width, "height": height}, reduced_motion="reduce")
+        normal.goto("about:blank")
+        normal.set_content(HTML, wait_until="domcontentloaded")
+        normal.evaluate('location.hash="#/proposals"')
+        normal.locator('[data-action="invite-socii"]').wait_for(state="visible")
+        assert normal.locator('.preview-vote-lab,.demo-tools,.local-archive-actions,[data-action="toggle-tools"]').count()==0, (ENGINE,width,"advanced controls exposed")
+        assert 'DADOS FICTÍCIOS' in normal.locator('.footer-demo').inner_text().upper(), (ENGINE,width,"disclaimer absent")
+        assert not normal.evaluate("document.documentElement.scrollWidth > innerWidth + 1"), (ENGINE,width,"normal-mode overflow")
+        normal.close()
         page = browser.new_page(viewport={"width": width, "height": height}, reduced_motion="reduce")
         page.set_default_timeout(7000)
         errors = []
@@ -76,7 +87,7 @@ with sync_playwright() as playwright:
         assert page.locator("#schedule-deliberation-form").is_visible(), (ENGINE,width,"schedule form")
         assert not page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"), (ENGINE,width,"calendar overflow")
         assert not errors, (ENGINE,width,"javascript errors",errors)
-        results.append({"engine":ENGINE,"width":width,"height":height,"pass":True})
+        results.append({"engine":ENGINE,"width":width,"height":height,"normalMode":True,"pass":True})
         page.close()
     browser.close()
 (ROOT / "dist" / f"cross_engine_{ENGINE}_report.json").write_text(
