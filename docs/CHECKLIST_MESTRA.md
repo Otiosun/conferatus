@@ -764,3 +764,13 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - Nos testes de agendamento inspecionados, as datas operacionais de dezembro/novembro futuro ainda são posteriores a 05/11/2026. Uma data histórica de arquivo restaurado permanece fixture de importação, sem justificativa para alterar código ou testes.
 - A experiência de voto comum foi inspecionada: aviso de escolha fictícia, gravação somente em `sessionStorage` e nenhuma remessa Academy. A integração com contas, votos institucionais e apuração definitiva segue fora do escopo contratado da prévia.
 - **Próximo gate objetivo:** obter execução completa e verificável da CI para este HEAD ou um descendente, corrigir exclusivamente falhas reais, preservar D1–D6 e solicitar homologação da Megalos quando couber. Relatório de auditoria também lançado no handoff mestre do Google Drive Komekko em 05/11/2026.
+
+
+## Fechamento do gate técnico de prévia — CI #37 (05/11/2026)
+
+- [x] A execução **GitHub Actions #42028651277**, no commit `ad25f6b435574aa88d23812847242f774b94fcdf`, encerrou com **success** em 05/11/2026. Evidência: https://github.com/Otiosun/conferatus/actions/runs/42028651277
+- [x] O job `postgres-lab` passou em PostgreSQL 16 **descartável**, inclusive seis modalidades, entradas adversariais, idempotência, simultaneidade, auditoria atômica e bloqueio de voto após encerramento. Não houve contato com banco Academy.
+- [x] O job `validate` passou: TypeScript/build, **51/51 testes Node**, **29/29 scripts Playwright Chromium** e empacotamento offline. Os logs foram lidos; não é inferência a partir de arquivos presentes. Os ensaios são sintéticos e não homologam Firefox, WebKit, leitor de tela real nem hardware.
+- [x] Os artefatos de CI foram preservados na pasta privada do projeto no Drive Komekko: [prévia HTML testada](https://drive.google.com/file/d/1MbKMzURub0qf7zw78Zg63CKk6IyVsaEy/view) e [capturas de navegador](https://drive.google.com/file/d/1sMGu2DE6rv0EVQCUq34UjPmvAbPKOwEH/view), com leitura de metadados confirmando tamanho e pasta. O ZIP da prévia contém `CONFFRATUS_demo_offline.html`, sem backend institucional.
+- [ ] A Etapa 06 continua **1/5** até revisão de fidelidade com Megalos, validação visual/hardware aplicável e decisão explícita de publicação. A Etapa 07 continua **7/12**; o laboratório não homologa integração Academy nem regras D1–D6.
+- **Decisão de escopo:** nenhum defeito de código exigiu correção nesta rodada. Não desenvolver recursos extras, não alterar `main`, produção, autenticação ou serviços Academy. O próximo passo é **homologação da prévia pela Megalos**, não ampliação automática do sistema.
