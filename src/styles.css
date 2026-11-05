@@ -1182,7 +1182,7 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .app-footer {
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:0; width:100%; min-height:76px; height:auto;
-  padding:11px 82px calc(8px + env(safe-area-inset-bottom,0px));
+  padding:20px 82px calc(4px + env(safe-area-inset-bottom,0px));
   box-sizing:border-box;
 }
 .app-footer > img {
