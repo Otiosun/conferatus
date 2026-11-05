@@ -14,6 +14,23 @@ WIDTHS=(280,320,360,390,540,740,768,1024,1440)
 FIXED=os.environ.get('STAGE7_FIXED','1')=='1'
 measurements=[]
 defects=[]
+
+def text_contrast(control):
+    # Read the actual rendered CSS values rather than hard-coding palette constants.
+    foreground, background=control.evaluate('''element => {
+      const css=getComputedStyle(element);
+      return [css.color,css.backgroundColor].map(value=>
+        (value.match(/[0-9.]+/g)||[]).slice(0,3).map(Number));
+    }''')
+    def luminance(channels):
+        linear=[]
+        for value in channels:
+            scaled=value/255
+            linear.append(scaled/12.92 if scaled<=0.04045 else ((scaled+0.055)/1.055)**2.4)
+        return .2126*linear[0]+.7152*linear[1]+.0722*linear[2]
+    light,dark=luminance(foreground),luminance(background)
+    return (max(light,dark)+0.05)/(min(light,dark)+0.05)
+
 with sync_playwright() as p:
  browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
  for width in WIDTHS:
@@ -46,6 +63,9 @@ with sync_playwright() as p:
   page.locator('.icon-button--edit').first.tap()
   edit=page.locator('#edit-member-form')
   assert edit.is_visible(),(width,'edit form missing')
+  save_contrast=text_contrast(edit.locator('button.small-action'))
+  if FIXED:
+   assert save_contrast>=4.5,(width,'Gerenciamento: botão Salvar abaixo de 4.5:1',round(save_contrast,2))
   edit.locator('input[name="acdmId"]').fill('!')
   edit.locator('button[type="submit"]').tap()
   err=page.locator('#edit-error')

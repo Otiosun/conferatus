@@ -811,3 +811,10 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 
 - [x] Artefatos **exatos do commit 05fe01f**, gerados pela CI #44 e preservados no Drive Komekko: [HTML offline](https://drive.google.com/file/d/1Y30vkpxnOrRdysRhRADGwsUxaj6rgiN0/view), [28 capturas do workflow](https://drive.google.com/file/d/1wHRzzrrz_uLDDWZ3s--UXKF2RIhakX2J/view), [QA complementar do HTML exato com 84 medições e capturas em quatro larguras](https://drive.google.com/file/d/19Amt_sVvUzA5EiWSbCNxp1cTfyO70D-L/view) e [comparação antes/depois a 280px](https://drive.google.com/file/d/1EuSDxFWXXetXMyV_atBrlp5mQNtCiCXr/view). Metadados de tamanho/pasta no Drive conferidos.
 - [ ] A Etapa 06 continua **1/5** e a Etapa 07 **7/12**: faltam validação final em aparelhos e tecnologias assistivas, decisões visuais D1–D6 e aceite Megalos; nenhuma certificação WCAG global foi alegada. Não alterar `main`, produção ou Academy sem autorização.
+
+
+## 07.10 — Contraste do botão Salvar no gerenciamento demonstrativo (05/11/2026)
+
+- [x] Varredura adicional de estados ativos do Chromium offline detectou contraste insuficiente no botão `Salvar` da edição de membros fictícios: `#3d46a3` sobre `#afb7e6` resulta em aproximadamente **4,12:1** para texto de 11 px. A cor da classe `.small-action` foi corrigida para `#303b85`, resultando em aproximadamente **5,14:1** com o mesmo fundo. Nenhuma alteração de layout, dados, autorização ou ações do formulário.
+- [x] Teste de contraste calculado a partir das cores reais do navegador adicionado ao script Playwright existente `tests/browser_stage7_form_edge_targets_v0131.py`, já incluído na CI, em nove larguras de 280–1440 px. Verificado localmente em 280, 320, 390, 740 e 1280 px que o botão continua com alvo >=44 px, formulário funcional e sem overflow com a cor corrigida.
+- [ ] Aguardar a CI completa deste commit antes de declarar o lote aprovado. O teste cobre esse controle e não certifica todos os critérios WCAG nem substitui hardware/leitor de tela. Não modificar `main` ou a Academy.
