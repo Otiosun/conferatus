@@ -1,12 +1,12 @@
 # CONFFRATUS — roteiro de demonstração e entrega da prévia
 
-**Referência:** branch `preview/v0.10.60-six-vote-forms` · demonstração local, novembro de 2026.
+**Referência:** branch `preview/v0.10.60-six-vote-forms` · demonstração por navegador ou HTML offline, novembro de 2026.
 
 Este roteiro apresenta **o produto que nossa equipe entrega**, sem sugerir autenticação ou autorização Academy. Os membros, resultados e dados institucionais exibidos na prévia são fictícios. As propostas, os Socii e os agendamentos criados pelo demonstrador pertencem somente à sessão do navegador. A integração efetiva com a Academy cabe à equipe responsável por ela.
 
 ## Preparar a apresentação
 
-1. Na pasta do repositório, execute `npm install`, `npm run build` e `npm run serve`. Abra o endereço local informado pelo servidor. Como alternativa, use o HTML `dist/CONFFRATUS_demo_offline.html` gerado pela CI; alguns navegadores restringem o armazenamento quando se abre um arquivo diretamente.
+1. Abra a [prévia da branch no Cloudflare Pages](https://preview-v0-10-60-six-vote-fo.conferatus.pages.dev). Ela não é o domínio de produção. O deploy do commit `b12f8e2` foi confirmado pelo Cloudflare e aprovado pela [CI #47](https://github.com/Otiosun/conferatus/actions/runs/42074157858). Verifique a navegação no aparelho antes do aceite. Alternativa: `npm install`, `npm run build`, `npm run serve`, ou o HTML offline da CI (abertura direta pode restringir sessionStorage).
 2. Use a interface **sem** `?demo=1` para a apresentação principal. O parâmetro `?demo=1` é reservado às ferramentas avançadas de teste.
 3. Trabalhe apenas com os registros fictícios. Não introduza dados pessoais, credenciais ou informações privadas da Academy na demonstração.
 

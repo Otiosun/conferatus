@@ -2,7 +2,9 @@
 
 Aplicação em desenvolvimento a partir dos modelos da Megalos para a Academy. **Nome exibido na prévia: CONFFRATUS**, conforme correção solicitada pelo responsável no chat de 02/11/2026. A grafia CONFERATUS aparece em referências históricas e caminhos técnicos legados; essas fontes são preservadas. O aceite formal da Megalos continua pendente, assim como a eventual troca de domínio/repositório.
 
-Endereço técnico existente: **https://conferatus.pages.dev** (domínio legado, não renomeado nem redirecionado).
+Endereço técnico existente: **https://conferatus.pages.dev** (domínio legado de produção, não renomeado nem redirecionado).
+
+**Prévia para avaliação:** https://preview-v0-10-60-six-vote-fo.conferatus.pages.dev (alias de branch no Cloudflare Pages). O Cloudflare confirmou o deploy do commit `b12f8e2`, validado na [CI #47](https://github.com/Otiosun/conferatus/actions/runs/42074157858). A abertura HTTP em aparelho real ainda precisa de verificação; status do deploy não é aceite Megalos. Não há login Academy.
 
 ## O que existe
 
