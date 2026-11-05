@@ -1239,3 +1239,23 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 @media (max-height:440px) {
   .app-footer .bottom-menu .menu-list {scrollbar-gutter:stable both-edges;}
 }
+
+/* Megalos profile 0225: five indicators share one row. The previous
+   four-column grid wrapped Socii onto a second line even at 740px. */
+.profile-summary > .metrics {
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:2px;
+}
+.profile-summary > .metrics .metric-cell {
+  min-width:0;
+  gap:2px;
+  flex-wrap:wrap;
+  justify-content:center;
+  white-space:normal;
+  text-align:center;
+  overflow-wrap:anywhere;
+}
+@media (max-width:320px) {
+  .profile-summary > .metrics,
+  .profile-summary > .metrics small {font-size:8px;}
+}

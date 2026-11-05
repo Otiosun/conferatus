@@ -100,6 +100,20 @@ with sync_playwright() as playwright:
         page.locator('.footer-nav').click()
         page.locator('.menu-item[data-route="members"]').click()
         assert '#/members' in page.url,(width,'route failed')
+        page.locator('.member-item').first.click()
+        metrics=page.evaluate("""() => {
+          const root=document.querySelector('.profile-summary > .metrics');
+          const cells=[...root?.children||[]];
+          const rects=cells.map(el=>el.getBoundingClientRect());
+          return {count:cells.length,
+            tops:rects.map(r=>Math.round(r.top)),
+            overflow:document.documentElement.scrollWidth>innerWidth+1,
+            cellOverflow:cells.some(el=>el.scrollWidth>el.clientWidth+1)};
+        }""")
+        assert metrics['count']==5,(width,'profile missing one metric',metrics)
+        assert len(set(metrics['tops']))==1,(width,'profile metrics wrap/misalign',metrics)
+        assert not metrics['overflow'] and not metrics['cellOverflow'],(
+            width,'profile metrics overflow',metrics)
         assert not errors,(width,errors)
         results.append({'width':width,'height':height,'pass':True})
         page.close()
