@@ -139,7 +139,7 @@ jobs:
           node-version: '22'
       - name: Build this exact preview commit
         run: |
-          npm ci --ignore-scripts --no-audit --no-fund
+          npm install --ignore-scripts --no-audit --no-fund
           npm run build
       - name: Install disposable Firefox and WebKit
         run: |
