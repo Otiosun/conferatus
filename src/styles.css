@@ -660,7 +660,7 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .workflow-review-panel .workflow-review-form {background:transparent;border:0;padding:0;margin:0;gap:11px;}
 .workflow-review-sheet {position:relative;background:#e7e9ee;border:1px solid #d2d5df;border-radius:23px;padding:31px 22px 21px;box-shadow:0 2px 5px #00000015;}
 .workflow-review-crest {display:block;position:absolute;width:38px;height:38px;left:calc(50% - 19px);top:-19px;object-fit:contain;}
-.workflow-review-panel .workflow-review-sheet>p {font-size:13px;line-height:1.4;color:#7b808e;text-align:center;margin:2px 0 19px;}
+.workflow-review-panel .workflow-review-sheet>p {font-size:13px;line-height:1.4;color:#5b6275;text-align:center;margin:2px 0 19px;}
 .workflow-review-sheet label {font-size:12px;color:#767b8b;font-weight:500;margin-top:13px;}
 .workflow-review-sheet select {border:1px solid #d5d8e4;min-height:51px;background:#f1f3f7;border-radius:18px;padding:11px 13px;color:#30384c;box-shadow:inset 0 1px 4px #00000008;}
 .workflow-review-buttons {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:11px;}
@@ -1113,3 +1113,50 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 
 /* Keep the simulated administrative boundary readable next to its controls. */
 .governance-preview-disclosure{margin:12px 20px 8px;font-size:12px;line-height:1.5;color:#4b5472;overflow-wrap:anywhere;}
+
+
+/* Stage 07.05 follow-up: at 280–360px the footer's old three-column grid
+   wraps CONFFRATUS into multiple lines when text is enlarged. Keep the name,
+   menu and demo notice readable, and reserve the lower row for the crest. */
+@media (max-width:360px) {
+  .app-footer {
+    grid-template-columns:minmax(0,1fr) 78px;
+    grid-template-rows:auto minmax(44px,auto);
+    padding-top:4px;
+  }
+  .app-footer .footer-home {
+    grid-column:1;
+    grid-row:1;
+    min-height:44px;
+  }
+  .app-footer .footer-demo {
+    grid-column:1 / -1;
+    grid-row:2;
+    box-sizing:border-box;
+    width:calc(100% - 68px);
+    max-width:none;
+    padding:2px 10px 4px 0;
+    justify-self:end;
+    align-self:center;
+  }
+  .app-footer .footer-nav {
+    grid-column:2;
+    grid-row:1;
+    position:static;
+    min-width:0;
+    width:100%;
+    max-width:100%;
+    height:auto;
+    min-height:44px;
+    padding:6px 4px;
+    box-sizing:border-box;
+    line-height:1.2;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    align-self:stretch;
+  }
+  .app-footer > img {
+    left:7px;
+    bottom:env(safe-area-inset-bottom,0px);
+  }
+}

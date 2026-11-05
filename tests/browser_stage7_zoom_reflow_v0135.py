@@ -1,8 +1,7 @@
-"""Stage 07.05: reflow at 1280px/400%=320 CSS px, 200%=640 CSS px;
-plus an explicitly synthetic 200% TEXT-ONLY enlargement stress test.
-
-This is Chromium offline, not native browser chrome zoom, Firefox text zoom,
-WebKit, OS font scaling or hardware certification. Never imply otherwise.
+"""Stage 07.05: CSS reflow for 1280px/400%=320px and 200%=640px,
+plus synthetic 200%-text stress across compact and wide viewports.
+Includes the Socii review and footer legibility; storage uses a memory substitute.
+This is not native browser zoom, real hardware, WCAG certification or Academy.
 """
 from pathlib import Path
 import json
@@ -12,7 +11,7 @@ ROOT=Path(__file__).resolve().parents[1]
 HTML=(ROOT/'dist/CONFFRATUS_demo_offline.html').read_text(encoding='utf-8')
 VIEWPORTS=(320,640,1280) # CSS viewport equivalents for 1280px at 400%, 200%, 100%
 TEXT_VIEWPORTS=(280,320,390,540,640,740,1280)
-ROUTES=('ballot','members','overview','governance','calendar','proposals','compose')
+ROUTES=('ballot','members','overview','governance','calendar','proposals','compose','review')
 records=[]; failures=[]; screenshots=[]
 
 def navigate(page,route):
@@ -22,6 +21,21 @@ def navigate(page,route):
     elif route=='compose':
         page.evaluate('location.hash="#/proposals"')
         page.locator('[data-action="new-proposal"]').click()
+    elif route=='review':
+        # Exercise the review with an actual linked Socii participant, not a
+        # blank direct hash; this adds the formerly untested review layout.
+        page.evaluate('location.hash="#/proposals"')
+        page.locator('[data-action="new-proposal"]').click()
+        page.locator('#draft-title').fill('Revisão de acessibilidade')
+        page.locator('#draft-body').fill('Texto demonstrativo para verificar a revisão com Socii em telas estreitas e texto ampliado.')
+        page.locator('#compose-proposal-form [value="save"]').click()
+        page.locator('[data-action="invite-socii"]').click()
+        page.locator('#invite-socii-form [name="memberId"]').select_option(index=1)
+        page.locator('#invite-socii-form button.workflow-primary').click()
+        record=page.locator('.workflow-record').filter(has_text='Revisão de acessibilidade')
+        record.locator('[data-confirm-partner]').click()
+        page.locator('.workflow-record').filter(has_text='Revisão de acessibilidade').locator('[data-draft]').click()
+        page.locator('#confirm-proposal-form').wait_for(state='visible')
 
 def scale_text(page):
     # Intentionally style only text-bearing DOM nodes; persistent nodes are
@@ -38,8 +52,13 @@ def measure(page,mode,width,route):
       const footer=document.querySelector('.app-footer');
       const within=(a,b)=>a.left>=b.left-1&&a.right<=b.right+1&&a.top>=b.top-1&&a.bottom<=b.bottom+1;
       const intersection=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
-      const f=rect(footer),home=rect(footer.querySelector('.footer-home')),
-            demo=rect(footer.querySelector('.footer-demo')),nav=rect(footer.querySelector('.footer-nav')),
+      const homeEl=footer.querySelector('.footer-home'), navEl=footer.querySelector('.footer-nav');
+      const brandRange=document.createRange();
+      brandRange.selectNodeContents(homeEl);
+      const brandLines=new Set([...brandRange.getClientRects()]
+          .filter(r=>r.width>0).map(r=>Math.round(r.top))).size;
+      const f=rect(footer),home=rect(homeEl),
+            demo=rect(footer.querySelector('.footer-demo')),nav=rect(navEl),
             logo=rect(footer.querySelector('img'));
       let cal=null, header=null;
       const month=document.querySelector('.calendar-month-nav');
@@ -50,13 +69,32 @@ def measure(page,mode,width,route):
       const statRail=document.querySelector('.overview-stats');
       return {client:innerWidth,scroll:document.documentElement.scrollWidth,
           footer:{inside:within(home,f)&&within(demo,f),collisions:intersection(home,nav)+intersection(demo,nav)+intersection(home,logo)+intersection(demo,logo),
+                  brandLines, navClipped:navEl.scrollHeight>navEl.clientHeight+1,
                   h:home, demo, nav, logo, height:f.height},cal,header,
+          reviewNote:(()=>{
+            const note=document.querySelector('.workflow-review-sheet > p');
+            if(!note)return null;
+            const rgb=s=>(s.match(/[0-9.]+/g)||[]).slice(0,3).map(Number);
+            const luminance=s=>{
+              const [r,g,b]=rgb(s).map(n=>{
+                const c=n/255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4;
+              });
+              return .2126*r+.7152*g+.0722*b;
+            };
+            const fg=luminance(getComputedStyle(note).color);
+            const bg=luminance(getComputedStyle(note.parentElement).backgroundColor);
+            return {contrast:(Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05)};
+          })(),
           statsLocalOverflow:statRail?statRail.scrollWidth>statRail.clientWidth+1:false};
     }''')
     errors=[]
     if results['scroll']>results['client']+1:errors.append('document overflow')
     if not results['footer']['inside']:errors.append('footer text clipped')
     if results['footer']['collisions']>1:errors.append('footer text overlaps crest/menu')
+    if width<=360 and results['footer']['brandLines']!=1:errors.append('footer brand wraps at compact width')
+    if results['footer']['navClipped']:errors.append('footer menu label is clipped')
+    if route=='review' and (not results['reviewNote'] or results['reviewNote']['contrast']<4.5):
+        errors.append('review notice text contrast below 4.5:1')
     if results['cal'] and (results['cal']['overlap']>1 or not results['cal']['inside']):errors.append('calendar month/nav collision')
     if results['header'] and results['header']['overlap']>1:errors.append('header title overlaps settings button')
     if errors:failures.append({'mode':mode,'width':width,'route':route,'errors':errors,'metrics':results})
@@ -69,7 +107,20 @@ with sync_playwright() as p:
             page=browser.new_page(viewport={'width':width,'height':780})
             page_errors=[]
             page.on('pageerror',lambda e:page_errors.append(str(e)))
-            page.goto('about:blank?demo=1');page.set_content(HTML)
+            page.goto('about:blank?demo=1')
+            # Opaque about:blank denies native sessionStorage. Replace it only
+            # for this visual/reflow test; persistence failures have separate tests.
+            page.evaluate('''() => {
+              const values=new Map();
+              Object.defineProperty(window,'sessionStorage',{configurable:true,
+                get:()=>({
+                  getItem:k=>values.get(String(k))??null,
+                  setItem:(k,v)=>values.set(String(k),String(v)),
+                  removeItem:k=>values.delete(String(k)),
+                  clear:()=>values.clear()
+                })});
+            }''')
+            page.set_content(HTML)
             for route in ROUTES:
                 navigate(page,route)
                 if mode=='synthetic-text-200':scale_text(page)
@@ -98,5 +149,5 @@ report={'cases':len(records),'routes':ROUTES,'viewportWidths':VIEWPORTS,'textOnl
 (ROOT/'dist'/'stage7_zoom_reflow_v0135_report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
 assert len(records)==len(ROUTES)*(len(VIEWPORTS)+len(TEXT_VIEWPORTS)),('incomplete scenario matrix',len(records))
 assert not failures,f'{len(failures)} zoom/reflow failures: {failures[:5]}'
-print('07.05 zoom/reflow PASS:',len(records),'route-width combinations (21 viewport equivalents + 49 synthetic text-size stresses); month controls functional')
+print('07.05 zoom/reflow PASS:',len(records),'route-width combinations (24 viewport equivalents + 56 synthetic text-size stresses); month controls functional')
 print('NOTE: 640px overview statistics remain in an intentional internal scrolling rail, not document-level overflow.')
