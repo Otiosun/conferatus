@@ -755,3 +755,12 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] A matriz contínua inclui três verificações Playwright já existentes: relacionamento ARIA entre controles e painéis, avisos de estado persistentes e vínculo de erros aos campos de formulário. **29 suítes** de navegador selecionadas, sem dependências novas.
 - [x] Corrigidos dois scripts legados: indentação no ensaio de avisos e seleção explícita da modalidade binária na verificação de datas inválidas. Nenhuma validação do produto foi reduzida.
 - [ ] Validar 29/29 no GitHub Actions antes de afirmar conclusão. Evidência de DOM/ARIA no Chromium não substitui leitor de tela real nem certificação WCAG.
+
+
+## Auditoria de retomada para fechamento da prévia — 05/11/2026
+
+- A branch `preview/v0.10.60-six-vote-forms` foi inspecionada no HEAD `2878343c9db87534d06c199514656d87cbc86e8f`; a `main` foi confirmada em `4b244591c2f42913d2dca051b7d1256b896d25d8`. Esta seção é somente reconciliação documental; não contém código de produto nem aprovação de publicação.
+- Os **29 caminhos de suítes Playwright** declarados em `.github/workflows/preview-voting-check.yml` foram lidos com sucesso na branch. A CI contém PostgreSQL 16 descartável, build TypeScript/Node e execução de navegador; a presença de arquivos e configuração **não prova execução bem-sucedida**. Nenhum 29/29 é atribuído a este levantamento.
+- Nos testes de agendamento inspecionados, as datas operacionais de dezembro/novembro futuro ainda são posteriores a 05/11/2026. Uma data histórica de arquivo restaurado permanece fixture de importação, sem justificativa para alterar código ou testes.
+- A experiência de voto comum foi inspecionada: aviso de escolha fictícia, gravação somente em `sessionStorage` e nenhuma remessa Academy. A integração com contas, votos institucionais e apuração definitiva segue fora do escopo contratado da prévia.
+- **Próximo gate objetivo:** obter execução completa e verificável da CI para este HEAD ou um descendente, corrigir exclusivamente falhas reais, preservar D1–D6 e solicitar homologação da Megalos quando couber. Relatório de auditoria também lançado no handoff mestre do Google Drive Komekko em 05/11/2026.
