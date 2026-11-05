@@ -83,7 +83,11 @@ def measure(page,mode,width,route):
             };
             const fg=luminance(getComputedStyle(note).color);
             const bg=luminance(getComputedStyle(note.parentElement).backgroundColor);
-            return {contrast:(Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05)};
+            const labelContrasts=[...note.parentElement.querySelectorAll('label')].map(label=>{
+              const labelLight=luminance(getComputedStyle(label).color);
+              return (Math.max(labelLight,bg)+.05)/(Math.min(labelLight,bg)+.05);
+            });
+            return {contrast:(Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05),labelContrasts};
           })(),
           statsLocalOverflow:statRail?statRail.scrollWidth>statRail.clientWidth+1:false};
     }''')
@@ -95,6 +99,8 @@ def measure(page,mode,width,route):
     if results['footer']['navClipped']:errors.append('footer menu label is clipped')
     if route=='review' and (not results['reviewNote'] or results['reviewNote']['contrast']<4.5):
         errors.append('review notice text contrast below 4.5:1')
+    if route=='review' and results['reviewNote'] and any(value<4.5 for value in results['reviewNote']['labelContrasts']):
+        errors.append('review form label contrast below 4.5:1')
     if results['cal'] and (results['cal']['overlap']>1 or not results['cal']['inside']):errors.append('calendar month/nav collision')
     if results['header'] and results['header']['overlap']>1:errors.append('header title overlaps settings button')
     if errors:failures.append({'mode':mode,'width':width,'route':route,'errors':errors,'metrics':results})
