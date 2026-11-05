@@ -97,6 +97,7 @@ jobs:
             tests/browser_cancelled_save_recovery_v0154.py \
             tests/browser_restored_proposal_integrity_v0156.py \
             tests/browser_navigation_v014.py \
+            tests/browser_footer_drawer_v0162.py \
             tests/browser_stage7_form_edge_targets_v0131.py \
             tests/browser_preview_disclosure_v0117.py \
             tests/browser_stage7_dynamic_aria_v0141.py \

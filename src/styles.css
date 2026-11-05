@@ -1161,3 +1161,17 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
     bottom:env(safe-area-inset-bottom,0px);
   }
 }
+/* Swipe drawer stays above the actual footer rather than extending page height. */
+.app-footer .bottom-menu {
+  position:absolute;
+  inset-inline:0;
+  bottom:100%;
+  z-index:20;
+  width:100%;
+  max-height:calc(100dvh - 125px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  box-sizing:border-box;
+}
+/* Swiping over the footer brand must not scroll the document itself. */
+.app-footer .footer-home {touch-action:none;}

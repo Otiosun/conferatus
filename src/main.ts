@@ -106,13 +106,12 @@ function navigate(route: Route, memberId?: string) {
 }
 function crest() { return '<img src="./assets/crest.png" width="29" height="29" alt="Símbolo da Academy">'; }
 function footer() {
-  return `${menuOpen ? `<nav id="bottom-navigation" class="bottom-menu" aria-label="Navegação principal"><div class="menu-list">
+  return `<footer class="app-footer">${menuOpen ? `<nav id="bottom-navigation" class="bottom-menu" aria-label="Navegação principal"><div class="menu-list">
     <button class="menu-item" data-route="members" ${routeFromHash()==='members'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3.5 19v-2.2a5.5 5.5 0 0 1 11 0V19M17 8h4M17 12h4M17 16h4"/></svg></span>Membros e Serviços da Cúpula Cíntia</button>
     <button class="menu-item" data-route="overview" ${routeFromHash()==='overview'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h2M12 9h5M7 13h2M12 13h5M7 17h2M12 17h5"/></svg></span>Histórico de Votações e Proposições</button>
     <button class="menu-item" data-route="calendar" ${routeFromHash()==='calendar'?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true">▦</span>Agendar e Iniciar Deliberação</button>
     <button class="menu-item" data-route="proposals" ${['proposals','compose','review'].includes(routeFromHash())?'aria-current="page"':''}><span class="menu-icon" aria-hidden="true">✎</span>Elaborar Proposição e Socii</button>
-  </div></nav>` : ''}
-  <footer class="app-footer">${crest()}<button type="button" class="footer-home" data-route="ballot" aria-label="Voltar à votação">CONFFRATUS</button><small class="footer-demo">DADOS FICTÍCIOS · PRÉVIA</small>
+  </div></nav>` : ''}${crest()}<button type="button" class="footer-home" data-route="ballot" aria-label="Voltar à votação">CONFFRATUS</button><small class="footer-demo">DADOS FICTÍCIOS · PRÉVIA</small>
    <button type="button" class="footer-nav" aria-expanded="${menuOpen}" ${menuOpen?'aria-controls="bottom-navigation"':''} aria-label="${menuOpen?'Fechar':'Abrir'} menu" data-action="menu">${menuOpen?'Fechar ×':'☰ Menu'}</button>
   </footer>`;
 }
