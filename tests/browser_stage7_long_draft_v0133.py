@@ -1,7 +1,7 @@
 """07.04: extreme titles/bodies and untrusted literal markup survive the workflow.
 
 No inserted HTML/event handler may execute in list, editor or review.
-This is a deterministic Chromium offline regression, not a security audit of the Academy.
+Uses memory-only sessionStorage to avoid opaque-origin false failures; not a real storage/persistence test, nor a security audit of the Academy.
 """
 from pathlib import Path
 import json
@@ -22,6 +22,17 @@ with sync_playwright() as p:
   errors=[]
   pg.on('pageerror',lambda e:errors.append(str(e)))
   pg.goto('about:blank?stage7=1')
+  # An opaque about:blank origin blocks browser storage. For this rendering
+  # test only, use session storage in memory. Persistence failures are
+  # covered separately; do not mistake the mock for a real browser origin.
+  pg.evaluate("""() => {
+    const items=new Map();
+    Object.defineProperty(window,'sessionStorage',{configurable:true,get:()=>({
+      getItem:k=>items.get(String(k))??null,
+      setItem:(k,v)=>items.set(String(k),String(v)),
+      removeItem:k=>items.delete(String(k)),clear:()=>items.clear()
+    })});
+  }""")
   pg.set_content(HTML)
   pg.locator('.footer-nav').click()
   pg.locator('.menu-item[data-route="proposals"]').click()
