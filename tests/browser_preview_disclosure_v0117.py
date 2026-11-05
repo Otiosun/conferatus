@@ -65,8 +65,17 @@ with sync_playwright() as p:
         action.click()
         assert action.get_attribute('aria-expanded')=='false',width
         assert page.locator('#schedule-deliberation-form').count()==0,width
+        # The normal view must not expose advanced testing tools or local
+        # archive operations; retain useful Socii controls and the disclaimer.
+        page.locator('.footer-nav').click()
+        page.locator('.menu-item[data-route="proposals"]').click()
+        assert page.locator('.local-archive-actions').count()==0,width
+        assert page.locator('[data-action="export-local-archive"],[data-action="import-local-archive"]').count()==0,width
+        assert page.locator('[data-action="toggle-tools"],.preview-vote-lab').count()==0,width
+        assert page.locator('[data-action="invite-socii"]').is_visible(),width
+        assert 'DADOS FICTÍCIOS' in page.locator('.footer-demo').inner_text().upper(),width
         assert not errors,(width,errors)
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
         page.close()
     browser.close()
-print('Schedule-only disclosure and expandable form in four widths: OK')
+print('Normal-mode preview controls and disclosures: 4 widths OK; no advanced voting, debug or archive operations')

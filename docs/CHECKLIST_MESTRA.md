@@ -74,10 +74,10 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 ## 06 — Acabamento, validação e entrega
 - [ ] Comparar o visual com os modelos originais e recentes.
 - [ ] Revisar responsividade, textos, navegação e fluidez dos fluxos.
-- [ ] Remover controles desnecessários de demonstração da experiência normal.
+- [x] Separar da experiência normal os controles desnecessários de teste: sem `?demo=1`, não exibir laboratório avançado de voto, painel técnico de identidade/ferramentas nem botões de exportar/restaurar JSON. Manter somente os fluxos fictícios necessários à demonstração e avisos explícitos de que não são funções Academy. Regressão em quatro larguras na CI e inspeção independente em seis telas × quatro larguras; **não** equivale a aprovar a fidelidade visual da Megalos.
 - [ ] Consolidar testes e publicar novos builds primeiro em preview, depois no `main`.
 - [x] Atualizar documentação e preparar a demonstração à Megalos, distinguindo recursos reais dos simulados (`docs/DEMO_GUIDE.md`, revisado em 03/11/2026; não equivale a aceite Megalos).
-**Estado:** 1/5 critérios cumpridos para a prévia demonstrativa; revisão visual, entrega final e promoção à `main` permanecem pendentes.
+**Estado:** 2/5 critérios cumpridos para a prévia demonstrativa (separação dos controles avançados e guia de apresentação). A comparação visual final, o acabamento integral e a promoção autorizada à `main` permanecem pendentes.
 
 ## 07 — Perfeccionismo visual, front-end e responsividade absoluta verificável
 
@@ -830,3 +830,11 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Artefatos CI #47 preservados no Drive privado: [HTML offline exato b12f8e2](https://drive.google.com/file/d/12wq-E6GZV3MrpLQl62SYJDPgm0S_u9hh/view), [28 capturas Playwright](https://drive.google.com/file/d/1n2pxJJVfPjk-5wF3lOyepCvTxWBeJG__/view). ZIPs inspecionados, contendo as correções, digests SHA-256 idênticos aos da CI. [Comparação antes/depois do botão Salvar](https://drive.google.com/file/d/1COVEyaSoG-qP73glUYehHmJn-nkEE3Gr/view) é inspeção local e não captura da publicação HTTP.
 - [x] Cloudflare Pages confirmou deploy de preview do commit b12f8e2 no alias de branch: https://preview-v0-10-60-six-vote-fo.conferatus.pages.dev. Endereço inserido também no README e roteiro de demonstração, e no documento privado de homologação da Megalos. O acesso HTTP real neste ambiente ficou bloqueado: não presumir teste direto do site publicado.
 - [ ] Etapas 06=1/5 e 07=7/12 ainda abertas: faltam homologação Megalos, testes em aparelhos/tecnologias assistivas e autorização expressa para publicar na main. Nenhuma integração Academy ou promoção à produção.
+
+
+## Gate de normalidade da prévia e segurança de texto (05/11/2026)
+
+- [x] Inspeção independente do HTML offline **CI #47**: em 6 rotas × 4 larguras (320/390/740/1280 CSS px), o modo normal exibiu apenas navegação e ações demonstrativas previstas; sem laboratório avançado, exportação/restauração JSON, painel técnico ou ações de teste exclusivas de `?demo=1`. Aviso visível `DADOS FICTÍCIOS · PRÉVIA` preservado.
+- [x] `tests/browser_preview_disclosure_v0117.py` estendido para cobrir, no modo normal, ocultação dos controles avançados em Proposições/Socii, botão Socii acessível e legenda preservada, em quatro larguras. O subitem 06 de separação dos controles de teste foi encerrado **no escopo demonstrativo**, sem alegar entrega institucional completa.
+- [x] Prova exploratória independente do fluxo de proposições com texto HTML não confiável em título e corpo, em 9 larguras 280–1440 CSS px: HTML/eventos JavaScript ficaram como texto literal na lista, editor e revisão, com zero execução de eventos e zero rolagem horizontal. O teste permanente `tests/browser_stage7_long_draft_v0133.py` passou a verificar esse caso sem alterar o produto, commit `d8245a77b4f65b54f360d604ae9f8194f24b6fa0`.
+- [ ] Confirmar a CI completa dos commits de testes antes de afirmar **29/29 scripts e 51/51 Node** na versão final da branch. A varredura sintética não equivale a pentest, leitor de tela, aparelhos reais, homologação Megalos, ou política de privacidade/sessão de produção.
