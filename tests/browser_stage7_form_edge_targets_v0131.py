@@ -31,6 +31,33 @@ def text_contrast(control):
     light,dark=luminance(foreground),luminance(background)
     return (max(light,dark)+0.05)/(min(light,dark)+0.05)
 
+def placeholder_contrast(control):
+    # Composite the placeholder over the field and ancestor backgrounds.
+    # These forms have solid backgrounds; gradients/images are not modeled.
+    return control.evaluate('''field => {
+      const parse=value=>{
+        const values=(value.match(/[0-9.]+/g)||[]).map(Number);
+        return [values[0]||0,values[1]||0,values[2]||0,values[3]??1];
+      };
+      const blend=(top,bottom)=>top.slice(0,3).map((v,i)=>
+        v*top[3]+bottom[i]*(1-top[3])).concat([1]);
+      const layers=[];
+      for(let node=field;node;node=node.parentElement)layers.unshift(node);
+      let background=[255,255,255,1];
+      for(const layer of layers)
+        background=blend(parse(getComputedStyle(layer).backgroundColor),background);
+      const foreground=blend(parse(getComputedStyle(field,'::placeholder').color),background);
+      const luminance=rgb=>{
+        const [r,g,b]=rgb.slice(0,3).map(channel=>{
+          const v=channel/255;
+          return v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4;
+        });
+        return 0.2126*r+0.7152*g+0.0722*b;
+      };
+      const a=luminance(foreground),b=luminance(background);
+      return (Math.max(a,b)+0.05)/(Math.min(a,b)+0.05);
+    }''')
+
 with sync_playwright() as p:
  browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
  for width in WIDTHS:
@@ -63,6 +90,10 @@ with sync_playwright() as p:
   page.locator('.icon-button--edit').first.tap()
   edit=page.locator('#edit-member-form')
   assert edit.is_visible(),(width,'edit form missing')
+  if FIXED:
+   for name in ('acdmId','cumulativeVoteWeight'):
+    ratio=placeholder_contrast(edit.locator(f'input[name="{name}"]'))
+    assert ratio>=4.5,(width,f'Edit placeholder {name} low contrast',round(ratio,2))
   save_contrast=text_contrast(edit.locator('button.small-action'))
   if FIXED:
    assert save_contrast>=4.5,(width,'Gerenciamento: botão Salvar abaixo de 4.5:1',round(save_contrast,2))
@@ -87,6 +118,10 @@ with sync_playwright() as p:
   page.locator('[data-action="open-schedule"]').tap()
   form=page.locator('#schedule-deliberation-form')
   assert form.is_visible(),(width,'schedule form missing')
+  if FIXED:
+   for name in ('title','objective'):
+    ratio=placeholder_contrast(form.locator(f'[name="{name}"]'))
+    assert ratio>=4.5,(width,f'Schedule placeholder {name} low contrast',round(ratio,2))
   form.locator('[name="title"]').fill('Teste de evento demonstrativo')
   form.locator('[name="objective"]').fill('Conferência dos estados visuais do formulário')
   form.locator('[name="proposalId"]').select_option(index=1)
