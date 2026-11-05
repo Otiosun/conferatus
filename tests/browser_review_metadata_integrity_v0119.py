@@ -26,6 +26,13 @@ def prepare_partner_review(page, title):
     assert 'aguardando autoria' in record.inner_text().casefold(),record.inner_text()
     record.locator('[data-draft]').click()
     page.locator('#confirm-proposal-form').wait_for(state='visible')
+    bar=page.locator('.workflow-socii-editor-bar')
+    assert bar.count()==1 and bar.is_visible(),title
+    assert bar.get_attribute('aria-label')=='Socii desta proposição, demonstração local',title
+    assert 'Concluíram 1 de 2' in bar.inner_text(),(title,bar.inner_text())
+    assert 'hora' not in bar.inner_text().casefold(),title
+    if title=='Classificação unchanged 390':
+        page.screenshot(path=str(Path(__file__).resolve().parents[1]/'dist/socii_review_390.png'),full_page=True)
 
 
 with sync_playwright() as p:
@@ -66,6 +73,14 @@ with sync_playwright() as p:
                 record=page.locator('.workflow-record').filter(has_text=title)
                 assert 'concluíram 2 de 2' in record.inner_text().casefold(),width
                 assert 'concluída' in record.inner_text().casefold(),width
+        # Proposals without partners should not show a fictitious Socii group.
+        open_proposals(page)
+        page.locator('[data-action=new-proposal]').click()
+        page.locator('#draft-title').fill(f'Sem Socii {width}')
+        page.locator('#draft-body').fill('Redação fictícia individual, sem outros participantes vinculados a esta proposição.')
+        page.locator('#compose-proposal-form [value=conclude]').click()
+        page.locator('#confirm-proposal-form').wait_for(state='visible')
+        assert page.locator('.workflow-socii-editor-bar').count()==0,width
         assert not errors,(width,errors)
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
         page.close()

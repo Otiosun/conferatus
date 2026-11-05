@@ -774,3 +774,11 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Os artefatos de CI foram preservados na pasta privada do projeto no Drive Komekko: [prévia HTML testada](https://drive.google.com/file/d/1MbKMzURub0qf7zw78Zg63CKk6IyVsaEy/view) e [capturas de navegador](https://drive.google.com/file/d/1sMGu2DE6rv0EVQCUq34UjPmvAbPKOwEH/view), com leitura de metadados confirmando tamanho e pasta. O ZIP da prévia contém `CONFFRATUS_demo_offline.html`, sem backend institucional.
 - [ ] A Etapa 06 continua **1/5** até revisão de fidelidade com Megalos, validação visual/hardware aplicável e decisão explícita de publicação. A Etapa 07 continua **7/12**; o laboratório não homologa integração Academy nem regras D1–D6.
 - **Decisão de escopo:** nenhum defeito de código exigiu correção nesta rodada. Não desenvolver recursos extras, não alterar `main`, produção, autenticação ou serviços Academy. O próximo passo é **homologação da prévia pela Megalos**, não ampliação automática do sistema.
+
+
+## Revisão com Socii — reprodução do cabeçalho da Megalos (05/11/2026)
+
+- [x] Corrigida **diferença objetiva de apresentação**: a revisão de proposição com participante Socii agora reutiliza a mesma faixa de participantes e progresso que já existia na redação. A fonte visual `1001930222.jpg` e o vídeo mostram esta faixa na revisão; nenhum novo estilo ou componente foi inventado.
+- [x] A faixa depende exclusivamente de participantes efetivamente vinculados à proposição local; não aparece em revisão individual. O texto distingue **prévia local** e conserva a contagem de confirmações sem inventar horas, convites remotos ou regras de conclusão.
+- [x] O teste existente `tests/browser_review_metadata_integrity_v0119.py` foi estendido para verificar presença/ausência da faixa em quatro larguras e registrar a revisão com Socii a 390 px; nenhuma suíte adicional nem dependência de produção.
+- [ ] Validar este commit integralmente na CI de preview (Node, 29 jornadas Chromium, PostgreSQL descartável). **Não** declarar homologação de D4 ou alteração de `main` por este ajuste.

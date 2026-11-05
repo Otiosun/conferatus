@@ -540,7 +540,7 @@ function composePage(){
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
  if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar às proposições'}</button></div></div>`;
- return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
+ return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
  <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
  <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>Confira os dados e a redação antes de confirmar a conclusão.</p>
