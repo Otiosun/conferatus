@@ -69,6 +69,9 @@ with sync_playwright() as p:
         # archive operations; retain useful Socii controls and the disclaimer.
         page.locator('.footer-nav').click()
         page.locator('.menu-item[data-route="proposals"]').click()
+        # Hash navigation renders asynchronously. First wait for the target
+        # screen so absence checks cannot pass on the previous calendar view.
+        page.wait_for_function('location.hash==="#/proposals" && document.querySelector("[data-action=invite-socii]")!==null')
         assert page.locator('.local-archive-actions').count()==0,width
         assert page.locator('[data-action="export-local-archive"],[data-action="import-local-archive"]').count()==0,width
         assert page.locator('[data-action="toggle-tools"],.preview-vote-lab').count()==0,width
