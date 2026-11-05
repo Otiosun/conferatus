@@ -1,6 +1,7 @@
-"""07.04: user-entered maximum title and long body survive editor/review/records.
+"""07.04: extreme titles/bodies and untrusted literal markup survive the workflow.
 
-Offline demo only, no Academy credentials or external resources.
+No inserted HTML/event handler may execute in list, editor or review.
+This is a deterministic Chromium offline regression, not a security audit of the Academy.
 """
 from pathlib import Path
 import json
@@ -45,8 +46,33 @@ with sync_playwright() as p:
   assert pg.locator('.workflow-editor-head h1').inner_text()==TITLE,(width,'final record title lost')
   assert not pg.evaluate('document.documentElement.scrollWidth > innerWidth + 1'),(width,'final record overflow')
   assert not errors,(width,errors)
-  measurements.append({'width':width,'review':True,'records':True,'complete':True})
+  # Untrusted title and body must remain literal text through all three views.
+  # This deliberately harmless marker is only set if HTML events execute.
+  pg.evaluate('location.hash="#/proposals"')
+  pg.locator('[data-action="new-proposal"]').click()
+  probe='window.__conffratusInjectionProbe'
+  hostile='<img src=x onerror="'+probe+'=1"> & <svg onload="'+probe+'=2"></svg>'
+  pg.evaluate('window.__conffratusInjectionProbe=0')
+  pg.locator('#draft-title').fill(hostile)
+  pg.locator('#draft-body').fill(hostile)
+  pg.locator('#compose-proposal-form [value="save"]').click()
+  hostile_record=pg.locator('.workflow-record').filter(has_text=probe)
+  hostile_record.first.wait_for(state='visible')
+  assert hostile_record.count()==1,(width,'escaped draft not listed')
+  assert '<img src=x' in hostile_record.inner_text(),(width,'literal markup missing from record')
+  assert pg.evaluate('window.__conffratusInjectionProbe')==0,(width,'HTML event executed in record')
+  assert hostile_record.locator('img[src="x"],svg[onload]').count()==0,(width,'markup interpreted in record')
+  hostile_record.locator('[data-draft]').click()
+  assert pg.evaluate('window.__conffratusInjectionProbe')==0,(width,'HTML event executed in editor')
+  pg.locator('#compose-proposal-form [value="conclude"]').click()
+  pg.locator('#confirm-proposal-form').wait_for(state='visible')
+  assert '<img src=x' in pg.locator('.workflow-review-body').inner_text(),width
+  assert pg.locator('.workflow-review-body img[src="x"], .workflow-review-body svg[onload]').count()==0,width
+  assert pg.evaluate('window.__conffratusInjectionProbe')==0,(width,'HTML event executed in review')
+  assert not pg.evaluate('document.documentElement.scrollWidth > innerWidth + 1'),(width,'markup review overflow')
+  assert not errors,(width,errors)
+  measurements.append({'width':width,'review':True,'records':True,'complete':True,'literalMarkupSafe':True})
   pg.close()
  browser.close()
 (ROOT/'dist'/'stage7_long_draft_v0133_report.json').write_text(json.dumps(measurements,indent=2),encoding='utf-8')
-print(f'07.04 long draft PASS: {len(measurements)} widths, 140-character title and {len(BODY)}-character body preserved in review, list and final record')
+print(f'07.04 long draft PASS: {len(measurements)} widths, extreme text preserved, no executable markup injected into proposal workflow')
