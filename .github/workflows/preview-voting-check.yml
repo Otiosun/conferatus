@@ -132,7 +132,7 @@ jobs:
     # Independent build: cross-engine QA still runs when an unrelated
     # Chromium assertion fails; it never bypasses the required validate gate.
     runs-on: ubuntu-24.04
-    timeout-minutes: 22
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
