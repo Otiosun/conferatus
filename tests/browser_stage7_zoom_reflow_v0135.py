@@ -57,6 +57,10 @@ def measure(page,mode,width,route):
       brandRange.selectNodeContents(homeEl);
       const brandLines=new Set([...brandRange.getClientRects()]
           .filter(r=>r.width>0).map(r=>Math.round(r.top))).size;
+      const navRange=document.createRange();
+      navRange.selectNodeContents(navEl);
+      const navLines=new Set([...navRange.getClientRects()]
+          .filter(r=>r.width>0).map(r=>Math.round(r.top))).size;
       const f=rect(footer),home=rect(homeEl),
             demo=rect(footer.querySelector('.footer-demo')),nav=rect(navEl),
             logo=rect(footer.querySelector('img'));
@@ -69,7 +73,7 @@ def measure(page,mode,width,route):
       const statRail=document.querySelector('.overview-stats');
       return {client:innerWidth,scroll:document.documentElement.scrollWidth,
           footer:{inside:within(home,f)&&within(demo,f),collisions:intersection(home,nav)+intersection(demo,nav)+intersection(home,logo)+intersection(demo,logo),
-                  brandLines, navClipped:navEl.scrollHeight>navEl.clientHeight+1,
+                  brandLines, navLines, navClipped:navEl.scrollHeight>navEl.clientHeight+1,
                   h:home, demo, nav, logo, height:f.height},cal,header,
           reviewNote:(()=>{
             const note=document.querySelector('.workflow-review-sheet > p');
@@ -97,6 +101,8 @@ def measure(page,mode,width,route):
     if results['footer']['collisions']>1:errors.append('footer text overlaps crest/menu')
     if width<=360 and results['footer']['brandLines']!=1:errors.append('footer brand wraps at compact width')
     if results['footer']['navClipped']:errors.append('footer menu label is clipped')
+    if mode=='synthetic-text-200' and width<=320 and results['footer']['navLines']>2:
+        errors.append('footer Menu breaks inside the word at compact width')
     if route=='review' and (not results['reviewNote'] or results['reviewNote']['contrast']<4.5):
         errors.append('review notice text contrast below 4.5:1')
     if route=='review' and results['reviewNote'] and any(value<4.5 for value in results['reviewNote']['labelContrasts']):
