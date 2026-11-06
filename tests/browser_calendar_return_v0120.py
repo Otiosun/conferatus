@@ -46,7 +46,8 @@ with sync_playwright() as p:
         page.locator('[data-overview-tab=proposicoes]').click()
         local=page.locator('.overview-local-proposal').filter(has_text='Proposição de navegação para agenda')
         assert local.count()==1,(width,'local proposal absent from overview')
-        assert 'Não alteram os indicadores' in page.locator('.overview-local-disclosure').inner_text(),width
+        assert page.locator('.overview-local-history .session-proposals-heading').inner_text()=='Proposições desta sessão',width
+        assert page.locator('.overview-local-disclosure').count()==0,width
         local.locator('[data-draft]').click()
         assert page.locator('.workflow-finished strong').inner_text()=='Proposição concluída',width
         back_to_history=page.locator('.workflow-finished [data-route=overview]')

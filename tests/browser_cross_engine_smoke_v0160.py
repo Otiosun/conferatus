@@ -72,7 +72,7 @@ with sync_playwright() as playwright:
         page.locator("#confirm-proposal-form").wait_for(state="visible")
         bar = page.locator(".workflow-socii-editor-bar")
         assert bar.is_visible() and "Concluíram 1 de 2" in bar.inner_text(), (ENGINE,width,"review Socii bar")
-        assert "confirmou sua participação nesta prévia local" in page.locator(".workflow-review-sheet > p").inner_text(), (ENGINE,width,"review notice")
+        assert "concluiu sua parte" in page.locator(".workflow-review-sheet > p").inner_text(), (ENGINE,width,"review notice")
         assert not page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"), (ENGINE,width,"review overflow")
         if width in (320,740):
             page.screenshot(path=str(ROOT / "dist" / f"cross_engine_{ENGINE}_{width}_review.png"),full_page=True)

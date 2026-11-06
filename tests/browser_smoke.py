@@ -134,12 +134,12 @@ with sync_playwright() as p:
         page.locator('[data-edit="m01"]').first.click()
         page.locator('#member-acdm-id').fill('DEMO-5012')
         page.locator('#edit-member-form button[type="submit"]').click()
-        assert 'Cadastro demonstrativo de Helena Avelar atualizado' in page.locator('main').inner_text(), width
+        assert 'Dados de Helena Avelar atualizados.' in page.locator('main').inner_text(), width
         page.locator('[data-action="undo"]').click()
         assert 'Alteração desfeita' in page.locator('main').inner_text(), width
 
         open_menu(page, 'calendar')
-        assert 'não inicia uma votação real' in page.locator('.calendar-preview-disclosure').inner_text(), width
+        assert 'Defina a data e a modalidade da deliberação.' in page.locator('.calendar-preview-disclosure').inner_text(), width
         page.locator('[data-action="open-schedule"]').click()
         page.locator('#schedule-deliberation-form').wait_for()
         page.locator('[data-action="open-schedule"]').click()

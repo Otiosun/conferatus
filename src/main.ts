@@ -265,11 +265,11 @@ function ballotPage() {
  const demoOptions = ballot.options.map(o => ({...o, votes:o.votes + (canRecordVote(ballot) && demoVoteId===o.id?1:0)}));
  const sum=totalVotes(demoOptions);
  return `<div class="main-pad">${header(undefined,undefined,true)}<div class="results">
- ${demoOptions.map(o=>`<div class="result-row ${demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${demoVoteId===o.id?'<small class="your-vote">Escolha simulada</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
+ ${demoOptions.map(o=>`<div class="result-row ${demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
  </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="toggle-demo" aria-expanded="${demoExpanded}" ${demoExpanded?'aria-controls="demo-vote-panel"':''}>${demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':'Ver situação'}</button></div>
- <p class="ballot-description">${escapeHTML(ballot.description)}</p><p class="ballot-preview-disclosure" role="note">Resultados fictícios. A escolha é simulada somente nesta aba; nenhum voto é enviado à Academy.</p>${demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Votação fictícia aberta. Selecione uma opção apenas para simular.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
+ <p class="ballot-description">${escapeHTML(ballot.description)}</p><p class="ballot-preview-disclosure" role="note">Resultados de exemplo</p>${demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Selecione uma opção para testar a votação.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
  ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
- <p class="vote-feedback" role="status">${demoVoteId?'Escolha simulada nesta aba. Nenhum voto foi enviado.':'Selecione uma opção para a simulação.'}</p>
+ <p class="vote-feedback" role="status">${demoVoteId?'Opção selecionada. Você pode alterá-la.':'Selecione uma opção.'}</p>
  ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}</section>${advancedPreview?previewVoteLab():''}`;
 }
 function matchingMembers() {
@@ -343,7 +343,7 @@ function profilePage() {
  const local=member.id===members[0]?.id && activeTab==='proposicoes'
   ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button>${linkedScheduleButtons(d)}</article>`).join('') : '';
  return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
- ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}${relevant.length?'<h2 class="session-proposals-heading">Histórico demonstrativo</h2>':''}`:''}
+ ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}${relevant.length?'<h2 class="session-proposals-heading">Histórico de exemplo</h2>':''}`:''}
  ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>`;
 }
 function overviewPage() {
@@ -355,7 +355,7 @@ function overviewPage() {
  const remaining=relevant.length-visible.length;
  // New drafts belong to this browser session. They never change fixture totals.
  const localHistory=overviewTab==='proposicoes'&&drafts.length
-  ? `<section class="overview-local-history" aria-label="Proposições desta sessão"><h2 class="session-proposals-heading">Proposições desta sessão</h2><p class="overview-local-disclosure">Registros locais de demonstração. Não alteram os indicadores fictícios acima.</p>${drafts.map(d=>`<article class="workflow-record overview-local-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${linkedScheduleButtons(d)}</article>`).join('')}</section>` : '';
+  ? `<section class="overview-local-history" aria-label="Proposições desta sessão"><h2 class="session-proposals-heading">Proposições desta sessão</h2>${drafts.map(d=>`<article class="workflow-record overview-local-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${linkedScheduleButtons(d)}</article>`).join('')}</section>` : '';
  return `${header(undefined,undefined,false)}<div class="overview-stats" role="group" aria-label="Indicadores institucionais">
   <span class="stat-chip">${accepted} Aprovados</span><span class="stat-chip">${proposals.length-accepted} Arquivados</span>
   <span class="stat-figure">${votes.reduce((n,a)=>n+a.votes,0)} Votos</span>
@@ -368,7 +368,7 @@ function overviewPage() {
 function governancePage() {
  const active=sections.find(s=>s.id===expandedSection);
  return `${header('GERENCIAMENTO DELIBERATIVO','Gerencie as seções e deliberados da Cúpula Institucional Academy.')}
- <p class="governance-preview-disclosure" role="note">Gerenciamento fictício nesta prévia: editar ou rebaixar altera somente dados locais deste navegador. Nenhum cadastro da Academy é modificado.</p>
+ <p class="governance-preview-disclosure" role="note">Alterações nesta página não afetam cadastros oficiais.</p>
  ${rolePreview==='membro'?'<p class="status-line" role="status">O gerenciamento das seções é exclusivo da diretoria.</p>':
  `<div class="governance-list">${sections.map(s=>`${s.category==='comum'?'<h2 class="governance-group-heading">Membros da Academy</h2>':''}<div><button type="button" class="section-toggle" data-section="${s.id}" aria-expanded="${expandedSection===s.id}" ${expandedSection===s.id?`aria-controls="section-members-${escapeHTML(s.id)}"`: ''}><span>${escapeHTML(s.name)}${s.places ? `<small class="section-capacity">${s.places} integrantes previstos</small>` : ''}</span><span class="section-chevron" aria-hidden="true">${expandedSection===s.id?'▾':'▸'}</span></button>
  ${expandedSection===s.id?`<div id="section-members-${escapeHTML(s.id)}">${members.filter(m=>m.sectionIds.includes(s.id)).map(m=>`<div class="section-member"><div class="avatar" aria-hidden="true"></div><button class="section-member-name" type="button" data-edit="${m.id}" title="Editar ${escapeHTML(m.name)}">${escapeHTML(m.name)}</button><button class="icon-button icon-button--edit" type="button" data-edit="${m.id}" aria-label="Editar identificador de ${escapeHTML(m.name)}"><img src="./assets/editar.png" alt=""></button>${s.id==='membros'?'':`<button class="icon-button" type="button" data-demote="${m.id}" aria-label="Rebaixar ${escapeHTML(m.name)} para membro comum"><img src="./assets/rebaixamento.png" alt=""></button>`}</div>
@@ -420,7 +420,7 @@ const unreadableRecordsBackup={drafts:draftRestore.unreadableRaw,schedule:schedu
 const ignoredRecordsBackup={drafts:restoredDrafts.rejected,schedule:restoredSchedule.rejected};
 const ignoredSavedRecords=ignoredRecordsBackup.drafts.length>0||ignoredRecordsBackup.schedule.length>0||
  draftRestore.unreadableRaw!==null||scheduleRestore.unreadableRaw!==null;
-function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos ou repetidos desta prévia local não foram carregados.</p>':'';}
+function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos ou repetidos não foram carregados.</p>':'';}
 const blankDraft=()=>({title:'',body:''});
 let draftForm=blankDraft();
 let currentDraftId='';
@@ -504,16 +504,16 @@ function friendlyStamp(date:string){const parsed=new Date(date);return Number.is
 // an authenticated Academy account. Show only active, already-linked schedules.
 function linkedScheduleButtons(d:Draft) {
  const linked=schedule.filter(item=>item.proposalId===d.id&&item.status==='programada');
- return linked.length?`<div class="session-schedule-links" role="group" aria-label="Programações locais desta proposição">${linked.map(item=>`<button type="button" class="session-schedule-link" data-linked-schedule="${escapeHTML(item.id)}">Programação: ${escapeHTML(item.title)} · ${friendlyStamp(item.start)} (prévia local)</button>`).join('')}</div>`:'';
+ return linked.length?`<div class="session-schedule-links" role="group" aria-label="Programações locais desta proposição">${linked.map(item=>`<button type="button" class="session-schedule-link" data-linked-schedule="${escapeHTML(item.id)}">Programação: ${escapeHTML(item.title)} · ${friendlyStamp(item.start)}</button>`).join('')}</div>`:'';
 }
 function proposalsPage(){
  const author=members[0];
  const examples=activities.filter(a=>a.type==='proposicao' && a.memberId===author?.id).slice(0,4);
  return `${header(undefined,undefined,false)}<div class="workflow-profile">${author?memberHeader(author,'proposicoes',false):''}<div class="tabs workflow-tabs" role="group" aria-label="Histórico do membro"><button class="tab" type="button" data-route="profile" aria-label="Consultar histórico de votação">Histórico de votações</button><span class="tab" aria-current="page">Proposições e Socii</span></div></div>
   <div class="workflow-layout workflow-proposals-layout">${savedRecordNotice()}${drafts.length?'<h2 class="workflow-record-heading">Proposições desta sessão</h2>':''}${drafts.length?drafts.map(d=>`<article class="workflow-record"><button data-draft="${escapeHTML(d.id)}" class="workflow-record-btn"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><p>${escapeHTML(d.body.slice(0,140))}</p></button>${linkedScheduleButtons(d)}${d.partners.length?`<p class="workflow-partners"><strong>Concluíram ${Number(d.authorComplete)+d.partners.filter(p=>p.complete).length} de ${d.partners.length+1}</strong><span>Autoria: ${d.authorComplete?'concluída':'pendente'} · Socii: ${d.partners.map(p=>`${escapeHTML(members.find(m=>m.id===p.id)?.name??'Membro')} (${p.complete?'concluiu':'pendente'})`).join(', ')}</span></p>`:''}${advancedPreview&&d.partners.some(p=>!p.complete)?d.partners.filter(p=>!p.complete).map(p=>`<button class="workflow-demo-confirm" data-confirm-partner="${escapeHTML(d.id)}:${escapeHTML(p.id)}">Simular conclusão de ${escapeHTML(members.find(m=>m.id===p.id)?.name??'participante')}</button>`).join(''):''}</article>`).join(''):''}
- ${examples.length?'<h2 class="workflow-record-heading">Histórico demonstrativo</h2>':''}${examples.map(activityItem).join('')}
+ ${examples.length?'<h2 class="workflow-record-heading">Histórico de exemplo</h2>':''}${examples.map(activityItem).join('')}
  ${advancedPreview?`<section class="local-archive" aria-label="Cópia de segurança dos registros da prévia"><h2>Cópia local da prévia</h2><p>Exporta apenas proposições, Socii e programações desta aba. O arquivo pode conter o texto que você escreveu. Não inclui login, votos, permissões ou dados da Academy.</p><div class="local-archive-actions"><button type="button" data-action="export-local-archive">Baixar cópia JSON</button><button type="button" data-action="import-local-archive">Restaurar cópia JSON</button><input id="archive-file-input" type="file" accept=".json,application/json" hidden></div>${archiveMessage?`<p class="local-archive-message" role="${archiveIsError?'alert':'status'}">${escapeHTML(archiveMessage)}</p>`:''}</section>`:''}
- </div><div class="workflow-actions"><button type="button" class="workflow-outline" data-action="invite-socii" aria-expanded="${inviteOpen}" ${inviteOpen?'aria-controls="invite-socii-form"':''}>Convidar para Socii</button>${inviteOpen?`<form id="invite-socii-form" class="workflow-inline" aria-label="Adicionar participante Socii (prévia local)"><label>Proposição<select name="draftId" required>${drafts.filter(d=>d.status!=='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label><label>Participante<select name="memberId" required><option value="" selected disabled>Selecione uma pessoa</option>${selectOptions('',members.slice(1))}</select></label><button class="workflow-primary" ${!drafts.some(d=>d.status!=='concluida')?'disabled':''}>Adicionar participante</button></form>`:''}
+ </div><div class="workflow-actions"><button type="button" class="workflow-outline" data-action="invite-socii" aria-expanded="${inviteOpen}" ${inviteOpen?'aria-controls="invite-socii-form"':''}>Convidar para Socii</button>${inviteOpen?`<form id="invite-socii-form" class="workflow-inline" aria-label="Adicionar participante ao Socii"><label>Proposição<select name="draftId" required>${drafts.filter(d=>d.status!=='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label><label>Participante<select name="memberId" required><option value="" selected disabled>Selecione uma pessoa</option>${selectOptions('',members.slice(1))}</select></label><button class="workflow-primary" ${!drafts.some(d=>d.status!=='concluida')?'disabled':''}>Adicionar participante</button></form>`:''}
  <button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>
  ${workflowNotice?`<p class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}`;
 }
@@ -523,9 +523,9 @@ function sociiEditorBar(d:Draft|undefined){
  const names=d.partners.map(p=>members.find(m=>m.id===p.id)?.name).filter((n):n is string=>Boolean(n));
  const participantText=names.length===1?`Você e ${names[0]}`:`Você e ${d.partners.length} participantes`;
  const finished=Number(d.authorComplete)+d.partners.filter(p=>p.complete).length;
- return `<aside class="workflow-socii-editor-bar" aria-label="Socii desta proposição, demonstração local">
+ return `<aside class="workflow-socii-editor-bar" aria-label="Participantes do Socii nesta proposição">
  <span class="workflow-socii-avatars" aria-hidden="true"><i></i><i></i></span>
- <div class="workflow-socii-editor-status"><strong>${escapeHTML(participantText)} em Socii</strong><small>Prévia local · Concluíram ${finished} de ${d.partners.length+1}</small></div>
+ <div class="workflow-socii-editor-status"><strong>${escapeHTML(participantText)} em Socii</strong><small>Concluíram ${finished} de ${d.partners.length+1}</small></div>
  <span class="workflow-socii-editor-label" aria-hidden="true">Socii</span></aside>`;
 }
 function composePage(){
@@ -542,7 +542,7 @@ function reviewPage(){
  const confirmedPartner=d.partners.find(p=>p.complete);
  const confirmedName=confirmedPartner?members.find(m=>m.id===confirmedPartner.id)?.name:undefined;
  const reviewMessage=confirmedPartner
-  ? `${confirmedName?escapeHTML(confirmedName):'Um participante do Socii'} confirmou sua participação nesta prévia local. Confira os dados e a redação antes de confirmar a conclusão.`
+  ? `${confirmedName?escapeHTML(confirmedName):'Um participante do Socii'} concluiu sua parte. Confira os dados e a redação antes de confirmar a conclusão.`
   : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
@@ -567,14 +567,14 @@ function calendarPage(){
  // Cancelled entries remain in the session's original schedule array. Keep them
  // separate from active calendar markers, date filters and scheduling controls.
  const cancelled=schedule.filter(item=>item.status==='cancelada');
- const cancelledHistory=cancelled.length?`<section class="calendar-history" aria-label="Histórico de cancelamentos da prévia local">
- <button type="button" class="calendar-history-toggle" data-action="toggle-cancelled-history" aria-expanded="${cancelledHistoryOpen}" ${cancelledHistoryOpen?'aria-controls="cancelled-schedule-history"':''}>Histórico de cancelamentos da prévia (${cancelled.length})</button>
- ${cancelledHistoryOpen?`<div id="cancelled-schedule-history" role="region" aria-label="Programações canceladas da sessão"><p class="calendar-history-note">Registros da sessão, somente para consulta. Cancelamento não é uma deliberação ativa.</p>${cancelled.map(item=>{
+ const cancelledHistory=cancelled.length?`<section class="calendar-history" aria-label="Histórico de cancelamentos">
+ <button type="button" class="calendar-history-toggle" data-action="toggle-cancelled-history" aria-expanded="${cancelledHistoryOpen}" ${cancelledHistoryOpen?'aria-controls="cancelled-schedule-history"':''}>Programações canceladas (${cancelled.length})</button>
+ ${cancelledHistoryOpen?`<div id="cancelled-schedule-history" role="region" aria-label="Programações canceladas da sessão"><p class="calendar-history-note">Programações canceladas permanecem disponíveis para consulta.</p>${cancelled.map(item=>{
    const linked=drafts.find(d=>d.id===item.proposalId);
    return `<article class="calendar-cancelled-record"><h3>${escapeHTML(item.title)}</h3><p><strong>Cancelada</strong> · ${escapeHTML(item.type)}</p><p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(m=>m.id===item.method)?.label??'Não informada (registro anterior)')}</p><p>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</p><p>Seção: ${escapeHTML(sections.find(section=>section.id===item.sectionId)?.name??'Não disponível')}</p><p>Proposição: ${linked?escapeHTML(linked.title):'Proposição associada indisponível nesta sessão'}</p><p>${escapeHTML(item.objective)}</p></article>`;
   }).join('')}</div>`:''}</section>`:'';
  return `<div class="workflow-layout">${savedRecordNotice()}${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}" ${scheduleFormOpen?'aria-controls="schedule-deliberation-form"':''}>${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
- <p class="calendar-preview-disclosure" role="note">Esta prévia apenas programa uma deliberação; não inicia uma votação real.</p>
+ <p class="calendar-preview-disclosure" role="note">Defina a data e a modalidade da deliberação.</p>
  ${scheduleFormOpen?`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
  ${!drafts.some(d=>d.status==='concluida')?'<p class="workflow-help">Para agendar, conclua uma proposição primeiro. <button type="button" data-route="proposals">Ir às proposições</button></p>':''}
  <label>Título da deliberação<input name="title" maxlength="140" required placeholder="Título da deliberação"></label>
@@ -585,12 +585,12 @@ function calendarPage(){
  <label>Tipo de proposição<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
   <label>Modalidade de votação<select name="method" id="schedule-method" required><option value="">Selecione a modalidade</option>${DELIBERATION_METHODS.map(mode=>`<option value="${mode.id}">${escapeHTML(mode.label)} — ${escapeHTML(mode.detail)}</option>`).join('')}</select></label>
   ${scheduleMethod&&scheduleMethod!=='binaria'?`<label>Alternativas para esta deliberação<textarea name="choices" rows="5" maxlength="648" placeholder="Uma alternativa por linha, de 2 a 8" required></textarea></label><p class="workflow-help">De 2 a 8 alternativas distintas, uma por linha (até 80 caracteres cada).</p>`:'' }
-  <p class="workflow-help">A modalidade descreve como os membros votariam. A prévia não contabiliza votos institucionais.</p>
+  <p class="workflow-help">Defina como as opções serão apresentadas aos participantes.</p>
  <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
  ${cancellationSaveFailed||workflowNotice?`<p class="workflow-status">${escapeHTML(cancellationSaveFailed?cancellationSaveWarning:workflowNotice)}</p>`:''}
  ${cancellationSaveFailed?'<button type="button" class="calendar-save-retry" data-action="retry-cancellation-save">Tentar salvar cancelamento nesta sessão</button>':''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
- ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p><p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(mode=>mode.id===item.method)?.label??'Não informada (registro anterior)')}</p>${item.choices?`<p>Alternativas: ${item.choices.map(option=>escapeHTML(option.label)).join(' · ')}</p>`:''}${advancedPreview&&item.id!=='sample-1'&&item.method&&(item.method==='binaria'||isValidPreviewChoices(item.choices))?`<button type="button" data-preview-schedule="${escapeHTML(item.id)}" class="preview-schedule-open">Simular voto nesta programação</button>`:''}${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria (prévia local)</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
+ ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p><p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(mode=>mode.id===item.method)?.label??'Não informada (registro anterior)')}</p>${item.choices?`<p>Alternativas: ${item.choices.map(option=>escapeHTML(option.label)).join(' · ')}</p>`:''}${advancedPreview&&item.id!=='sample-1'&&item.method&&(item.method==='binaria'||isValidPreviewChoices(item.choices))?`<button type="button" data-preview-schedule="${escapeHTML(item.id)}" class="preview-schedule-open">Simular voto nesta programação</button>`:''}${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button></div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -1039,8 +1039,8 @@ document.addEventListener('submit',(event)=>{
   }
   const stored=saveWorkflows();
   if(saveOnly){
-   workflowNotice=stored?'Rascunho salvo nesta sessão.':'Rascunho mantido somente enquanto a página estiver aberta.';
-   if(confirmationsReset)workflowNotice+=' O texto mudou; confirmações anteriores foram reiniciadas nesta prévia.';
+   workflowNotice=stored?'Rascunho salvo.':'Rascunho mantido somente enquanto a página estiver aberta.';
+   if(confirmationsReset)workflowNotice+=' O texto mudou; as confirmações anteriores foram reiniciadas.';
    navigate('proposals');
   }
   else navigate('review');
@@ -1056,7 +1056,7 @@ document.addEventListener('submit',(event)=>{
   d.sectionId=sectionId;d.type=proposalType;
   d.authorComplete=true;d.status=draftReady(d)?'concluida':'revisao';
   const saved=saveWorkflows();
-  workflowNotice=(classificationChanged&&d.partners.length?'A seção ou o tipo mudou; as confirmações do Socii foram reiniciadas nesta prévia. ':'')+
+  workflowNotice=(classificationChanged&&d.partners.length?'A seção ou o tipo mudou; as confirmações do Socii foram reiniciadas. ':'')+
    (saved?(d.status==='concluida'?'Proposição concluída.':'Sua parte foi concluída. Aguardando participantes do Socii.'):'Conclusão aplicada somente nesta aba: não foi possível salvar.');
   navigate('proposals');return;
  }
@@ -1065,7 +1065,7 @@ document.addEventListener('submit',(event)=>{
   if(d&&memberId&&memberId!==members[0]?.id&&!d.partners.some(p=>p.id===memberId)){
    d.partners.push({id:memberId,complete:false});if(d.authorComplete)d.status='revisao';
    const saved=saveWorkflows();
-   workflowNotice=saved?'Participante incluído na simulação. Nenhum convite real foi enviado.':'Participante incluído apenas nesta aba: não foi possível salvar. Nenhum convite real foi enviado.';
+   workflowNotice=saved?'Participante adicionado ao Socii. Nenhum convite foi enviado.':'Participante adicionado, mas não foi possível salvar. Nenhum convite foi enviado.';
   }else workflowNotice='Selecione uma pessoa que ainda não esteja no Socii.';
   inviteOpen=false;render();
   // The submitter disappears when the invitation form closes. Restore a
@@ -1095,7 +1095,7 @@ document.addEventListener('submit',(event)=>{
     showScheduleFormError(form,'Informe de 2 a 8 alternativas distintas, com até 80 caracteres por linha.','choices');return;
    }
    const item:Deliberation={id:nextLocalRecordId('sched',schedule),title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),method,...(method!=='binaria'?{choices}:{}),status:'programada'};
-  schedule.unshift(item);const stored=saveWorkflows();workflowNotice=stored?'Deliberação programada nesta demonstração.':'Programação mantida somente enquanto a página estiver aberta.';scheduleFormOpen=false;scheduleMethod=null;expandedSchedule=item.id;
+  schedule.unshift(item);const stored=saveWorkflows();workflowNotice=stored?'Deliberação programada.':'Programação mantida somente enquanto a página estiver aberta.';scheduleFormOpen=false;scheduleMethod=null;expandedSchedule=item.id;
   const date=new Date(`${start.slice(0,10)}T12:00:00`);calendarYear=date.getFullYear();calendarMonth=date.getMonth();selectedCalendarDay=start.slice(0,10);
   render();
   // The saved schedule is the result of the form which has just disappeared.
@@ -1156,7 +1156,7 @@ document.addEventListener('submit',(event)=>{
   notice='';render();document.querySelector<HTMLInputElement>('#member-cumulative-weight')?.focus({preventScroll:true});return;
  }
  editError='';rememberChange(member);member.acdmId=acdmId;member.cumulativeVoteWeight=voteWeight;saveDemoMembers();
- notice=`Cadastro demonstrativo de ${member.name} atualizado.`;
+ notice=`Dados de ${member.name} atualizados.`;
  editingMemberId=null;render();
  document.querySelector<HTMLButtonElement>('[data-action=undo]')?.focus({preventScroll:true});
 });

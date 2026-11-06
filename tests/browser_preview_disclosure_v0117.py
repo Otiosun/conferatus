@@ -26,13 +26,13 @@ with sync_playwright() as p:
         assert page.locator('.preview-vote-lab').count() == 0, width
         note = page.locator('.ballot-preview-disclosure[role="note"]')
         assert note.is_visible(), width
-        assert 'nenhum voto é enviado à Academy' in note.inner_text(), width
+        assert note.inner_text().strip() == 'Resultados de exemplo', width
         before = page.evaluate("window.__previewStorageWrites.length")
         page.locator('[data-action="toggle-demo"]').click()
-        assert 'Votação fictícia aberta' in page.locator('.demo-ballot').inner_text(), width
+        assert 'Selecione uma opção para testar a votação.' in page.locator('.demo-ballot').inner_text(), width
         page.locator('[data-vote]').first.click()
-        assert 'Nenhum voto foi enviado' in page.locator('.vote-feedback').inner_text(), width
-        assert 'Escolha simulada' in page.locator('.result-row--chosen').inner_text(), width
+        assert 'Opção selecionada' in page.locator('.vote-feedback').inner_text(), width
+        assert 'Sua escolha' in page.locator('.result-row--chosen').inner_text(), width
         writes = page.evaluate("window.__previewStorageWrites.slice()")
         assert writes[before:] == ["conferatus:demo-vote"], (width, "vote should only write the local demo key", writes)
         page.locator('[data-action="reset-vote"]').click()
@@ -43,7 +43,7 @@ with sync_playwright() as p:
         warning=page.locator('.governance-preview-disclosure[role="note"]')
         warning.wait_for(state="visible",timeout=5000)
         assert warning.is_visible(),width
-        assert 'Nenhum cadastro da Academy é modificado' in warning.inner_text(),width
+        assert warning.inner_text().strip() == 'Alterações nesta página não afetam cadastros oficiais.',width
         assert page.locator('[data-action="toggle-tools"]').count()==0,width
         page.locator('.footer-nav').click()
         page.locator('[data-route="calendar"]').first.click()
@@ -52,7 +52,7 @@ with sync_playwright() as p:
         note=page.locator('.calendar-preview-disclosure[role="note"]')
         assert note.count()==1,width
         assert note.is_visible(),width
-        assert 'não inicia uma votação real' in note.inner_text(),width
+        assert note.inner_text().strip() == 'Defina a data e a modalidade da deliberação.',width
         assert action.get_attribute('aria-expanded')=='false',width
         if width in (390,740):
             page.screenshot(path=f'/mnt/data/conferatus_v0117_disclosure_{width}.png',full_page=True)
@@ -61,7 +61,7 @@ with sync_playwright() as p:
         assert page.locator('#schedule-deliberation-form').is_visible(),width
         assert page.locator('.calendar-preview-disclosure').is_visible(),width
         assert page.locator('#schedule-deliberation-form').get_by_text('Programar deliberação').count()==1,width
-        assert 'votação real' in page.locator('.calendar-preview-disclosure').inner_text(),width
+        assert 'data e a modalidade' in page.locator('.calendar-preview-disclosure').inner_text(),width
         action.click()
         assert action.get_attribute('aria-expanded')=='false',width
         assert page.locator('#schedule-deliberation-form').count()==0,width

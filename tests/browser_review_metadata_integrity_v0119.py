@@ -28,10 +28,10 @@ def prepare_partner_review(page, title):
     page.locator('#confirm-proposal-form').wait_for(state='visible')
     bar=page.locator('.workflow-socii-editor-bar')
     assert bar.count()==1 and bar.is_visible(),title
-    assert bar.get_attribute('aria-label')=='Socii desta proposição, demonstração local',title
+    assert bar.get_attribute('aria-label')=='Participantes do Socii nesta proposição',title
     assert 'Concluíram 1 de 2' in bar.inner_text(),(title,bar.inner_text())
     assert 'hora' not in bar.inner_text().casefold(),title
-    assert 'confirmou sua participação nesta prévia local' in page.locator('.workflow-review-sheet > p').inner_text(),title
+    assert 'concluiu sua parte' in page.locator('.workflow-review-sheet > p').inner_text(),title
     if title=='Classificação unchanged 390':
         page.screenshot(path=str(Path(__file__).resolve().parents[1]/'dist/socii_review_390.png'),full_page=True)
 
