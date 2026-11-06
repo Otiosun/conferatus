@@ -847,3 +847,14 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [ ] Gate da CI e avaliação em Android físico pendentes antes de promover à main. D1–D6 permanecem como diferenças reais de composição/posicionamento dependentes da revisão da Megalos, particularmente botões inferiores do perfil, local do agendamento e confirmação visual.
 
 - [x] Comparação específica do perfil 0225 identificou um defeito de grade independente da navegação: cinco métricas com `grid-template-columns:repeat(4,...)` faziam “35 Socii” descer para outra linha. Corrigido para cinco colunas flexíveis; ensaio local em 280/320/360/390/540/740 CSS px sem overflow, com adaptação a 200% de texto. Teste de cinco indicadores e linha única acrescentado a `browser_footer_drawer_v0162.py`; CI final ainda pendente.
+
+
+## Retomada de CI multimotor: diagnóstico de timeout — 05/11/2026
+
+- [x] HEAD anterior conferido: preview `6b8f9acc1ca4eccbcd252596dc708e0cdbef0c81`; main/produção `81d0f55eb7772cbd1665df05cf05addb44db9723`. Quatro commits separavam a prévia da main antes deste lote. As regras em `AGENTS.md` seguem vigentes.
+- [x] Logs da GitHub Actions `42100170732` lidos: `postgres-lab` SUCCESS, `validate` SUCCESS, TypeScript/build, **51/51 testes Node** e **31/31 scripts Chromium**. O script `browser_footer_drawer_v0162.py` reportou **8/8 PASS** nas verificações sintéticas do menu, centralização e indicadores. https://github.com/Otiosun/conferatus/actions/runs/42100170732
+- [x] O `cross-browser-lab` desse mesmo run foi **CANCELLED na instalação de dependências Firefox/WebKit**, com downloads lentos do Ubuntu e limite de **22 minutos**. O passo de testes multimotor ficou `skipped`; **não atribuir 3/3 Firefox ou 3/3 WebKit ao SHA 6b8f9ac**. Não há falha de produto demonstrada por esse cancelamento.
+- [x] Alteração estritamente de infraestrutura no commit `719bdb60595b0d2f36fab9c2ac62132a15613532`: `cross-browser-lab.timeout-minutes: 22 → 40`, sem alterar comandos, exclusões ou asserts; mensagem `[cross-browser]` opta pelo job. Arquivo único: `.github/workflows/preview-voting-check.yml`. https://github.com/Otiosun/conferatus/commit/719bdb60595b0d2f36fab9c2ac62132a15613532
+- [ ] Ainda **não** foi confirmada a conclusão da CI para o novo HEAD. Guardar logs e artefatos do novo run quando verificados; não promover para `main` com base apenas no aumento de tempo.
+- [ ] Android físico após correção, decisões D1–D6/"127 horas" e homologação Megalos permanecem pendentes. Contagens **Etapa 06 = 2/5** e **Etapa 07 = 7/12** não mudam. Academy, dados institucionais, autenticação, APIs e produção intocados.
+- Handoff mestre no Google Drive Komekko atualizado com o checkpoint 84. Nenhum recurso novo ou alteração de aparência foi incluído neste lote.
