@@ -858,3 +858,15 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [ ] Ainda **não** foi confirmada a conclusão da CI para o novo HEAD. Guardar logs e artefatos do novo run quando verificados; não promover para `main` com base apenas no aumento de tempo.
 - [ ] Android físico após correção, decisões D1–D6/"127 horas" e homologação Megalos permanecem pendentes. Contagens **Etapa 06 = 2/5** e **Etapa 07 = 7/12** não mudam. Academy, dados institucionais, autenticação, APIs e produção intocados.
 - Handoff mestre no Google Drive Komekko atualizado com o checkpoint 84. Nenhum recurso novo ou alteração de aparência foi incluído neste lote.
+
+
+## 07.05 — não fragmentar “Menu” com texto a 200% — 06/11/2026
+
+- [x] Inspeção direta da captura `zoom_text200_calendar_320.png` do HTML offline da CI `42100170732` revelou que o rótulo do botão de rodapé aparecia como `Men` / `u` em 320 CSS px com ampliação sintética do texto a 200%. O teste legado verificava apenas clipping e colisões, não fragmentação de palavra.
+- [x] QA exploratório local em Chromium, **sobre o HTML exato da CI anterior com CSS injetado apenas no navegador**, verificou 280/320/360/390 px. A declaração `overflow-wrap:normal` no próprio `.app-footer .footer-nav` reduziu o texto de três para duas linhas em 280/320 px (ícone separado, palavra Menu íntegra), mantendo largura do documento, marca centralizada, sem overflow do botão e sem colisão entre título/menu. Não representa execução da nova build nem aparelho físico.
+- [x] Correção de uma declaração CSS aplicada somente à prévia: commit `1cd053350ff58b0ef74c6e8c57f6be4d374b85f9`, em `src/styles.css`. Nenhuma mudança de markup, fonte, nível de zoom, conteúdo, dados ou fluxo.
+- [x] A suíte já existente `tests/browser_stage7_zoom_reflow_v0135.py` foi ampliada com contagem de linhas reais do texto do botão e asserção de no máximo duas linhas a 200% nas larguras compactas 280/320 px. Commit `f5c48f7a68460600d368e568ea3a11d914d0a872`. CSS e teste lidos novamente na branch.
+- [x] Evidência privada de antes/depois (320 CSS px, texto 200%, **ensaio offline sintético, não CI do novo commit**): https://drive.google.com/file/d/1UolbSiQeSW2XXLpnuMbUqXXw6MkLhurj/view .
+- [x] Pacotes temporários da CI anterior `42100170732` preservados no Drive Komekko, com integridade ZIP local e tamanhos verificados após upload: HTML 97.228 bytes https://drive.google.com/file/d/1gRwY13JhJc-rU7VLpsVCJz4gfAzqmBSB/view ; 33 capturas PNG, ZIP 2.918.371 bytes https://drive.google.com/file/d/1ugkpi60StA7FhXlvLuWUBBE06e0ngSM2/view . Esses pacotes são da base `6b8f9ac`, não do CSS novo.
+- [ ] A CI de código do lote e o laboratório Firefox/WebKit **ainda precisam de resultado confirmado**. Não reportar aprovação automática do novo HEAD. Sem homologação Megalos D1–D6, regra de “127 horas” ou teste Android físico. Etapa 06=2/5 e Etapa 07=7/12, inalteradas.
+- [x] `main` verificada intacta em `81d0f55eb7772cbd1665df05cf05addb44db9723`. Nada de Academy, banco real, autenticação, publicação principal ou novas modalidades.
