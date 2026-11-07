@@ -37,7 +37,7 @@ with sync_playwright() as p:
  if ENGINE=='chromium' and Path('/usr/bin/chromium').exists():
   opts.update(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
  browser=getattr(p,ENGINE).launch(**opts)
- for width in (320,390,740,1280):
+ for width in (280,320,390,740,1280):
   page=browser.new_page(viewport={'width':width,'height':860})
   errors=[]
   page.on('pageerror',lambda err:errors.append(str(err)))
@@ -58,6 +58,17 @@ with sync_playwright() as p:
   page.locator('[data-action=enable-rich-editor]').click()
   editor=page.locator('#draft-rich-body')
   editor.wait_for(state='visible')
+  if width<=320:
+   toolbar=page.evaluate("""() => {
+    const el=document.querySelector('.workflow-rich-toolbar'),outer=el.getBoundingClientRect();
+    const rects=[...el.querySelectorAll('button')].map(button=>button.getBoundingClientRect());
+    return {
+     visible:rects.every(rect=>rect.left>=outer.left-1&&rect.right<=outer.right+1),
+     rows:new Set(rects.map(rect=>Math.round(rect.top))).size,
+     scroll:el.scrollWidth,client:el.clientWidth
+    };
+   }""")
+   assert toolbar['visible'] and toolbar['rows']==2 and toolbar['scroll']<=toolbar['client']+1,(ENGINE,width,toolbar)
   select_character(page,'H2O',1)
   page.locator('[data-rich-command=subscript]').click()
   assert editor.locator('sub').count()>0,(ENGINE,width,editor.inner_html())
@@ -90,6 +101,6 @@ with sync_playwright() as p:
   page.close()
  browser.close()
 Path('dist',f'cross_engine_rich_indices_{ENGINE}.json').write_text(json.dumps({
- 'engine':ENGINE,'widths':[320,390,740,1280],'status':'pass'
+ 'engine':ENGINE,'widths':[280,320,390,740,1280],'status':'pass'
 },indent=2),encoding='utf-8')
-print(f'Inline subscripts/superscripts {ENGINE}: 4 widths, save/reopen/review PASS')
+print(f'Inline subscripts/superscripts {ENGINE}: 5 widths, toolbar/roundtrip PASS')
