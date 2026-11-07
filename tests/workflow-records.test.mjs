@@ -220,6 +220,7 @@ test('safe HTTP links survive copy and review, hostile URL schemes never render'
  assert.equal(normalizeHttpHref('https://example.com/\nalert(1)'),undefined);
  assert.equal(normalizeHttpHref(' https://example.com/'),undefined);
  assert.equal(normalizeHttpHref('https://example.com/\x00'),undefined);
+ assert.equal(normalizeHttpHref('https://\\\\evil.example/path'),undefined);
  assert.equal(normalizeHttpHref('https://example.com/'+'a'.repeat(3000)),undefined);
  assert.equal(isRichTextRuns(runs,body),true);
  assert.equal(isSavedDraft({...original,body,bodyRuns:runs},context),true);

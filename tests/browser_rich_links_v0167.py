@@ -71,7 +71,7 @@ with sync_playwright() as p:
   assert page.locator('#draft-rich-body a').count()==0,(ENGINE,width)
   select_phrase(page,'referência externa')
   # javascript/data/credential URLs cannot ever produce active anchors.
-  for hostile in ('javascript:alert(1)','data:text/html,bad','https://user:pass@example.com'):
+  for hostile in ('javascript:alert(1)','data:text/html,bad','https://user:pass@example.com',r'https://\evil.example/path'):
    page.locator('#draft-link-url').fill(hostile)
    page.locator('[data-rich-link=apply]').click()
    assert page.locator('#draft-link-url').get_attribute('aria-invalid')=='true',(ENGINE,width,hostile)

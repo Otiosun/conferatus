@@ -11,7 +11,7 @@ const isHex=(x:unknown):x is string=>typeof x==='string'&&/^#[0-9a-fA-F]{6}$/.te
 /** Accept canonical absolute HTTP(S) URLs only, without credentials or control characters. */
 export function normalizeHttpHref(value:unknown):string|undefined{
  if(typeof value!=='string'||!value||value.length>2048||value.trim()!==value||
-    !/^https?:\/\/[^/]/i.test(value)||/[\u0000-\u001f\u007f]/.test(value))return undefined;
+    value.includes('\\')||!/^https?:\/\/[^/]/i.test(value)||/[\u0000-\u001f\u007f]/.test(value))return undefined;
  try{
   const url=new URL(value);
   if((url.protocol!=='http:'&&url.protocol!=='https:')||
