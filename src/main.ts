@@ -1359,12 +1359,26 @@ document.addEventListener('keydown',(event)=>{
   document.querySelector<HTMLButtonElement>('[data-rich-link="apply"]')?.click();
  }
 });
-document.addEventListener('selectionchange',()=>{
+/** Capture selection synchronously before the URL input steals focus.
+ * Firefox/WebKit and Chromium differ in when selectionchange is delivered. */
+function rememberRichSelection(){
  const editor=document.querySelector<HTMLElement>('#draft-rich-body');
  const selection=window.getSelection();
  if(editor&&selection?.rangeCount&&selection.anchorNode&&selection.focusNode&&
-    editor.contains(selection.anchorNode)&&editor.contains(selection.focusNode))
-  lastRichSelection=selection.getRangeAt(0).cloneRange();
+    editor.contains(selection.anchorNode)&&editor.contains(selection.focusNode)){
+  lastRichSelection=selection.isCollapsed?null:selection.getRangeAt(0).cloneRange();
+ }
+}
+document.addEventListener('selectionchange',rememberRichSelection);
+document.addEventListener('focusout',(event)=>{
+ const target=event.target;
+ if(target instanceof HTMLElement&&target.id==='draft-rich-body')
+  rememberRichSelection();
+});
+document.addEventListener('pointerdown',(event)=>{
+ const target=event.target;
+ if(target instanceof Element&&target.closest('.workflow-rich-links,.workflow-rich-toolbar,.workflow-rich-options'))
+  rememberRichSelection();
 });
 document.addEventListener('paste',event=>{
  const target=event.target;
