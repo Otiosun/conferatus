@@ -13,9 +13,9 @@ const __providers = (({members,sections})=>{${sources[2]};return {FixtureMemberP
 const __academyIdentity = (()=>{${sources[3]};return {UnconnectedAcademyIdentityProvider};})();
 const __memberReference = (()=>{${sources[4]};return {resolveMemberReference};})();
 const __workflowArchive = (()=>{${sources[5]};return {exportWorkflowArchive,parseWorkflowArchive,WORKFLOW_ARCHIVE_MAX_BYTES};})();
-const __richText = (()=>{${sources[6]};return {INLINE_MARKS,normalizeRichTextRuns,isRichTextRuns,renderRichText};})();
+const __richText = (()=>{${sources[6]};return {INLINE_MARKS,RICH_FONTS,RICH_SIZES,normalizeRichTextRuns,isRichTextRuns,renderRichText};})();
 const __workflowRecords = (({isDeliberationMethod,searchKey},{isRichTextRuns})=>{${sources[7]};return {isValidPreviewChoices,isSavedDraft,cleanDraftRecord,cleanScheduleRecord,isRestorableSchedule,uniqueSavedRecords,nextLocalRecordId};})(__rules,__richText);
-const __richEditor = (({normalizeRichTextRuns})=>{${sources[8]};return {runsFromEditable};})(__richText);
+const __richEditor = (({normalizeRichTextRuns,RICH_FONTS,RICH_SIZES})=>{${sources[8]};return {runsFromEditable};})(__richText);
 const __previewLedger = (({validatePreviewVote})=>{${sources[9]};return {createPreviewSampleLedger};})(__rules);
 await (async ({activities,ballots},{FixtureMemberProvider},{UnconnectedAcademyIdentityProvider},{resolveMemberReference},{exportWorkflowArchive,parseWorkflowArchive,WORKFLOW_ARCHIVE_MAX_BYTES},{escapeHTML,resultPercentage,totalVotes,updateSectionAssignment,restoreDemoMembers,searchKey,demoteToCommonMember,canRecordVote,isDeliberativeMember,hasPersonalVoteHistory,DELIBERATION_METHODS,isDeliberationMethod,isPositiveCumulativeVoteWeight,PREVIEW_BINARY_OPTIONS,PREVIEW_LIST_OPTIONS,validatePreviewVote,summarizePreviewVotes},{isValidPreviewChoices,isSavedDraft,cleanDraftRecord,cleanScheduleRecord,isRestorableSchedule,uniqueSavedRecords,nextLocalRecordId},{createPreviewSampleLedger},{renderRichText},{runsFromEditable})=>{${sources[10]}})(__fixture,__providers,__academyIdentity,__memberReference,__workflowArchive,__rules,__workflowRecords,__previewLedger,__richText,__richEditor);`;
 for (const name of ['crest', 'editar', 'rebaixamento', 'painel']) {

@@ -106,7 +106,9 @@ export function cleanDraftRecord(draft: Draft): Draft {
     title: draft.title,
     body: draft.body,
     ...(isRichTextRuns(draft.bodyRuns, draft.body)
-      ? { bodyRuns: draft.bodyRuns.map(run => ({text: run.text, marks: [...run.marks]})) }
+      ? { bodyRuns: draft.bodyRuns.map(run => ({text: run.text, marks: [...run.marks],
+        ...(run.font?{font:run.font}:{}),...(run.size?{size:run.size}:{}),
+        ...(run.color?{color:run.color}:{}),...(run.highlight?{highlight:run.highlight}:{})})) }
       : {}),
     sectionId: draft.sectionId,
     type: draft.type,

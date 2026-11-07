@@ -1271,3 +1271,15 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .workflow-rich-editor:focus-visible{outline:2px solid #7982d7;outline-offset:-2px}
 .workflow-rich-editor:empty::before{content:attr(data-placeholder);color:#7d8294;pointer-events:none}
 .workflow-rich-editor[aria-invalid="true"]{outline:2px solid #a53e47}
+
+/* Font and color selection remains within the opt-in editor, including narrow phones. */
+.workflow-rich-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:10px 0 6px;max-width:100%}
+.workflow-rich-options label{min-width:0;font-size:12px;color:#4a4f64}
+.workflow-rich-options select,.workflow-rich-options input[type="color"]{display:block;width:100%;min-width:0;box-sizing:border-box;min-height:44px;border:1px solid #cdd3e8;border-radius:10px;background:#fff;color:#303750;padding:6px 9px;font:inherit}
+.workflow-rich-options input[type="color"]{padding:5px 7px;cursor:pointer}
+.workflow-rich-options select:focus-visible,.workflow-rich-options input:focus-visible{outline:2px solid #515dc7;outline-offset:2px}
+.workflow-rich-editor font[size="2"]{font-size:12px}
+.workflow-rich-editor font[size="3"]{font-size:16px}
+.workflow-rich-editor font[size="4"]{font-size:18px}
+.workflow-rich-editor font[size="5"]{font-size:24px}
+.workflow-rich-editor font[size="6"]{font-size:30px}

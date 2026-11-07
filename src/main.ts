@@ -428,7 +428,9 @@ const blankDraft=():{title:string;body:string;bodyRuns?:RichTextRun[]}=>({title:
 let draftForm=blankDraft();
 let richEditorOpen=false;
 let lastRichSelection:Range|null=null;
-const hasFormatting=(runs?:readonly RichTextRun[])=>Boolean(runs?.some(run=>run.marks.length));
+const hasFormatting=(runs?:readonly RichTextRun[])=>Boolean(runs?.some(
+ run=>run.marks.length||run.font||run.size||run.color||run.highlight
+));
 function syncRichEditor(){
  const editor=document.querySelector<HTMLElement>('#draft-rich-body');
  const field=document.querySelector<HTMLTextAreaElement>('#draft-body');
@@ -560,6 +562,12 @@ function composePage(){
  <button type="button" data-rich-command="italic" aria-label="Itálico"><em>I</em></button>
  <button type="button" data-rich-command="underline" aria-label="Sublinhado"><u>S</u></button>
  <button type="button" data-rich-command="strike" aria-label="Tachado"><s>T</s></button></div>
+ <div class="workflow-rich-options" role="group" aria-label="Tipografia e cores">
+ <label>Fonte<select data-rich-format="font" aria-label="Fonte do texto selecionado"><option value="">Escolha a fonte</option><option value="aptos">Aptos</option><option value="arial">Arial</option><option value="georgia">Georgia</option></select></label>
+ <label>Tamanho<select data-rich-format="size" aria-label="Tamanho do texto selecionado"><option value="">Tamanho</option><option value="12">12 px</option><option value="16">16 px</option><option value="18">18 px</option><option value="24">24 px</option><option value="30">30 px</option></select></label>
+ <label>Cor do texto<input type="color" data-rich-format="color" value="#242733" aria-label="Cor do texto selecionado"></label>
+ <label>Marca-texto<input type="color" data-rich-format="highlight" value="#fff0a5" aria-label="Cor de realce do texto selecionado"></label>
+ </div>
  <div id="draft-rich-body" class="workflow-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Redação" data-placeholder="Escreva..." ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''}>${renderRichText(draftForm.body,draftForm.bodyRuns)}</div>
  <textarea id="draft-body" name="body" hidden>${escapeHTML(draftForm.body)}</textarea>`:`<textarea id="draft-body" name="body" required minlength="20" ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
  <button type="button" class="workflow-enable-rich" data-action="enable-rich-editor">Formatar texto</button>`}
@@ -1283,6 +1291,34 @@ document.addEventListener('paste',event=>{
 });
 document.addEventListener('change',(event)=>{
  const target=event.target;
+ const format=target instanceof HTMLElement ? target.dataset.richFormat : undefined;
+ if(format&&target.closest('#compose-proposal-form')){
+  const family:Record<string,string>={aptos:'Aptos',arial:'Arial',georgia:'Georgia'};
+  const sizes:Record<string,string>={'12':'2','16':'3','18':'4','24':'5','30':'6'};
+  let command='',value='';
+  if(format==='font'&&target instanceof HTMLSelectElement&&family[target.value]){
+   command='fontName';value=family[target.value];
+  }else if(format==='size'&&target instanceof HTMLSelectElement&&sizes[target.value]){
+   command='fontSize';value=sizes[target.value];
+  }else if((format==='color'||format==='highlight')&&target instanceof HTMLInputElement&&
+           /^#[0-9a-fA-F]{6}$/.test(target.value)){
+   command=format==='color'?'foreColor':'hiliteColor';value=target.value;
+  }
+  if(command){
+   const editor=document.querySelector<HTMLElement>('#draft-rich-body');
+   if(editor){
+    editor.focus({preventScroll:true});
+    if(lastRichSelection&&editor.contains(lastRichSelection.commonAncestorContainer)){
+     const selection=window.getSelection();
+     selection?.removeAllRanges();selection?.addRange(lastRichSelection);
+    }
+    document.execCommand(command,false,value);
+    syncRichEditor();
+   }
+  }
+  if(target instanceof HTMLSelectElement)target.value='';
+  return;
+ }
  if(target instanceof HTMLSelectElement && target.id==='schedule-method' && target.closest('#schedule-deliberation-form')){
   scheduleMethod=isDeliberationMethod(target.value)?target.value:null;render();
   document.querySelector<HTMLSelectElement>('#schedule-method')?.focus({preventScroll:true});return;

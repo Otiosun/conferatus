@@ -127,3 +127,24 @@ test('formatting renderer escapes hostile text and never emits arbitrary HTML',(
  ]);
  assert.deepEqual(normalized,[{text:'AB',marks:['bold','italic']},{text:'C',marks:[]}]);
 });
+test('formatting accepts only whitelisted fonts sizes and safe colors',()=>{
+ const body='Texto formatado e seguro';
+ const runs=[{text:'Texto',marks:['bold'],font:'aptos',size:24,color:'#123abc',highlight:'#ffef99'},
+             {text:' formatado e seguro',marks:[]}];
+ assert.equal(isRichTextRuns(runs,body),true);
+ assert.equal(isSavedDraft({...original,body,bodyRuns:runs},context),true);
+ const copy=cleanDraftRecord({...original,body,bodyRuns:runs});
+ assert.deepEqual(copy.bodyRuns,runs);assert.notEqual(copy.bodyRuns[0],runs[0]);
+ const html=renderRichText(body,runs);
+ assert.match(html,/font-family:Aptos/);assert.match(html,/font-size:24px/);
+ assert.match(html,/color:#123abc/);assert.match(html,/background-color:#ffef99/);
+ for(const bad of [{font:'Arial;url(evil)'},{size:900},{color:'#fff;url(x)'},{highlight:'url(x)'},{onclick:'evil'}]){
+  const invalid=[{text:body,marks:[],...bad}];
+  assert.equal(isRichTextRuns(invalid,body),false);
+  assert.equal(renderRichText(body,invalid),body);
+  assert.equal(isSavedDraft({...original,body,bodyRuns:invalid},context),false);
+ }
+ assert.deepEqual(normalizeRichTextRuns([{text:'A',marks:[],font:'aptos'},{text:'B',marks:[],font:'aptos'}]),
+ [{text:'AB',marks:[],font:'aptos'}]);
+});
+
