@@ -1,7 +1,7 @@
 import { isDeliberationMethod, searchKey } from './rules.js';
 import type { DeliberationMethod } from './types.js';
-import { isRichTextRuns } from './rich-text.js';
-import type { RichTextRun } from './rich-text.js';
+import { isRichTextRuns, isRichLayout } from './rich-text.js';
+import type { RichTextRun, RichBodyLayout } from './rich-text.js';
 
 export type ProposalType = 'PDR' | 'PR' | 'Ofício';
 export type PreviewChoice = { id: string; label: string };
@@ -12,6 +12,8 @@ export type Draft = {
   body: string;
   /** Optional safe formatting, always mirrored by the plain body. */
   bodyRuns?: RichTextRun[];
+  /** Optional document layout; old text-only drafts remain valid. */
+  bodyLayout?: RichBodyLayout;
   sectionId: string;
   type: ProposalType;
   authorComplete: boolean;
@@ -70,6 +72,7 @@ export function isSavedDraft(value: unknown, context: WorkflowValidationContext)
   if (typeof draft.id !== 'string' || !draft.id ||
       typeof draft.title !== 'string' || typeof draft.body !== 'string' ||
       (draft.bodyRuns !== undefined && !isRichTextRuns(draft.bodyRuns, draft.body)) ||
+      (draft.bodyLayout !== undefined && !isRichLayout(draft.bodyLayout)) ||
       typeof draft.sectionId !== 'string' ||
       !['PDR', 'PR', 'Ofício'].includes(String(draft.type)) ||
       typeof draft.authorComplete !== 'boolean' ||
@@ -110,6 +113,7 @@ export function cleanDraftRecord(draft: Draft): Draft {
         ...(run.font?{font:run.font}:{}),...(run.size?{size:run.size}:{}),
         ...(run.color?{color:run.color}:{}),...(run.highlight?{highlight:run.highlight}:{})})) }
       : {}),
+    ...(isRichLayout(draft.bodyLayout) ? {bodyLayout:{...draft.bodyLayout}} : {}),
     sectionId: draft.sectionId,
     type: draft.type,
     authorComplete: draft.authorComplete,

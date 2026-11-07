@@ -69,3 +69,38 @@ export function renderRichText(body:string,runs?:unknown):string{
   return style.length?'<span style="'+style.join(';')+'">'+html+'</span>':html;
  }).join('');
 }
+
+
+/** Whole-document layout does not alter text, runs or internal paragraph markup. */
+export const RICH_ALIGNMENTS=['left','center','right','justify'] as const;
+export const RICH_INDENTS=[0,16,32] as const;
+export const RICH_LINE_HEIGHTS=[1.4,1.7,2] as const;
+export type RichBodyLayout={
+ align:typeof RICH_ALIGNMENTS[number];
+ left:typeof RICH_INDENTS[number];
+ right:typeof RICH_INDENTS[number];
+ lineHeight:typeof RICH_LINE_HEIGHTS[number];
+};
+export const DEFAULT_RICH_LAYOUT:RichBodyLayout={
+ align:'left',left:0,right:0,lineHeight:1.7
+};
+/** Reject untrusted CSS, extra keys and values outside the finite options. */
+export function isRichLayout(value:unknown):value is RichBodyLayout{
+ if(!value||typeof value!=='object'||Array.isArray(value))return false;
+ const layout=value as Record<string,unknown>;
+ const keys=Object.keys(layout);
+ if(keys.length!==4||keys.some(key=>!['align','left','right','lineHeight'].includes(key)))return false;
+ return RICH_ALIGNMENTS.includes(layout.align as RichBodyLayout['align']) &&
+  RICH_INDENTS.includes(layout.left as RichBodyLayout['left']) &&
+  RICH_INDENTS.includes(layout.right as RichBodyLayout['right']) &&
+  RICH_LINE_HEIGHTS.includes(layout.lineHeight as RichBodyLayout['lineHeight']);
+}
+/** Only type-checked values are interpolated; baseline editor inset is retained. */
+export function richLayoutStyle(value:unknown,inEditor=false):string{
+ if(!isRichLayout(value))return '';
+ const base=inEditor?7:0;
+ return 'text-align:'+value.align+
+  ';padding-left:'+(base+value.left)+'px'+
+  ';padding-right:'+(base+value.right)+'px'+
+  ';line-height:'+value.lineHeight;
+}

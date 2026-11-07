@@ -8,8 +8,8 @@ import type { PreviewVote } from './domain/rules.js';
 import { createPreviewSampleLedger } from './domain/preview-ledger.js';
 import { isValidPreviewChoices, isSavedDraft, cleanDraftRecord, cleanScheduleRecord, isRestorableSchedule, uniqueSavedRecords, nextLocalRecordId } from './domain/workflow-records.js';
 import type { ProposalType, Draft, PreviewChoice, Deliberation } from './domain/workflow-records.js';
-import { renderRichText } from './domain/rich-text.js';
-import type { RichTextRun } from './domain/rich-text.js';
+import { renderRichText, DEFAULT_RICH_LAYOUT, isRichLayout, richLayoutStyle } from './domain/rich-text.js';
+import type { RichTextRun, RichBodyLayout } from './domain/rich-text.js';
 import { runsFromEditable } from './domain/rich-editor.js';
 import type { Activity, Member, DeliberationMethod } from './domain/types.js';
 
@@ -424,7 +424,7 @@ const ignoredRecordsBackup={drafts:restoredDrafts.rejected,schedule:restoredSche
 const ignoredSavedRecords=ignoredRecordsBackup.drafts.length>0||ignoredRecordsBackup.schedule.length>0||
  draftRestore.unreadableRaw!==null||scheduleRestore.unreadableRaw!==null;
 function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos ou repetidos não foram carregados.</p>':'';}
-const blankDraft=():{title:string;body:string;bodyRuns?:RichTextRun[]}=>({title:'',body:''});
+const blankDraft=():{title:string;body:string;bodyRuns?:RichTextRun[];bodyLayout?:RichBodyLayout}=>({title:'',body:''});
 let draftForm=blankDraft();
 let richEditorOpen=false;
 let lastRichSelection:Range|null=null;
@@ -554,6 +554,12 @@ function sociiEditorBar(d:Draft|undefined){
  <span class="workflow-socii-editor-label" aria-hidden="true">Socii</span></aside>`;
 }
 function composePage(){
+ const layout=draftForm.bodyLayout??DEFAULT_RICH_LAYOUT;
+ const alignChoices: [RichBodyLayout['align'],string][]=[
+  ['left','Esquerda'],['center','Centro'],['right','Direita'],['justify','Justificado']
+ ];
+ const indentChoices=[0,16,32] as const;
+ const lineChoices=[1.4,1.7,2] as const;
  const editing=drafts.find(d=>d.id===currentDraftId);
  return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
  <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Título" value="${escapeHTML(draftForm.title)}">
@@ -568,7 +574,22 @@ function composePage(){
  <label>Cor do texto<input type="color" data-rich-format="color" value="#242733" aria-label="Cor do texto selecionado"></label>
  <label>Marca-texto<input type="color" data-rich-format="highlight" value="#fff0a5" aria-label="Cor de realce do texto selecionado"></label>
  </div>
- <div id="draft-rich-body" class="workflow-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Redação" data-placeholder="Escreva..." ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''}>${renderRichText(draftForm.body,draftForm.bodyRuns)}</div>
+ <div class="workflow-rich-layout" role="group" aria-label="Alinhamento e espaçamento da redação inteira">
+ <p class="workflow-rich-layout-caption">Redação inteira</p>
+ <label>Alinhamento<select data-rich-layout="align" aria-label="Alinhamento da redação">
+ ${alignChoices.map(([value,label])=>`<option value="${value}" ${layout.align===value?'selected':''}>${label}</option>`).join('')}
+ </select></label>
+ <label>Altura de linha<select data-rich-layout="lineHeight" aria-label="Altura de linha da redação">
+ ${lineChoices.map(value=>`<option value="${value}" ${layout.lineHeight===value?'selected':''}>${String(value).replace('.',',')}</option>`).join('')}
+ </select></label>
+ <label>Recuo esquerdo<select data-rich-layout="left" aria-label="Recuo à esquerda">
+ ${indentChoices.map(value=>`<option value="${value}" ${layout.left===value?'selected':''}>${value===0?'Sem recuo':value+' px'}</option>`).join('')}
+ </select></label>
+ <label>Recuo direito<select data-rich-layout="right" aria-label="Recuo à direita">
+ ${indentChoices.map(value=>`<option value="${value}" ${layout.right===value?'selected':''}>${value===0?'Sem recuo':value+' px'}</option>`).join('')}
+ </select></label>
+ </div>
+ <div id="draft-rich-body" class="workflow-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Redação" data-placeholder="Escreva..." style="${richLayoutStyle(draftForm.bodyLayout,true)}" ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''}>${renderRichText(draftForm.body,draftForm.bodyRuns)}</div>
  <textarea id="draft-body" name="body" hidden>${escapeHTML(draftForm.body)}</textarea>`:`<textarea id="draft-body" name="body" required minlength="20" ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
  <button type="button" class="workflow-enable-rich" data-action="enable-rich-editor">Formatar texto</button>`}
  ${composeError?`<p id="compose-save-error" class="workflow-form-error" role="alert">${escapeHTML(composeError)}</p>`:''}
@@ -576,14 +597,14 @@ function composePage(){
 }
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
- if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${renderRichText(d.body,d.bodyRuns)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar às proposições'}</button></div></div>`;
+ if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar às proposições'}</button></div></div>`;
  const confirmedPartner=d.partners.find(p=>p.complete);
  const confirmedName=confirmedPartner?members.find(m=>m.id===confirmedPartner.id)?.name:undefined;
  const reviewMessage=confirmedPartner
   ? `${confirmedName?escapeHTML(confirmedName):'Um participante do Socii'} concluiu sua parte. Confira os dados e a redação antes de confirmar a conclusão.`
   : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
- <div class="workflow-review-body"><p>${renderRichText(d.body,d.bodyRuns)}</p></div>
+ <div class="workflow-review-body"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div>
  <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
  <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>${reviewMessage}</p>
  <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>
@@ -886,7 +907,7 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='enable-rich-editor'){
   const title=document.querySelector<HTMLInputElement>('#draft-title');
   const body=document.querySelector<HTMLTextAreaElement>('#draft-body');
-  draftForm={title:title?.value??draftForm.title,body:body?.value??draftForm.body,bodyRuns:draftForm.bodyRuns};
+  draftForm={title:title?.value??draftForm.title,body:body?.value??draftForm.body,bodyRuns:draftForm.bodyRuns,bodyLayout:draftForm.bodyLayout};
   richEditorOpen=true;lastRichSelection=null;render();
   document.querySelector<HTMLElement>('#draft-rich-body')?.focus({preventScroll:true});
   return;
@@ -937,13 +958,13 @@ document.addEventListener('click',(event)=>{
   return;
  }
  const draftEl=target.closest<HTMLElement>('[data-draft]');
- if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo=routeFromHash()==='overview'?'overview':routeFromHash()==='profile'?'profile':'proposals';draftForm={title:d.title,body:d.body,bodyRuns:d.bodyRuns};richEditorOpen=hasFormatting(d.bodyRuns);lastRichSelection=null;composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
+ if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo=routeFromHash()==='overview'?'overview':routeFromHash()==='profile'?'profile':'proposals';draftForm={title:d.title,body:d.body,bodyRuns:d.bodyRuns,bodyLayout:d.bodyLayout};richEditorOpen=hasFormatting(d.bodyRuns)||Boolean(d.bodyLayout);lastRichSelection=null;composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
  const scheduleEl=target.closest<HTMLElement>('[data-schedule]');
  if(scheduleEl?.dataset.schedule){expandedSchedule=expandedSchedule===scheduleEl.dataset.schedule?'':scheduleEl.dataset.schedule;render();return;}
  const proposalEl=target.closest<HTMLElement>('[data-open-schedule-proposal]');
  if(proposalEl?.dataset.openScheduleProposal){
   const d=drafts.find(x=>x.id===proposalEl.dataset.openScheduleProposal);
-  if(d){currentDraftId=d.id;finishedProposalReturnTo='calendar';draftForm={title:d.title,body:d.body,bodyRuns:d.bodyRuns};navigate('review');}
+  if(d){currentDraftId=d.id;finishedProposalReturnTo='calendar';draftForm={title:d.title,body:d.body,bodyRuns:d.bodyRuns,bodyLayout:d.bodyLayout};navigate('review');}
   return;
  }
  const cancelEl=target.closest<HTMLElement>('[data-cancel-schedule]');
@@ -1076,9 +1097,10 @@ document.addEventListener('submit',(event)=>{
  if(id==='compose-proposal-form'){
   const title=String(data.get('title')??'').trim(),body=String(data.get('body')??'').trim();
   const bodyRuns=richEditorOpen&&hasFormatting(draftForm.bodyRuns)?draftForm.bodyRuns:undefined;
+  const bodyLayout=richEditorOpen&&isRichLayout(draftForm.bodyLayout)?draftForm.bodyLayout:undefined;
   if(richEditorOpen&&!saveOnly&&body.length<20){
    composeError='Escreva pelo menos 20 caracteres na redação.';
-   draftForm={title,body,bodyRuns};render();
+   draftForm={title,body,bodyRuns,bodyLayout};render();
    document.querySelector<HTMLElement>('#draft-rich-body')?.focus({preventScroll:true});
    return;
   }
@@ -1091,14 +1113,14 @@ document.addEventListener('submit',(event)=>{
    return;
   }
   composeError='';
-  draftForm={title,body,bodyRuns};
+  draftForm={title,body,bodyRuns,bodyLayout};
   let d=drafts.find(x=>x.id===currentDraftId);
   let confirmationsReset=false;
   if(!d||d.status==='concluida'){
-   d={id:nextLocalRecordId('draft',drafts),title,body,...(bodyRuns?{bodyRuns}:{}),sectionId:'integridade',type:'PDR',authorComplete:false,partners:[],status:'redacao'};drafts.unshift(d);currentDraftId=d.id;
+   d={id:nextLocalRecordId('draft',drafts),title,body,...(bodyRuns?{bodyRuns}:{}),...(bodyLayout?{bodyLayout}:{}),sectionId:'integridade',type:'PDR',authorComplete:false,partners:[],status:'redacao'};drafts.unshift(d);currentDraftId=d.id;
   }else{
    // A confirmation of an earlier text cannot approve a changed version.
-   if(d.title!==title||d.body!==body||JSON.stringify(d.bodyRuns??[])!==JSON.stringify(bodyRuns??[])){
+   if(d.title!==title||d.body!==body||JSON.stringify(d.bodyRuns??[])!==JSON.stringify(bodyRuns??[])||JSON.stringify(d.bodyLayout??null)!==JSON.stringify(bodyLayout??null)){
     confirmationsReset=d.authorComplete||d.partners.some(p=>p.complete);
     d.authorComplete=false;
     d.partners.forEach(p=>{p.complete=false;});
@@ -1107,6 +1129,8 @@ document.addEventListener('submit',(event)=>{
    d.title=title;d.body=body;
    if(bodyRuns)d.bodyRuns=bodyRuns;
    else delete d.bodyRuns;
+   if(bodyLayout)d.bodyLayout=bodyLayout;
+   else delete d.bodyLayout;
   }
   const stored=saveWorkflows();
   if(saveOnly){
@@ -1291,6 +1315,20 @@ document.addEventListener('paste',event=>{
 });
 document.addEventListener('change',(event)=>{
  const target=event.target;
+ if(target instanceof HTMLSelectElement && target.dataset.richLayout &&
+    target.closest('#compose-proposal-form')){
+  const key=target.dataset.richLayout;
+  if(['align','left','right','lineHeight'].includes(key)){
+   const current=draftForm.bodyLayout??DEFAULT_RICH_LAYOUT;
+   const next={...current,[key]:key==='align'?target.value:Number(target.value)};
+   if(isRichLayout(next)){
+    draftForm.bodyLayout=JSON.stringify(next)===JSON.stringify(DEFAULT_RICH_LAYOUT)?undefined:next;
+    const editor=document.querySelector<HTMLElement>('#draft-rich-body');
+    if(editor)editor.style.cssText=richLayoutStyle(next,true);
+   }
+  }
+  return;
+ }
  const format=target instanceof HTMLElement ? target.dataset.richFormat : undefined;
  if(format&&target instanceof HTMLElement&&target.closest('#compose-proposal-form')){
   const family:Record<string,string>={aptos:'Aptos',arial:'Arial',georgia:'Georgia'};

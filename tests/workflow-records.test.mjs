@@ -1,5 +1,5 @@
 import test from 'node:test';
-import {isRichTextRuns, normalizeRichTextRuns, renderRichText} from '../dist/domain/rich-text.js';
+import {isRichTextRuns, normalizeRichTextRuns, renderRichText, DEFAULT_RICH_LAYOUT, isRichLayout, richLayoutStyle} from '../dist/domain/rich-text.js';
 import assert from 'node:assert/strict';
 import {
  isValidPreviewChoices,
@@ -148,3 +148,26 @@ test('formatting accepts only whitelisted fonts sizes and safe colors',()=>{
  [{text:'AB',marks:[],font:'aptos'}]);
 });
 
+
+test('document alignment, bilateral indents and line height persist safely',()=>{
+ const safe={align:'justify',left:16,right:32,lineHeight:2};
+ assert.equal(isRichLayout(DEFAULT_RICH_LAYOUT),true);
+ assert.equal(isRichLayout(safe),true);
+ assert.equal(isSavedDraft({...original,bodyLayout:safe},context),true);
+ assert.match(richLayoutStyle(safe,true),/padding-left:23px;padding-right:39px;line-height:2/);
+ assert.match(richLayoutStyle(safe),/text-align:justify;padding-left:16px;padding-right:32px/);
+ const cleaned=cleanDraftRecord({...original,bodyLayout:safe});
+ assert.deepEqual(cleaned.bodyLayout,safe);
+ assert.notEqual(cleaned.bodyLayout,safe);
+ assert.equal(isSavedDraft(original,context),true);
+ for(const bad of [
+  {...safe,align:'evil();'}, {...safe,left:-5},
+  {...safe,right:9999}, {...safe,lineHeight:0},
+  {...safe,lineHeight:'1.7;transform:rotate(5deg)'},
+  {...safe,onload:'alert(1)'}, {align:'left',left:0,right:0}
+ ]){
+  assert.equal(isRichLayout(bad),false);
+  assert.equal(isSavedDraft({...original,bodyLayout:bad},context),false);
+  assert.equal(richLayoutStyle(bad),'');
+ }
+});
