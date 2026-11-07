@@ -27,6 +27,7 @@ Versão 1.0 — 28/10/2026. Este arquivo foi preparado para virar `AGENTS.md` na
 18. **Publicar sem sustos.** Dev/staging/prod separados, secrets fora do Git, migrations versionadas, backup/restauração testável, controle de versão e rollback documentado.
 19. **Sem sobreengenharia em antecipação.** Pontos de extensão pequenos e reais; não criar plugins, eventos distribuídos, abstrações de banco e escalabilidade imaginária para cenários hipotéticos.
 20. **Qualidade proporcional ao risco.** Desenhos experimentais podem ser protótipos; voto, autenticação, permissão, cargo e dados pessoais nunca são protótipos disfarçados de produção.
+21. **Investigação fria antes de implementar (07/11/2026).** Para toda mudança técnica material, investigar na Internet as soluções já consolidadas, documentação oficial vigente, problemas conhecidos e correções existentes antes de escrever código. Confrontar soluções nativas, código atual e alternativas maduras; documentar fontes e datas, riscos de segurança, licenças, acessibilidade, interoperabilidade e manutenção, e a razão para aceitar/rejeitar abordagens. Registrar em `docs/decisions/`, na checklist e no Drive mestre. Reproduzir problemas conhecidos e testar regressões pertinentes (incluindo motores de navegador nas APIs de edição). Nunca copiar código sem revisão, inventar compatibilidade ou introduzir dependências sem evidência. A pesquisa não autoriza reescrever a arquitetura nem tocar produção. Profundidade proporcional ao risco, sem burocracia para ajuste trivial.
 
 ## Stack vigente e escopo de entrega
 

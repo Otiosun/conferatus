@@ -1296,3 +1296,15 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
  .workflow-rich-toolbar {flex-wrap:wrap;overflow-x:visible;}
  .workflow-rich-toolbar button {flex:1 1 calc((100% - 12px)/3);min-width:0;}
 }
+
+/* Real link editing, kept separate from text styles and accessible on narrow screens. */
+.workflow-rich-links{display:grid;gap:8px;padding:10px 0;border-top:1px solid #e1e4ee}
+.workflow-rich-links label{font-size:12px;font-weight:700;color:#4e5369}
+.workflow-rich-links input{width:100%;min-width:0;box-sizing:border-box;min-height:44px;border:1px solid #cdd3e8;border-radius:10px;background:#fff;padding:8px 10px;color:#303750;font:inherit}
+.workflow-rich-link-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.workflow-rich-link-actions button{min-width:0;min-height:44px;padding:7px 10px;background:#f4f5fa;border:1px solid #cdd3e8;border-radius:10px;color:#303750;font:inherit;cursor:pointer}
+.workflow-rich-links input:focus-visible,.workflow-rich-link-actions button:focus-visible{outline:2px solid #515dc7;outline-offset:2px}
+.workflow-rich-links [aria-invalid="true"]{border-color:#9b2335}
+.workflow-rich-links p{margin:0;font-size:12px;color:#4a4f64;overflow-wrap:anywhere}
+.workflow-rich-editor a,.workflow-review-body a{color:#3446a4;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.workflow-review-body a:focus-visible{outline:2px solid #515dc7;outline-offset:2px}

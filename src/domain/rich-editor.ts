@@ -1,4 +1,4 @@
-import { normalizeRichTextRuns, RICH_FONTS, RICH_SIZES } from './rich-text.js';
+import { normalizeRichTextRuns, RICH_FONTS, RICH_SIZES, normalizeHttpHref } from './rich-text.js';
 import type { InlineMark, RichFont, RichTextRun } from './rich-text.js';
 
 /** Convert browser colors to a six-digit hex; do not persist arbitrary CSS. */
@@ -23,7 +23,8 @@ export function runsFromEditable(editor:HTMLElement):RichTextRun[]{
  const append=(text:string,s:Style)=>{
   if(text)result.push({text,marks:[...s.marks],
    ...(s.font?{font:s.font}:{}),...(s.size?{size:s.size}:{}),
-   ...(s.color?{color:s.color}:{}),...(s.highlight?{highlight:s.highlight}:{})});
+   ...(s.color?{color:s.color}:{}),...(s.highlight?{highlight:s.highlight}:{}),
+   ...(s.href?{href:s.href}:{})});
  };
  const newline=()=>Boolean(result[result.length-1]?.text.endsWith('\n'));
  const visit=(node:Node,parent:Style)=>{
@@ -47,6 +48,10 @@ export function runsFromEditable(editor:HTMLElement):RichTextRun[]{
   if(tag==='s'||tag==='strike'||tag==='del')mark('strike');
   if(tag==='sub')mark('subscript');
   if(tag==='sup')mark('superscript');
+  if(tag==='a'){
+   const href=normalizeHttpHref(node.getAttribute('href'));
+   if(href)style.href=href;
+  }
   if(tag==='font'){
    const face=safeFont(node.getAttribute('face')??'');
    if(face)style.font=face;

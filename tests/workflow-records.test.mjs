@@ -1,5 +1,5 @@
 import test from 'node:test';
-import {isRichTextRuns, normalizeRichTextRuns, renderRichText, DEFAULT_RICH_LAYOUT, isRichLayout, richLayoutStyle} from '../dist/domain/rich-text.js';
+import {isRichTextRuns, normalizeRichTextRuns, renderRichText, normalizeHttpHref, DEFAULT_RICH_LAYOUT, isRichLayout, richLayoutStyle} from '../dist/domain/rich-text.js';
 import assert from 'node:assert/strict';
 import {
  isValidPreviewChoices,
@@ -202,4 +202,49 @@ test('subscript and superscript preserve plain text, exclude conflicting marks a
   assert.equal(isSavedDraft({...original,body,bodyRuns:invalid},context),false);
   assert.equal(renderRichText(body,invalid),body);
  }
+});
+
+test('safe HTTP links survive copy and review, hostile URL schemes never render',()=>{
+ const href='https://example.com/reference?a=1&b=2';
+ const body='Referência <img src=x onerror=alert(1)> & texto seguro';
+ const runs=[{text:body,marks:['bold'],href}];
+ assert.equal(normalizeHttpHref(href),href);
+ assert.equal(normalizeHttpHref('https://EXAMPLE.com'), 'https://example.com/');
+ assert.equal(normalizeHttpHref('javascript:alert(1)'),undefined);
+ assert.equal(normalizeHttpHref('data:text/html,evil'),undefined);
+ assert.equal(normalizeHttpHref('file:///tmp/test'),undefined);
+ assert.equal(normalizeHttpHref('mailto:example@example.com'),undefined);
+ assert.equal(normalizeHttpHref('//example.com'),undefined);
+ assert.equal(normalizeHttpHref('/relative'),undefined);
+ assert.equal(normalizeHttpHref('https://user:pass@example.com/'),undefined);
+ assert.equal(normalizeHttpHref('https://example.com/\nalert(1)'),undefined);
+ assert.equal(normalizeHttpHref(' https://example.com/'),undefined);
+ assert.equal(normalizeHttpHref('https://example.com/\x00'),undefined);
+ assert.equal(normalizeHttpHref('https://example.com/'+'a'.repeat(3000)),undefined);
+ assert.equal(isRichTextRuns(runs,body),true);
+ assert.equal(isSavedDraft({...original,body,bodyRuns:runs},context),true);
+ const copy=cleanDraftRecord({...original,body,bodyRuns:runs});
+ assert.deepEqual(copy.bodyRuns,runs);
+ assert.notEqual(copy.bodyRuns[0],runs[0]);
+ const html=renderRichText(body,runs);
+ assert.match(html,/<a href="https:\/\/example.com\/reference\?a=1&amp;b=2" target="_blank" rel="noopener noreferrer">/);
+ assert.match(html,/<strong>Referência/);
+ assert.equal(html.includes('<img'),false);
+ assert.match(html,/&lt;img/);
+ for(const bad of [
+  [{text:body,marks:[],href:'javascript:alert(1)'}],
+  [{text:body,marks:[],href:'data:text/html,<script>x</script>'}],
+  [{text:body,marks:[],href:'https://user:pass@example.com'}],
+  [{text:body,marks:[],href:'http://example.com',onmouseover:'bad'}],
+  [{text:body,marks:[],href:'https://example.com/\nredirect'}]
+ ]){
+  assert.equal(isRichTextRuns(bad,body),false);
+  assert.equal(isSavedDraft({...original,body,bodyRuns:bad},context),false);
+  assert.equal(renderRichText(body,bad),renderRichText(body));
+ }
+ assert.deepEqual(normalizeRichTextRuns([
+   {text:'Primeira',marks:[],href},
+   {text:' segunda',marks:[],href},
+   {text:' terceira',marks:[]}
+ ]),[{text:'Primeira segunda',marks:[],href},{text:' terceira',marks:[]}]);
 });

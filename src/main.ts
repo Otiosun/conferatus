@@ -8,7 +8,7 @@ import type { PreviewVote } from './domain/rules.js';
 import { createPreviewSampleLedger } from './domain/preview-ledger.js';
 import { isValidPreviewChoices, isSavedDraft, cleanDraftRecord, cleanScheduleRecord, isRestorableSchedule, uniqueSavedRecords, nextLocalRecordId } from './domain/workflow-records.js';
 import type { ProposalType, Draft, PreviewChoice, Deliberation } from './domain/workflow-records.js';
-import { renderRichText, DEFAULT_RICH_LAYOUT, isRichLayout, richLayoutStyle } from './domain/rich-text.js';
+import { renderRichText, DEFAULT_RICH_LAYOUT, isRichLayout, richLayoutStyle, normalizeHttpHref } from './domain/rich-text.js';
 import type { RichTextRun, RichBodyLayout } from './domain/rich-text.js';
 import { runsFromEditable } from './domain/rich-editor.js';
 import type { Activity, Member, DeliberationMethod } from './domain/types.js';
@@ -429,7 +429,7 @@ let draftForm=blankDraft();
 let richEditorOpen=false;
 let lastRichSelection:Range|null=null;
 const hasFormatting=(runs?:readonly RichTextRun[])=>Boolean(runs?.some(
- run=>run.marks.length||run.font||run.size||run.color||run.highlight
+ run=>run.marks.length||run.font||run.size||run.color||run.highlight||run.href
 ));
 function syncRichEditor(){
  const editor=document.querySelector<HTMLElement>('#draft-rich-body');
@@ -575,6 +575,15 @@ function composePage(){
  <label>Tamanho<select data-rich-format="size" aria-label="Tamanho do texto selecionado"><option value="">Tamanho</option><option value="12">12 px</option><option value="16">16 px</option><option value="18">18 px</option><option value="24">24 px</option><option value="30">30 px</option></select></label>
  <label>Cor do texto<input type="color" data-rich-format="color" value="#242733" aria-label="Cor do texto selecionado"></label>
  <label>Marca-texto<input type="color" data-rich-format="highlight" value="#fff0a5" aria-label="Cor de realce do texto selecionado"></label>
+ </div>
+ <div class="workflow-rich-links" role="group" aria-label="Links do texto selecionado">
+ <label for="draft-link-url">Link do trecho selecionado</label>
+ <input id="draft-link-url" type="text" inputmode="url" autocomplete="url" maxlength="2048" placeholder="https://exemplo.com" aria-describedby="draft-link-feedback">
+ <div class="workflow-rich-link-actions">
+ <button type="button" data-rich-link="apply">Inserir link</button>
+ <button type="button" data-rich-link="remove">Remover link</button>
+ </div>
+ <p id="draft-link-feedback" role="status" aria-live="polite">Selecione um trecho da redação antes de aplicar ou remover um link.</p>
  </div>
  <div class="workflow-rich-layout" role="group" aria-label="Alinhamento e espaçamento da redação inteira">
  <p class="workflow-rich-layout-caption">Redação inteira</p>
@@ -797,6 +806,46 @@ document.addEventListener('click',(event)=>{
    previewScheduleId=item.id;previewMode=item.method;previewRequestId=null;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';
    navigate('ballot');document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
   }return;
+ }
+ // Links inside the editor remain editable text; never navigate by clicking them.
+ const editorLink=target.closest<HTMLAnchorElement>('#draft-rich-body a');
+ if(editorLink){event.preventDefault();return;}
+ const linkButton=target.closest<HTMLButtonElement>('[data-rich-link]');
+ if(linkButton){
+  const editor=document.querySelector<HTMLElement>('#draft-rich-body');
+  const input=document.querySelector<HTMLInputElement>('#draft-link-url');
+  const status=document.querySelector<HTMLElement>('#draft-link-feedback');
+  const selected=lastRichSelection;
+  const action=linkButton.dataset.richLink;
+  const validRange=Boolean(editor&&selected&&!selected.collapsed&&
+   editor.contains(selected.startContainer)&&editor.contains(selected.endContainer));
+  if(!validRange){
+   if(status)status.textContent='Selecione um trecho da redação antes de alterar um link.';
+   editor?.focus({preventScroll:true});
+   return;
+  }
+  const href=action==='apply'?normalizeHttpHref(input?.value.trim()):undefined;
+  if(action==='apply'&&!href){
+   if(status)status.textContent='Informe uma URL completa iniciada por https:// ou http://, sem credenciais.';
+   input?.setAttribute('aria-invalid','true');
+   input?.focus({preventScroll:true});
+   return;
+  }
+  editor!.focus({preventScroll:true});
+  const selection=window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(selected!.cloneRange());
+  const success=document.execCommand(action==='remove'?'unlink':'createLink',false,href??'');
+  syncRichEditor();
+  const changed=action==='apply'
+   ? Boolean(draftForm.bodyRuns?.some(run=>run.href===href))
+   : success;
+  if(changed){
+   input?.removeAttribute('aria-invalid');
+   if(input&&action==='apply')input.value='';
+   if(status)status.textContent=action==='apply'?'Link inserido no trecho selecionado.':'Link removido do trecho selecionado.';
+  }else if(status)status.textContent='Não foi possível alterar o link dessa seleção.';
+  return;
  }
  const richCommand=target.closest<HTMLButtonElement>('[data-rich-command]');
  if(richCommand){
