@@ -118,8 +118,8 @@ jobs:
           path: dist/*.png
           if-no-files-found: ignore
           retention-days: 7
-      - name: Upload tested offline preview
-        if: success()
+      - name: Upload offline preview for QA (also on failure)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: CONFFRATUS-v0.10.60-preview

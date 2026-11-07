@@ -32,10 +32,15 @@ with sync_playwright() as p:
   }""")
   pg.locator('[data-rich-command=bold]').click()
   assert 'Texto' in editor.locator('strong,b').inner_text(),(width,editor.inner_html())
+  before_save=editor.inner_html()
   pg.locator('#compose-proposal-form [value=save]').click()
+  saved_draft=pg.evaluate("JSON.parse(sessionStorage.getItem('conferatus:proposals-v010'))")
   record=pg.locator('.workflow-record').filter(has_text=f'Proposta formatada {width}')
   record.locator('[data-draft]').click()
-  assert pg.locator('#draft-rich-body strong,#draft-rich-body b').count()>0,width
+  reopened=pg.evaluate("""() => ({path:location.hash,
+   editor:document.querySelector('#draft-rich-body')?.innerHTML ?? null,
+   body:document.querySelector('#draft-body')?.value ?? null})""")
+  assert pg.locator('#draft-rich-body strong,#draft-rich-body b').count()>0,(width,before_save,saved_draft,reopened)
   pg.locator('#compose-proposal-form [value=conclude]').click()
   assert pg.locator('.workflow-review-body strong').count()>0,width
   pg.locator('#confirm-proposal-form button[type=submit]').click()
