@@ -33,11 +33,20 @@ export function runsFromEditable(editor:HTMLElement):RichTextRun[]{
   if(tag==='br'){append('\n',parent);return;}
   if((tag==='div'||tag==='p')&&result.length&&!newline())append('\n',{marks:[]});
   const style:Style={...parent,marks:[...parent.marks]};
-  const mark=(m:InlineMark)=>{if(!style.marks.includes(m))style.marks.push(m);};
+  const mark=(m:InlineMark)=>{
+   // Subscript and superscript are mutually exclusive for any character.
+   if(m==='subscript'||m==='superscript'){
+    const opposite=m==='subscript'?'superscript':'subscript';
+    style.marks=style.marks.filter(existing=>existing!==opposite);
+   }
+   if(!style.marks.includes(m))style.marks.push(m);
+  };
   if(tag==='strong'||tag==='b')mark('bold');
   if(tag==='em'||tag==='i')mark('italic');
   if(tag==='u')mark('underline');
   if(tag==='s'||tag==='strike'||tag==='del')mark('strike');
+  if(tag==='sub')mark('subscript');
+  if(tag==='sup')mark('superscript');
   if(tag==='font'){
    const face=safeFont(node.getAttribute('face')??'');
    if(face)style.font=face;
@@ -52,6 +61,8 @@ export function runsFromEditable(editor:HTMLElement):RichTextRun[]{
    if(node.style.fontStyle==='italic')mark('italic');
    if(node.style.textDecorationLine.includes('underline'))mark('underline');
    if(node.style.textDecorationLine.includes('line-through'))mark('strike');
+   if(node.style.verticalAlign==='sub')mark('subscript');
+   if(node.style.verticalAlign==='super')mark('superscript');
    const face=safeFont(node.style.fontFamily);
    if(face)style.font=face;
    const size=Number.parseFloat(node.style.fontSize);

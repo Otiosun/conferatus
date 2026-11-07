@@ -171,3 +171,35 @@ test('document alignment, bilateral indents and line height persist safely',()=>
   assert.equal(richLayoutStyle(bad),'');
  }
 });
+
+test('subscript and superscript preserve plain text, exclude conflicting marks and escape HTML',()=>{
+ const body='H2O e m2 em um documento';
+ const runs=[
+  {text:'H',marks:[]},{text:'2',marks:['subscript']},
+  {text:'O e m',marks:[]},{text:'2',marks:['superscript']},
+  {text:' em um documento',marks:[]}
+ ];
+ assert.equal(isRichTextRuns(runs,body),true);
+ assert.equal(isSavedDraft({...original,body,bodyRuns:runs},context),true);
+ const copy=cleanDraftRecord({...original,body,bodyRuns:runs});
+ assert.deepEqual(copy.bodyRuns,runs);
+ assert.notEqual(copy.bodyRuns[1].marks,runs[1].marks);
+ const html=renderRichText(body,runs);
+ assert.match(html,/<sub>2<\/sub>/);
+ assert.match(html,/<sup>2<\/sup>/);
+ assert.equal(html.replace(/<[^>]*>/g,''),body);
+ const hostile='<img src=x onerror=alert(1)> & H2O';
+ const marked=[{text:hostile,marks:['subscript']}];
+ assert.equal(renderRichText(hostile,marked).includes('<img'),false);
+ assert.match(renderRichText(hostile,marked),/&lt;img/);
+ for(const invalid of [
+  [{text:body,marks:['subscript','superscript']}],
+  [{text:body,marks:['subscript','subscript']}],
+  [{text:body,marks:['script']}],
+  [{text:body,marks:[],onclick:'alert(1)'}]
+ ]){
+  assert.equal(isRichTextRuns(invalid,body),false);
+  assert.equal(isSavedDraft({...original,body,bodyRuns:invalid},context),false);
+  assert.equal(renderRichText(body,invalid),body);
+ }
+});

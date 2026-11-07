@@ -1,5 +1,5 @@
 /** Plain text remains authoritative; optional inline styling is whitelisted. */
-export const INLINE_MARKS=['bold','italic','underline','strike'] as const;
+export const INLINE_MARKS=['bold','italic','underline','strike','subscript','superscript'] as const;
 export type InlineMark=typeof INLINE_MARKS[number];
 export const RICH_FONTS=['aptos','arial','georgia'] as const;
 export type RichFont=typeof RICH_FONTS[number];
@@ -36,7 +36,8 @@ export function isRichTextRuns(value:unknown,body:string):value is RichTextRun[]
   const run=entry as Record<string,unknown>;
   if(Object.keys(run).some(key=>!keys.has(key))||
      typeof run.text!=='string'||!run.text||!Array.isArray(run.marks)||
-     run.marks.length>4||
+     run.marks.length>INLINE_MARKS.length||
+     (run.marks.includes('subscript')&&run.marks.includes('superscript'))||
      !run.marks.every(m=>typeof m==='string'&&INLINE_MARKS.includes(m as InlineMark))||
      new Set(run.marks).size!==run.marks.length)return false;
   if(run.font!==undefined&&(typeof run.font!=='string'||!RICH_FONTS.includes(run.font as RichFont)))return false;
@@ -51,7 +52,7 @@ export function isRichTextRuns(value:unknown,body:string):value is RichTextRun[]
 const safeText=(s:string)=>s.replace(/[&<>"']/g,c=>({
  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
 })[c]??c);
-const tags:Record<InlineMark,string>={bold:'strong',italic:'em',underline:'u',strike:'s'};
+const tags:Record<InlineMark,string>={bold:'strong',italic:'em',underline:'u',strike:'s',subscript:'sub',superscript:'sup'};
 const families:Record<RichFont,string>={
  aptos:"Aptos, 'Segoe UI', sans-serif",arial:'Arial, sans-serif',georgia:'Georgia, serif'
 };

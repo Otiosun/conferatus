@@ -567,7 +567,9 @@ function composePage(){
  <button type="button" data-rich-command="bold" aria-label="Negrito"><strong>B</strong></button>
  <button type="button" data-rich-command="italic" aria-label="Itálico"><em>I</em></button>
  <button type="button" data-rich-command="underline" aria-label="Sublinhado"><u>S</u></button>
- <button type="button" data-rich-command="strike" aria-label="Tachado"><s>T</s></button></div>
+ <button type="button" data-rich-command="strike" aria-label="Tachado"><s>T</s></button>
+ <button type="button" data-rich-command="subscript" aria-label="Subscrito (x dois)">x<sub>2</sub></button>
+ <button type="button" data-rich-command="superscript" aria-label="Sobrescrito (x ao quadrado)">x<sup>2</sup></button></div>
  <div class="workflow-rich-options" role="group" aria-label="Tipografia e cores">
  <label>Fonte<select data-rich-format="font" aria-label="Fonte do texto selecionado"><option value="">Escolha a fonte</option><option value="aptos">Aptos</option><option value="arial">Arial</option><option value="georgia">Georgia</option></select></label>
  <label>Tamanho<select data-rich-format="size" aria-label="Tamanho do texto selecionado"><option value="">Tamanho</option><option value="12">12 px</option><option value="16">16 px</option><option value="18">18 px</option><option value="24">24 px</option><option value="30">30 px</option></select></label>
@@ -800,7 +802,7 @@ document.addEventListener('click',(event)=>{
  if(richCommand){
   const editor=document.querySelector<HTMLElement>('#draft-rich-body');
   const command=richCommand.dataset.richCommand;
-  if(editor&&['bold','italic','underline','strike'].includes(command??'')){
+  if(editor&&['bold','italic','underline','strike','subscript','superscript'].includes(command??'')){
    editor.focus({preventScroll:true});
    if(lastRichSelection&&editor.contains(lastRichSelection.commonAncestorContainer)){
     const selection=window.getSelection();
