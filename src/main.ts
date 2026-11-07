@@ -1292,14 +1292,16 @@ document.addEventListener('paste',event=>{
 document.addEventListener('change',(event)=>{
  const target=event.target;
  const format=target instanceof HTMLElement ? target.dataset.richFormat : undefined;
- if(format&&target.closest('#compose-proposal-form')){
+ if(format&&target instanceof HTMLElement&&target.closest('#compose-proposal-form')){
   const family:Record<string,string>={aptos:'Aptos',arial:'Arial',georgia:'Georgia'};
   const sizes:Record<string,string>={'12':'2','16':'3','18':'4','24':'5','30':'6'};
+  const selected=target instanceof HTMLSelectElement?target.value:'';
+  const fontChoice=family[selected],sizeChoice=sizes[selected];
   let command='',value='';
-  if(format==='font'&&target instanceof HTMLSelectElement&&family[target.value]){
-   command='fontName';value=family[target.value];
-  }else if(format==='size'&&target instanceof HTMLSelectElement&&sizes[target.value]){
-   command='fontSize';value=sizes[target.value];
+  if(format==='font'&&target instanceof HTMLSelectElement&&fontChoice){
+   command='fontName';value=fontChoice;
+  }else if(format==='size'&&target instanceof HTMLSelectElement&&sizeChoice){
+   command='fontSize';value=sizeChoice;
   }else if((format==='color'||format==='highlight')&&target instanceof HTMLInputElement&&
            /^#[0-9a-fA-F]{6}$/.test(target.value)){
    command=format==='color'?'foreColor':'hiliteColor';value=target.value;
