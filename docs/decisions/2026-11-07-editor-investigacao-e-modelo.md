@@ -42,3 +42,10 @@ A Lei Máxima 21 exige pesquisa prévia proporcional ao risco, documentação da
 ## Gate
 
 Pesquisa fundamenta a escolha, mas não garante resultado: qualquer afirmação de implementação ou compatibilidade depende do SHA e do teste real. Registros na checklist e no Drive são obrigatórios antes de encerrar a rodada.
+
+
+## Falha adicional identificada antes da homologação
+
+A MDN documenta que Enter num `input type=text` dentro de `form` pode acionar o primeiro botão `submit` do formulário. No CONFFRATUS, isso poderia concluir uma proposição enquanto a pessoa digita a URL. Fonte: https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit_event . **Correção:** capturar Enter somente no campo de links, prevenir o submit implícito e executar a ação real de aplicar o link. O browser test passa a exigir que o formulário continue na tela e o link seja efetivamente aplicado.
+
+Outra armadilha evitada: o retorno booleano de `execCommand('createLink'/'unlink')` não é evidência suficiente de sucesso. Comparar a representação validada `bodyRuns` antes/depois e confirmar que o `body` textual não mudou; somente então exibir sucesso. A limitação de undo/redo nativo e seleção via IME/celular físico permanece **não homologada** até teste específico.

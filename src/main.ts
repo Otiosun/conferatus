@@ -835,11 +835,15 @@ document.addEventListener('click',(event)=>{
   const selection=window.getSelection();
   selection?.removeAllRanges();
   selection?.addRange(selected!.cloneRange());
-  const success=document.execCommand(action==='remove'?'unlink':'createLink',false,href??'');
+  const previousBody=draftForm.body;
+  const previousRuns=JSON.stringify(draftForm.bodyRuns??[]);
+  document.execCommand(action==='remove'?'unlink':'createLink',false,href??'');
   syncRichEditor();
+  const metadataChanged=draftForm.body===previousBody&&
+   JSON.stringify(draftForm.bodyRuns??[])!==previousRuns;
   const changed=action==='apply'
-   ? Boolean(draftForm.bodyRuns?.some(run=>run.href===href))
-   : success;
+   ? metadataChanged&&Boolean(draftForm.bodyRuns?.some(run=>run.href===href))
+   : metadataChanged;
   if(changed){
    input?.removeAttribute('aria-invalid');
    if(input&&action==='apply')input.value='';
@@ -1346,6 +1350,13 @@ document.addEventListener('input',(event)=>{
  if(target instanceof HTMLInputElement&&target.id==='search-members') {
   filter=target.value;
   updateMemberSearch();
+ }
+});
+document.addEventListener('keydown',(event)=>{
+ const target=event.target;
+ if(target instanceof HTMLInputElement&&target.id==='draft-link-url'&&event.key==='Enter'){
+  event.preventDefault();
+  document.querySelector<HTMLButtonElement>('[data-rich-link="apply"]')?.click();
  }
 });
 document.addEventListener('selectionchange',()=>{
