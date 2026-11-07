@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {isRichTextRuns, normalizeRichTextRuns, renderRichText} from '../dist/domain/rich-text.js';
 import assert from 'node:assert/strict';
 import {
  isValidPreviewChoices,
@@ -92,4 +93,37 @@ test('duplicate IDs are quarantined and locally-generated IDs avoid clock collis
  const first=nextLocalRecordId('draft',[],1234);
  assert.equal(nextLocalRecordId('draft',[{id:first}],1234),first+'-1');
  assert.equal(nextLocalRecordId('draft',[{id:first},{id:first+'-1'}],1234),first+'-2');
+});
+
+test('formatting runs preserve the plain body and accept only known inline styles',()=> {
+ const body='Texto em negrito e itálico';
+ const runs=[{text:'Texto ',marks:[]},{text:'em negrito',marks:['bold']},{text:' e itálico',marks:['italic']}];
+ assert.equal(isRichTextRuns(runs,body),true);
+ assert.equal(isSavedDraft({...original,body,bodyRuns:runs},context),true);
+ assert.equal(isRichTextRuns([...runs,{text:'! EXTRA',marks:[]}],body),false);
+ assert.equal(isRichTextRuns([{text:body,marks:['script']}],body),false);
+ assert.equal(isRichTextRuns([{text:body,marks:['bold','bold']}],body),false);
+ assert.equal(isSavedDraft({...original,body,bodyRuns:[{text:body,marks:['script']}]},context),false);
+ const cleaned=cleanDraftRecord({...original,body,bodyRuns:runs});
+ assert.deepEqual(cleaned.bodyRuns,runs);
+ assert.notEqual(cleaned.bodyRuns,runs);
+ assert.notEqual(cleaned.bodyRuns[1].marks,runs[1].marks);
+});
+
+test('formatting renderer escapes hostile text and never emits arbitrary HTML',()=> {
+ const dangerous='<img src=x onerror=alert(1)> & <script>run()</script>';
+ const runs=[{text:dangerous,marks:['bold','italic']}];
+ const html=renderRichText(dangerous,runs);
+ assert.match(html,/&lt;img/);
+ assert.match(html,/&lt;script&gt;/);
+ assert.equal(html.includes('<img'),false);
+ assert.equal(html.includes('<script'),false);
+ assert.match(html,/<strong>/);
+ assert.match(html,/<em>/);
+ assert.equal(renderRichText(dangerous,[{text:dangerous,marks:['iframe']}]),renderRichText(dangerous));
+ const normalized=normalizeRichTextRuns([
+  {text:'A',marks:['italic','bold']},{text:'B',marks:['bold','italic']},
+  {text:'',marks:[]},{text:'C',marks:[]}
+ ]);
+ assert.deepEqual(normalized,[{text:'AB',marks:['bold','italic']},{text:'C',marks:[]}]);
 });

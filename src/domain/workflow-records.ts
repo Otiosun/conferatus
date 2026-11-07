@@ -1,5 +1,7 @@
 import { isDeliberationMethod, searchKey } from './rules.js';
 import type { DeliberationMethod } from './types.js';
+import { isRichTextRuns } from './rich-text.js';
+import type { RichTextRun } from './rich-text.js';
 
 export type ProposalType = 'PDR' | 'PR' | 'Ofício';
 export type PreviewChoice = { id: string; label: string };
@@ -8,6 +10,8 @@ export type Draft = {
   id: string;
   title: string;
   body: string;
+  /** Optional safe formatting, always mirrored by the plain body. */
+  bodyRuns?: RichTextRun[];
   sectionId: string;
   type: ProposalType;
   authorComplete: boolean;
@@ -65,6 +69,7 @@ export function isSavedDraft(value: unknown, context: WorkflowValidationContext)
   const draft = value as Record<string, unknown>;
   if (typeof draft.id !== 'string' || !draft.id ||
       typeof draft.title !== 'string' || typeof draft.body !== 'string' ||
+      (draft.bodyRuns !== undefined && !isRichTextRuns(draft.bodyRuns, draft.body)) ||
       typeof draft.sectionId !== 'string' ||
       !['PDR', 'PR', 'Ofício'].includes(String(draft.type)) ||
       typeof draft.authorComplete !== 'boolean' ||
@@ -100,6 +105,9 @@ export function cleanDraftRecord(draft: Draft): Draft {
     id: draft.id,
     title: draft.title,
     body: draft.body,
+    ...(isRichTextRuns(draft.bodyRuns, draft.body)
+      ? { bodyRuns: draft.bodyRuns.map(run => ({text: run.text, marks: [...run.marks]})) }
+      : {}),
     sectionId: draft.sectionId,
     type: draft.type,
     authorComplete: draft.authorComplete,
