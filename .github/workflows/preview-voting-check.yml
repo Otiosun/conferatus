@@ -152,6 +152,7 @@ jobs:
         run: |
           for engine in firefox webkit; do
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_cross_engine_smoke_v0160.py
+            CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_rich_typography_v0164.py
           done
       - name: Upload optional multi-engine evidence
         if: always()

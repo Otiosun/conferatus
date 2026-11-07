@@ -1,9 +1,16 @@
 """Richer typography survives save, reopening and completed proposal review."""
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+import os
+import json
+ENGINE=os.environ.get('CONFFRATUS_TEST_ENGINE','chromium').lower()
+assert ENGINE in ('chromium','firefox','webkit')
 HTML=(Path(__file__).resolve().parents[1]/'dist/CONFERATUS_demo_offline.html').read_text()
 with sync_playwright() as p:
- browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ options={'headless':True}
+ if ENGINE=='chromium' and Path('/usr/bin/chromium').exists():
+  options.update(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ browser=getattr(p,ENGINE).launch(**options)
  for width in (320,390,740,1280):
   page=browser.new_page(viewport={'width':width,'height':860})
   errors=[]
@@ -56,4 +63,5 @@ with sync_playwright() as p:
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
   page.close()
  browser.close()
-print('Rich typography roundtrip 4 widths: font, size, color and highlight PASS')
+Path('dist',f'cross_engine_rich_typography_{ENGINE}.json').write_text(json.dumps({'engine':ENGINE,'widths':[320,390,740,1280],'status':'pass'},indent=2),encoding='utf-8')
+print(f'Rich typography {ENGINE}: 4 widths, font/size/color/highlight PASS')
