@@ -37,14 +37,17 @@ with sync_playwright() as p:
   saved_draft=pg.evaluate("JSON.parse(sessionStorage.getItem('conferatus:proposals-v010'))")
   record=pg.locator('.workflow-record').filter(has_text=f'Proposta formatada {width}')
   record.locator('[data-draft]').click()
+  pg.locator('#draft-rich-body').wait_for(state='visible')
   reopened=pg.evaluate("""() => ({path:location.hash,
    editor:document.querySelector('#draft-rich-body')?.innerHTML ?? null,
    body:document.querySelector('#draft-body')?.value ?? null})""")
   assert pg.locator('#draft-rich-body strong,#draft-rich-body b').count()>0,(width,before_save,saved_draft,reopened)
   pg.locator('#compose-proposal-form [value=conclude]').click()
+  pg.locator('#confirm-proposal-form').wait_for(state='visible')
   assert pg.locator('.workflow-review-body strong').count()>0,width
   pg.locator('#confirm-proposal-form button[type=submit]').click()
   pg.locator('.workflow-record').filter(has_text=f'Proposta formatada {width}').locator('[data-draft]').click()
+  pg.locator('.workflow-finished').wait_for(state='visible')
   assert pg.locator('.workflow-review-body strong').count()>0,width
   pg.evaluate('location.hash="#/proposals"')
   pg.locator('[data-action=new-proposal]').click()
@@ -52,8 +55,17 @@ with sync_playwright() as p:
   pg.locator('#draft-body').fill('Texto inicial preenchido antes da formatação.')
   pg.locator('[data-action=enable-rich-editor]').click()
   pg.locator('#draft-rich-body').fill('<img src=x onerror=window.__test=1> & <svg onload=window.__test=2></svg>')
+  # Format part of the *literal* markup so restoration must use the safe renderer.
+  pg.evaluate("""() => {
+   const n=document.querySelector('#draft-rich-body').firstChild;
+   const r=document.createRange(),s=getSelection();
+   r.setStart(n,0);r.setEnd(n,4);s.removeAllRanges();s.addRange(r);
+  }""")
+  pg.locator('[data-rich-command=bold]').click()
   pg.locator('#compose-proposal-form [value=save]').click()
   pg.locator('.workflow-record').filter(has_text='Texto literal seguro').locator('[data-draft]').click()
+  pg.locator('#draft-rich-body').wait_for(state='visible')
+  assert pg.locator('#draft-rich-body strong').count()>0,width
   assert pg.locator('#draft-rich-body img,#draft-rich-body svg').count()==0,width
   assert '<img src=x' in pg.locator('#draft-rich-body').inner_text(),width
   assert not errors,(width,errors)
