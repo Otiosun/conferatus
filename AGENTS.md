@@ -38,7 +38,7 @@ Versão 1.0 — 28/10/2026. Este arquivo foi preparado para virar `AGENTS.md` na
 - Preparar contratos claros de integração, mas **não desenvolver outro login, gateways de produção, infra redundante nem políticas eleitorais não aprovadas**.
 - A prévia pode ser homologada como produto demonstrativo; nunca chamar de sistema institucional integrado ou pronto para registrar votos reais.
 
-## Gates operacionais das 20 leis
+## Gates operacionais das 21 leis
 
 1. **Código humano:** preferir funções pequenas, nomes claros e fluxo previsível. Nunca minificar a fonte ou comprimir várias decisões de negócio numa linha para economizar espaço. Separar validação pura da renderização quando isso realmente reduzir acoplamento. Não reescrever a aplicação por estética arquitetural.
 2. **Preguiça inteligente:** antes de adicionar arquivo, dependência ou camada, demonstrar por que uma função ou componente existente não resolve. Manter zero dependências de runtime enquanto a prévia puder usar APIs nativas.
