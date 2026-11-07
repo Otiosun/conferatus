@@ -8,6 +8,9 @@ import type { PreviewVote } from './domain/rules.js';
 import { createPreviewSampleLedger } from './domain/preview-ledger.js';
 import { isValidPreviewChoices, isSavedDraft, cleanDraftRecord, cleanScheduleRecord, isRestorableSchedule, uniqueSavedRecords, nextLocalRecordId } from './domain/workflow-records.js';
 import type { ProposalType, Draft, PreviewChoice, Deliberation } from './domain/workflow-records.js';
+import { renderRichText } from './domain/rich-text.js';
+import type { RichTextRun } from './domain/rich-text.js';
+import { runsFromEditable } from './domain/rich-editor.js';
 import type { Activity, Member, DeliberationMethod } from './domain/types.js';
 
 type Route = 'ballot' | 'members' | 'profile' | 'overview' | 'governance' | 'calendar' | 'proposals' | 'compose' | 'review';
@@ -421,8 +424,28 @@ const ignoredRecordsBackup={drafts:restoredDrafts.rejected,schedule:restoredSche
 const ignoredSavedRecords=ignoredRecordsBackup.drafts.length>0||ignoredRecordsBackup.schedule.length>0||
  draftRestore.unreadableRaw!==null||scheduleRestore.unreadableRaw!==null;
 function savedRecordNotice(){return ignoredSavedRecords?'<p class="workflow-form-error" role="status">Alguns registros incompletos ou repetidos não foram carregados.</p>':'';}
-const blankDraft=()=>({title:'',body:''});
+const blankDraft=():{title:string;body:string;bodyRuns?:RichTextRun[]}=>({title:'',body:''});
 let draftForm=blankDraft();
+let richEditorOpen=false;
+let lastRichSelection:Range|null=null;
+const hasFormatting=(runs?:readonly RichTextRun[])=>Boolean(runs?.some(run=>run.marks.length));
+function syncRichEditor(){
+ const editor=document.querySelector<HTMLElement>('#draft-rich-body');
+ const field=document.querySelector<HTMLTextAreaElement>('#draft-body');
+ if(!editor||!field)return;
+ const runs=runsFromEditable(editor);
+ const body=runs.map(run=>run.text).join('');
+ field.value=body;
+ draftForm.body=body;
+ draftForm.bodyRuns=hasFormatting(runs)?runs:undefined;
+ if(composeError&&(body.trim()||document.querySelector<HTMLInputElement>('#draft-title')?.value.trim())){
+  composeError='';
+  document.querySelector('#compose-save-error')?.remove();
+  document.querySelector('#draft-title')?.removeAttribute('aria-invalid');
+  field.removeAttribute('aria-invalid');
+  editor.removeAttribute('aria-invalid');
+ }
+}
 let currentDraftId='';
 let finishedProposalReturnTo:'proposals'|'calendar'|'overview'|'profile'='proposals';
 let workflowNotice='';
@@ -532,20 +555,27 @@ function composePage(){
  const editing=drafts.find(d=>d.id===currentDraftId);
  return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
  <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Título" value="${escapeHTML(draftForm.title)}">
- <label for="draft-body">Redação</label><textarea id="draft-body" name="body" required minlength="20" ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
+ <label for="draft-body">Redação</label>${richEditorOpen?`<div class="workflow-rich-toolbar" role="group" aria-label="Formatação da redação">
+ <button type="button" data-rich-command="bold" aria-label="Negrito"><strong>B</strong></button>
+ <button type="button" data-rich-command="italic" aria-label="Itálico"><em>I</em></button>
+ <button type="button" data-rich-command="underline" aria-label="Sublinhado"><u>S</u></button>
+ <button type="button" data-rich-command="strike" aria-label="Tachado"><s>T</s></button></div>
+ <div id="draft-rich-body" class="workflow-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Redação" data-placeholder="Escreva..." ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''}>${renderRichText(draftForm.body,draftForm.bodyRuns)}</div>
+ <textarea id="draft-body" name="body" hidden>${escapeHTML(draftForm.body)}</textarea>`:`<textarea id="draft-body" name="body" required minlength="20" ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
+ <button type="button" class="workflow-enable-rich" data-action="enable-rich-editor">Formatar texto</button>`}
  ${composeError?`<p id="compose-save-error" class="workflow-form-error" role="alert">${escapeHTML(composeError)}</p>`:''}
  <div class="workflow-editor-actions"><button class="workflow-primary" type="submit" name="intent" value="conclude">Concluir redação</button><button class="workflow-outline" type="submit" name="intent" value="save" formnovalidate>Salvar rascunho</button><button class="workflow-outline" type="button" data-route="${finishedProposalReturnTo==='profile'?'profile':'proposals'}">${finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar'}</button></div></form>`;
 }
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
- if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar às proposições'}</button></div></div>`;
+ if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p>${renderRichText(d.body,d.bodyRuns)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar às proposições'}</button></div></div>`;
  const confirmedPartner=d.partners.find(p=>p.complete);
  const confirmedName=confirmedPartner?members.find(m=>m.id===confirmedPartner.id)?.name:undefined;
  const reviewMessage=confirmedPartner
   ? `${confirmedName?escapeHTML(confirmedName):'Um participante do Socii'} concluiu sua parte. Confira os dados e a redação antes de confirmar a conclusão.`
   : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
- <div class="workflow-review-body"><p>${escapeHTML(d.body)}</p></div>
+ <div class="workflow-review-body"><p>${renderRichText(d.body,d.bodyRuns)}</p></div>
  <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
  <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>${reviewMessage}</p>
  <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>
@@ -737,6 +767,21 @@ document.addEventListener('click',(event)=>{
    navigate('ballot');document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
   }return;
  }
+ const richCommand=target.closest<HTMLButtonElement>('[data-rich-command]');
+ if(richCommand){
+  const editor=document.querySelector<HTMLElement>('#draft-rich-body');
+  const command=richCommand.dataset.richCommand;
+  if(editor&&['bold','italic','underline','strike'].includes(command??'')){
+   editor.focus({preventScroll:true});
+   if(lastRichSelection&&editor.contains(lastRichSelection.commonAncestorContainer)){
+    const selection=window.getSelection();
+    selection?.removeAllRanges();selection?.addRange(lastRichSelection);
+   }
+   document.execCommand(command==='strike'?'strikeThrough':command!,false);
+   syncRichEditor();
+  }
+  return;
+ }
  const actionEl=target.closest<HTMLElement>('[data-action]');
  const routeEl=target.closest<HTMLElement>('[data-route]');
  const memberEl=target.closest<HTMLElement>('[data-member]');
@@ -830,7 +875,15 @@ document.addEventListener('click',(event)=>{
  if(advancedPreview && actionEl?.dataset.action==='import-local-archive'){
   document.querySelector<HTMLInputElement>('#archive-file-input')?.click();return;
  }
- if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();workflowNotice='';composeError='';navigate('compose');return;}
+ if(actionEl?.dataset.action==='enable-rich-editor'){
+  const title=document.querySelector<HTMLInputElement>('#draft-title');
+  const body=document.querySelector<HTMLTextAreaElement>('#draft-body');
+  draftForm={title:title?.value??draftForm.title,body:body?.value??draftForm.body,bodyRuns:draftForm.bodyRuns};
+  richEditorOpen=true;lastRichSelection=null;render();
+  document.querySelector<HTMLElement>('#draft-rich-body')?.focus({preventScroll:true});
+  return;
+ }
+ if(actionEl?.dataset.action==='new-proposal'){currentDraftId='';draftForm=blankDraft();richEditorOpen=false;lastRichSelection=null;workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
  if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;scheduleMethod=null;if(!cancellationSaveFailed)workflowNotice='';render();return;}
  if(actionEl?.dataset.action==='toggle-cancelled-history'){cancelledHistoryOpen=!cancelledHistoryOpen;render();return;}
@@ -876,13 +929,13 @@ document.addEventListener('click',(event)=>{
   return;
  }
  const draftEl=target.closest<HTMLElement>('[data-draft]');
- if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo=routeFromHash()==='overview'?'overview':routeFromHash()==='profile'?'profile':'proposals';draftForm={title:d.title,body:d.body};composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
+ if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo=routeFromHash()==='overview'?'overview':routeFromHash()==='profile'?'profile':'proposals';draftForm={title:d.title,body:d.body,bodyRuns:d.bodyRuns};richEditorOpen=hasFormatting(d.bodyRuns);lastRichSelection=null;composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
  const scheduleEl=target.closest<HTMLElement>('[data-schedule]');
  if(scheduleEl?.dataset.schedule){expandedSchedule=expandedSchedule===scheduleEl.dataset.schedule?'':scheduleEl.dataset.schedule;render();return;}
  const proposalEl=target.closest<HTMLElement>('[data-open-schedule-proposal]');
  if(proposalEl?.dataset.openScheduleProposal){
   const d=drafts.find(x=>x.id===proposalEl.dataset.openScheduleProposal);
-  if(d){currentDraftId=d.id;finishedProposalReturnTo='calendar';draftForm={title:d.title,body:d.body};navigate('review');}
+  if(d){currentDraftId=d.id;finishedProposalReturnTo='calendar';draftForm={title:d.title,body:d.body,bodyRuns:d.bodyRuns};navigate('review');}
   return;
  }
  const cancelEl=target.closest<HTMLElement>('[data-cancel-schedule]');
@@ -997,7 +1050,7 @@ document.addEventListener('change',async event=>{
  previewSampleLedger.clearAll();
  previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;
  previewVoteError='';previewVoteMemberId='';
- currentDraftId='';draftForm=blankDraft();inviteOpen=false;expandedSchedule='';
+ currentDraftId='';draftForm=blankDraft();richEditorOpen=false;lastRichSelection=null;inviteOpen=false;expandedSchedule='';
  archiveMessage=`Cópia restaurada nesta sessão: ${drafts.length} proposição(ões) e ${schedule.length} programação(ões).`;
  archiveIsError=false;render();
  document.querySelector<HTMLButtonElement>('[data-action="import-local-archive"]')?.focus({preventScroll:true});
@@ -1009,10 +1062,18 @@ document.addEventListener('submit',(event)=>{
  event.preventDefault();
  const submitter=(event as SubmitEvent).submitter;
  const saveOnly=id==='compose-proposal-form' && submitter instanceof HTMLButtonElement && submitter.value==='save';
+ if(id==='compose-proposal-form'&&richEditorOpen)syncRichEditor();
  if(!saveOnly && !form.reportValidity())return;
  const data=new FormData(form);
  if(id==='compose-proposal-form'){
   const title=String(data.get('title')??'').trim(),body=String(data.get('body')??'').trim();
+  const bodyRuns=richEditorOpen&&hasFormatting(draftForm.bodyRuns)?draftForm.bodyRuns:undefined;
+  if(richEditorOpen&&!saveOnly&&body.length<20){
+   composeError='Escreva pelo menos 20 caracteres na redação.';
+   draftForm={title,body,bodyRuns};render();
+   document.querySelector<HTMLElement>('#draft-rich-body')?.focus({preventScroll:true});
+   return;
+  }
   if(saveOnly ? (!title && !body) : (title.length<3||body.length<20)){
    if(saveOnly){
     composeError='Escreva um título ou algum texto antes de salvar.';
@@ -1022,20 +1083,22 @@ document.addEventListener('submit',(event)=>{
    return;
   }
   composeError='';
-  draftForm={title,body};
+  draftForm={title,body,bodyRuns};
   let d=drafts.find(x=>x.id===currentDraftId);
   let confirmationsReset=false;
   if(!d||d.status==='concluida'){
-   d={id:nextLocalRecordId('draft',drafts),title,body,sectionId:'integridade',type:'PDR',authorComplete:false,partners:[],status:'redacao'};drafts.unshift(d);currentDraftId=d.id;
+   d={id:nextLocalRecordId('draft',drafts),title,body,...(bodyRuns?{bodyRuns}:{}),sectionId:'integridade',type:'PDR',authorComplete:false,partners:[],status:'redacao'};drafts.unshift(d);currentDraftId=d.id;
   }else{
    // A confirmation of an earlier text cannot approve a changed version.
-   if(d.title!==title||d.body!==body){
+   if(d.title!==title||d.body!==body||JSON.stringify(d.bodyRuns??[])!==JSON.stringify(bodyRuns??[])){
     confirmationsReset=d.authorComplete||d.partners.some(p=>p.complete);
     d.authorComplete=false;
     d.partners.forEach(p=>{p.complete=false;});
     d.status='redacao';
    }
    d.title=title;d.body=body;
+   if(bodyRuns)d.bodyRuns=bodyRuns;
+   else delete d.bodyRuns;
   }
   const stored=saveWorkflows();
   if(saveOnly){
@@ -1162,6 +1225,7 @@ document.addEventListener('submit',(event)=>{
 });
 document.addEventListener('input',(event)=>{
  const target=event.target;
+ if(target instanceof HTMLElement&&target.id==='draft-rich-body')syncRichEditor();
  // An empty draft save is invalid only while *both* fields are blank. Do not
  // leave a stale error attached after the user supplies either field.
  if((target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) &&
@@ -1200,6 +1264,22 @@ document.addEventListener('input',(event)=>{
   filter=target.value;
   updateMemberSearch();
  }
+});
+document.addEventListener('selectionchange',()=>{
+ const editor=document.querySelector<HTMLElement>('#draft-rich-body');
+ const selection=window.getSelection();
+ if(editor&&selection?.rangeCount&&selection.anchorNode&&selection.focusNode&&
+    editor.contains(selection.anchorNode)&&editor.contains(selection.focusNode))
+  lastRichSelection=selection.getRangeAt(0).cloneRange();
+});
+document.addEventListener('paste',event=>{
+ const target=event.target;
+ if(!(target instanceof HTMLElement)||target.id!=='draft-rich-body')return;
+ const plain=event.clipboardData?.getData('text/plain');
+ if(plain===undefined)return;
+ event.preventDefault();
+ document.execCommand('insertText',false,plain);
+ syncRichEditor();
 });
 document.addEventListener('change',(event)=>{
  const target=event.target;

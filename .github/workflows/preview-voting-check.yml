@@ -85,6 +85,7 @@ jobs:
             tests/browser_stage7_keyboard_focus_v0139.py \
             tests/browser_stage7_zoom_reflow_v0135.py \
             tests/browser_stage7_long_draft_v0133.py \
+            tests/browser_rich_editor_v0163.py \
             tests/browser_calendar_v012.py \
             tests/browser_drafts_v011.py \
             tests/browser_socii_progress_v014.py \
