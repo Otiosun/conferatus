@@ -5,7 +5,7 @@ import type {InlineMark,RichTextRun} from './rich-text.js';
 export function runsFromEditable(editor:HTMLElement):RichTextRun[]{
  const collected:RichTextRun[]=[];
  const add=(s:string,marks:InlineMark[])=>{if(s)collected.push({text:s,marks:[...marks]});};
- const newline=()=>collected.length>0&&collected[collected.length-1].text.endsWith('\n');
+ const newline=()=>collected.length>0&&collected[collected.length-1]?.text.endsWith('\n');
  const visit=(node:Node,inherited:InlineMark[])=>{
   if(node.nodeType===Node.TEXT_NODE){add(node.textContent??'',inherited);return;}
   if(!(node instanceof HTMLElement))return;
