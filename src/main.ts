@@ -93,7 +93,34 @@ function routeFromHash(): Route {
     default: return 'ballot';
   }
 }
+// A rerender or route switch must not silently discard an unfinished proposal.
+// Compare against the last saved local record, not against the mutable form cache.
+let approvedComposeDeparture=false;
+function hasPendingComposeChanges():boolean{
+ const form=document.querySelector<HTMLFormElement>('#compose-proposal-form');
+ if(!form)return false;
+ const title=form.querySelector<HTMLInputElement>('#draft-title')?.value.trim()??'';
+ const plainBody=form.querySelector<HTMLTextAreaElement>('#draft-body')?.value??'';
+ const body=(richEditorOpen?draftForm.body:plainBody).trim();
+ const original=drafts.find(d=>d.id===currentDraftId);
+ if(!original)return Boolean(title||body);
+ const formatted=richEditorOpen&&hasFormatting(draftForm.bodyRuns)?draftForm.bodyRuns:undefined;
+ const layout=richEditorOpen&&isRichLayout(draftForm.bodyLayout)?draftForm.bodyLayout:undefined;
+ return original.title!==title||original.body!==body||
+  JSON.stringify(original.bodyRuns??[])!==JSON.stringify(formatted??[])||
+  JSON.stringify(original.bodyLayout??null)!==JSON.stringify(layout??null);
+}
+function confirmComposeDeparture():boolean{
+ return !hasPendingComposeChanges()||window.confirm('Esta redação tem alterações não salvas. Deseja sair e descartá-las?');
+}
 function navigate(route: Route, memberId?: string) {
+ if(routeFromHash()==='compose'&&route!=='compose'){
+  if(!confirmComposeDeparture()){
+   if(menuOpen){menuOpen=false;render();}
+   return;
+  }
+  approvedComposeDeparture=true;
+ }
   if(route!=='calendar'){scheduleFormOpen=false;scheduleMethod=null;}
   menuOpen = false;
   demoToolsOpen = false;
@@ -102,6 +129,7 @@ function navigate(route: Route, memberId?: string) {
   lastChange = null;
   const hash = `#/${route}${route==='profile' && memberId?`/${encodeURIComponent(memberId)}`:''}`;
   if (location.hash === hash) {
+    approvedComposeDeparture=false;
     render();
     document.querySelector<HTMLElement>('#main-content')?.focus({preventScroll:true});
   } else location.hash = hash;
@@ -666,6 +694,15 @@ function calendarPage(){
 let lastRenderedHash = location.hash;
 function render() {
  if (!root) return;
+ // The footer/menu and validation messages rerender the composer; first capture
+ // plain input fields so this local UI refresh does not erase unsaved keystrokes.
+ const composing=root.querySelector<HTMLFormElement>('#compose-proposal-form');
+ if(composing){
+  const titleInput=composing.querySelector<HTMLInputElement>('#draft-title');
+  const plainBody=composing.querySelector<HTMLTextAreaElement>('#draft-body');
+  if(titleInput)draftForm.title=titleInput.value;
+  if(!richEditorOpen&&plainBody)draftForm.body=plainBody.value;
+ }
  // A local edit must not unexpectedly jump the user to the top of a long page.
  const previousScroll = window.scrollY;
  // Preserve local scheduling inputs while browsing days and months.
@@ -750,6 +787,14 @@ function syncRouteState() {
 // The route rerenders the entire DOM. Move focus to the destination for keyboard
 // and screen-reader users instead of leaving it on the removed navigation button.
 window.addEventListener('hashchange',()=>{
+ // Browser Back can change the hash without passing through navigate().
+ const previousRoute=lastRenderedHash.replace(/^#\\/?/,'').split('/')[0];
+ const leavingEditor=previousRoute==='compose'&&routeFromHash()!=='compose';
+ if(leavingEditor&&!approvedComposeDeparture&&!confirmComposeDeparture()){
+  history.replaceState(history.state,'',lastRenderedHash||'#/compose');
+  return;
+ }
+ approvedComposeDeparture=false;
   menuOpen=false;demoToolsOpen=false;syncRouteState();render();
   if(routeFromHash()==='ballot'&&previewScheduleId){
    const title=document.querySelector<HTMLElement>('#preview-vote-title');
