@@ -86,6 +86,9 @@ with sync_playwright() as p:
         assert page.locator('[data-action="export-local-archive"],[data-action="import-local-archive"]').count()==0,width
         assert page.locator('[data-action="toggle-tools"],.preview-vote-lab').count()==0,width
         assert page.locator('[data-action="invite-socii"]').is_visible(),width
+        page.locator('[data-action="invite-socii"]').click()
+        assert 'primeiro redija e salve uma proposição' in page.locator('#invite-socii-form').inner_text(),width
+        assert page.locator('#invite-socii-form button.workflow-primary').is_disabled(),width
         assert 'DADOS FICTÍCIOS' in page.locator('.footer-demo').inner_text().upper(),width
         assert not errors,(width,errors)
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
