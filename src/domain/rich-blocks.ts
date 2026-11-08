@@ -69,10 +69,12 @@ export function isRichBlockDocument(value: unknown): value is RichBlockDocumentV
     if (!isRecord(block)) return false;
 
     if (block.type === 'horizontalRule') {
+      const previous = blocks[index - 1];
+      const next = blocks[index + 1];
       if (Object.keys(block).length !== 1 ||
           index === 0 || index === blocks.length - 1 ||
-          !isRecord(blocks[index - 1]) || blocks[index - 1].type !== 'paragraph' ||
-          !isRecord(blocks[index + 1]) || blocks[index + 1].type !== 'paragraph') {
+          !isRecord(previous) || previous.type !== 'paragraph' ||
+          !isRecord(next) || next.type !== 'paragraph') {
         return false;
       }
       continue;
