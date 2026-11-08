@@ -174,6 +174,8 @@ jobs:
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_block_recovery_v0171.py
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_full_workflow_journey_v0173.py
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_unsaved_unload_v0174.py
+            CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_mobile_readability_v0175.py
+            CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_socii_multiple_drafts_v0176.py
           done
       - name: Upload optional multi-engine evidence
         if: always()
