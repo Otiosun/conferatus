@@ -788,7 +788,7 @@ function syncRouteState() {
 // and screen-reader users instead of leaving it on the removed navigation button.
 window.addEventListener('hashchange',()=>{
  // Browser Back can change the hash without passing through navigate().
- const previousRoute=lastRenderedHash.replace(/^#\\/?/,'').split('/')[0];
+ const previousRoute=lastRenderedHash.replace(/^#\/?/,'').split('/')[0];
  const leavingEditor=previousRoute==='compose'&&routeFromHash()!=='compose';
  if(leavingEditor&&!approvedComposeDeparture&&!confirmComposeDeparture()){
   history.replaceState(history.state,'',lastRenderedHash||'#/compose');
