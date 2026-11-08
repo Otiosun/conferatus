@@ -4,6 +4,7 @@ Synthetic beforeunload dispatch exercises listener wiring, NOT browser mobile
 shutdown behavior or guaranteed recovery; browsers can skip this event.
 """
 from pathlib import Path
+import os
 from playwright.sync_api import sync_playwright
 
 html=(Path(__file__).resolve().parents[1]/'dist/CONFERATUS_demo_offline.html').read_text(encoding='utf-8')
@@ -13,7 +14,9 @@ probe="""() => {
   return event.defaultPrevented;
 }"""
 with sync_playwright() as p:
- browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ engine=os.getenv('CONFFRATUS_TEST_ENGINE','chromium')
+ browser=(p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+          if engine=='chromium' else getattr(p,engine).launch(headless=True))
  for width in (320,390,740,1280):
   page=browser.new_page(viewport={'width':width,'height':844})
   page.set_default_timeout(6500)
