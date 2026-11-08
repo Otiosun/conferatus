@@ -39,3 +39,14 @@ Os testes Node `tests/rich-blocks.test.mjs` devem provar: migração e volta sem
 4. Somente após esses gates, liberar divisor realmente editável. Tabelas e controles por parágrafo requerem extensão do esquema e homologação específica. A página de votação permanece uma decisão separada D1–D6.
 
 **Estado:** experimento de modelo, sem UI ativa, sem contagem de etapa encerrada e sem `main` alterada.
+
+
+## Evidência de execução e correções — 08/11/2026
+
+A CI do commit inicial `13e10b7` encontrou erros TS2571 ao ler vizinhos de tipos desconhecidos; corrigidos com narrowing explícito no `f8a0c70`. A segunda execução detectou um **defeito real de aliasing** na operação imutável: inserir divisor reutilizava objetos de parágrafos, de modo que alterar a cópia também alterava a versão anterior. O commit `2536215` introduziu cópia profunda dos metadados e marcas ao inserir/remover blocos e corrigiu a contagem de comprimento considerando apenas as separações de parágrafo. O teste que revelou o defeito foi mantido, não suavizado.
+
+GitHub Actions [42447625273](https://github.com/Otiosun/conferatus/actions/runs/42447625273), SHA exato `2536215c05746566d6a05f9dd27601b2cf7917a4`: **SUCCESS** para `npm run build` (TypeScript e 64/64 Node, incluindo sete novos testes de blocos), 36/36 scripts Chromium históricos e PostgreSQL descartável. A matriz extra Firefox/WebKit foi `SKIPPED` intencionalmente: ainda não existe nenhum controle de bloco no aplicativo nem mudança de API de navegador.
+
+Evidência arquivada com CRC e SHA-256 idênticos ao Actions: [HTML do CI (104.699 bytes)](https://drive.google.com/file/d/1J-k_IpeZIwBVVF7PGUyD4ApGl11bnmdP/view); [33 capturas de regressão (2.828.560 bytes)](https://drive.google.com/file/d/1ZFqPDdE-NXYYiZBhdwrBWTamJSCGsVKr/view). O HTML da aplicação permanece funcionalmente inalterado; as capturas mostram regressões anteriores, **não uma tela de divisor**.
+
+**Decisão mantém-se:** schema/codec experimental comprovado no domínio, sem ativação em `Draft`, `sessionStorage` ou UI; não equivaler a entrega do editor de blocos, não marcar etapas 04/06/07 e não alterar `main`.
