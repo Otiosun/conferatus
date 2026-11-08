@@ -1307,3 +1307,12 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .workflow-rich-links p{margin:0;font-size:12px;color:#4a4f64;overflow-wrap:anywhere}
 .workflow-rich-editor a,.workflow-review-body a{color:#3446a4;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
 .workflow-review-body a:focus-visible{outline:2px solid #515dc7;outline-offset:2px}
+
+/* 2026-11-08 fidelity/comfort: keep seven day columns usable at 320 CSS px.
+   Preserve the reference's full grid without horizontal page scrolling. At 280px,
+   the compact fallback is still >=24px per WCAG 2.5.8, but physical touch QA
+   remains necessary; do not claim complete WCAG compliance from this rule. */
+@media(max-width:350px){
+  .calendar-hero{margin-inline:-10px;padding-inline:2px}
+  .calendar-grid{gap:0}
+}
