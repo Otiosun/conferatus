@@ -24,9 +24,11 @@ with sync_playwright() as p:
         page.set_content(html)
         # The normal preview must never present a simulated choice as an official vote.
         assert page.locator('.preview-vote-lab').count() == 0, width
-        note = page.locator('.ballot-preview-disclosure[role="note"]')
-        assert note.is_visible(), width
-        assert note.inner_text().strip() == 'Resultados de exemplo', width
+        # A single permanent disclosure is clearer than two adjacent labels.
+        assert page.locator('.ballot-preview-disclosure').count() == 0, width
+        footer = page.locator('.footer-demo')
+        assert footer.is_visible(), width
+        assert 'DADOS FICTÍCIOS' in footer.inner_text().upper(), width
         before = page.evaluate("window.__previewStorageWrites.length")
         page.locator('[data-action="toggle-demo"]').click()
         assert 'Selecione uma opção para testar a votação.' in page.locator('.demo-ballot').inner_text(), width
@@ -47,6 +49,14 @@ with sync_playwright() as p:
         assert page.locator('[data-action="toggle-tools"]').count()==0,width
         page.locator('.footer-nav').click()
         page.locator('[data-route="calendar"]').first.click()
+        # The fixed sample predates per-deliberation methods: do not present
+        # its missing field as a real legacy record or invent a voting mode.
+        sample = page.locator('[data-schedule="sample-1"]')
+        if sample.get_attribute('aria-expanded') != 'true':
+            sample.click()
+        sample_details = page.locator('#schedule-details-sample-1').inner_text()
+        assert 'Modalidade:' not in sample_details, (width, sample_details)
+        assert 'Não informada (registro anterior)' not in sample_details, width
         action=page.locator('[data-action="open-schedule"]')
         assert action.inner_text()=='Iniciar uma Votação',width  # Megalos' prototype wording stays intact
         note=page.locator('.calendar-preview-disclosure[role="note"]')
