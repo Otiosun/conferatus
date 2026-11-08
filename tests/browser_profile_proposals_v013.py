@@ -44,6 +44,36 @@ with sync_playwright() as p:
   page.locator('.footer-nav').click();page.locator('[data-route=proposals]').first.click()
   page.locator('.workflow-tabs button[data-route=profile]').click()
   assert page.evaluate('location.hash')=='#/profile/m01',(width,'wrong member selected for author history')
+  # Original Megalos profile composition: two real actions on the author's
+  # Proposições tab, not inert copies of the separate proposals buttons.
+  page.locator('[data-tab=proposicoes]').click()
+  actions=page.locator('.profile-workflow-actions')
+  actions.wait_for(state='visible')
+  assert actions.locator('button').count()==2,width
+  assert all(button.bounding_box()['height']>=44 for button in actions.locator('button').all()),width
+  actions.locator('[data-action=invite-socii-from-profile]').click()
+  page.locator('#invite-socii-form').wait_for(state='visible')
+  assert page.evaluate('location.hash')=='#/proposals',width
+  page.locator('.workflow-tabs button[data-route=profile]').click()
+  page.locator('[data-tab=proposicoes]').click()
+  page.locator('.profile-workflow-actions [data-action=new-proposal]').click()
+  page.locator('#draft-title').wait_for(state='visible')
+  assert page.locator('.workflow-editor-actions [data-route=profile]').inner_text()=='Voltar ao perfil',width
+  page.locator('.workflow-editor-actions [data-route=profile]').click()
+  page.locator('.profile-workflow-actions').wait_for(state='visible')
+  assert page.evaluate('location.hash')=='#/profile/m01',width
+  # A different fictitious person's profile cannot expose authoring privileges.
+  page.locator('.footer-nav').click();page.locator('[data-route=members]').first.click()
+  page.locator('.member-item[data-member="m04"]').click()
+  page.locator('[data-tab=proposicoes]').click()
+  assert page.locator('.profile-workflow-actions').count()==0,width
+  # Calendar day targets gain an ergonomic 44px footprint on 320px+ screens.
+  page.locator('.footer-nav').click();page.locator('[data-route=calendar]').first.click()
+  day=page.locator('.calendar-day').first
+  day.wait_for(state='visible')
+  rect=day.bounding_box()
+  assert rect['width']>=44 and rect['height']>=44,(width,rect)
+  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
   assert not errors,(width,errors)
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
   page.close()
