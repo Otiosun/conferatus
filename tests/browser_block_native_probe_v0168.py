@@ -18,6 +18,7 @@ p{font:16px/1.5 sans-serif}hr{border:0;border-top:1px solid #888}</style>
 </head><body><main><div id="editor" role="textbox" aria-multiline="true"
 contenteditable="true"><p id="first">Antes</p><hr contenteditable="false">
 <p id="second">Depois</p></div></main><script>
+(() => {
 window.__events = [];
 const editor=document.getElementById('editor');
 for(const type of ['beforeinput','input','compositionstart','compositionend']){
@@ -30,6 +31,7 @@ for(const type of ['beforeinput','input','compositionstart','compositionend']){
   });
  });
 }
+})();
 </script></body></html>"""
 
 def fresh(page):
