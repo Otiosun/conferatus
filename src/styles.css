@@ -1316,3 +1316,16 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
   .calendar-hero{margin-inline:-10px;padding-inline:2px}
   .calendar-grid{gap:0}
 }
+
+/* Mobile readability: original controls are still in the same positions, but
+   navigational labels should not require deciphering 10–11px text. Changes
+   do not affect fixture/result typography or the Academy visual identity. */
+@media(max-width:540px){
+ .profile-head .tabs .tab,
+ .overview-tabs .tab,
+ .workflow-profile .workflow-tabs .tab,
+ .search-trigger,
+ .footer-nav,
+ .section-toggle,
+ .proposal-trigger{font-size:12px;}
+}
