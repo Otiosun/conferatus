@@ -1,0 +1,41 @@
+# Decisão 2026-11-08 — modelo de blocos versionados (prova isolada)
+
+## Problema observado
+
+O editor atual mantém `Draft.body` como texto simples e `Draft.bodyRuns` como marcas por trecho. `runsFromEditable()` extrai apenas texto e formatação, ignorando nós sem conteúdo textual. Um `<hr>` introduzido no `contenteditable` desapareceria do registro após salvar e reabrir. Inserir um botão sem contrato de persistência violaria as Leis 5, 15, 16 e 21 de `AGENTS.md`.
+
+**Objetivo deste checkpoint:** elaborar, codificar e testar o modelo **fora da aplicação e do bundle público**, sem abrir um controle visual novo e sem converter registros reais ou sintéticos armazenados na sessão. Não houve alteração em voto, regras, Academy, autenticação, banco ou `main`.
+
+## Pesquisa de engenharia (08/11/2026)
+
+| Fonte técnica | Evidência relevante | Consequência |
+|---|---|---|
+| ProseMirror — Guide, https://prosemirror.net/docs/guide/ | Parágrafos são blocos com texto/marcas; `horizontal_rule` é um bloco folha sem texto, separado das marks | Modelar divisor como nó estrutural, nunca como string HTML em `bodyRuns` |
+| ProseMirror — esquema básico, https://github.com/ProseMirror/prosemirror-schema-basic/blob/master/src/schema-basic.ts | `doc` define a sequência permitida; `paragraph` e `horizontal_rule` são nós distintos | Validar ordem, atributos, tipo, tamanho e versão do documento |
+| Lexical — Serialization, https://lexicaljs.com/docs/serialization/ | O estado estruturado pode ser serializado em JSON a partir de nós | Usar esquema JSON tipado/versionado, sem armazenar DOM/HTML |
+| MDN — `execCommand`, https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand | API obsoleta e com diferenças entre browsers; às vezes preserva o undo nativo | Não estender `execCommand` com `insertHorizontalRule` sem provar seleção, edição, desfazer, export e reabertura |
+
+Foram consideradas (1) acrescentar `<hr>` ao editor atual; (2) substituir imediatamente a edição por Lexical/ProseMirror/Tiptap; (3) fazer um codec mínimo de blocos versionados em isolamento. Escolhida **(3)**, pois (1) perde o nó no esquema antigo e (2) reescreveria funcionalidades já aprovadas, custos e dependências, sem homologação e plano de migração. Nenhum pacote novo é introduzido.
+
+## Contrato experimental V1
+
+- `RichBlockDocumentV1` aceita apenas `{version:1,blocks:[...]}` mais `layout?` validado. Blocos válidos: `paragraph` com `text` e `runs?` já validados pelo módulo oficial; `horizontalRule` como nó sem atributos.
+- `paragraph.text` não contém quebras de linha, pois cada separação é representada por outro parágrafo. Parágrafos vazios e quebras de linha finais são preservados.
+- Máximo de 1.024 blocos, 2.048 runs e 200 mil unidades UTF-16 de texto; atributos adicionais, CSS, HTML, URLs proibidas, nós desconhecidos e divisor em posições inválidas são rejeitados.
+- `migrateLegacyRichText()` recebe **cópia** do `body`, `bodyRuns?` e `bodyLayout?`, separa em parágrafos preservando o texto/cores/fonts/marcas e links HTTP(S) já sanitizados. **Não altera `sessionStorage`**. Quebras de linha formatadas de forma incompatível são rejeitadas com motivo explícito; nunca remover marcações silenciosamente.
+- `insertHorizontalRule()` e `removeHorizontalRule()` são funções puras/imutáveis, exigem dois parágrafos adjacentes e não permitem divisor duplicado ou nas extremidades.
+- `projectRichBlocksToLegacy()` devolve texto e runs no esquema antigo **somente quando a projeção é sem perda**. Se houver divisor, retorna `{ok:false,reason:'structural-blocks'}`; não exporta silenciosamente um documento sem seu separador.
+- `renderRichBlockDocument()` é apenas uma saída de ensaio: escapa todo texto, reusa `renderRichText` e pode gerar somente `<p>` e `<hr>` conhecidos. **Não é um editor nem foi conectado à interface.**
+
+## Aceite desta prova, sem antecipar homologação
+
+Os testes Node `tests/rich-blocks.test.mjs` devem provar: migração e volta sem mudança semântica de `body`/`bodyRuns`, preservação de linhas vazias/trailing-newline e links, recusa de newline com estilo irrecuperável, operações imutáveis, serialização JSON e restauração do divisor, recusa de downgrades com perda, rejeição de entradas hostis e saída HTML escapada. O `npm run build` deve continuar executando a matriz antiga. Não dar o status de aprovado antes de consultar logs da CI vinculada ao SHA.
+
+## Próximos gates antes de integrar ao editor
+
+1. Mapear seleção por parágrafo/bloco e edição IME/clipboard/undo (Chromium, Firefox, WebKit e aparelhos físicos) sem depender de DOM acidental.
+2. Decidir onde armazenar `bodyBlocks` versionado e como migrar `Draft`, histórico, backup/importação, assinaturas Socii e revisão com recuperação de falhas.
+3. Provar alteração entre blocos, Enter, Backspace, cursor nos limites de `<hr>`, copiar/colar e exclusão com o teclado móvel. Fazer capturas e testes visuais da Megalos **antes** de disponibilizar o botão.
+4. Somente após esses gates, liberar divisor realmente editável. Tabelas e controles por parágrafo requerem extensão do esquema e homologação específica. A página de votação permanece uma decisão separada D1–D6.
+
+**Estado:** experimento de modelo, sem UI ativa, sem contagem de etapa encerrada e sem `main` alterada.
