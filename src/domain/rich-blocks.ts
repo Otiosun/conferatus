@@ -62,6 +62,7 @@ export function isRichBlockDocument(value: unknown): value is RichBlockDocumentV
   }
 
   let length = 0;
+  let paragraphCount = 0;
   let runCount = 0;
   const blocks = value.blocks as unknown[];
   for (let index = 0; index < blocks.length; index++) {
@@ -86,7 +87,7 @@ export function isRichBlockDocument(value: unknown): value is RichBlockDocumentV
       return false;
     }
 
-    length += block.text.length + (index > 0 ? 1 : 0);
+    length += block.text.length + (paragraphCount++ > 0 ? 1 : 0);
     runCount += Array.isArray(block.runs) ? block.runs.length : 0;
     if (length > MAX_TEXT_LENGTH || runCount > MAX_RUNS) return false;
   }
@@ -104,6 +105,15 @@ function copyRuns(runs: readonly RichTextRun[]): RichTextRun[] {
     ...(highlight ? { highlight } : {}),
     ...(href ? { href } : {})
   }));
+}
+
+function cloneBlock(block: RichBlock): RichBlock {
+  if (block.type === 'horizontalRule') return { type: 'horizontalRule' };
+  return {
+    type: 'paragraph',
+    text: block.text,
+    ...(block.runs ? { runs: copyRuns(block.runs) } : {})
+  };
 }
 
 function styledLineBreak(run: RichTextRun): boolean {
@@ -228,9 +238,9 @@ export function insertHorizontalRule(
   return { ok: true, value: {
     version: 1,
     blocks: [
-      ...value.blocks.slice(0, afterBlockIndex + 1),
+      ...value.blocks.slice(0, afterBlockIndex + 1).map(cloneBlock),
       { type: 'horizontalRule' },
-      ...value.blocks.slice(afterBlockIndex + 1)
+      ...value.blocks.slice(afterBlockIndex + 1).map(cloneBlock)
     ],
     ...(value.layout ? { layout: { ...value.layout } } : {})
   }};
@@ -247,7 +257,7 @@ export function removeHorizontalRule(
   }
   return { ok: true, value: {
     version: 1,
-    blocks: value.blocks.filter((_, index) => index !== blockIndex),
+    blocks: value.blocks.filter((_, index) => index !== blockIndex).map(cloneBlock),
     ...(value.layout ? { layout: { ...value.layout } } : {})
   }};
 }
