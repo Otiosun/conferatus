@@ -63,7 +63,7 @@ A menor etapa selecionada é separar **operações puras** do navegador. `splitR
 
 O diagnóstico `tests/browser_block_native_probe_v0168.py` cria um **editor sintético descartável**, diferente do site, e observa as operações nativas Enter/Backspace/undo perto de um `<hr contenteditable=false>` em Chromium, Firefox e WebKit. Salva observações em `dist/cross_engine_block_native_probe_*.json`; os resultados não são declarados homogêneos por definição, e nenhum assert contorna discrepâncias. Nunca chamar esse teste de validação de teclado móvel, IME, colagem real, edição de blocos integrada, Socii ou votação.
 
-Aceite limitado: Node garante propriedades de divisão/união/imobilidade de divisoress, e o navegador fornece observações para escolher futura estratégia de edição. Somente após teste efetivo e consentimento de design da Megalos poderá surgir botão de divisor na prévia; tabelas não entram nesta rodada.
+Aceite limitado: Node garante propriedades de divisão/união/imutabilidade de divisores, e o navegador fornece observações para escolher futura estratégia de edição. Somente após teste efetivo e consentimento de design da Megalos poderá surgir botão de divisor na prévia; tabelas não entram nesta rodada.
 
 
 ## Comportamento nativo medido e guarda experimental — 08/11/2026
@@ -73,3 +73,17 @@ A CI `42452511504` (Firefox/WebKit) produziu observações reproduzíveis em 280
 A solução mínima em `src/domain/rich-block-dom.ts` (ainda SEM importação pela UI) disponibiliza `installRuleDeletionGuard(host)` e devolve função de desinstalação. Captura Backspace na fronteira inicial do parágrafo após uma regra e Delete na fronteira final do parágrafo anterior, inclusive `beforeinput` cancelável; **não** bloqueia edição normal dentro de parágrafos nem remove regras silenciosamente. Requer estrutura DOM conhecida por `data-rich-block=paragraph` e `data-rich-block=horizontalRule`, sem CSS dinâmico ou HTML arbitrário. Se IME/autocorreção produzir evento não cancelável, será necessária validação posterior contra snapshot modelado, ainda não implementada.
 
 `tests/browser_block_deletion_guard_v0169.py` injeta o JS **compilado** do módulo no ambiente isolado; demonstra proteção Backspace/Delete, edição normal e evento `beforeinput` sem teclado, em 280/390/1280 px nos três motores. `cross-browser-lab` e validação Chromium foram ampliados para executar este teste. Gate: CI no SHA exato, comparação de logs e evidência JSON; teste não prova acessibilidade/IME/clipboard reais e não habilita botão no Conffratus.
+
+
+## CI final, divergência confirmada e evidências — 08/11/2026
+
+O SHA funcional final `34e5bb9fd1b2f712e32a984c9e2ecd8d9f14ab4b` passou [GitHub Actions 42452854771](https://github.com/Otiosun/conferatus/actions/runs/42452854771) em todos os jobs: **70/70 testes Node**, **38/38 scripts Chromium** (36 anteriores + 2 de blocos), PostgreSQL descartável PASS e `cross-browser-lab` Firefox/WebKit PASS. A saída dos três motores incluiu o teste do módulo compilado da guarda em 280,390,1280 CSS px, confirmando proteção de ambos os comandos de exclusão e edição comum não bloqueada. Nenhuma suíte anterior foi desligada.
+
+A primeira execução cross-browser `42452375509` havia encontrado redeclaração de `const editor` na recarga do harness via `set_content`; a correção IIFE no commit `7d542d4` não alterou código do site. A CI `42452511504` passou para a versão do diagnóstico. O relatório nativo prova Firefox manteve `HR` enquanto WebKit o excluiu (3/3 tamanhos), e uma reprodução local Chromium, com a mesma estrutura mínima, também excluiu `HR` sem guarda. O experimento com guarda passou em todos os motores, mas **não demonstra recuperação de eventos IME não canceláveis** nem teste físico de hardware.
+
+Evidências do SHA final na pasta privada Komekko, conferidas sem erro CRC com os hashes do GitHub:
+- [HTML do CI, 104.699 bytes](https://drive.google.com/file/d/1ZZAZcpcrF4CddLSQ4lMxGxH4wpg8T4ux/view), SHA-256 `c17b74d3794c65b988380f696d6cb52743d4fd6d5d3118430b235c4f57b321c9`.
+- [33 capturas das regressões existentes, ZIP 2.859.838 bytes](https://drive.google.com/file/d/11647Nxb_-qEotiJPYcOh5Hb9NLuwV0KA/view), SHA-256 `b2911b5b5bb5266a01197f1a4462019495aa596d4ad24ecc21a6a5f0d8523b97`.
+- [18 itens multimotor Firefox/WebKit, ZIP 206.116 bytes](https://drive.google.com/file/d/1yEAb3eVyWz4JxOi24wuBzJr4x8ea0kf-/view), SHA-256 `c3b00d09b5a4c44369e5c6a9e404f0778b961f374c97b9119499f642048fa16c`. Inclui os JSONs nativos e da guarda.
+
+**Limite adicional detectado na revisão fria:** `splitRichParagraph` recusa divisão dentro de um par substituto UTF-16, mas não verifica ainda todos os limites de grafemas (p.ex., letra + acento combinante ou emoji com ZWJ). Antes da UI, comparar `Intl.Segmenter` nativo (MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter , Baseline abril/2024) e fallback; não declarar segmentação de grafemas completa. Mantida a decisão de não ativar divisor antes de estado persistente, snapshot/restore para IME, histórico de undo, clipboard, seleção e aceitação Megalos.
