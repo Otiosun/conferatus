@@ -113,6 +113,25 @@ function hasPendingComposeChanges():boolean{
 function confirmComposeDeparture():boolean{
  return !hasPendingComposeChanges()||window.confirm('Esta redação tem alterações não salvas. Deseja sair e descartá-las?');
 }
+// The route guard protects in-app navigation. A separate, conditional
+// beforeunload listener also warns when reloading/closing a dirty composer.
+// Browsers (especially mobile) may skip this event: it is not an autosave.
+let composerUnloadListenerAttached=false;
+function warnBeforeComposerUnload(event: BeforeUnloadEvent) {
+ if(!hasPendingComposeChanges())return;
+ event.preventDefault();
+ event.returnValue=' ';
+}
+function refreshComposerUnloadGuard(){
+ const pending=hasPendingComposeChanges();
+ if(pending&&!composerUnloadListenerAttached){
+  window.addEventListener('beforeunload',warnBeforeComposerUnload);
+  composerUnloadListenerAttached=true;
+ }else if(!pending&&composerUnloadListenerAttached){
+  window.removeEventListener('beforeunload',warnBeforeComposerUnload);
+  composerUnloadListenerAttached=false;
+ }
+}
 function navigate(route: Route, memberId?: string) {
  if(routeFromHash()==='compose'&&route!=='compose'){
   if(!confirmComposeDeparture()){
@@ -475,6 +494,7 @@ function syncRichEditor(){
   field.removeAttribute('aria-invalid');
   editor.removeAttribute('aria-invalid');
  }
+ refreshComposerUnloadGuard();
 }
 let currentDraftId='';
 let finishedProposalReturnTo:'proposals'|'calendar'|'overview'|'profile'='proposals';
@@ -768,6 +788,7 @@ function render() {
   workflowAnnouncer.textContent = workflowNotice;
  }
  if (preserveScroll) window.scrollTo({top:previousScroll,behavior:'instant'});
+ refreshComposerUnloadGuard();
 }
 // Announce calendar filtering and month changes through the existing stable
 // status region. Recreating an aria-live element during render() does not
@@ -1359,6 +1380,7 @@ document.addEventListener('submit',(event)=>{
 document.addEventListener('input',(event)=>{
  const target=event.target;
  if(target instanceof HTMLElement&&target.id==='draft-rich-body')syncRichEditor();
+ if(target instanceof HTMLElement && target.closest('#compose-proposal-form'))refreshComposerUnloadGuard();
  // An empty draft save is invalid only while *both* fields are blank. Do not
  // leave a stale error attached after the user supplies either field.
  if((target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) &&
