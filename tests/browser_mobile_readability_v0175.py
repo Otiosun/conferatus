@@ -4,11 +4,14 @@ Sizes and text only: automated browser checks cannot certify actual visual comfo
 or assistive-technology behavior on the user's device.
 """
 from pathlib import Path
+import os
 from playwright.sync_api import sync_playwright
 
 html=(Path(__file__).resolve().parents[1]/'dist/CONFERATUS_demo_offline.html').read_text(encoding='utf-8')
 with sync_playwright() as p:
- browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ engine=os.getenv('CONFFRATUS_TEST_ENGINE','chromium')
+ browser=(p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+          if engine=='chromium' else getattr(p,engine).launch(headless=True))
  cases={
   'members':['.profile-head .tabs .tab','.search-trigger'],
   'proposals':['.workflow-profile .workflow-tabs .tab','.proposal-trigger'],
@@ -16,7 +19,7 @@ with sync_playwright() as p:
   'governance':['.section-toggle']
  }
  for width in (280,320,390,540,740,1280):
-  page=browser.new_page(viewport={'width':width,'height':844},has_touch=True,is_mobile=True)
+  page=browser.new_page(viewport={'width':width,'height':844},**({'has_touch':True,'is_mobile':True} if engine=='chromium' else {}))
   page.set_default_timeout(6500)
   errors=[]
   page.on('pageerror',lambda error:errors.append(str(error)))
