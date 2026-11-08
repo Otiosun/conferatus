@@ -275,12 +275,17 @@ export function renderRichBlockDocument(value: unknown): string | undefined {
 }
 
 
-/** Native caret offsets use UTF-16; never divide one emoji into two paragraphs. */
-function isInsideSurrogatePair(text: string, offset: number): boolean {
-  if (offset <= 0 || offset >= text.length) return false;
-  const left = text.charCodeAt(offset - 1);
-  const right = text.charCodeAt(offset);
-  return left >= 0xD800 && left <= 0xDBFF && right >= 0xDC00 && right <= 0xDFFF;
+/**
+ * Cursor offsets are UTF-16; a split is allowed only at an extended grapheme
+ * boundary. Unicode sequences such as "e" + combining accent, flag pairs and
+ * ZWJ emoji are indivisible even when their surrogate pairs are individually valid.
+ * Fail closed on older engines: never guess an interior boundary.
+ */
+function isGraphemeBoundary(text: string, offset: number): boolean {
+  if (offset === 0 || offset === text.length) return true;
+  if (typeof Intl.Segmenter !== 'function') return false;
+  return new Intl.Segmenter('pt-BR', { granularity: 'grapheme' })
+    .segment(text).containing(offset)?.index === offset;
 }
 
 /** Copy arbitrary slices of inline marks without creating a dangling URL or style. */
@@ -315,7 +320,7 @@ export function splitRichParagraph(
   const block = value.blocks[blockIndex];
   if (!Number.isInteger(blockIndex) || !block || block.type !== 'paragraph' ||
       !Number.isInteger(offset) || offset < 0 || offset > block.text.length ||
-      isInsideSurrogatePair(block.text, offset)) {
+      !isGraphemeBoundary(block.text, offset)) {
     return { ok: false, reason: 'invalid-position' };
   }
 

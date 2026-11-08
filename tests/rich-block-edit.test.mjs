@@ -115,3 +115,58 @@ test('reject invalid offsets, invalid documents and 1024-block overflow without 
  assert.deepEqual(joinRichParagraphs({version:1,blocks:[{type:'table'}]},0),
   {ok:false,reason:'invalid-document'});
 });
+
+
+test('split refuses combining accents, skin tones, joined emoji and flags as partial graphemes',()=>{
+ const examples=[
+  {body:'e\u0301x',rejected:[1],accepted:[0,2,3]},
+  {body:'👩🏽‍💻x',rejected:[2,3,4,5,6],accepted:[0,7,8]},
+  {body:'🇧🇷!',rejected:[1,2,3],accepted:[0,4,5]},
+  {body:'a\u0308\u0301z',rejected:[1,2],accepted:[0,3,4]}
+ ];
+ for(const {body,rejected,accepted} of examples){
+  const from=migrateLegacyRichText({body});
+  assert.equal(from.ok,true,body);
+  for(const offset of rejected){
+   assert.deepEqual(splitRichParagraph(from.value,0,offset),
+    {ok:false,reason:'invalid-position'},body+' offset '+offset);
+  }
+  for(const offset of accepted){
+   const split=splitRichParagraph(from.value,0,offset);
+   assert.equal(split.ok,true,body+' offset '+offset);
+   const joined=joinRichParagraphs(split.value,0);
+   assert.deepEqual(joined,{ok:true,value:from.value});
+  }
+ }
+});
+
+test('split also rejects a grapheme boundary hidden inside different formatting runs',()=>{
+ const body='e\u0301 pronto';
+ const rich=migrateLegacyRichText({body,bodyRuns:[
+  {text:'e',marks:['bold']},
+  {text:'\u0301 pronto',marks:['italic'],href:'https://example.com/'}
+ ]});
+ assert.equal(rich.ok,true);
+ const unchanged=structuredClone(rich.value);
+ assert.deepEqual(splitRichParagraph(rich.value,0,1),
+  {ok:false,reason:'invalid-position'});
+ const okay=splitRichParagraph(rich.value,0,2);
+ assert.equal(okay.ok,true);
+ assert.equal(projectRichBlocksToLegacy(joinRichParagraphs(okay.value,0).value).value.body,body);
+ assert.deepEqual(rich.value,unchanged);
+});
+
+test('unavailable grapheme segmenter fails closed without affecting empty/end splits',()=>{
+ const from=migrateLegacyRichText({body:'Abc'}).value;
+ const descriptor=Object.getOwnPropertyDescriptor(Intl,'Segmenter');
+ assert.equal(typeof Intl.Segmenter,'function');
+ try{
+  Object.defineProperty(Intl,'Segmenter',{configurable:true,writable:true,value:undefined});
+  assert.deepEqual(splitRichParagraph(from,0,1),
+   {ok:false,reason:'invalid-position'});
+  assert.equal(splitRichParagraph(from,0,0).ok,true);
+  assert.equal(splitRichParagraph(from,0,3).ok,true);
+ }finally{
+  if(descriptor)Object.defineProperty(Intl,'Segmenter',descriptor);
+ }
+});
