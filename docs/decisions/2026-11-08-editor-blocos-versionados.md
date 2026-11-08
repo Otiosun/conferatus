@@ -50,3 +50,17 @@ GitHub Actions [42447625273](https://github.com/Otiosun/conferatus/actions/runs/
 Evidência arquivada com CRC e SHA-256 idênticos ao Actions: [HTML do CI (104.699 bytes)](https://drive.google.com/file/d/1J-k_IpeZIwBVVF7PGUyD4ApGl11bnmdP/view); [33 capturas de regressão (2.828.560 bytes)](https://drive.google.com/file/d/1ZFqPDdE-NXYYiZBhdwrBWTamJSCGsVKr/view). O HTML da aplicação permanece funcionalmente inalterado; as capturas mostram regressões anteriores, **não uma tela de divisor**.
 
 **Decisão mantém-se:** schema/codec experimental comprovado no domínio, sem ativação em `Draft`, `sessionStorage` ou UI; não equivaler a entrega do editor de blocos, não marcar etapas 04/06/07 e não alterar `main`.
+
+
+## Operações de cursor e investigação entre motores — 08/11/2026
+
+Fontes adicionais consultadas antes da implementação:
+- MDN `beforeinput` (https://developer.mozilla.org/en-US/docs/Web/API/Element/beforeinput_event): nem toda modificação dispara um evento cancelável; IME, autocorreção e autocomplete podem escapar dos handlers. Portanto, `preventDefault` isolado não garante integridade em celulares.
+- MDN `InputEvent.inputType` (https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType): permite observar `insertParagraph`, `deleteContentBackward` e edição de texto, mas não normaliza o DOM resultante.
+- ProseMirror GapCursor (https://prosemirror.net/docs/ref/version/0.24.0.html e https://github.com/ProseMirror/prosemirror-view/blob/master/src/selection.ts): nós folha como `horizontal_rule` precisam de estratégia explícita de cursor; diferenças históricas no WebKit entre nós não editáveis exigem teste de motor, não suposição.
+
+A menor etapa selecionada é separar **operações puras** do navegador. `splitRichParagraph(document, blockIndex, offset)` e `joinRichParagraphs(document, leftIndex)` preservam texto e marcas, rejeitam índices inválidos, recusam unir parágrafos separados por divisor e não editam referências do documento de origem. `offset` é UTF-16, com guarda para não cortar um par de substitutos de emoji. A conversão para o editor atual não foi habilitada.
+
+O diagnóstico `tests/browser_block_native_probe_v0168.py` cria um **editor sintético descartável**, diferente do site, e observa as operações nativas Enter/Backspace/undo perto de um `<hr contenteditable=false>` em Chromium, Firefox e WebKit. Salva observações em `dist/cross_engine_block_native_probe_*.json`; os resultados não são declarados homogêneos por definição, e nenhum assert contorna discrepâncias. Nunca chamar esse teste de validação de teclado móvel, IME, colagem real, edição de blocos integrada, Socii ou votação.
+
+Aceite limitado: Node garante propriedades de divisão/união/imobilidade de divisoress, e o navegador fornece observações para escolher futura estratégia de edição. Somente após teste efetivo e consentimento de design da Megalos poderá surgir botão de divisor na prévia; tabelas não entram nesta rodada.

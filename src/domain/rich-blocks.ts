@@ -273,3 +273,108 @@ export function renderRichBlockDocument(value: unknown): string | undefined {
   return '<div class="workflow-block-preview"' +
     (style ? ' style="' + style + '"' : '') + '>' + html + '</div>';
 }
+
+
+/** Native caret offsets use UTF-16; never divide one emoji into two paragraphs. */
+function isInsideSurrogatePair(text: string, offset: number): boolean {
+  if (offset <= 0 || offset >= text.length) return false;
+  const left = text.charCodeAt(offset - 1);
+  const right = text.charCodeAt(offset);
+  return left >= 0xD800 && left <= 0xDBFF && right >= 0xDC00 && right <= 0xDFFF;
+}
+
+/** Copy arbitrary slices of inline marks without creating a dangling URL or style. */
+function sliceParagraphRuns(
+  paragraph: ParagraphBlock, start: number, end: number
+): RichTextRun[] | undefined {
+  if (!paragraph.runs || end === start) return undefined;
+  const result: RichTextRun[] = [];
+  let position = 0;
+  for (const run of paragraph.runs) {
+    const from = Math.max(position, start);
+    const to = Math.min(position + run.text.length, end);
+    if (from < to) {
+      result.push({
+        ...copyRuns([run])[0]!,
+        text: run.text.slice(from - position, to - position)
+      });
+    }
+    position += run.text.length;
+  }
+  return normalizeRichTextRuns(result);
+}
+
+/**
+ * Split a paragraph at a valid cursor offset. Existing marks are retained on
+ * each side; the newline becomes a structural boundary, not an inline mark.
+ */
+export function splitRichParagraph(
+  value: unknown, blockIndex: number, offset: number
+): Result<RichBlockDocumentV1, 'invalid-document' | 'invalid-position' | 'limit-exceeded'> {
+  if (!isRichBlockDocument(value)) return { ok: false, reason: 'invalid-document' };
+  const block = value.blocks[blockIndex];
+  if (!Number.isInteger(blockIndex) || !block || block.type !== 'paragraph' ||
+      !Number.isInteger(offset) || offset < 0 || offset > block.text.length ||
+      isInsideSurrogatePair(block.text, offset)) {
+    return { ok: false, reason: 'invalid-position' };
+  }
+
+  const left: ParagraphBlock = {
+    type: 'paragraph', text: block.text.slice(0, offset),
+    ...(sliceParagraphRuns(block, 0, offset) ?
+      { runs: sliceParagraphRuns(block, 0, offset) } : {})
+  };
+  const right: ParagraphBlock = {
+    type: 'paragraph', text: block.text.slice(offset),
+    ...(sliceParagraphRuns(block, offset, block.text.length) ?
+      { runs: sliceParagraphRuns(block, offset, block.text.length) } : {})
+  };
+  const next: RichBlockDocumentV1 = {
+    version: 1,
+    blocks: [
+      ...value.blocks.slice(0, blockIndex).map(cloneBlock),
+      left, right,
+      ...value.blocks.slice(blockIndex + 1).map(cloneBlock)
+    ],
+    ...(value.layout ? { layout: { ...value.layout } } : {})
+  };
+  return isRichBlockDocument(next)
+    ? { ok: true, value: next } : { ok: false, reason: 'limit-exceeded' };
+}
+
+/** Backspace at a paragraph boundary may merge paragraphs, never erase a rule. */
+export function joinRichParagraphs(
+  value: unknown, leftIndex: number
+): Result<RichBlockDocumentV1, 'invalid-document' | 'invalid-position' | 'limit-exceeded'> {
+  if (!isRichBlockDocument(value)) return { ok: false, reason: 'invalid-document' };
+  const left = value.blocks[leftIndex];
+  const right = value.blocks[leftIndex + 1];
+  if (!Number.isInteger(leftIndex) || !left || left.type !== 'paragraph' ||
+      !right || right.type !== 'paragraph') {
+    return { ok: false, reason: 'invalid-position' };
+  }
+
+  const needsRuns = left.runs !== undefined || right.runs !== undefined;
+  const combined = needsRuns ? normalizeRichTextRuns([
+    ...(left.runs ? copyRuns(left.runs) :
+       left.text ? [{ text: left.text, marks: [] }] : []),
+    ...(right.runs ? copyRuns(right.runs) :
+       right.text ? [{ text: right.text, marks: [] }] : [])
+  ]) : undefined;
+  const merged: ParagraphBlock = {
+    type: 'paragraph',
+    text: left.text + right.text,
+    ...(combined && combined.length ? { runs: combined } : {})
+  };
+  const next: RichBlockDocumentV1 = {
+    version: 1,
+    blocks: [
+      ...value.blocks.slice(0, leftIndex).map(cloneBlock),
+      merged,
+      ...value.blocks.slice(leftIndex + 2).map(cloneBlock)
+    ],
+    ...(value.layout ? { layout: { ...value.layout } } : {})
+  };
+  return isRichBlockDocument(next)
+    ? { ok: true, value: next } : { ok: false, reason: 'limit-exceeded' };
+}

@@ -90,6 +90,7 @@ jobs:
             tests/browser_rich_layout_v0165.py \
             tests/browser_rich_indices_v0166.py \
             tests/browser_rich_links_v0167.py \
+            tests/browser_block_native_probe_v0168.py \
             tests/browser_calendar_v012.py \
             tests/browser_drafts_v011.py \
             tests/browser_socii_progress_v014.py \
@@ -159,6 +160,7 @@ jobs:
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_rich_layout_v0165.py
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_rich_indices_v0166.py
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_rich_links_v0167.py
+            CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_block_native_probe_v0168.py
           done
       - name: Upload optional multi-engine evidence
         if: always()
