@@ -97,6 +97,7 @@ jobs:
             tests/browser_compose_exit_guard_v0172.py \
             tests/browser_full_workflow_journey_v0173.py \
             tests/browser_unsaved_unload_v0174.py \
+            tests/browser_mobile_readability_v0175.py \
             tests/browser_calendar_v012.py \
             tests/browser_drafts_v011.py \
             tests/browser_socii_progress_v014.py \
