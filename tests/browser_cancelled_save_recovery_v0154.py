@@ -49,6 +49,7 @@ with sync_playwright() as p:
         row = page.locator('.calendar-item').filter(has_text=SCHEDULE['title'])
         row.locator('[data-schedule]').click()
         row.locator('[data-cancel-schedule]').click()
+        row.locator('[data-confirm-cancel-schedule]').click()
         # Must be honest about failed persistence and offer a recovery action.
         assert page.locator('.workflow-status').count() == 1, width
         assert 'não foi possível salvar' in page.locator('.workflow-status').inner_text().lower(), width
