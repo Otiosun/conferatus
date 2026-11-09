@@ -55,6 +55,7 @@ with sync_playwright() as p:
         if 'calendar-item--expanded' not in (item.get_attribute('class') or ''):
             item.locator('[data-schedule]').click()
         item.locator('[data-cancel-schedule]').click()
+        item.locator('[data-confirm-cancel-schedule]').click()
 
         saved = page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:deliberations-v010"))')
         assert {x['title']: x['status'] for x in saved} == {
