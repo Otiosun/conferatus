@@ -1,7 +1,7 @@
 """Explicit backup/restore of fictional local workflows only. No Academy integration."""
 from pathlib import Path
 import json
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 ROOT=Path(__file__).resolve().parents[1]
 HTML=(ROOT/'dist/CONFFRATUS_demo_offline.html').read_text(encoding='utf-8')
@@ -28,9 +28,26 @@ def menu(page):
  page.locator('.menu-item[data-route="proposals"]').click()
  page.locator('[data-action="export-local-archive"]').wait_for(state='visible')
 
-def upload(page,text):
- page.locator('#archive-file-input').set_input_files({
-  'name':'copia.json','mimeType':'application/json','buffer':text.encode('utf-8')})
+def upload(page,text,expected_message=None,decision=None):
+ # file.text() is asynchronous: the previous status may still be visible
+ # after set_input_files returns. Wait for this input to be replaced by render().
+ previous_input=page.locator('#archive-file-input').element_handle()
+ def select_file():
+  page.locator('#archive-file-input').set_input_files({
+   'name':'copia.json','mimeType':'application/json','buffer':text.encode('utf-8')})
+ if decision is None:
+  select_file()
+ else:
+  with page.expect_event('dialog') as confirmation:
+   page.once('dialog',lambda dialog:dialog.accept() if decision=='accept' else dialog.dismiss())
+   select_file()
+  assert 'Restaurar' in confirmation.value.message
+ if decision=='dismiss':
+  assert previous_input.evaluate('(input)=>input.isConnected'), 'Cancel must leave form intact'
+  return
+ page.wait_for_function('(input)=>!input.isConnected',arg=previous_input)
+ if expected_message:
+  expect(page.locator('.local-archive-message')).to_contain_text(expected_message)
 
 def message(page):
  page.locator('.local-archive-message').wait_for(state='visible')
@@ -69,20 +86,22 @@ with sync_playwright() as pw:
   assert 'Guarde' in message(page),width
 
   # Invalid JSON, unknown archive version and duplicate IDs are never imported.
-  for content in ('{not json}',archive([NEW],[],version=88),archive([NEW,NEW],[]),archive([NEW],[{**ACTIVE,'proposalId':'not-there','sectionId':'unknown-section'}])):
-   upload(page,content)
-   assert 'não' in message(page).lower() or 'inválid' in message(page).lower() or 'repetido' in message(page).lower(),(width,message(page))
+  for content,expected in (
+   ('{not json}','não contém JSON válido'),
+   (archive([NEW],[],version=88),'versão de exportação compatível'),
+   (archive([NEW,NEW],[]),'IDs repetidos'),
+   (archive([NEW],[{**ACTIVE,'proposalId':'not-there','sectionId':'unknown-section'}]),'IDs repetidos'),
+  ):
+   upload(page,content,expected_message=expected)
    assert page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:proposals-v010"))')[0]['id']=='draft-existing',width
 
   # User can refuse the replacement without changing anything.
-  page.once('dialog',lambda dialog:dialog.dismiss())
-  upload(page,archive([NEW],[CANCEL,ACTIVE]))
+  upload(page,archive([NEW],[CANCEL,ACTIVE]),decision='dismiss')
   assert page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:proposals-v010"))')[0]['id']=='draft-existing',width
 
   # A failed second key write must roll back both in memory and in storage.
   page.evaluate('window.__blockSave()')
-  page.once('dialog',lambda dialog:dialog.accept())
-  upload(page,archive([NEW],[CANCEL,ACTIVE]))
+  upload(page,archive([NEW],[CANCEL,ACTIVE]),expected_message='registros anteriores',decision='accept')
   assert 'registros anteriores' in message(page).lower(),(width,message(page))
   assert page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:proposals-v010"))')[0]['id']=='draft-existing',width
   assert page.locator('.workflow-record').filter(has_text='Proposta atual de demonstração').count()==1,width
@@ -94,8 +113,7 @@ with sync_playwright() as pw:
   page.locator('.preview-vote-submit').click()
   assert 'amostras nesta aba (1)' in page.locator('.preview-vote-summary').inner_text(),width
   menu(page)
-  page.once('dialog',lambda dialog:dialog.accept())
-  upload(page,archive([{**NEW,'authToken':'should-never-import'}],[{**CANCEL,'secret':'should-never-import'},ACTIVE]))
+  upload(page,archive([{**NEW,'authToken':'should-never-import'}],[{**CANCEL,'secret':'should-never-import'},ACTIVE]),expected_message='restaurada',decision='accept')
   assert 'should-never-import' not in page.evaluate('sessionStorage.getItem("conferatus:proposals-v010")'),width
   assert 'should-never-import' not in page.evaluate('sessionStorage.getItem("conferatus:deliberations-v010")'),width
   assert 'restaurada' in message(page).lower(),(width,message(page))
