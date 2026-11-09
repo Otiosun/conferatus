@@ -423,7 +423,7 @@ function profilePage() {
   ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button>${linkedScheduleButtons(d)}${contextualScheduleButton(d)}</article>`).join('') : '';
  return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
  ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}${relevant.length?'<h2 class="session-proposals-heading">Histórico de exemplo</h2>':''}`:''}
- ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>${member.id===members[0]?.id&&activeTab==='proposicoes'?`<div class="workflow-actions profile-workflow-actions" role="group" aria-label="Ações da proposição"><button type="button" class="workflow-outline" data-action="invite-socii-from-profile">Convidar para Socii</button><button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>`:''}${profileSheetExperiment&&profileScheduleSheetOpen&&member.id===members[0]?.id&&activeTab==='proposicoes'?`<dialog id="profile-schedule-dialog" aria-labelledby="profile-schedule-sheet-label"><div class="profile-schedule-sheet-head">${crest()}<h2 id="profile-schedule-sheet-label" tabindex="-1">Programar deliberação</h2><button type="button" class="profile-schedule-sheet-close" data-dismiss-schedule-sheet aria-label="Fechar agendamento">Fechar</button></div>${scheduleFormMarkup()}</dialog>`:''}`;
+ ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>${member.id===members[0]?.id&&activeTab==='proposicoes'?`<div class="workflow-actions profile-workflow-actions" role="group" aria-label="Ações da proposição"><button type="button" class="workflow-outline" data-action="invite-socii-from-profile">Convidar para Socii</button><button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>`:''}${profileSheetExperiment&&profileScheduleSheetOpen&&member.id===members[0]?.id&&activeTab==='proposicoes'?`<dialog id="profile-schedule-dialog" aria-labelledby="profile-schedule-sheet-label"><div class="profile-schedule-sheet-head">${crest()}<h2 id="profile-schedule-sheet-label" tabindex="-1">Programar deliberação</h2><button type="button" class="profile-schedule-sheet-close" data-dismiss-schedule-sheet aria-label="Fechar agendamento">Fechar</button></div>${scheduleFormMarkup(true)}</dialog>`:''}`;
 }
 function overviewPage() {
  const votes=activities.filter(a=>a.type==='voto');
@@ -714,18 +714,34 @@ function calendarSociiLine(proposalId:string){
  return names.length?`<span class="calendar-socii">Socii: ${names.map(escapeHTML).join(', ')}</span>`:'';
 }
 // Share a single form, validation and persistence path with the D2 prototype.
-function scheduleFormMarkup(){return `<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
+function scheduleFormMarkup(profileSheet=false){
+ const heading=`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
  ${!drafts.some(d=>d.status==='concluida')?'<p class="workflow-help">Para agendar, conclua uma proposição primeiro. <button type="button" data-route="proposals">Ir às proposições</button></p>':''}
- <label>Título da deliberação<input name="title" maxlength="140" required placeholder="Título da deliberação"></label>
- <label>Descrição objetiva<textarea name="objective" required minlength="15" rows="3" placeholder="Descrição objetiva"></textarea></label>
- <label>Selecione a proposição<select name="proposalId" required ${!drafts.some(d=>d.status==='concluida')?'disabled':''}><option value="" ${schedulePrefillProposalId?'':'selected'}>Selecione</option>${drafts.filter(d=>d.status==='concluida').map(d=>`<option value="${escapeHTML(d.id)}" ${d.id===schedulePrefillProposalId?'selected':''}>${escapeHTML(d.title)}</option>`).join('')}</select></label>
- <label>Seção deliberativa<select name="sectionId" required>${selectOptions('integridade',sections.filter(s=>s.category==='deliberativa'))}</select></label>
- <div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
- <label>Tipo de proposição<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
-  <label>Modalidade de votação<select name="method" id="schedule-method" required><option value="">Selecione a modalidade</option>${DELIBERATION_METHODS.map(mode=>`<option value="${mode.id}">${escapeHTML(mode.label)} — ${escapeHTML(mode.detail)}</option>`).join('')}</select></label>
-  ${scheduleMethod&&scheduleMethod!=='binaria'?`<label>Alternativas para esta deliberação<textarea name="choices" rows="5" maxlength="648" placeholder="Uma alternativa por linha, de 2 a 8" required></textarea></label><p class="workflow-help">De 2 a 8 alternativas distintas, uma por linha (até 80 caracteres cada).</p>`:'' }
-  <p class="workflow-help">Defina como as opções serão apresentadas aos participantes.</p>
- <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`;}
+ `;
+ const titleField=`<label>Título da deliberação<input name="title" maxlength="140" required placeholder="Título da deliberação"></label>
+ `;
+ const objectiveField=`<label>Descrição objetiva<textarea name="objective" required minlength="15" rows="3" placeholder="Descrição objetiva"></textarea></label>
+ `;
+ const proposalField=`<label>Selecione a proposição<select name="proposalId" required ${!drafts.some(d=>d.status==='concluida')?'disabled':''}><option value="" ${schedulePrefillProposalId?'':'selected'}>Selecione</option>${drafts.filter(d=>d.status==='concluida').map(d=>`<option value="${escapeHTML(d.id)}" ${d.id===schedulePrefillProposalId?'selected':''}>${escapeHTML(d.title)}</option>`).join('')}</select></label>
+ `;
+ const sectionField=`<label>Seção deliberativa<select name="sectionId" required>${selectOptions('integridade',sections.filter(s=>s.category==='deliberativa'))}</select></label>
+ `;
+ const datesField=`<div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
+ `;
+ const typeField=`<label>Tipo de proposição<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
+  `;
+ const methodField=`<label>Modalidade de votação<select name="method" id="schedule-method" required><option value="">Selecione a modalidade</option>${DELIBERATION_METHODS.map(mode=>`<option value="${mode.id}">${escapeHTML(mode.label)} — ${escapeHTML(mode.detail)}</option>`).join('')}</select></label>
+`;
+ const choicesField=`  ${scheduleMethod&&scheduleMethod!=='binaria'?`<label>Alternativas para esta deliberação<textarea name="choices" rows="5" maxlength="648" placeholder="Uma alternativa por linha, de 2 a 8" required></textarea></label><p class="workflow-help">De 2 a 8 alternativas distintas, uma por linha (até 80 caracteres cada).</p>`:'' }
+`;
+ const helpField=`  <p class="workflow-help">Defina como as opções serão apresentadas aos participantes.</p>
+`;
+ const footer=` <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`;
+ const normal=titleField+objectiveField+proposalField+sectionField+datesField+typeField+methodField+choicesField+helpField;
+ const supplemental=`<section class="profile-schedule-supplemental" aria-labelledby="profile-sheet-supplemental-title"><h3 id="profile-sheet-supplemental-title">Detalhes da programação</h3>${titleField}${objectiveField}${methodField}${choicesField}${helpField}</section>`;
+ const sheet=proposalField+sectionField+datesField+typeField+supplemental;
+ return heading+(profileSheet?sheet:normal)+footer;
+}
 function calendarPage(){
  const sample:Deliberation[]=[{id:'sample-1',title:'Revisão do calendário de reuniões',sectionId:'integridade',objective:'Organizar o calendário de reuniões institucionais.',start:'2026-11-22T14:00',end:'2026-11-23T14:00',type:'PDR',proposalId:'',status:'programada' as const}];
  const all=[...sample,...schedule.filter(s=>s.status==='programada')]
