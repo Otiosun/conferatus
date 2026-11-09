@@ -94,6 +94,11 @@ with sync_playwright() as p:
   assert abs(scroll_after-scroll_before)<=4,(width,'method change reset internal reading position',scroll_before,scroll_after)
   assert form.locator('[name=title]').input_value()=='Sessão do perfil',width
   form.locator('[name=choices]').fill('Primeira\nSegunda')
+  # A temporary change to binary must not erase already written options.
+  form.locator('[name=method]').select_option('binaria')
+  assert form.locator('[name=choices]').count()==0,width
+  form.locator('[name=method]').select_option('nominal')
+  assert form.locator('[name=choices]').input_value()=='Primeira\nSegunda',(width,'method round-trip erased draft choices')
   form.locator('[name=start]').fill('2027-04-13T10:00')
   form.locator('[name=end]').fill('2027-04-13T11:00')
   # A rejected Escape must not discard the entered fields.
@@ -122,6 +127,14 @@ with sync_playwright() as p:
   outcome=page.locator('.profile-schedule-result')
   outcome.wait_for(state='visible')
   assert 'Deliberação programada' in outcome.inner_text(),(width,'missing visible save confirmation')
+  # A brand-new schedule must NOT inherit alternatives from the previous one.
+  page.locator('.session-proposal [data-schedule-draft]').click()
+  fresh=page.locator('#profile-schedule-dialog')
+  fresh.wait_for(state='visible')
+  fresh.locator('[name=method]').select_option('nominal')
+  assert fresh.locator('[name=choices]').input_value()=='',(width,'stale alternatives leaked to another schedule')
+  page.keyboard.press('Escape')
+  assert fresh.count()==0,(width,'new untouched schedule should close normally')
   assert not errors,(width,errors)
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),(width,'overflow')
   page.close()
