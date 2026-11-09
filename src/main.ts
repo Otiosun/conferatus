@@ -713,7 +713,7 @@ function reviewPage(){
   : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div>
- <div class="workflow-review-panel workflow-review-panel--pending"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
+ <div class="workflow-review-panel workflow-review-panel--pending"><form id="confirm-proposal-form" class="workflow-form workflow-review-form" data-review-draft="${escapeHTML(d.id)}">
  <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>${reviewMessage}</p>
  <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>
  <label>Tipo de proposição<select name="type" required>${['PDR','PR','Ofício'].map(t=>`<option value="${t}" ${t===d.type?'selected':''}>${t}</option>`).join('')}</select></label>
@@ -798,6 +798,12 @@ function render() {
  // Preserve local scheduling inputs while browsing days and months.
  const scheduleForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
  const scheduleValues = scheduleForm ? new FormData(scheduleForm) : null;
+ // Preserve unsaved choices on the SAME proposal's review sheet when local
+ // UI controls (such as the footer menu) rerender the page.
+ const previousReviewForm=root.querySelector<HTMLFormElement>('#confirm-proposal-form');
+ const previousReviewDraft=previousReviewForm?.dataset.reviewDraft;
+ const previousReviewSection=previousReviewForm?.querySelector<HTMLSelectElement>('[name="sectionId"]')?.value;
+ const previousReviewType=previousReviewForm?.querySelector<HTMLSelectElement>('[name="type"]')?.value;
  const previousChoices=scheduleForm?.querySelector<HTMLTextAreaElement>('[name="choices"]');
  if(previousChoices)scheduleChoicesDraft=previousChoices.value;
  // Never use data-member here: it triggers the global profile-navigation click handler.
@@ -854,6 +860,15 @@ function render() {
   const choiceField=currentScheduleForm.querySelector<HTMLTextAreaElement>('[name="choices"]');
   if(choiceField&&!scheduleValues?.has('choices'))choiceField.value=scheduleChoicesDraft;
  }else scheduleChoicesDraft='';
+ const nextReviewForm=root.querySelector<HTMLFormElement>('#confirm-proposal-form');
+ if(previousReviewDraft && nextReviewForm?.dataset.reviewDraft===previousReviewDraft){
+  const nextSection=nextReviewForm.querySelector<HTMLSelectElement>('[name="sectionId"]');
+  const nextType=nextReviewForm.querySelector<HTMLSelectElement>('[name="type"]');
+  if(nextSection && previousReviewSection && [...nextSection.options].some(o=>o.value===previousReviewSection))
+   nextSection.value=previousReviewSection;
+  if(nextType && previousReviewType && [...nextType.options].some(o=>o.value===previousReviewType))
+   nextType.value=previousReviewType;
+ }
  if(voteFields){
   const fields=root.querySelector<HTMLFormElement>('#preview-vote-form')?.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input,select');
   if(fields?.length===voteFields.length)fields.forEach((field,index)=>{
