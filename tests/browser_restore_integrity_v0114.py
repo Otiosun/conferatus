@@ -33,6 +33,7 @@ with sync_playwright() as p:
   assert row.locator('[data-open-schedule-proposal]').count()==0,width
   # Saving a valid user action must back up, rather than silently discard, skipped records.
   row.locator('[data-cancel-schedule]').click()
+  row.locator('[data-confirm-cancel-schedule]').click()
   backup=page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:invalid-session-backup-v0114"))')
   assert [d['id'] for d in backup['drafts']]==['broken-draft'],(width,backup)
   assert [d['id'] for d in backup['schedule']]==['broken-sched'],(width,backup)
