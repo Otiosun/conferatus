@@ -47,6 +47,9 @@ with sync_playwright() as p:
   assert page.evaluate('location.hash').startswith('#/profile'),width
   assert sheet.evaluate('(el)=>el.open&&el.matches(":modal")'),(width,'sheet is not native modal')
   assert page.locator('#schedule-deliberation-form').count()==1,width
+  order=sheet.locator('#schedule-deliberation-form select, #schedule-deliberation-form input, #schedule-deliberation-form textarea').evaluate_all('(xs)=>xs.map(el=>el.name)')
+  assert order[:5]==['proposalId','sectionId','start','end','type'],(width,'sheet diverged from original field order',order)
+  assert 'title' in order and 'objective' in order and 'method' in order,width
   assert sheet.locator('[name=proposalId]').input_value()!='',width
   assert sheet.locator('#profile-schedule-sheet-label').evaluate('(el)=>document.activeElement===el'),width
   assert sheet.evaluate('(el)=>getComputedStyle(el).position')=='fixed',width
