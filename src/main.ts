@@ -140,7 +140,7 @@ function navigate(route: Route, memberId?: string) {
   }
   approvedComposeDeparture=true;
  }
-  if(route!=='calendar'){scheduleFormOpen=false;scheduleMethod=null;}
+  if(route!=='calendar'){scheduleFormOpen=false;scheduleMethod=null;pendingScheduleCancellation=null;}
   menuOpen = false;
   demoToolsOpen = false;
   notice = '';
@@ -709,7 +709,7 @@ function calendarPage(){
  ${cancellationSaveFailed||workflowNotice?`<p class="workflow-status">${escapeHTML(cancellationSaveFailed?cancellationSaveWarning:workflowNotice)}</p>`:''}
  ${cancellationSaveFailed?'<button type="button" class="calendar-save-retry" data-action="retry-cancellation-save">Tentar salvar cancelamento nesta sessão</button>':''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
- ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.id==='sample-1'&&!item.method?'':`<p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(mode=>mode.id===item.method)?.label??'Não informada (registro anterior)')}</p>`}${item.choices?`<p>Alternativas: ${item.choices.map(option=>escapeHTML(option.label)).join(' · ')}</p>`:''}${advancedPreview&&item.id!=='sample-1'&&item.method&&(item.method==='binaria'||isValidPreviewChoices(item.choices))?`<button type="button" data-preview-schedule="${escapeHTML(item.id)}" class="preview-schedule-open">Simular voto nesta programação</button>`:''}${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" aria-expanded="${pendingScheduleCancellation===item.id}" ${pendingScheduleCancellation===item.id?`aria-controls="schedule-cancel-confirm-${escapeHTML(item.id)}"`:''} ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button>${pendingScheduleCancellation===item.id?`<div id="schedule-cancel-confirm-${escapeHTML(item.id)}" class="calendar-cancel-confirm" role="group" aria-label="Confirmar cancelamento de programação"><p>Cancelar a programação “${escapeHTML(item.title)}”? Ela sairá da lista ativa, mas permanecerá no histórico desta sessão.</p><div class="calendar-cancel-confirm-actions"><button type="button" data-keep-schedule="${escapeHTML(item.id)}">Manter programação</button><button type="button" data-confirm-cancel-schedule="${escapeHTML(item.id)}">Confirmar cancelamento</button></div></div>`:''}</div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
+ ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.id==='sample-1'&&!item.method?'':`<p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(mode=>mode.id===item.method)?.label??'Não informada (registro anterior)')}</p>`}${item.choices?`<p>Alternativas: ${item.choices.map(option=>escapeHTML(option.label)).join(' · ')}</p>`:''}${advancedPreview&&item.id!=='sample-1'&&item.method&&(item.method==='binaria'||isValidPreviewChoices(item.choices))?`<button type="button" data-preview-schedule="${escapeHTML(item.id)}" class="preview-schedule-open">Simular voto nesta programação</button>`:''}${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" aria-expanded="${pendingScheduleCancellation===item.id}" ${pendingScheduleCancellation===item.id?`aria-controls="schedule-cancel-confirm-${escapeHTML(item.id)}"`:''} ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button>${pendingScheduleCancellation===item.id?`<div id="schedule-cancel-confirm-${escapeHTML(item.id)}" class="calendar-cancel-confirm" role="group" tabindex="-1" aria-label="Confirmar cancelamento de programação"><p>Cancelar a programação “${escapeHTML(item.title)}”? Ela sairá da lista ativa, mas permanecerá no histórico desta sessão.</p><div class="calendar-cancel-confirm-actions"><button type="button" data-keep-schedule="${escapeHTML(item.id)}">Manter programação</button><button type="button" data-confirm-cancel-schedule="${escapeHTML(item.id)}">Confirmar cancelamento</button></div></div>`:''}</div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -817,6 +817,7 @@ window.addEventListener('hashchange',()=>{
   return;
  }
  approvedComposeDeparture=false;
+  if(routeFromHash()!=='calendar')pendingScheduleCancellation=null;
   menuOpen=false;demoToolsOpen=false;syncRouteState();render();
   if(routeFromHash()==='ballot'&&previewScheduleId){
    const title=document.querySelector<HTMLElement>('#preview-vote-title');
@@ -857,8 +858,10 @@ document.addEventListener('keydown', event => {
    (editTrigger ?? document.querySelector<HTMLButtonElement>('[data-section][aria-expanded=true]'))?.focus();
   }
   else if(pendingScheduleCancellation && routeFromHash()==='calendar'){
+   const cancellingId=pendingScheduleCancellation;
    pendingScheduleCancellation=null;render();
-   document.querySelector<HTMLButtonElement>('[data-cancel-schedule][aria-expanded="false"]')?.focus({preventScroll:true});
+   [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')]
+    .find(button=>button.dataset.cancelSchedule===cancellingId)?.focus({preventScroll:true});
   }
   else if(searchExpanded && routeFromHash()==='members'){
    searchExpanded=false;filter='';render();document.querySelector<HTMLButtonElement>('[data-action=search]')?.focus();
@@ -1101,15 +1104,17 @@ document.addEventListener('click',(event)=>{
    pendingScheduleCancellation=pendingScheduleCancellation===item.id?null:item.id;
    render();
    (pendingScheduleCancellation
-    ? document.querySelector<HTMLButtonElement>('[data-keep-schedule]')
-    : document.querySelector<HTMLButtonElement>('[data-cancel-schedule][aria-expanded="false"]'))?.focus({preventScroll:true});
+    ? document.querySelector<HTMLElement>('.calendar-cancel-confirm')
+    : [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')].find(button=>button.dataset.cancelSchedule===item.id))?.focus({preventScroll:true});
   }
   return;
  }
  const keepScheduleEl=target.closest<HTMLElement>('[data-keep-schedule]');
  if(keepScheduleEl?.dataset.keepSchedule){
+  const keptId=keepScheduleEl.dataset.keepSchedule;
   pendingScheduleCancellation=null;render();
-  document.querySelector<HTMLButtonElement>('[data-cancel-schedule][aria-expanded="false"]')?.focus({preventScroll:true});
+  [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')]
+   .find(button=>button.dataset.cancelSchedule===keptId)?.focus({preventScroll:true});
   return;
  }
  const confirmScheduleEl=target.closest<HTMLElement>('[data-confirm-cancel-schedule]');
