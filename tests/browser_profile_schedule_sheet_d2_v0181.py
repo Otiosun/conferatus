@@ -54,6 +54,11 @@ with sync_playwright() as p:
   assert sheet.locator('#profile-schedule-sheet-label').evaluate('(el)=>document.activeElement===el'),width
   assert sheet.evaluate('(el)=>getComputedStyle(el).position')=='fixed',width
   assert sheet.bounding_box()['width']<=width+1,width
+  sheet_box=sheet.bounding_box()
+  emblem_box=sheet.locator('.profile-schedule-sheet-head img').bounding_box()
+  assert emblem_box and abs((emblem_box['x']+emblem_box['width']/2)-(sheet_box['x']+sheet_box['width']/2))<3,(width,'crest not centered over D2 sheet',emblem_box,sheet_box)
+  close_box=sheet.locator('[data-dismiss-schedule-sheet]').bounding_box()
+  assert close_box and close_box['height']>=44,(width,'explicit close target is too small')
   bounds=sheet.bounding_box()
   assert bounds['y']>= (250 if width<=380 else 300),(width,'sheet obscured too much of profile',bounds)
   assert sheet.evaluate('(e)=>e.scrollHeight>e.clientHeight'),(width,'required extra inputs must remain scrollable')
