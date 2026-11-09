@@ -119,6 +119,8 @@ function confirmComposeDeparture():boolean{
 function hasPendingScheduleChanges():boolean{
  const form=document.querySelector<HTMLFormElement>('#schedule-deliberation-form');
  if(!form)return false;
+ // Hidden options are still unsaved author input until this form closes.
+ if(scheduleChoicesDraft.trim()&&!form.elements.namedItem('choices'))return true;
  for(const [name,value] of new FormData(form)){
   if(typeof value!=='string')continue;
   const initial=name==='sectionId'?'integridade':name==='type'?'PDR':name==='proposalId'?(schedulePrefillProposalId??''):'';
@@ -531,6 +533,8 @@ let workflowNotice='';
 let composeError='';
 let scheduleFormOpen=false;
 let schedulePrefillProposalId:string|null=null;
+// Temporary draft only: not a saved option set and never shared across sessions.
+let scheduleChoicesDraft='';
 let profileScheduleSheetOpen=false;
 // Shared, guarded exit for close button, Escape and native close requests.
 function dismissProfileScheduleSheet(){
@@ -794,6 +798,8 @@ function render() {
  // Preserve local scheduling inputs while browsing days and months.
  const scheduleForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
  const scheduleValues = scheduleForm ? new FormData(scheduleForm) : null;
+ const previousChoices=scheduleForm?.querySelector<HTMLTextAreaElement>('[name="choices"]');
+ if(previousChoices)scheduleChoicesDraft=previousChoices.value;
  // Never use data-member here: it triggers the global profile-navigation click handler.
  // Preserve checked values on ballot validation errors, not across distinct methods.
  const priorVoteForm=root.querySelector<HTMLFormElement>('#preview-vote-form');
@@ -841,6 +847,13 @@ function render() {
    if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) field.value = String(value);
   }
  }
+ // A method may hide the choices textarea. Keep its unsaved text on a
+ // method round-trip, then discard the cache when the scheduling form closes.
+ const currentScheduleForm=root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
+ if(currentScheduleForm){
+  const choiceField=currentScheduleForm.querySelector<HTMLTextAreaElement>('[name="choices"]');
+  if(choiceField&&!scheduleValues?.has('choices'))choiceField.value=scheduleChoicesDraft;
+ }else scheduleChoicesDraft='';
  if(voteFields){
   const fields=root.querySelector<HTMLFormElement>('#preview-vote-form')?.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input,select');
   if(fields?.length===voteFields.length)fields.forEach((field,index)=>{
