@@ -74,7 +74,7 @@ with sync_playwright() as p:
   assert not page.evaluate(probe),(width,'untouched contextual preselection triggers an unnecessary leave warning')
   heading=form.locator('h2')
   assert heading.evaluate('(e)=>document.activeElement===e'),(width,'new form heading not focused')
-  assert heading.evaluate('(e)=>e.getAttribute('tabindex')')=='-1',width
+  assert heading.evaluate("(e)=>e.getAttribute('tabindex')")=='-1',width
   bounds=heading.bounding_box()
   assert bounds and bounds['y']>=-1 and bounds['y']<850,(width,'form intro outside viewport',bounds)
   page.keyboard.press('Tab')
