@@ -72,7 +72,13 @@ with sync_playwright() as p:
   select=form.locator('[name=proposalId]')
   assert select.input_value()==chosen,(width,'wrong proposal linked')
   assert not page.evaluate(probe),(width,'untouched contextual preselection triggers an unnecessary leave warning')
-  assert select.evaluate('(e)=>document.activeElement===e'),(width,'contextual form missing focus')
+  heading=form.locator('h2')
+  assert heading.evaluate('(e)=>document.activeElement===e'),(width,'new form heading not focused')
+  assert heading.evaluate('(e)=>e.getAttribute('tabindex')')=='-1',width
+  bounds=heading.bounding_box()
+  assert bounds and bounds['y']>=-1 and bounds['y']<850,(width,'form intro outside viewport',bounds)
+  page.keyboard.press('Tab')
+  assert form.locator('[name=title]').evaluate('(e)=>document.activeElement===e'),(width,'Tab skipped the first field')
   # Closing an unmodified contextual form should be quick and quiet.
   unexpected=[]
   page.on('dialog',lambda dlg:(unexpected.append(dlg.message),dlg.dismiss()))
