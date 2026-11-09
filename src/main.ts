@@ -861,7 +861,7 @@ document.addEventListener('keydown', event => {
    const cancellingId=pendingScheduleCancellation;
    pendingScheduleCancellation=null;render();
    [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')]
-    .find(button=>button.dataset.cancelSchedule===cancellingId)?.focus({preventScroll:true});
+    .find(button=>button.dataset.cancelSchedule===cancellingId)?.focus();
   }
   else if(searchExpanded && routeFromHash()==='members'){
    searchExpanded=false;filter='';render();document.querySelector<HTMLButtonElement>('[data-action=search]')?.focus();
@@ -1105,7 +1105,7 @@ document.addEventListener('click',(event)=>{
    render();
    (pendingScheduleCancellation
     ? document.querySelector<HTMLElement>('.calendar-cancel-confirm')
-    : [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')].find(button=>button.dataset.cancelSchedule===item.id))?.focus({preventScroll:true});
+    : [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')].find(button=>button.dataset.cancelSchedule===item.id))?.focus();
   }
   return;
  }
@@ -1114,7 +1114,7 @@ document.addEventListener('click',(event)=>{
   const keptId=keepScheduleEl.dataset.keepSchedule;
   pendingScheduleCancellation=null;render();
   [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')]
-   .find(button=>button.dataset.cancelSchedule===keptId)?.focus({preventScroll:true});
+   .find(button=>button.dataset.cancelSchedule===keptId)?.focus();
   return;
  }
  const confirmScheduleEl=target.closest<HTMLElement>('[data-confirm-cancel-schedule]');
