@@ -1188,3 +1188,11 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - **Limites:** não provou zoom nativo de 400%, 200% de texto em todos os componentes, teclado virtual real, aparelhos físicos, leitores de tela ou WCAG integral. A CI no novo HEAD privado permanece sem sucesso verificado. **07.05 e 07.06 continuam [ ]; 07.10–07.12 também; 07=7/12, total 33/57, sem marcador alterado.**
 - **Próximo gate:** testes de hardware/zoom/IME quando disponíveis, decisões Megalos D1–D6 e integração Academy conforme escopo; nunca converter ensaio técnico em aceite institucional.
 
+
+## CHECKPOINT 140 — Amostra de foco não obscurecido (09/11/2026)
+
+- **Objetivo:** aprofundar 07.10, WCAG 2.2 AA SC 2.4.11, sem falsificar 07.05/07.06 ou a conformidade global.
+- **Código e confirmação:** novo `tests/browser_stage7_focus_not_obscured_v0188.py`, Git blob `519e6fb1293518b1ab04c0ef17a7910bf62970c1`, commit `ec53226`; registrado no `validate` do Actions (commit `e69f98f`). `docs/decisions/2026-11-09-focus-not-obscured-v0188.md` explica W3C, método, alternativas descartadas e limites.
+- **Validação local:** Chromium com HTML offline exato do run anterior `42708774184` / `bb14e32a`. **192 amostras de foco** em **12 rota/viewport** (320×256, 390×320, 740×360 × votação, membros, calendário, editor). Nenhum controle ficou totalmente coberto nos pontos testados, após ajuste de foco, rolagem e transição. O teste distingue `body` do controle focado e usa espera condicional em vez de `sleep` fixo; evita falso positivo do skip link.
+- **Limites honestos:** apenas regressão parcial de foco; não testa hardware, zoom nativo, IME, leitores de tela, contraste integral ou certificação WCAG AA. Novo HEAD não teve CI completa aprovada. `main`/produção/identidade Academy inalteradas. D1–D6 Megalos pendentes.
+- **Marcadores formais preservados:** 07=7/12, geral=33/57. **07.10 segue aberta.**
