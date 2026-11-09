@@ -133,6 +133,7 @@ with sync_playwright() as p:
   fresh.wait_for(state='visible')
   fresh.locator('[name=method]').select_option('nominal')
   assert fresh.locator('[name=choices]').input_value()=='',(width,'stale alternatives leaked to another schedule')
+  page.once('dialog',lambda dlg:dlg.accept())
   page.keyboard.press('Escape')
   assert fresh.count()==0,(width,'new untouched schedule should close normally')
   assert not errors,(width,errors)
