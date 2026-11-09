@@ -71,3 +71,18 @@ A candidata experimental retornava à lista da autoria depois de salvar, e o ví
 Ao abrir o formulário D2 opt-in, `workflowNotice` é limpo para não confundir com ação anterior. Após o mesmo handler de `saveWorkflows()`, o perfil exibe `p.profile-schedule-result[role=status]` com o resultado real: programação gravada na sessão ou mantida apenas enquanto a página estiver aberta. O rótulo é produzido pelo handler existente e escapado antes da renderização. Nenhuma mensagem nova de integração ou publicação foi inventada; o fluxo padrão sem a flag continua igual.
 
 A regressão `browser_profile_schedule_sheet_d2_v0181.py` exige mensagem visível `Deliberação programada` após submissão com storage disponível. A recuperação e a clareza de falha de gravação seguem os contratos e testes gerais de sessionStorage; não alegar garantia de armazenamento após fechar navegador ou autenticação Academy.
+
+
+## Revisão 128 — rolagem interna e centralização do emblema
+
+**Base aprovada:** `4fcd4e97886f3cad771c47b67927a7e666ef8699`, Actions `42563500843`: `validate`, `cross-browser-lab` e `postgres-lab` concluídos com **SUCCESS**. O deploy Cloudflare desse mesmo SHA não tinha check separado na consulta inicial; não inferir aprovação de deploy a partir da CI.
+
+**Falha de conforto reproduzida no HTML exato do artefato CI:** em Chromium 280px, após abrir pelo perfil, descer até o seletor de `Modalidade de votação` e escolher `nominal`, o modal reconstruía sua marcação e perdia a posição de leitura: `scrollTop: 385 → 0`. O mesmo fluxo seria ainda mais cansativo porque a escolha revela as alternativas mais abaixo. O foco retornava ao `select`, mas ele podia ficar visualmente fora da área útil; o teste anterior só validava presença e armazenamento, não a rolagem da folha.
+
+**Correção:** em `render()`, guardar o `scrollTop` do `#profile-schedule-dialog` antes do rerender e restaurá-lo após recriar o diálogo e reidratar os `FormData`, sem transportar o valor para reaberturas diferentes. O fluxo de calendário padrão e seu `window.scrollY` existente são preservados. Nova asserção em `browser_profile_schedule_sheet_d2_v0181.py` exige rolagem inicial maior que 40px e desvio máximo de quatro pixels depois da alteração de modalidade, em 280/390/740/1280 CSS px.
+
+**Prova isolada, diferente da compilação final:** HTML exato da CI anterior ajustado localmente com a mudança JS, no Chromium instalado: 280px `385→385`, 390px `470→470` e 740px `373→373`; campos da modalidade e alternativas permaneceram no mesmo contexto de leitura; sem erros JS ou overflow observados no ensaio. O build atual ainda depende do resultado de sua própria CI.
+
+**Fidelidade visual:** o modelo `1001930226.jpg` centraliza o emblema da Academy no topo da folha; o HTML CI anterior apresentava emblema pequeno à esquerda do título. Testadas capturas a 280/390/740px com a composição alternativa: emblema centralizado e título + botão Fechar permanecendo claramente legíveis. CSS opt-in desloca somente o emblema para `left:50%;transform:translateX(-50%)` e reserva espaço vertical no cabeçalho. Teste reforçado para exigir centro geométrico do emblema alinhado ao centro do diálogo e alvo Fechar com pelo menos 44px de altura. A imagem original usa emblema ligeiramente acima da borda; aqui ele permanece dentro da folha para evitar corte pelo container de rolagem e preservar foco/semântica.
+
+**Pendente:** CI **do SHA mais recente**, capturas do HTML efetivamente compilado e leitura em dispositivo Android com teclado aberto. D2 é apenas candidata visual sob `?demo=1&d2=sheet` e ainda exige aceite da Megalos; não promove automaticamente à `main`. Sem backend institucional ou voto real.
