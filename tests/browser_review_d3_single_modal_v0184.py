@@ -98,6 +98,8 @@ with sync_playwright() as p:
   page.locator('#draft-title').fill('Normal sem D3')
   page.locator('#draft-body').fill('Corpo demonstrativo suficiente para a revisão padrão da proposição.')
   page.locator('#compose-proposal-form [value=conclude]').click()
+  # Hash routing is asynchronous: assert the standard review AFTER it renders.
+  page.locator('#confirm-proposal-form').wait_for(state='visible')
   assert page.locator('#d3-review-dialog').count()==0,(engine,suffix,'D3 leaked to standard')
   assert page.locator('#confirm-proposal-form .workflow-review-buttons button').count()==2,(engine,suffix,'standard actions changed')
   page.close()
