@@ -63,3 +63,11 @@ Falha **negativa reproduzida** no HTML real da primeira CI da candidata: com D2 
 Correção mínima em `src/main.ts`: `navigate()` distingue também `memberId` da pessoa atualmente selecionada. Qualquer `hashchange` enquanto a folha está aberta verifica primeiro `confirmScheduleDeparture()`; se negar descarte, restaura o hash antigo e mantém o documento aberto; se aceitar, fecha a folha e segue ao destino. O comportamento do calendário padrão permanece inalterado. Regressão em `browser_profile_schedule_sheet_d2_v0181.py` preenche o formulário, tenta mudar para `#/profile/m04`, rejeita e verifica hash original, título intacto e modal visível.
 
 Até a CI do commit que contém essa regressão terminar, **não** considerar o novo caminho comprovado. Main, dados Academy, PM2 e produção sem alterações.
+
+## Feedback explícito ao salvar no perfil
+
+A candidata experimental retornava à lista da autoria depois de salvar, e o vínculo de programação aparecia no cartão, mas a frase `Deliberação programada.` (ou aviso de falta de persistência) era emitida só no anunciador de acessibilidade. Para uma pessoa que utiliza a visão do perfil, essa ação não dava confirmação textual direta do resultado.
+
+Ao abrir o formulário D2 opt-in, `workflowNotice` é limpo para não confundir com ação anterior. Após o mesmo handler de `saveWorkflows()`, o perfil exibe `p.profile-schedule-result[role=status]` com o resultado real: programação gravada na sessão ou mantida apenas enquanto a página estiver aberta. O rótulo é produzido pelo handler existente e escapado antes da renderização. Nenhuma mensagem nova de integração ou publicação foi inventada; o fluxo padrão sem a flag continua igual.
+
+A regressão `browser_profile_schedule_sheet_d2_v0181.py` exige mensagem visível `Deliberação programada` após submissão com storage disponível. A recuperação e a clareza de falha de gravação seguem os contratos e testes gerais de sessionStorage; não alegar garantia de armazenamento após fechar navegador ou autenticação Academy.
