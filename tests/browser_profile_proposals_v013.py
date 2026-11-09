@@ -17,7 +17,8 @@ with sync_playwright() as p:
   page.locator('.footer-nav').click();page.locator('[data-route=members]').first.click()
   page.locator('.profile-name-button').click()
   label=page.locator('.profile-head [data-tab=proposicoes]')
-  assert label.inner_text().strip()=='Proposições e Socii',(width,'author label differs from Megalos reference')
+  page.wait_for_function("() => location.hash==='#/profile/m01' && document.querySelector('.profile-head [data-tab=proposicoes]')?.textContent?.trim()==='Proposições e Socii'")
+  assert label.text_content().strip()=='Proposições e Socii',(width,'author label differs from Megalos reference')
   assert label.bounding_box()['height']>=44,(width,'profile tab too small')
   page.locator('[data-tab=proposicoes]').click()
   page.locator('.session-proposals-heading').first.wait_for()
@@ -68,7 +69,8 @@ with sync_playwright() as p:
   # A different fictitious person's profile cannot expose authoring privileges.
   page.locator('.footer-nav').click();page.locator('[data-route=members]').first.click()
   page.locator('.member-item[data-member="m04"]').click()
-  assert page.locator('.profile-head [data-tab=proposicoes]').inner_text().strip()=='Proposições',width
+  page.wait_for_function("() => location.hash==='#/profile/m04' && document.querySelector('.profile-head [data-tab=proposicoes]')?.textContent?.trim()==='Proposições'")
+  assert page.locator('.profile-head [data-tab=proposicoes]').text_content().strip()=='Proposições',width
   page.locator('[data-tab=proposicoes]').click()
   assert page.locator('.profile-workflow-actions').count()==0,width
   # Calendar day targets gain an ergonomic 44px footprint on 320px+ screens.
