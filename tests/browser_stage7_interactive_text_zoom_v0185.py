@@ -9,7 +9,7 @@ from playwright.sync_api import sync_playwright
 
 HTML=(Path(__file__).resolve().parents[1]/'dist/CONFERATUS_demo_offline.html').read_text(encoding='utf-8')
 WIDTHS=(280,320,390,740)
-ROUTES=('ballot','members','overview','calendar','proposals','history')
+ROUTES=('ballot','members','overview','calendar','proposals','profile/m01')
 
 def enlarge_text(page):
  page.evaluate("""() => {
@@ -58,8 +58,8 @@ with sync_playwright() as pw:
     target={'ballot':'.app-footer','members':'.member-item',
             'overview':'.overview-stats','calendar':'.calendar-month-nav',
             'proposals':'[data-action=new-proposal]',
-            'history':'.history-tabs'}[route]
-    page.locator(target).first.wait_for(state='visible')
+            'profile/m01':'h1'}[route]
+    (page.locator('h1').filter(has_text='Perfil do membro') if route=='profile/m01' else page.locator(target).first).wait_for(state='visible')
     if mode!='default':enlarge_text(page)
     measure(page,width,engine,mode,route)
     cases+=1
