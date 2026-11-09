@@ -423,7 +423,7 @@ function profilePage() {
   ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button>${linkedScheduleButtons(d)}${contextualScheduleButton(d)}</article>`).join('') : '';
  return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
  ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}${relevant.length?'<h2 class="session-proposals-heading">Histórico de exemplo</h2>':''}`:''}
- ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>${member.id===members[0]?.id&&activeTab==='proposicoes'?`<div class="workflow-actions profile-workflow-actions" role="group" aria-label="Ações da proposição"><button type="button" class="workflow-outline" data-action="invite-socii-from-profile">Convidar para Socii</button><button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>`:''}${profileSheetExperiment&&profileScheduleSheetOpen&&member.id===members[0]?.id&&activeTab==='proposicoes'?`<dialog id="profile-schedule-dialog" aria-labelledby="profile-schedule-sheet-label"><div class="profile-schedule-sheet-head">${crest()}<h2 id="profile-schedule-sheet-label" tabindex="-1">Programar deliberação</h2><button type="button" class="profile-schedule-sheet-close" data-dismiss-schedule-sheet aria-label="Fechar agendamento">Fechar</button></div>${scheduleFormMarkup(true)}</dialog>`:''}`;
+ ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>${member.id===members[0]?.id&&activeTab==='proposicoes'?`<div class="workflow-actions profile-workflow-actions" role="group" aria-label="Ações da proposição"><button type="button" class="workflow-outline" data-action="invite-socii-from-profile">Convidar para Socii</button><button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>`:''}${profileSheetExperiment&&profileScheduleSheetOpen&&member.id===members[0]?.id&&activeTab==='proposicoes'?`<dialog id="profile-schedule-dialog" closedby="none" aria-labelledby="profile-schedule-sheet-label"><div class="profile-schedule-sheet-head">${crest()}<h2 id="profile-schedule-sheet-label" tabindex="-1">Programar deliberação</h2><button type="button" class="profile-schedule-sheet-close" data-dismiss-schedule-sheet aria-label="Fechar agendamento">Fechar</button></div>${scheduleFormMarkup(true)}</dialog>`:''}`;
 }
 function overviewPage() {
  const votes=activities.filter(a=>a.type==='voto');
@@ -532,6 +532,15 @@ let composeError='';
 let scheduleFormOpen=false;
 let schedulePrefillProposalId:string|null=null;
 let profileScheduleSheetOpen=false;
+// Shared, guarded exit for close button, Escape and native close requests.
+function dismissProfileScheduleSheet(){
+ if(!profileScheduleSheetOpen||!confirmScheduleDeparture())return;
+ const proposalId=schedulePrefillProposalId;
+ profileScheduleSheetOpen=false;schedulePrefillProposalId=null;scheduleMethod=null;
+ render();
+ [...document.querySelectorAll<HTMLButtonElement>('[data-schedule-draft]')]
+  .find(btn=>btn.dataset.scheduleDraft===proposalId)?.focus();
+}
 let expandedSchedule='sample-1';
 let cancelledHistoryOpen=false;
 let pendingScheduleCancellation:string|null=null;
@@ -1144,13 +1153,7 @@ document.addEventListener('click',(event)=>{
   return;
  }
  const dismissSheet=target.closest<HTMLElement>('[data-dismiss-schedule-sheet]');
- if(dismissSheet&&profileScheduleSheetOpen){
-  if(!confirmScheduleDeparture())return;
-  const id=schedulePrefillProposalId;
-  profileScheduleSheetOpen=false;schedulePrefillProposalId=null;scheduleMethod=null;render();
-  [...document.querySelectorAll<HTMLButtonElement>('[data-schedule-draft]')].find(btn=>btn.dataset.scheduleDraft===id)?.focus();
-  return;
- }
+ if(dismissSheet&&profileScheduleSheetOpen){dismissProfileScheduleSheet();return;}
  if(actionEl?.dataset.action==='open-schedule'){
   if(scheduleFormOpen&&!confirmScheduleDeparture())return;
   schedulePrefillProposalId=null;
@@ -1359,15 +1362,22 @@ document.addEventListener('change',async event=>{
  archiveIsError=false;render();
  document.querySelector<HTMLButtonElement>('[data-action="import-local-archive"]')?.focus({preventScroll:true});
 });
-// Prevent native Escape from discarding a partially completed D2 sheet.
+// Some Chromium versions may finish a native Escape close despite a nested
+// window.confirm in 'cancel'. Intercept the key request before its default action.
+// closedby=none also blocks implicit close requests in browsers that support it.
+document.addEventListener('keydown',event=>{
+ if(event.key!=='Escape'||!profileScheduleSheetOpen)return;
+ const dialog=document.querySelector<HTMLDialogElement>('#profile-schedule-dialog');
+ if(!dialog?.open)return;
+ event.preventDefault();
+ event.stopPropagation();
+ dismissProfileScheduleSheet();
+},true);
 document.addEventListener('cancel',event=>{
  const dialog=event.target;
  if(!(dialog instanceof HTMLDialogElement)||dialog.id!=='profile-schedule-dialog')return;
  event.preventDefault();
- if(!confirmScheduleDeparture())return;
- const id=schedulePrefillProposalId;
- profileScheduleSheetOpen=false;schedulePrefillProposalId=null;scheduleMethod=null;render();
- [...document.querySelectorAll<HTMLButtonElement>('[data-schedule-draft]')].find(btn=>btn.dataset.scheduleDraft===id)?.focus();
+ dismissProfileScheduleSheet();
 },true);
 document.addEventListener('submit',(event)=>{
  const form=event.target;if(!(form instanceof HTMLFormElement))return;
