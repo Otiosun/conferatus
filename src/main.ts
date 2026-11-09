@@ -213,7 +213,7 @@ function metricRow(m: Member) {
   return `<div class="metrics" role="group" aria-label="Indicadores de participação">
   <div class="metric-cell">${personalVotes}<small>Votos</small></div>
   <div class="metric-cell">${m.proposals}<small>PDR</small></div>
-  <div class="metric-cell">${m.approved}<small>PR</small></div>
+  <div class="metric-cell">${String(m.approved).padStart(2,'0')}<small>PR</small></div>
   <div class="metric-cell">${m.officialLetters ?? 0}<small>Ofício</small></div><div class="metric-cell">${m.collaborations}<small>Socii</small></div></div>`;
 }
 function tabBar(tab: Tab, personalVotingHistory = true, hasSociiContext = false) {
