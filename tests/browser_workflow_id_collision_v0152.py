@@ -70,6 +70,7 @@ with sync_playwright() as playwright:
         if 'calendar-item--expanded' not in (target.get_attribute('class') or ''):
             target.locator('[data-schedule]').click()
         target.locator('[data-cancel-schedule]').click()
+        target.locator('[data-confirm-cancel-schedule]').click()
         updated = page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:deliberations-v010"))')
         assert {item['title']: item['status'] for item in updated} == {
             'Primeira programação sob mesmo relógio': 'programada',
