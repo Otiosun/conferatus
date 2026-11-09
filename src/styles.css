@@ -1329,3 +1329,30 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
  .section-toggle,
  .activity-proposal .proposal-trigger{font-size:12px;}
 }
+
+/* Local-only calendar cancellation: intentional two-step confirmation.
+   Keeps the original card composition; no modal or institutional action. */
+.calendar-cancel-confirm{
+  margin:12px 0 0;padding:13px 12px 12px;border:1px solid #aab2d9;
+  background:#f7f8ff;border-radius:13px;color:#323d70;min-width:0;
+}
+.calendar-cancel-confirm:focus{outline:2px solid #4653b1;outline-offset:3px;}
+.calendar-expanded .calendar-cancel-confirm p{
+  margin:0 0 12px;padding:0;background:transparent;border:0;
+  color:#323d70;font-size:13px;line-height:1.5;overflow-wrap:anywhere;
+}
+.calendar-cancel-confirm-actions{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+}
+.calendar-cancel-confirm-actions button{
+  font:inherit;font-size:12px;font-weight:700;min-height:46px;padding:9px 10px;
+  border:1px solid #8b99cf;border-radius:10px;cursor:pointer;
+  background:#fff;color:#3c4886;white-space:normal;overflow-wrap:anywhere;
+}
+.calendar-cancel-confirm-actions [data-confirm-cancel-schedule]{
+  background:#515dc7;color:#fff;border-color:#515dc7;
+}
+.calendar-cancel-confirm-actions button:focus-visible{outline:3px solid #24377b;outline-offset:2px;}
+@media(max-width:350px){
+ .calendar-cancel-confirm-actions{grid-template-columns:1fr;}
+}
