@@ -788,6 +788,9 @@ function render() {
  }
  // A local edit must not unexpectedly jump the user to the top of a long page.
  const previousScroll = window.scrollY;
+ // The D2 bottom sheet is a separate scroll container; preserve its viewport
+ // when a voting method change rebuilds the shared form's extra fields.
+ const previousProfileSheetScroll=root.querySelector<HTMLDialogElement>('#profile-schedule-dialog')?.scrollTop;
  // Preserve local scheduling inputs while browsing days and months.
  const scheduleForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
  const scheduleValues = scheduleForm ? new FormData(scheduleForm) : null;
@@ -856,6 +859,9 @@ function render() {
   workflowAnnouncer.textContent = workflowNotice;
  }
  if (preserveScroll) window.scrollTo({top:previousScroll,behavior:'instant'});
+ if(profileDialog?.open&&previousProfileSheetScroll!==undefined){
+  profileDialog.scrollTop=previousProfileSheetScroll;
+ }
  refreshComposerUnloadGuard();
 }
 // Announce calendar filtering and month changes through the existing stable
