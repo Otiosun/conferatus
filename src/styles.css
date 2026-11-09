@@ -1435,3 +1435,10 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 #profile-schedule-dialog .workflow-schedule-form button[type=submit]{
  min-height:48px;
 }
+
+/* The contextual preview reports whether a new schedule actually persisted. */
+.profile-schedule-result{
+ margin:12px;padding:11px 13px;line-height:1.45;font-size:13px;
+ background:#eef0fc;color:#30407c;border:1px solid #bcc6e8;
+ border-radius:10px;overflow-wrap:anywhere;
+}
