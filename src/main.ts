@@ -151,7 +151,7 @@ function refreshComposerUnloadGuard(){
  }
 }
 function navigate(route: Route, memberId?: string) {
- if(profileScheduleSheetOpen&&route!=='profile'){
+ if(profileScheduleSheetOpen&&(route!=='profile'||(memberId!==undefined&&memberId!==currentMember))){
   if(!confirmScheduleDeparture())return;
   profileScheduleSheetOpen=false;schedulePrefillProposalId=null;scheduleMethod=null;
  }
@@ -884,7 +884,7 @@ window.addEventListener('hashchange',()=>{
   return;
  }
  approvedComposeDeparture=false;
- if(profileScheduleSheetOpen&&routeFromHash()!=='profile'){
+ if(profileScheduleSheetOpen){
   if(!confirmScheduleDeparture()){
    history.replaceState(history.state,'',lastRenderedHash||'#/profile/m01');return;
   }
