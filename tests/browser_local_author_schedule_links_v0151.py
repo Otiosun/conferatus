@@ -64,6 +64,7 @@ with sync_playwright() as p:
 
         # Cancellation is respected by the profile and no longer offers the cancelled schedule.
         page.locator('.calendar-item--expanded [data-cancel-schedule]').click()
+        page.locator('.calendar-item--expanded [data-confirm-cancel-schedule]').click()
         menu('members')
         page.locator('.profile-name-button').click()
         page.locator('[data-tab="proposicoes"]').click()
