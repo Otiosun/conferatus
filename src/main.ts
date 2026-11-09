@@ -216,11 +216,11 @@ function metricRow(m: Member) {
   <div class="metric-cell">${m.approved}<small>PR</small></div>
   <div class="metric-cell">${m.officialLetters ?? 0}<small>Ofício</small></div><div class="metric-cell">${m.collaborations}<small>Socii</small></div></div>`;
 }
-function tabBar(tab: Tab, personalVotingHistory = true) {
+function tabBar(tab: Tab, personalVotingHistory = true, hasSociiContext = false) {
   const showSelected=routeFromHash()!=='members';
   return `<div class="tabs" role="group" aria-label="Histórico do membro">
    ${personalVotingHistory ? `<button class="tab" type="button" aria-pressed="${showSelected && tab==='votos'}" data-tab="votos">Histórico de votações</button>` : ''}
-   <button class="tab" type="button" aria-pressed="${showSelected && tab==='proposicoes'}" data-tab="proposicoes">Proposições</button>
+   <button class="tab" type="button" aria-pressed="${showSelected && tab==='proposicoes'}" data-tab="proposicoes">${hasSociiContext?'Proposições e Socii':'Proposições'}</button>
   </div>`;
 }
 function memberHeader(m:Member, tab:Tab, displayTabs=true) {
@@ -229,7 +229,7 @@ function memberHeader(m:Member, tab:Tab, displayTabs=true) {
   : `<strong>${escapeHTML(m.name)}</strong>`;
  return `<div class="profile-head"><div class="profile-summary"><div class="avatar avatar--large" aria-hidden="true"></div>
    ${metricRow(m)}</div><div class="profile-identity"><div>${identity} <small>${m.role==='diretor'?'Diretoria':isDeliberativeMember(m, sections)?'Membro deliberativo':'Membro da Academy'}</small></div>
-   <p>${escapeHTML(m.subtitle)}</p>${routeFromHash()==='profile' && m.acdmId?`<p class="profile-reference"><a class="profile-reference-link" href="#/profile/acdm/${encodeURIComponent(m.acdmId)}" aria-label="Abrir link de referência demonstrativa ACDM ID ${escapeHTML(m.acdmId)}">ACDM ID: ${escapeHTML(m.acdmId)}</a><span> · prévia local</span></p>`:''}</div>${displayTabs?tabBar(tab, hasPersonalVoteHistory(m, sections)):''}</div>`;
+   <p>${escapeHTML(m.subtitle)}</p>${routeFromHash()==='profile' && m.acdmId?`<p class="profile-reference"><a class="profile-reference-link" href="#/profile/acdm/${encodeURIComponent(m.acdmId)}" aria-label="Abrir link de referência demonstrativa ACDM ID ${escapeHTML(m.acdmId)}">ACDM ID: ${escapeHTML(m.acdmId)}</a><span> · prévia local</span></p>`:''}</div>${displayTabs?tabBar(tab, hasPersonalVoteHistory(m, sections), routeFromHash()==='profile'&&m.id===members[0]?.id):''}</div>`;
 }
 
 function previewSelectedSchedule():Deliberation|undefined {
