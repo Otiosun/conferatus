@@ -83,6 +83,7 @@ jobs:
             tests/browser_review_unsaved_selection_v0183.py \
             tests/browser_review_d3_single_modal_v0184.py \
             tests/browser_stage7_interactive_text_zoom_v0185.py \
+            tests/browser_stage7_short_viewport_v0187.py \
             tests/browser_stage7_advanced_controls_v0132.py \
             tests/browser_restored_links_integrity_v0157.py \
             tests/browser_local_archive_v0158.py \
