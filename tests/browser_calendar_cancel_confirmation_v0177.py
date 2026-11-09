@@ -78,6 +78,10 @@ with sync_playwright() as p:
   assert row.locator('.calendar-cancel-confirm').count()==0,width
   assert row.locator('[data-cancel-schedule]').evaluate('(e)=>document.activeElement===e'),width
   row.locator('[data-cancel-schedule]').click()
+  page.locator('[data-action=calendar-next]').click()
+  assert row.locator('.calendar-cancel-confirm').count()==0,(width,'calendar navigation left a stale cancellation prompt')
+  assert row.count()==1,(width,'calendar navigation cancelled unexpectedly')
+  row.locator('[data-cancel-schedule]').click()
   row.locator('[data-confirm-cancel-schedule]').click()
   assert row.count()==0,(width,'explicit confirmation failed to cancel')
   history=page.locator('[data-action=toggle-cancelled-history]')
