@@ -60,8 +60,18 @@ with sync_playwright() as p:
   close_box=sheet.locator('[data-dismiss-schedule-sheet]').bounding_box()
   assert close_box and close_box['height']>=44,(width,'explicit close target is too small')
   bounds=sheet.bounding_box()
-  assert bounds['y']>= (250 if width<=380 else 300),(width,'sheet obscured too much of profile',bounds)
+  # The original sheet begins lower on the profile. Keep the opt-in candidate
+  # compact at normal viewport height without hiding required extra inputs.
+  assert bounds['y']>= (400 if width<=380 else 455),(width,'D2 sheet hides too much of the profile',bounds)
   assert sheet.evaluate('(e)=>e.scrollHeight>e.clientHeight'),(width,'required extra inputs must remain scrollable')
+  assert sheet.locator('[name=proposalId]').bounding_box()['height']>=50,(width,'sheet inputs too small')
+  if width==390:
+   # Dynamic browser chrome / mobile keyboard can reduce available height.
+   # Re-expand usable dialog area instead of leaving a tiny scroll viewport.
+   page.set_viewport_size({'width':390,'height':520})
+   short=sheet.bounding_box()
+   assert short and short['height']>=380 and short['y']>=0,(width,'short-viewport sheet unusable',short)
+   page.set_viewport_size({'width':390,'height':850})
   # Tab must stay inside the modal, never reach background buttons.
   for _ in range(12):
    page.keyboard.press('Tab')
