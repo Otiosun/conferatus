@@ -26,3 +26,12 @@ Alternativas: painel genérico `div` com trap manual foi recusado (mais pontos d
 - Nenhuma alteração de `main`, banco/Academy/PM2/produção. As etapas formais **04=17/22, 06=2/5, 07=7/12** permanecem intocadas. D1–D6 e a página institucional de votação continuam pendentes.
 
 Este experimento não constitui autorização para mover a folha à versão padrão.
+
+
+## Revisão de composição — ordem original dos campos
+
+A revisão direta da imagem `1001930226.jpg` evidenciou outra diferença: o formulário original começa por **Proposição → Seção → Datas lado a lado → Tipo**. A primeira candidata preservava a ordem do formulário do calendário (título/descrição antes da proposta), inadequada visualmente mesmo em um experimento.
+
+A função compartilhada `scheduleFormMarkup(profileSheet=false)` foi dividida em pequenos fragmentos sem novos handlers nem novos estados. Na versão **calendar**, concatena os campos na ordem anterior, mantendo a regressão e o contrato existente. Na versão opt-in **profileSheet**, concatena proposta, seção, datas e tipo primeiro; depois uma seção visível **Detalhes da programação** reúne título, descrição, modalidade e alternativas condicionais — campos efetivamente exigidos pelo workflow demonstrativo. Esses campos não são ocultados nem têm validação reduzida. A ordem do DOM e a ordem visual/tabulação coincidem.
+
+O teste `browser_profile_schedule_sheet_d2_v0181.py` agora exige a sequência `proposalId, sectionId, start, end, type` nas primeiras cinco entradas, sem perder `title`, `objective` e `method`. Não declarar a versão fiel integral ao desenho: a referência tem menos campos e não define o destino dos dados adicionais. Escolha final de conteúdo/hierarquia, altura em celular real, scroll e aceite da Megalos permanecem D2 aberta.
