@@ -48,6 +48,7 @@ let expandedActivity = '';
 let rolePreview: 'diretor' | 'membro' = 'diretor';
 let demoToolsOpen = false;
 const advancedPreview = new URLSearchParams(location.search).get('demo') === '1';
+const profileSheetExperiment=advancedPreview&&new URLSearchParams(location.search).get('d2')==='sheet';
 let lastChange: {memberId: string; acdmId: string | undefined; sectionIds: string[]; role: Member['role']; hadDeliberativeHistory?: boolean; cumulativeVoteWeight?: number} | null = null;
 const initialMembers = new Map(members.map(m=>[m.id,{name:m.name,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory,cumulativeVoteWeight:m.cumulativeVoteWeight}]));
 const demoMembersKey = 'conferatus:demo-members-v07';
@@ -150,6 +151,10 @@ function refreshComposerUnloadGuard(){
  }
 }
 function navigate(route: Route, memberId?: string) {
+ if(profileScheduleSheetOpen&&route!=='profile'){
+  if(!confirmScheduleDeparture())return;
+  profileScheduleSheetOpen=false;schedulePrefillProposalId=null;scheduleMethod=null;
+ }
  if(routeFromHash()==='compose'&&route!=='compose'){
   if(!confirmComposeDeparture()){
    if(menuOpen){menuOpen=false;render();}
@@ -418,7 +423,7 @@ function profilePage() {
   ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button>${linkedScheduleButtons(d)}${contextualScheduleButton(d)}</article>`).join('') : '';
  return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
  ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}${relevant.length?'<h2 class="session-proposals-heading">Histórico de exemplo</h2>':''}`:''}
- ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>${member.id===members[0]?.id&&activeTab==='proposicoes'?`<div class="workflow-actions profile-workflow-actions" role="group" aria-label="Ações da proposição"><button type="button" class="workflow-outline" data-action="invite-socii-from-profile">Convidar para Socii</button><button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>`:''}`;
+ ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>${member.id===members[0]?.id&&activeTab==='proposicoes'?`<div class="workflow-actions profile-workflow-actions" role="group" aria-label="Ações da proposição"><button type="button" class="workflow-outline" data-action="invite-socii-from-profile">Convidar para Socii</button><button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>`:''}${profileSheetExperiment&&profileScheduleSheetOpen&&member.id===members[0]?.id&&activeTab==='proposicoes'?`<dialog id="profile-schedule-dialog" aria-labelledby="profile-schedule-sheet-label"><div class="profile-schedule-sheet-head">${crest()}<h2 id="profile-schedule-sheet-label" tabindex="-1">Programar deliberação</h2><button type="button" class="profile-schedule-sheet-close" data-dismiss-schedule-sheet aria-label="Fechar agendamento">Fechar</button></div>${scheduleFormMarkup()}</dialog>`:''}`;
 }
 function overviewPage() {
  const votes=activities.filter(a=>a.type==='voto');
@@ -526,6 +531,7 @@ let workflowNotice='';
 let composeError='';
 let scheduleFormOpen=false;
 let schedulePrefillProposalId:string|null=null;
+let profileScheduleSheetOpen=false;
 let expandedSchedule='sample-1';
 let cancelledHistoryOpen=false;
 let pendingScheduleCancellation:string|null=null;
@@ -707,6 +713,19 @@ function calendarSociiLine(proposalId:string){
   .filter((name):name is string=>Boolean(name))??[];
  return names.length?`<span class="calendar-socii">Socii: ${names.map(escapeHTML).join(', ')}</span>`:'';
 }
+// Share a single form, validation and persistence path with the D2 prototype.
+function scheduleFormMarkup(){return `<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
+ ${!drafts.some(d=>d.status==='concluida')?'<p class="workflow-help">Para agendar, conclua uma proposição primeiro. <button type="button" data-route="proposals">Ir às proposições</button></p>':''}
+ <label>Título da deliberação<input name="title" maxlength="140" required placeholder="Título da deliberação"></label>
+ <label>Descrição objetiva<textarea name="objective" required minlength="15" rows="3" placeholder="Descrição objetiva"></textarea></label>
+ <label>Selecione a proposição<select name="proposalId" required ${!drafts.some(d=>d.status==='concluida')?'disabled':''}><option value="" ${schedulePrefillProposalId?'':'selected'}>Selecione</option>${drafts.filter(d=>d.status==='concluida').map(d=>`<option value="${escapeHTML(d.id)}" ${d.id===schedulePrefillProposalId?'selected':''}>${escapeHTML(d.title)}</option>`).join('')}</select></label>
+ <label>Seção deliberativa<select name="sectionId" required>${selectOptions('integridade',sections.filter(s=>s.category==='deliberativa'))}</select></label>
+ <div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
+ <label>Tipo de proposição<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
+  <label>Modalidade de votação<select name="method" id="schedule-method" required><option value="">Selecione a modalidade</option>${DELIBERATION_METHODS.map(mode=>`<option value="${mode.id}">${escapeHTML(mode.label)} — ${escapeHTML(mode.detail)}</option>`).join('')}</select></label>
+  ${scheduleMethod&&scheduleMethod!=='binaria'?`<label>Alternativas para esta deliberação<textarea name="choices" rows="5" maxlength="648" placeholder="Uma alternativa por linha, de 2 a 8" required></textarea></label><p class="workflow-help">De 2 a 8 alternativas distintas, uma por linha (até 80 caracteres cada).</p>`:'' }
+  <p class="workflow-help">Defina como as opções serão apresentadas aos participantes.</p>
+ <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`;}
 function calendarPage(){
  const sample:Deliberation[]=[{id:'sample-1',title:'Revisão do calendário de reuniões',sectionId:'integridade',objective:'Organizar o calendário de reuniões institucionais.',start:'2026-11-22T14:00',end:'2026-11-23T14:00',type:'PDR',proposalId:'',status:'programada' as const}];
  const all=[...sample,...schedule.filter(s=>s.status==='programada')]
@@ -723,18 +742,7 @@ function calendarPage(){
   }).join('')}</div>`:''}</section>`:'';
  return `<div class="workflow-layout">${savedRecordNotice()}${calendarGrid(all)}<button class="workflow-open" type="button" data-action="open-schedule" aria-expanded="${scheduleFormOpen}" ${scheduleFormOpen?'aria-controls="schedule-deliberation-form"':''}>${scheduleFormOpen?'Fechar agendamento':'Iniciar uma Votação'}</button>
  <p class="calendar-preview-disclosure" role="note">Defina a data e a modalidade da deliberação.</p>
- ${scheduleFormOpen?`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
- ${!drafts.some(d=>d.status==='concluida')?'<p class="workflow-help">Para agendar, conclua uma proposição primeiro. <button type="button" data-route="proposals">Ir às proposições</button></p>':''}
- <label>Título da deliberação<input name="title" maxlength="140" required placeholder="Título da deliberação"></label>
- <label>Descrição objetiva<textarea name="objective" required minlength="15" rows="3" placeholder="Descrição objetiva"></textarea></label>
- <label>Selecione a proposição<select name="proposalId" required ${!drafts.some(d=>d.status==='concluida')?'disabled':''}><option value="" ${schedulePrefillProposalId?'':'selected'}>Selecione</option>${drafts.filter(d=>d.status==='concluida').map(d=>`<option value="${escapeHTML(d.id)}" ${d.id===schedulePrefillProposalId?'selected':''}>${escapeHTML(d.title)}</option>`).join('')}</select></label>
- <label>Seção deliberativa<select name="sectionId" required>${selectOptions('integridade',sections.filter(s=>s.category==='deliberativa'))}</select></label>
- <div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
- <label>Tipo de proposição<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
-  <label>Modalidade de votação<select name="method" id="schedule-method" required><option value="">Selecione a modalidade</option>${DELIBERATION_METHODS.map(mode=>`<option value="${mode.id}">${escapeHTML(mode.label)} — ${escapeHTML(mode.detail)}</option>`).join('')}</select></label>
-  ${scheduleMethod&&scheduleMethod!=='binaria'?`<label>Alternativas para esta deliberação<textarea name="choices" rows="5" maxlength="648" placeholder="Uma alternativa por linha, de 2 a 8" required></textarea></label><p class="workflow-help">De 2 a 8 alternativas distintas, uma por linha (até 80 caracteres cada).</p>`:'' }
-  <p class="workflow-help">Defina como as opções serão apresentadas aos participantes.</p>
- <button class="workflow-primary" type="submit" ${!drafts.some(d=>d.status==='concluida')?'disabled':''}>Confirmar programação</button></form>`:''}
+ ${scheduleFormOpen?scheduleFormMarkup():''}
  ${cancellationSaveFailed||workflowNotice?`<p class="workflow-status">${escapeHTML(cancellationSaveFailed?cancellationSaveWarning:workflowNotice)}</p>`:''}
  ${cancellationSaveFailed?'<button type="button" class="calendar-save-retry" data-action="retry-cancellation-save">Tentar salvar cancelamento nesta sessão</button>':''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
@@ -793,6 +801,11 @@ function render() {
   heading.textContent = routeHeadings[route];
   mainContent.prepend(heading);
  }
+ const profileDialog=root.querySelector<HTMLDialogElement>('#profile-schedule-dialog');
+ if(profileDialog&&!profileDialog.open){
+  profileDialog.showModal();
+  profileDialog.querySelector<HTMLElement>('#profile-schedule-sheet-label')?.focus({preventScroll:true});
+ }
  if (scheduleValues) {
   const nextForm = root.querySelector<HTMLFormElement>('#schedule-deliberation-form');
   if (nextForm) for (const [name, value] of scheduleValues) {
@@ -846,6 +859,12 @@ window.addEventListener('hashchange',()=>{
   return;
  }
  approvedComposeDeparture=false;
+ if(profileScheduleSheetOpen&&routeFromHash()!=='profile'){
+  if(!confirmScheduleDeparture()){
+   history.replaceState(history.state,'',lastRenderedHash||'#/profile/m01');return;
+  }
+  profileScheduleSheetOpen=false;schedulePrefillProposalId=null;scheduleMethod=null;
+ }
  const leavingSchedule=previousRoute==='calendar'&&routeFromHash()!=='calendar';
  if(leavingSchedule&&!approvedScheduleDeparture&&!confirmScheduleDeparture()){
   history.replaceState(history.state,'',lastRenderedHash||'#/calendar');
@@ -1098,11 +1117,22 @@ document.addEventListener('click',(event)=>{
   const proposal=drafts.find(d=>d.id===fromProposal.dataset.scheduleDraft&&d.status==='concluida');
   if(!proposal)return;
   schedulePrefillProposalId=proposal.id;
+  if(profileSheetExperiment&&routeFromHash()==='profile'){
+   profileScheduleSheetOpen=true;scheduleMethod=null;render();return;
+  }
   scheduleFormOpen=true;
   scheduleMethod=null;
   selectedCalendarDay='';
   pendingScheduleCancellation=null;
   navigate('calendar');
+  return;
+ }
+ const dismissSheet=target.closest<HTMLElement>('[data-dismiss-schedule-sheet]');
+ if(dismissSheet&&profileScheduleSheetOpen){
+  if(!confirmScheduleDeparture())return;
+  const id=schedulePrefillProposalId;
+  profileScheduleSheetOpen=false;schedulePrefillProposalId=null;scheduleMethod=null;render();
+  [...document.querySelectorAll<HTMLButtonElement>('[data-schedule-draft]')].find(btn=>btn.dataset.scheduleDraft===id)?.focus();
   return;
  }
  if(actionEl?.dataset.action==='open-schedule'){
@@ -1313,6 +1343,16 @@ document.addEventListener('change',async event=>{
  archiveIsError=false;render();
  document.querySelector<HTMLButtonElement>('[data-action="import-local-archive"]')?.focus({preventScroll:true});
 });
+// Prevent native Escape from discarding a partially completed D2 sheet.
+document.addEventListener('cancel',event=>{
+ const dialog=event.target;
+ if(!(dialog instanceof HTMLDialogElement)||dialog.id!=='profile-schedule-dialog')return;
+ event.preventDefault();
+ if(!confirmScheduleDeparture())return;
+ const id=schedulePrefillProposalId;
+ profileScheduleSheetOpen=false;schedulePrefillProposalId=null;scheduleMethod=null;render();
+ [...document.querySelectorAll<HTMLButtonElement>('[data-schedule-draft]')].find(btn=>btn.dataset.scheduleDraft===id)?.focus();
+},true);
 document.addEventListener('submit',(event)=>{
  const form=event.target;if(!(form instanceof HTMLFormElement))return;
  const id=form.id;
@@ -1419,11 +1459,16 @@ document.addEventListener('submit',(event)=>{
     showScheduleFormError(form,'Informe de 2 a 8 alternativas distintas, com até 80 caracteres por linha.','choices');return;
    }
    const item:Deliberation={id:nextLocalRecordId('sched',schedule),title,objective,proposalId,sectionId:String(data.get('sectionId')??''),start,end,type:String(data.get('type')??''),method,...(method!=='binaria'?{choices}:{}),status:'programada'};
+  const fromProfileSheet=profileScheduleSheetOpen;
+  profileScheduleSheetOpen=false;
   schedule.unshift(item);const stored=saveWorkflows();workflowNotice=stored?'Deliberação programada.':'Programação mantida somente enquanto a página estiver aberta.';scheduleFormOpen=false;scheduleMethod=null;schedulePrefillProposalId=null;expandedSchedule=item.id;
   const date=new Date(`${start.slice(0,10)}T12:00:00`);calendarYear=date.getFullYear();calendarMonth=date.getMonth();selectedCalendarDay=start.slice(0,10);
   render();
   // The saved schedule is the result of the form which has just disappeared.
-  document.querySelector<HTMLButtonElement>(`[data-schedule="${item.id}"]`)?.focus({preventScroll:true});
+  if(fromProfileSheet){
+   [...document.querySelectorAll<HTMLButtonElement>('[data-schedule-draft]')]
+    .find(btn=>btn.dataset.scheduleDraft===item.proposalId)?.focus({preventScroll:true});
+  }else document.querySelector<HTMLButtonElement>(`[data-schedule="${item.id}"]`)?.focus({preventScroll:true});
   return;
  }
 });
