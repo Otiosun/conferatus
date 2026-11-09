@@ -62,11 +62,15 @@ with sync_playwright() as p:
   assert trigger.get_attribute('aria-expanded')=='true',width
   assert panel.get_attribute('role')=='group',width
   assert panel.evaluate('(el)=>document.activeElement===el'),(width,'confirmation focus missing')
+  panel_bounds=panel.bounding_box()
+  assert panel_bounds and panel_bounds['y']>=-1 and panel_bounds['y']+panel_bounds['height']<=845,(width,'confirmation not visible after click',panel_bounds)
   assert 'permanecerá no histórico' in panel.inner_text(),width
   assert row.locator('[data-confirm-cancel-schedule]').bounding_box()['height']>=44,width
   page.keyboard.press('Escape')
   assert row.locator('.calendar-cancel-confirm').count()==0,(width,'Escape did not close confirmation')
   assert row.locator('[data-cancel-schedule]').evaluate('(e)=>document.activeElement===e'),(width,'Escape did not restore trigger focus')
+  trigger_bounds=row.locator('[data-cancel-schedule]').bounding_box()
+  assert trigger_bounds and trigger_bounds['y']>=-1 and trigger_bounds['y']+trigger_bounds['height']<=845,(width,'restored trigger outside viewport',trigger_bounds)
   assert row.count()==1,width
   row.locator('[data-cancel-schedule]').click()
   row.locator('[data-keep-schedule]').click()
