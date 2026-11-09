@@ -1012,8 +1012,24 @@ document.addEventListener('touchcancel', () => {footerSwipeStart=null;}, {passiv
 // Capture Escape before the browser's implicit dialog dismissal. Avoid an
 // unguarded close while the user has unconfirmed review choices.
 document.addEventListener('keydown', event => {
- if(event.key!=='Escape'||!d3SingleExperiment||
-   !document.querySelector<HTMLDialogElement>('#d3-review-dialog')?.open)return;
+ if(!d3SingleExperiment)return;
+ const dialog=document.querySelector<HTMLDialogElement>('#d3-review-dialog');
+ if(!dialog?.open)return;
+ if(event.key==='Tab'){
+  // Chromium can temporarily focus <body> when Tab wraps in a native
+  // dialog. Explicitly wrap between visible descendants, without ever
+  // permitting focus on the inert underlying page.
+  const controls=[...dialog.querySelectorAll<HTMLElement>(
+   'button:not([disabled]),select:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])'
+  )].filter(el=>el.tabIndex>=0&&el.getClientRects().length>0);
+  const index=controls.indexOf(document.activeElement as HTMLElement);
+  if(controls.length&&(event.shiftKey?(index<=0):(index===controls.length-1||index<0))){
+   event.preventDefault();event.stopPropagation();
+   (event.shiftKey?controls[controls.length-1]:controls[0])?.focus({preventScroll:true});
+  }
+  return;
+ }
+ if(event.key!=='Escape')return;
  event.preventDefault();event.stopImmediatePropagation();
  dismissD3Review();
 },true);
