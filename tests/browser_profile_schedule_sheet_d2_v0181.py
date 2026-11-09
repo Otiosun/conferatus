@@ -83,6 +83,13 @@ with sync_playwright() as p:
   page.once('dialog',lambda dlg:dlg.dismiss())
   sheet.locator('[data-dismiss-schedule-sheet]').click()
   assert sheet.is_visible(),(width,'declined explicit close discarded sheet')
+  # Direct hashes and browser history can move between two profile IDs without
+  # changing the route name. Refusing the departure must preserve form values.
+  page.once('dialog',lambda dlg:dlg.dismiss())
+  page.evaluate('location.hash="#/profile/m04"')
+  page.wait_for_timeout(80)
+  assert page.evaluate('location.hash')=='#/profile/m01',(width,'same-route hash discarded changes')
+  assert sheet.is_visible() and form.locator('[name=title]').input_value()=='Sessão do perfil',width
   # Single source of truth: the shared submit handler stores the new item.
   form.locator('button[type=submit]').click()
   sheet.wait_for(state='detached')
