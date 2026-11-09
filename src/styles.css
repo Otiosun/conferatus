@@ -1383,3 +1383,40 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 
 /* Reserve breathing room when a contextual route focuses the schedule heading. */
 .workflow-schedule-form h2{scroll-margin-top:16px;}
+
+/* Visual D2 experiment: the reference's lower blue sheet over the author
+   profile. Only ?demo=1&d2=sheet uses it. A native modal keeps background inert
+   and keyboard focus contained; default UI remains unchanged. */
+#profile-schedule-dialog{
+ box-sizing:border-box;position:fixed;inset:auto 0 0; margin:0 auto;
+ width:min(100%,740px);max-width:740px;max-height:min(82dvh,760px);
+ padding:0 12px 14px;overflow-y:auto;overscroll-behavior:contain;
+ background:#505ec5;color:#fff;border:0;border-radius:26px 26px 0 0;
+ box-shadow:0 -12px 34px #1b244d40;
+}
+#profile-schedule-dialog::backdrop{background:rgba(24,33,64,.23);}
+.profile-schedule-sheet-head{
+ display:flex;align-items:center;gap:12px;min-height:62px;
+ padding:9px 2px;position:sticky;top:0;z-index:2;
+ background:#505ec5;border-bottom:1px solid #aab6e440;
+}
+.profile-schedule-sheet-head img{width:34px;height:34px;object-fit:contain;flex:none;}
+.profile-schedule-sheet-head h2{
+ margin:0;flex:1;color:#fff;font-size:15px;font-weight:700;line-height:1.4;
+}
+.profile-schedule-sheet-close{
+ color:#fff;background:#6471ce;border:1px solid #b2bcec;
+ border-radius:9px;padding:8px 11px;min-height:44px;cursor:pointer;
+ font:inherit;font-size:12px;
+}
+.profile-schedule-sheet-close:focus-visible,
+.profile-schedule-sheet-head h2:focus-visible{outline:3px solid #eef2ff;outline-offset:2px;}
+#profile-schedule-dialog .workflow-schedule-form{
+ width:100%;margin:0;padding:14px 6px 10px;max-width:none;
+ background:transparent;border:none;border-radius:0;box-shadow:none;
+}
+#profile-schedule-dialog .workflow-schedule-form>h2{display:none;}
+@media(max-width:380px){
+ #profile-schedule-dialog{padding-inline:9px;max-height:86dvh;}
+ .profile-schedule-sheet-head{gap:8px;}
+}
