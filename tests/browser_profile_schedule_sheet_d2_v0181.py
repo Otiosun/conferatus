@@ -98,6 +98,9 @@ with sync_playwright() as p:
   assert len(scheduled)==1 and scheduled[0]['proposalId']==drafts[0]['id'],(width,scheduled)
   assert scheduled[0]['method']=='nominal' and len(scheduled[0]['choices'])==2,width
   assert page.locator('.session-proposal .session-schedule-link').count()==1,width
+  outcome=page.locator('.profile-schedule-result')
+  outcome.wait_for(state='visible')
+  assert 'Deliberação programada' in outcome.inner_text(),(width,'missing visible save confirmation')
   assert not errors,(width,errors)
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),(width,'overflow')
   page.close()
