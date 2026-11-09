@@ -49,6 +49,8 @@ let rolePreview: 'diretor' | 'membro' = 'diretor';
 let demoToolsOpen = false;
 const advancedPreview = new URLSearchParams(location.search).get('demo') === '1';
 const profileSheetExperiment=advancedPreview&&new URLSearchParams(location.search).get('d2')==='sheet';
+// D3 is a reversible visual candidate, never the default Academy review contract.
+const d3SingleExperiment=advancedPreview&&new URLSearchParams(location.search).get('d3')==='single';
 let lastChange: {memberId: string; acdmId: string | undefined; sectionIds: string[]; role: Member['role']; hadDeliberativeHistory?: boolean; cumulativeVoteWeight?: number} | null = null;
 const initialMembers = new Map(members.map(m=>[m.id,{name:m.name,acdmId:m.acdmId,sectionIds:[...m.sectionIds],role:m.role,hadDeliberativeHistory:m.hadDeliberativeHistory,cumulativeVoteWeight:m.cumulativeVoteWeight}]));
 const demoMembersKey = 'conferatus:demo-members-v07';
@@ -128,6 +130,26 @@ function hasPendingScheduleChanges():boolean{
  }
  return false;
 }
+function hasPendingD3ReviewChanges():boolean{
+ if(!d3SingleExperiment)return false;
+ const form=document.querySelector<HTMLFormElement>('#d3-review-dialog #confirm-proposal-form');
+ if(!form)return false;
+ const draft=drafts.find(d=>d.id===form.dataset.reviewDraft);
+ if(!draft)return false;
+ return form.querySelector<HTMLSelectElement>('[name="sectionId"]')?.value!==draft.sectionId||
+        form.querySelector<HTMLSelectElement>('[name="type"]')?.value!==draft.type;
+}
+function confirmD3ReviewDeparture():boolean{
+ return !hasPendingD3ReviewChanges()||
+  window.confirm('A confirmação tem escolhas não salvas. Voltar à redação e descartá-las?');
+}
+let approvedD3ReviewDeparture=false;
+function dismissD3Review(){
+ if(!d3SingleExperiment||!document.querySelector<HTMLDialogElement>('#d3-review-dialog')?.open)return;
+ if(!confirmD3ReviewDeparture())return;
+ approvedD3ReviewDeparture=true;
+ navigate('compose');
+}
 function confirmScheduleDeparture():boolean{
  return !hasPendingScheduleChanges()||
   window.confirm('O agendamento tem informações não salvas. Deseja sair e descartá-las?');
@@ -138,12 +160,12 @@ let approvedScheduleDeparture=false;
 // Browsers (especially mobile) may skip this event: it is not an autosave.
 let composerUnloadListenerAttached=false;
 function warnBeforeComposerUnload(event: BeforeUnloadEvent) {
- if(!hasPendingComposeChanges()&&!hasPendingScheduleChanges())return;
+ if(!hasPendingComposeChanges()&&!hasPendingScheduleChanges()&&!hasPendingD3ReviewChanges())return;
  event.preventDefault();
  event.returnValue=' ';
 }
 function refreshComposerUnloadGuard(){
- const pending=hasPendingComposeChanges()||hasPendingScheduleChanges();
+ const pending=hasPendingComposeChanges()||hasPendingScheduleChanges()||hasPendingD3ReviewChanges();
  if(pending&&!composerUnloadListenerAttached){
   window.addEventListener('beforeunload',warnBeforeComposerUnload);
   composerUnloadListenerAttached=true;
@@ -706,6 +728,10 @@ function composePage(){
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
  if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar às proposições'}</button></div></div>`;
+ const d3Start=d3SingleExperiment?'<dialog id="d3-review-dialog" closedby="none" aria-labelledby="d3-review-title">':'';
+ const d3End=d3SingleExperiment?'</dialog>':'';
+ const d3Close=d3SingleExperiment?'<button type="button" class="d3-review-close" data-dismiss-d3-review aria-label="Voltar à redação sem confirmar">×</button>':'';
+ const d3Cancel=d3SingleExperiment?'':'<button type="button" class="workflow-outline" data-route="compose" aria-label="Cancelar confirmação e voltar à redação">Cancelar</button>';
  const confirmedPartner=d.partners.find(p=>p.complete);
  const confirmedName=confirmedPartner?members.find(m=>m.id===confirmedPartner.id)?.name:undefined;
  const reviewMessage=confirmedPartner
@@ -713,11 +739,11 @@ function reviewPage(){
   : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div>
- <div class="workflow-review-panel workflow-review-panel--pending"><form id="confirm-proposal-form" class="workflow-form workflow-review-form" data-review-draft="${escapeHTML(d.id)}">
- <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>${reviewMessage}</p>
+ <div class="workflow-review-panel workflow-review-panel--pending${d3SingleExperiment?' workflow-review-panel--d3':''}">${d3Start}<form id="confirm-proposal-form" class="workflow-form workflow-review-form" data-review-draft="${escapeHTML(d.id)}">
+ <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38">${d3SingleExperiment?'<h2 id="d3-review-title" class="sr-only">Confirmar proposição</h2>':`<p>${reviewMessage}</p>`}${d3Close}
  <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>
  <label>Tipo de proposição<select name="type" required>${['PDR','PR','Ofício'].map(t=>`<option value="${t}" ${t===d.type?'selected':''}>${t}</option>`).join('')}</select></label>
- </div><div class="workflow-review-buttons"><button type="button" class="workflow-outline" data-route="compose" aria-label="Cancelar confirmação e voltar à redação">Cancelar</button><button class="workflow-primary" type="submit">Confirmar</button></div></form></div>`;
+ </div><div class="workflow-review-buttons">${d3Cancel}<button class="workflow-primary" type="submit">${d3SingleExperiment?'CONFIRMAR':'Confirmar'}</button></div></form>${d3End}</div>`;
 }
 // Display only Socii participants already linked to this session's proposal.
 function calendarSociiLine(proposalId:string){
@@ -841,6 +867,11 @@ function render() {
   heading.textContent = routeHeadings[route];
   mainContent.prepend(heading);
  }
+ const d3Dialog=root.querySelector<HTMLDialogElement>('#d3-review-dialog');
+ if(d3Dialog&&!d3Dialog.open){
+  d3Dialog.showModal();
+  d3Dialog.querySelector<HTMLSelectElement>('[name="sectionId"]')?.focus({preventScroll:true});
+ }
  const profileDialog=root.querySelector<HTMLDialogElement>('#profile-schedule-dialog');
  if(profileDialog&&!profileDialog.open){
   profileDialog.showModal();
@@ -912,6 +943,13 @@ function syncRouteState() {
 window.addEventListener('hashchange',()=>{
  // Browser Back can change the hash without passing through navigate().
  const previousRoute=lastRenderedHash.replace(/^#\/?/,'').split('/')[0];
+ const leavingD3=previousRoute==='review'&&routeFromHash()!=='review'&&
+  d3SingleExperiment&&Boolean(document.querySelector<HTMLDialogElement>('#d3-review-dialog')?.open);
+ if(leavingD3&&!approvedD3ReviewDeparture&&!confirmD3ReviewDeparture()){
+  history.replaceState(history.state,'',lastRenderedHash||'#/review');
+  return;
+ }
+ approvedD3ReviewDeparture=false;
  const leavingEditor=previousRoute==='compose'&&routeFromHash()!=='compose';
  if(leavingEditor&&!approvedComposeDeparture&&!confirmComposeDeparture()){
   history.replaceState(history.state,'',lastRenderedHash||'#/compose');
@@ -971,6 +1009,14 @@ document.addEventListener('touchend', event => {
  render();
 }, {passive:true});
 document.addEventListener('touchcancel', () => {footerSwipeStart=null;}, {passive:true});
+// Capture Escape before the browser's implicit dialog dismissal. Avoid an
+// unguarded close while the user has unconfirmed review choices.
+document.addEventListener('keydown', event => {
+ if(event.key!=='Escape'||!d3SingleExperiment||
+   !document.querySelector<HTMLDialogElement>('#d3-review-dialog')?.open)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ dismissD3Review();
+},true);
 document.addEventListener('keydown', event => {
  if(event.key==='Escape') {
   if(demoToolsOpen){demoToolsOpen=false;render();document.querySelector<HTMLButtonElement>('[data-action=toggle-tools]')?.focus();}
@@ -998,6 +1044,8 @@ document.addEventListener('keydown', event => {
 document.addEventListener('click',(event)=>{
  const target=event.target;
  if (!(target instanceof Element)) return;
+ const d3Dismiss=target.closest<HTMLElement>('[data-dismiss-d3-review]');
+ if(d3Dismiss&&d3SingleExperiment){dismissD3Review();return;}
  const skip=target.closest<HTMLAnchorElement>('.skip-link');
  if(skip){event.preventDefault();document.querySelector<HTMLElement>('#main-content')?.focus({preventScroll:true});return;}
  const contextualVote=advancedPreview?target.closest<HTMLElement>('[data-preview-schedule]'):null;
@@ -1356,6 +1404,7 @@ function showScheduleFormError(form: HTMLFormElement,message:string,fieldName:st
 document.addEventListener('change',async event=>{
  const field=event.target;
  if(field instanceof HTMLElement && field.closest('#schedule-deliberation-form'))refreshComposerUnloadGuard();
+ if(field instanceof HTMLElement && field.closest('#d3-review-dialog'))refreshComposerUnloadGuard();
  if(!advancedPreview || !(field instanceof HTMLInputElement) || field.id!=='archive-file-input')return;
  const file=field.files?.[0];if(!file)return;
  const report=(text:string,error=true)=>{
@@ -1409,7 +1458,11 @@ document.addEventListener('keydown',event=>{
 },true);
 document.addEventListener('cancel',event=>{
  const dialog=event.target;
- if(!(dialog instanceof HTMLDialogElement)||dialog.id!=='profile-schedule-dialog')return;
+ if(!(dialog instanceof HTMLDialogElement))return;
+ if(dialog.id==='d3-review-dialog'&&d3SingleExperiment){
+  event.preventDefault();dismissD3Review();return;
+ }
+ if(dialog.id!=='profile-schedule-dialog')return;
  event.preventDefault();
  dismissProfileScheduleSheet();
 },true);
