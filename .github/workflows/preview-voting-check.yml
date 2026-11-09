@@ -79,6 +79,7 @@ jobs:
             tests/browser_schedule_unsaved_guard_v0179.py \
             tests/browser_profile_schedule_context_v0180.py \
             tests/browser_profile_schedule_sheet_d2_v0181.py \
+            tests/browser_schedule_choices_method_roundtrip_v0182.py \
             tests/browser_stage7_advanced_controls_v0132.py \
             tests/browser_restored_links_integrity_v0157.py \
             tests/browser_local_archive_v0158.py \
@@ -186,6 +187,7 @@ jobs:
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_schedule_unsaved_guard_v0179.py
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_profile_schedule_context_v0180.py
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_profile_schedule_sheet_d2_v0181.py
+            CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_schedule_choices_method_roundtrip_v0182.py
           done
       - name: Upload optional multi-engine evidence
         if: always()
