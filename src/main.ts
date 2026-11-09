@@ -1044,7 +1044,7 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='invite-socii-from-profile'){inviteOpen=true;navigate('proposals');return;}
  if(actionEl?.dataset.action==='new-proposal'){finishedProposalReturnTo=routeFromHash()==='profile'?'profile':'proposals';currentDraftId='';draftForm=blankDraft();richEditorOpen=false;lastRichSelection=null;workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
- if(actionEl?.dataset.action==='open-schedule'){scheduleFormOpen=!scheduleFormOpen;scheduleMethod=null;if(!cancellationSaveFailed)workflowNotice='';render();return;}
+ if(actionEl?.dataset.action==='open-schedule'){pendingScheduleCancellation=null;scheduleFormOpen=!scheduleFormOpen;scheduleMethod=null;if(!cancellationSaveFailed)workflowNotice='';render();return;}
  if(actionEl?.dataset.action==='toggle-cancelled-history'){cancelledHistoryOpen=!cancelledHistoryOpen;render();return;}
  if(actionEl?.dataset.action==='retry-workflow-save' && workflowSaveFailed){
   const saved=saveWorkflows();
@@ -1060,17 +1060,17 @@ document.addEventListener('click',(event)=>{
   (saved?document.querySelector<HTMLElement>('[data-action=toggle-cancelled-history]'):document.querySelector<HTMLElement>('[data-action=retry-cancellation-save]'))?.focus({preventScroll:true});
   return;
  }
- if(actionEl?.dataset.action==='calendar-prev'){calendarShift(-1);render();announceCalendarView();return;}
- if(actionEl?.dataset.action==='calendar-next'){calendarShift(1);render();announceCalendarView();return;}
- if(actionEl?.dataset.action==='calendar-today'){const currentDay=new Date();calendarYear=currentDay.getFullYear();calendarMonth=currentDay.getMonth();selectedCalendarDay=isoDay(currentDay);render();announceCalendarView();return;}
+ if(actionEl?.dataset.action==='calendar-prev'){pendingScheduleCancellation=null;calendarShift(-1);render();announceCalendarView();return;}
+ if(actionEl?.dataset.action==='calendar-next'){pendingScheduleCancellation=null;calendarShift(1);render();announceCalendarView();return;}
+ if(actionEl?.dataset.action==='calendar-today'){pendingScheduleCancellation=null;const currentDay=new Date();calendarYear=currentDay.getFullYear();calendarMonth=currentDay.getMonth();selectedCalendarDay=isoDay(currentDay);render();announceCalendarView();return;}
  if(actionEl?.dataset.action==='calendar-all'){
-  selectedCalendarDay='';render();announceCalendarView();
+  pendingScheduleCancellation=null;selectedCalendarDay='';render();announceCalendarView();
   const heading=document.querySelector<HTMLElement>('.calendar-list-head h2');
   if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
   return;
  }
  const dayEl=target.closest<HTMLElement>('[data-calendar-day]');
- if(dayEl?.dataset.calendarDay){selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();announceCalendarView();return;}
+ if(dayEl?.dataset.calendarDay){pendingScheduleCancellation=null;selectedCalendarDay=selectedCalendarDay===dayEl.dataset.calendarDay?'':dayEl.dataset.calendarDay;render();announceCalendarView();return;}
  const linkedScheduleEl=target.closest<HTMLElement>('[data-linked-schedule]');
  if(linkedScheduleEl?.dataset.linkedSchedule){
   const linked=schedule.find(item=>item.id===linkedScheduleEl.dataset.linkedSchedule&&item.status==='programada'&&drafts.some(d=>d.id===item.proposalId));
