@@ -82,6 +82,10 @@ with sync_playwright() as p:
   record=page.locator('.calendar-cancelled-record').filter(has_text='Programação protegida')
   record.wait_for(state='visible')
   assert 'Cancelada' in record.inner_text(),width
+  # The new schedule selects its own date; clear that filter before checking
+  # the unrelated fixed calendar fixture, which belongs to another month.
+  show_all=page.locator('[data-action=calendar-all]')
+  if show_all.count(): show_all.click()
   assert page.locator('.calendar-item').filter(has_text='Revisão do calendário de reuniões').count()==1,width
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),(width,'horizontal overflow')
   assert not errors,(width,errors)
