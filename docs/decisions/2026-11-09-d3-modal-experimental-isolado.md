@@ -39,3 +39,18 @@ A prévia funcional pré-existente mantém a confirmação normal com **Cancelar
 5. O que acontece após Confirmar quando ainda existem coautorias pendentes? **Continuar usando o comportamento demonstrativo já aprovado tecnicamente**, sem alterar Socii.
 
 **Escopo protegido:** nenhuma promoção para `main`, login institucional, voto real, PM2, banco de dados ou permissão Academy. Checklist formal permanece **04=17/22, 06=2/5, 07=7/12** até homologação.
+
+
+## Revisão pós-CI: foco no fim da sequência e desfoque seletivo
+
+A primeira CI do experimento (`42682761357`, commit `173db32`) **reprovou em Chromium** no novo teste v0184: depois de Tab ultrapassar o último botão, `document.activeElement` tornou-se temporariamente `body` em 280px. O modal permaneceu aberto, e outro Tab retornou ao primeiro botão, mas a regra W3C de foco **sempre dentro do diálogo** não estava cumprida pelo ciclo nativo. O teste foi preservado, sem rebaixar a exigência.
+
+**Correção funcional localizada:** listener `keydown` em captura, somente enquanto a D3 está aberta, detecta Tab/Shift+Tab atravessando a primeira/última posição e transfere diretamente o foco ao primeiro/último controle visível e habilitado. Não altera controles intermediários nem a navegação normal de outras telas. No ensaio local com o HTML *exato da CI que reprovou* e a correção de foco injetada, 10×Tab + 5×Shift+Tab permaneceram continuamente dentro de `#d3-review-dialog`, sem o estado transitório `body`. A regressão v0184 original continua a exigir esse resultado no build mais novo.
+
+**Ajuste visual com evidência:** a primeira captura do HTML da CI reprovada desfocava também o título da proposição, enquanto a arte `1001930223.jpg` mostra título nítido e **corpo da proposição** desfocado. CSS mudou para aplicar `filter:blur(5px)` somente à `workflow-review-body--d3`. O `::backdrop` permanece atenuando o fundo, mas sem filtro de desfoque geral; assim, o cabeçalho não fica borrado e o documento continua desviado de atenção. Ensaio local Chromium confirmou essa diferença. Teste v0184 atualizado para exigir `filter` de desfoque na **área do documento**, e `filter:none` no título. Não retirar a verificação de desfoque.
+
+**Foco após saída:** ao sair da D3 para `compose` via Escape/fechar, o foco deve retornar ao botão `Concluir` do editor (ação que levou à revisão), em vez de cair genericamente no início da página. Regressão v0184 exige esse retorno após Escape. Não confundir retorno à edição com confirmação/gravação.
+
+**Verificação independente das regras de negócio:** no HTML da CI anterior, um segundo ensaio Chromium em 280/390/740/1280 reproduziu que Escape sem mudanças volta ao editor; alteração de seção/tipo se mantém num rerender; recusar Esc, fechar ou mudança direta de hash preserva escolhas; o botão CONFIRMAR usa o mesmo handler e grava `diretoria/PR` na proposta local. O ensaio de fluxo não comprova o novo build nem os demais motores.
+
+A CI do **SHA exato** com os três ajustes (foco cíclico, blur seletivo, retorno de foco) deve ser executada com opt-in `[cross-browser]` para Firefox/WebKit, além de Chromium e PostgreSQL. Falha anterior permanece registrada, não substituir o resultado negativo por prova isolada.
