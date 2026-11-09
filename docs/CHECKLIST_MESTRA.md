@@ -1178,3 +1178,13 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - **Contagens formais mantidas:** 01=4/5; 02=0/4; 03=1/5; 04=17/22; 05=2/4; 06=2/5; 07=7/12; **33/57**. Nenhum novo critério institucional marcado concluído.
 - **Próximo gate:** consolidar evidência de execução integral a custo zero sem abrir o repo; em paralelo avançar Etapa 07.05/07.06 e decisões visuais D1–D6, mantendo privado o material da Megalos. Publicação da `main` depende de autorização explícita.
 
+
+## CHECKPOINT 139 — QA de viewport/altura curta (09/11/2026)
+
+- **Estado e proteção:** repo privado; somente branch de prévia. Referência de código do HTML offline: `bb14e32a`. A comparação com `fb918fa` mostrou exclusivamente alterações de teste/documentação, sem mudança na aplicação. Nenhuma alteração em `main`, produção, Academy ou PM2.
+- **Teste versionado:** `tests/browser_stage7_short_viewport_v0187.py`, hash Git blob `c8563d9868dbcda3e2922c30fc23c7b2891e1cc3` e workflow atualizado para incluí-lo em `validate`. Execução local repetida com o **mesmo arquivo exato** recuperado do GitHub.
+- **Matriz:** 6 viewports (280×256, 320×256, 390×256, 280×320, 320×360, 640×256) × 8 rotas = **48/48 PASS**; mais 6 jornadas de menu aberto por Enter e navegação até a última opção com sucesso; 0 erros JS/overflow horizontal nos cenários medidos. Sem mudança visual ou de regra funcional.
+- **Evidências Komekko:** [ZIP QA 139](https://drive.google.com/file/d/1xKPx-nShvFZMoGrjzb6jSt5p4y1g4s3n/view), SHA256 `8f423988bc232dee3cc2de7c5f17a85d0e4bdf0f984512ae93a8d45491e723db`; fontes W3C 1.4.4/1.4.10 em `docs/decisions/2026-11-09-stage7-short-height-v0187.md`.
+- **Limites:** não provou zoom nativo de 400%, 200% de texto em todos os componentes, teclado virtual real, aparelhos físicos, leitores de tela ou WCAG integral. A CI no novo HEAD privado permanece sem sucesso verificado. **07.05 e 07.06 continuam [ ]; 07.10–07.12 também; 07=7/12, total 33/57, sem marcador alterado.**
+- **Próximo gate:** testes de hardware/zoom/IME quando disponíveis, decisões Megalos D1–D6 e integração Academy conforme escopo; nunca converter ensaio técnico em aceite institucional.
+
