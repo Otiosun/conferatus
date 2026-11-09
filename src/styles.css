@@ -1452,3 +1452,9 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
  position:absolute;left:50%;top:4px;transform:translateX(-50%);
  width:35px;height:35px;
 }
+
+/* Match the author's Proposições e Socii reference without sacrificing
+   touch target size when the longer label wraps on narrow profiles. */
+.profile-head .tabs .tab{
+ min-height:44px;padding:9px 6px;line-height:1.35;white-space:normal;
+}
