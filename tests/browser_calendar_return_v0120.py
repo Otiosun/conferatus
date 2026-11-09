@@ -86,6 +86,7 @@ with sync_playwright() as p:
         assert page.locator('[data-calendar-day="2026-12-12"]').get_attribute('aria-pressed') == 'true', width
         assert page.locator('.calendar-item--expanded').filter(has_text='Programação ligada à proposição').count() == 1, width
         page.locator('.calendar-item--expanded').filter(has_text='Programação ligada à proposição').locator('[data-cancel-schedule]').click()
+        page.locator('.calendar-item--expanded').filter(has_text='Programação ligada à proposição').locator('[data-confirm-cancel-schedule]').click()
         assert page.locator('.calendar-item').filter(has_text='Programação ligada à proposição').count()==0,width
         page.locator('.footer-home').click()
         assert page.locator('.preview-vote-summary').count()==0,(width,'cancelled schedule leaked a sample into the fixture ballot')
