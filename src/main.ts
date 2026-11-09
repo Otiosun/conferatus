@@ -665,7 +665,7 @@ function reviewPage(){
   : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div>
- <div class="workflow-review-panel"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
+ <div class="workflow-review-panel workflow-review-panel--pending"><form id="confirm-proposal-form" class="workflow-form workflow-review-form">
  <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38"><p>${reviewMessage}</p>
  <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>
  <label>Tipo de proposição<select name="type" required>${['PDR','PR','Ofício'].map(t=>`<option value="${t}" ${t===d.type?'selected':''}>${t}</option>`).join('')}</select></label>
