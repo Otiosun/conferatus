@@ -738,7 +738,7 @@ function reviewPage(){
   ? `${confirmedName?escapeHTML(confirmedName):'Um participante do Socii'} concluiu sua parte. Confira os dados e a redação antes de confirmar a conclusão.`
   : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
- <div class="workflow-review-body"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div>
+ <div class="workflow-review-body${d3SingleExperiment?' workflow-review-body--d3':''}"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div>
  <div class="workflow-review-panel workflow-review-panel--pending${d3SingleExperiment?' workflow-review-panel--d3':''}">${d3Start}<form id="confirm-proposal-form" class="workflow-form workflow-review-form" data-review-draft="${escapeHTML(d.id)}">
  <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38">${d3SingleExperiment?'<h2 id="d3-review-title" class="sr-only">Confirmar proposição</h2>':`<p>${reviewMessage}</p>`}${d3Close}
  <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>
@@ -973,7 +973,10 @@ window.addEventListener('hashchange',()=>{
   pendingScheduleCancellation=null;scheduleFormOpen=false;scheduleMethod=null;schedulePrefillProposalId=null;
  }
   menuOpen=false;demoToolsOpen=false;syncRouteState();render();
-  if(routeFromHash()==='calendar'&&scheduleFormOpen&&schedulePrefillProposalId){
+  if(leavingD3&&routeFromHash()==='compose'){
+   // Return to the action that opened the confirmation from the editor.
+   document.querySelector<HTMLButtonElement>('#compose-proposal-form [value="conclude"]')?.focus({preventScroll:true});
+  }else if(routeFromHash()==='calendar'&&scheduleFormOpen&&schedulePrefillProposalId){
    // Focus the form introduction, not a preselected field in the middle.
    // Tabbing forward must reach title and objective before proposal/section.
    const formHeading=document.querySelector<HTMLElement>('#schedule-deliberation-form h2');
