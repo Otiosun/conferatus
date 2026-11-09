@@ -20,6 +20,7 @@ with sync_playwright() as p:
   page.wait_for_function("() => location.hash==='#/profile/m01' && document.querySelector('.profile-head [data-tab=proposicoes]')?.textContent?.trim()==='Proposições e Socii'")
   assert label.text_content().strip()=='Proposições e Socii',(width,'author label differs from Megalos reference')
   assert label.bounding_box()['height']>=44,(width,'profile tab too small')
+  assert page.locator('.profile-head .metric-cell').nth(2).text_content().strip().startswith('06'),(width,'PR metric lacks original two-digit formatting')
   page.locator('[data-tab=proposicoes]').click()
   page.locator('.session-proposals-heading').first.wait_for()
   page.get_by_text('Rascunho de comunicação').first.wait_for()
