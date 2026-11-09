@@ -113,17 +113,34 @@ function hasPendingComposeChanges():boolean{
 function confirmComposeDeparture():boolean{
  return !hasPendingComposeChanges()||window.confirm('Esta redação tem alterações não salvas. Deseja sair e descartá-las?');
 }
+// Do not treat unchanged required defaults as a schedule the user has begun.
+// Changes to any field, including a modality/section select, count as unfinished work.
+function hasPendingScheduleChanges():boolean{
+ const form=document.querySelector<HTMLFormElement>('#schedule-deliberation-form');
+ if(!form)return false;
+ for(const [name,value] of new FormData(form)){
+  if(typeof value!=='string')continue;
+  const initial=name==='sectionId'?'integridade':name==='type'?'PDR':'';
+  if(value.trim()!==initial)return true;
+ }
+ return false;
+}
+function confirmScheduleDeparture():boolean{
+ return !hasPendingScheduleChanges()||
+  window.confirm('O agendamento tem informações não salvas. Deseja sair e descartá-las?');
+}
+let approvedScheduleDeparture=false;
 // The route guard protects in-app navigation. A separate, conditional
 // beforeunload listener also warns when reloading/closing a dirty composer.
 // Browsers (especially mobile) may skip this event: it is not an autosave.
 let composerUnloadListenerAttached=false;
 function warnBeforeComposerUnload(event: BeforeUnloadEvent) {
- if(!hasPendingComposeChanges())return;
+ if(!hasPendingComposeChanges()&&!hasPendingScheduleChanges())return;
  event.preventDefault();
  event.returnValue=' ';
 }
 function refreshComposerUnloadGuard(){
- const pending=hasPendingComposeChanges();
+ const pending=hasPendingComposeChanges()||hasPendingScheduleChanges();
  if(pending&&!composerUnloadListenerAttached){
   window.addEventListener('beforeunload',warnBeforeComposerUnload);
   composerUnloadListenerAttached=true;
@@ -139,6 +156,13 @@ function navigate(route: Route, memberId?: string) {
    return;
   }
   approvedComposeDeparture=true;
+ }
+ if(routeFromHash()==='calendar'&&route!=='calendar'&&hasPendingScheduleChanges()){
+  if(!confirmScheduleDeparture()){
+   if(menuOpen){menuOpen=false;render();}
+   return;
+  }
+  approvedScheduleDeparture=true;
  }
   if(route!=='calendar'){scheduleFormOpen=false;scheduleMethod=null;pendingScheduleCancellation=null;}
   menuOpen = false;
@@ -817,7 +841,16 @@ window.addEventListener('hashchange',()=>{
   return;
  }
  approvedComposeDeparture=false;
-  if(routeFromHash()!=='calendar')pendingScheduleCancellation=null;
+ const leavingSchedule=previousRoute==='calendar'&&routeFromHash()!=='calendar';
+ if(leavingSchedule&&!approvedScheduleDeparture&&!confirmScheduleDeparture()){
+  history.replaceState(history.state,'',lastRenderedHash||'#/calendar');
+  if(menuOpen){menuOpen=false;render();}
+  return;
+ }
+ approvedScheduleDeparture=false;
+ if(routeFromHash()!=='calendar'){
+  pendingScheduleCancellation=null;scheduleFormOpen=false;scheduleMethod=null;
+ }
   menuOpen=false;demoToolsOpen=false;syncRouteState();render();
   if(routeFromHash()==='ballot'&&previewScheduleId){
    const title=document.querySelector<HTMLElement>('#preview-vote-title');
@@ -1044,7 +1077,14 @@ document.addEventListener('click',(event)=>{
  if(actionEl?.dataset.action==='invite-socii-from-profile'){inviteOpen=true;navigate('proposals');return;}
  if(actionEl?.dataset.action==='new-proposal'){finishedProposalReturnTo=routeFromHash()==='profile'?'profile':'proposals';currentDraftId='';draftForm=blankDraft();richEditorOpen=false;lastRichSelection=null;workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
- if(actionEl?.dataset.action==='open-schedule'){pendingScheduleCancellation=null;scheduleFormOpen=!scheduleFormOpen;scheduleMethod=null;if(!cancellationSaveFailed)workflowNotice='';render();return;}
+ if(actionEl?.dataset.action==='open-schedule'){
+  if(scheduleFormOpen&&!confirmScheduleDeparture())return;
+  pendingScheduleCancellation=null;
+  scheduleFormOpen=!scheduleFormOpen;
+  scheduleMethod=null;
+  if(!cancellationSaveFailed)workflowNotice='';
+  render();return;
+ }
  if(actionEl?.dataset.action==='toggle-cancelled-history'){cancelledHistoryOpen=!cancelledHistoryOpen;render();return;}
  if(actionEl?.dataset.action==='retry-workflow-save' && workflowSaveFailed){
   const saved=saveWorkflows();
@@ -1199,6 +1239,7 @@ function showScheduleFormError(form: HTMLFormElement,message:string,fieldName:st
 // for the two session workflow keys. It does not import demo votes or members.
 document.addEventListener('change',async event=>{
  const field=event.target;
+ if(field instanceof HTMLElement && field.closest('#schedule-deliberation-form'))refreshComposerUnloadGuard();
  if(!advancedPreview || !(field instanceof HTMLInputElement) || field.id!=='archive-file-input')return;
  const file=field.files?.[0];if(!file)return;
  const report=(text:string,error=true)=>{
@@ -1414,6 +1455,7 @@ document.addEventListener('input',(event)=>{
  const target=event.target;
  if(target instanceof HTMLElement&&target.id==='draft-rich-body')syncRichEditor();
  if(target instanceof HTMLElement && target.closest('#compose-proposal-form'))refreshComposerUnloadGuard();
+ if(target instanceof HTMLElement && target.closest('#schedule-deliberation-form'))refreshComposerUnloadGuard();
  // An empty draft save is invalid only while *both* fields are blank. Do not
  // leave a stale error attached after the user supplies either field.
  if((target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) &&
