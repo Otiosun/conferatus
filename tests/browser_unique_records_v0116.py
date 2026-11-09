@@ -46,6 +46,7 @@ with sync_playwright() as p:
   secondary=page.locator('.calendar-item').filter(has_text='Programação secundária')
   secondary.locator('[data-schedule]').click()
   secondary.locator('[data-cancel-schedule]').click()
+  secondary.locator('[data-confirm-cancel-schedule]').click()
   backup=page.evaluate('JSON.parse(sessionStorage.getItem("conferatus:invalid-session-backup-v0114"))')
   assert [d['title'] for d in backup['drafts']]==['Proposição duplicada incorreta','Socii repetido'],(width,backup)
   assert [s['title'] for s in backup['schedule']]==['Programação duplicada incorreta'],(width,backup)
@@ -71,6 +72,7 @@ with sync_playwright() as p:
    row=more.locator('.calendar-item').filter(has_text='Programação original')
    row.locator('[data-schedule]').click()
    row.locator('[data-cancel-schedule]').click()
+   row.locator('[data-confirm-cancel-schedule]').click()
    assert more.evaluate('JSON.parse(sessionStorage.getItem("conferatus:invalid-session-backup-v0114"))')==older
    second=more.evaluate('JSON.parse(sessionStorage.getItem("conferatus:quarantined-session-backups-v0116"))')
    assert len(second)==1 and second[0]['drafts'][0]['title']=='Proposição duplicada incorreta',second
