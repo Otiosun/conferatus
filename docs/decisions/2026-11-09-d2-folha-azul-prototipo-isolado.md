@@ -55,3 +55,11 @@ A regra opt-in foi reduzida a `max-height:min(58dvh,580px)` e, para telas até 3
 Como a imagem original mostra início/encerramento lado a lado, a versão atual preserva a quebra de datas em telas compactas quando duas entradas `datetime-local` completas lado a lado reduziriam a legibilidade. Trata-se de desvio de conforto a ser avaliado com a Megalos, não de aceite da D2.
 
 O teste permanente `browser_profile_schedule_sheet_d2_v0181.py` inclui limite de cobertura visual (parte do perfil deve permanecer visível) e exigência de rolagem do painel; continua verificando os campos e a guarda de saída. A altura é exclusiva do experimento, não altera calendário nem perfil padrão.
+
+## Preservação ao trocar entre perfis pela URL
+
+Falha **negativa reproduzida** no HTML real da primeira CI da candidata: com D2 aberta no perfil da autoria, título digitado e a navegação direta `location.hash='#/profile/m04'`, o modal desapareceu e o campo deixou de existir sem `window.confirm`, porque a guarda verificava apenas **nome da rota** (`profile`), não mudança de identificador dentro da mesma rota. Isso pode ocorrer pelo histórico/links do navegador, mesmo que o fundo do modal esteja inerte.
+
+Correção mínima em `src/main.ts`: `navigate()` distingue também `memberId` da pessoa atualmente selecionada. Qualquer `hashchange` enquanto a folha está aberta verifica primeiro `confirmScheduleDeparture()`; se negar descarte, restaura o hash antigo e mantém o documento aberto; se aceitar, fecha a folha e segue ao destino. O comportamento do calendário padrão permanece inalterado. Regressão em `browser_profile_schedule_sheet_d2_v0181.py` preenche o formulário, tenta mudar para `#/profile/m04`, rejeita e verifica hash original, título intacto e modal visível.
+
+Até a CI do commit que contém essa regressão terminar, **não** considerar o novo caminho comprovado. Main, dados Academy, PM2 e produção sem alterações.
