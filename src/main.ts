@@ -893,8 +893,10 @@ document.addEventListener('keydown', event => {
   else if(pendingScheduleCancellation && routeFromHash()==='calendar'){
    const cancellingId=pendingScheduleCancellation;
    pendingScheduleCancellation=null;render();
-   [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')]
-    .find(button=>button.dataset.cancelSchedule===cancellingId)?.focus();
+   const restored=[...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')]
+    .find(button=>button.dataset.cancelSchedule===cancellingId);
+   restored?.focus();
+   restored?.scrollIntoView({block:'center',inline:'nearest'});
   }
   else if(searchExpanded && routeFromHash()==='members'){
    searchExpanded=false;filter='';render();document.querySelector<HTMLButtonElement>('[data-action=search]')?.focus();
@@ -1143,9 +1145,11 @@ document.addEventListener('click',(event)=>{
   if(item){
    pendingScheduleCancellation=pendingScheduleCancellation===item.id?null:item.id;
    render();
-   (pendingScheduleCancellation
+   const focusTarget=pendingScheduleCancellation
     ? document.querySelector<HTMLElement>('.calendar-cancel-confirm')
-    : [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')].find(button=>button.dataset.cancelSchedule===item.id))?.focus();
+    : [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')].find(button=>button.dataset.cancelSchedule===item.id);
+   focusTarget?.focus();
+   focusTarget?.scrollIntoView({block:'center',inline:'nearest'});
   }
   return;
  }
@@ -1153,8 +1157,10 @@ document.addEventListener('click',(event)=>{
  if(keepScheduleEl?.dataset.keepSchedule){
   const keptId=keepScheduleEl.dataset.keepSchedule;
   pendingScheduleCancellation=null;render();
-  [...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')]
-   .find(button=>button.dataset.cancelSchedule===keptId)?.focus();
+  const restored=[...document.querySelectorAll<HTMLButtonElement>('[data-cancel-schedule]')]
+   .find(button=>button.dataset.cancelSchedule===keptId);
+  restored?.focus();
+  restored?.scrollIntoView({block:'center',inline:'nearest'});
   return;
  }
  const confirmScheduleEl=target.closest<HTMLElement>('[data-confirm-cancel-schedule]');
