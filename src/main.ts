@@ -858,9 +858,14 @@ window.addEventListener('hashchange',()=>{
  }
   menuOpen=false;demoToolsOpen=false;syncRouteState();render();
   if(routeFromHash()==='calendar'&&scheduleFormOpen&&schedulePrefillProposalId){
-   const selector=document.querySelector<HTMLSelectElement>('#schedule-deliberation-form [name="proposalId"]');
-   selector?.focus({preventScroll:true});
-   selector?.scrollIntoView({block:'center',inline:'nearest'});
+   // Focus the form introduction, not a preselected field in the middle.
+   // Tabbing forward must reach title and objective before proposal/section.
+   const formHeading=document.querySelector<HTMLElement>('#schedule-deliberation-form h2');
+   if(formHeading){
+    formHeading.tabIndex=-1;
+    formHeading.focus({preventScroll:true});
+    formHeading.scrollIntoView({block:'start',inline:'nearest'});
+   }
   }else if(routeFromHash()==='ballot'&&previewScheduleId){
    const title=document.querySelector<HTMLElement>('#preview-vote-title');
    if(title){title.tabIndex=-1;title.focus({preventScroll:true});title.scrollIntoView({block:'start'});}
