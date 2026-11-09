@@ -43,7 +43,8 @@ with sync_playwright() as p:
   assert modal.locator('[data-dismiss-d3-review]').get_attribute('aria-label'),(engine,width,'close has no accessible label')
   assert modal.locator('[data-dismiss-d3-review]').bounding_box()['height']>=44,(engine,width,'close too small')
   assert modal.locator('[name=sectionId]').evaluate('(el)=>document.activeElement===el'),(engine,width,'initial focus')
-  assert 'blur' in modal.evaluate('(el)=>getComputedStyle(el,"::backdrop").backdropFilter'),(engine,width,'background not blurred')
+  assert 'blur' in page.locator('.workflow-review-body--d3').evaluate('(el)=>getComputedStyle(el).filter'),(engine,width,'document not blurred')
+  assert page.locator('.workflow-editor-head').evaluate('(el)=>getComputedStyle(el).filter')=='none',(engine,width,'title should remain sharp')
   assert modal.bounding_box()['x']>=-1 and modal.bounding_box()['width']<=width+1,(engine,width,'modal width')
   for key in ['Tab']*10+['Shift+Tab']*5:
    page.keyboard.press(key)
@@ -51,6 +52,7 @@ with sync_playwright() as p:
   # Unedited exit is allowed; the same proposal remains available to revise.
   page.keyboard.press('Escape')
   page.locator('#compose-proposal-form').wait_for(state='visible')
+  assert page.locator('#compose-proposal-form [value=conclude]').evaluate('(el)=>document.activeElement===el'),(engine,width,'focus did not return to editor action')
   assert page.locator('#draft-title').input_value()=='D3 confirmação experimental',(engine,width,'return lost proposal')
   page.locator('#compose-proposal-form [value=conclude]').click()
   modal.wait_for(state='visible')
