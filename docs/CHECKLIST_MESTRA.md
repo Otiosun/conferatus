@@ -1119,3 +1119,5 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Protótipo baseado no HTML CI `42564900935` (sem substituir validação do novo SHA): Chromium 280/320/390/740/1280, autoria correta, perfil terceiro preservado, altura 50,4px em 280/320 e 44px nas demais, sem overflow horizontal. Regressão `browser_profile_proposals_v013.py` reforçada e sincronizada com hashchange.
 - [x] [Decisão documentada](decisions/2026-11-09-perfil-aba-proposicoes-socii.md).
 - [ ] **CI do HEAD exato**, captura visual do compilado final e hardware móvel continuam exigidos. D2 folha azul permanece opcional e sem aceite; D1–D6 e votação institucional pendentes. `main`, produção, contas Academy e PM2 intactos. Contagens 04=17/22, 06=2/5, 07=7/12 inalteradas.
+
+- [x] Complemento do perfil: o contador PR aparece como `06` quando o valor numérico é 6, conforme o modelo da Megalos; alteração apenas de formatação (sem copiar números do original para os dados). Regressão `browser_profile_proposals_v013.py` reforçada. Evidência do ZIP do rótulo é anterior a este complemento; conferir o build do HEAD exato.
