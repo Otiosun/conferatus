@@ -1356,3 +1356,17 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 @media(max-width:350px){
  .calendar-cancel-confirm-actions{grid-template-columns:1fr;}
 }
+
+/* Megalos 1001930222: the review sheet stays reachable at the bottom of a
+   standard portrait phone while the underlying proposition remains scrollable.
+   1001930223 (blurred one-button variant) is a separate unapproved state;
+   do not invent or enable it here. Keep very short viewports in normal flow. */
+@media(max-width:600px) and (min-height:680px){
+ .workflow-review-panel--pending{
+  position:sticky;bottom:0;z-index:12;
+  max-height:min(70dvh,450px);overflow-y:auto;overscroll-behavior:contain;
+  background:rgba(205,209,216,.97);
+  box-shadow:0 -9px 22px #1a23311f;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+ }
+}
