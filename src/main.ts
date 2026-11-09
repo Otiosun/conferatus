@@ -423,7 +423,7 @@ function profilePage() {
   ? drafts.map(d=>`<article class="activity activity-proposal session-proposal"><button type="button" data-draft="${escapeHTML(d.id)}" class="session-proposal-link"><strong>${escapeHTML(d.title||'Rascunho sem título')}</strong><small>${draftStatusLabel(d)} · ${escapeHTML(d.type)}</small><span>${escapeHTML(d.body.slice(0,170))}</span></button>${linkedScheduleButtons(d)}${contextualScheduleButton(d)}</article>`).join('') : '';
  return `${header(undefined,undefined,false)}${memberHeader(member,activeTab)}<section class="section-body">
  ${local?`<h2 class="session-proposals-heading">Proposições desta sessão</h2>${local}${relevant.length?'<h2 class="session-proposals-heading">Histórico de exemplo</h2>':''}`:''}
- ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>${member.id===members[0]?.id&&activeTab==='proposicoes'?`<div class="workflow-actions profile-workflow-actions" role="group" aria-label="Ações da proposição"><button type="button" class="workflow-outline" data-action="invite-socii-from-profile">Convidar para Socii</button><button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>`:''}${profileSheetExperiment&&profileScheduleSheetOpen&&member.id===members[0]?.id&&activeTab==='proposicoes'?`<dialog id="profile-schedule-dialog" closedby="none" aria-labelledby="profile-schedule-sheet-label"><div class="profile-schedule-sheet-head">${crest()}<h2 id="profile-schedule-sheet-label" tabindex="-1">Programar deliberação</h2><button type="button" class="profile-schedule-sheet-close" data-dismiss-schedule-sheet aria-label="Fechar agendamento">Fechar</button></div>${scheduleFormMarkup(true)}</dialog>`:''}`;
+ ${relevant.length?relevant.map(activityItem).join(''):local?'':'<p class="status-line">Nenhum registro encontrado.</p>'}</section>${member.id===members[0]?.id&&activeTab==='proposicoes'?`<div class="workflow-actions profile-workflow-actions" role="group" aria-label="Ações da proposição"><button type="button" class="workflow-outline" data-action="invite-socii-from-profile">Convidar para Socii</button><button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>`:''}${profileSheetExperiment&&member.id===members[0]?.id&&workflowNotice?`<p class="profile-schedule-result" role="status">${escapeHTML(workflowNotice)}</p>`:''}${profileSheetExperiment&&profileScheduleSheetOpen&&member.id===members[0]?.id&&activeTab==='proposicoes'?`<dialog id="profile-schedule-dialog" closedby="none" aria-labelledby="profile-schedule-sheet-label"><div class="profile-schedule-sheet-head">${crest()}<h2 id="profile-schedule-sheet-label" tabindex="-1">Programar deliberação</h2><button type="button" class="profile-schedule-sheet-close" data-dismiss-schedule-sheet aria-label="Fechar agendamento">Fechar</button></div>${scheduleFormMarkup(true)}</dialog>`:''}`;
 }
 function overviewPage() {
  const votes=activities.filter(a=>a.type==='voto');
@@ -1143,7 +1143,7 @@ document.addEventListener('click',(event)=>{
   if(!proposal)return;
   schedulePrefillProposalId=proposal.id;
   if(profileSheetExperiment&&routeFromHash()==='profile'){
-   profileScheduleSheetOpen=true;scheduleMethod=null;render();return;
+   profileScheduleSheetOpen=true;scheduleMethod=null;workflowNotice='';render();return;
   }
   scheduleFormOpen=true;
   scheduleMethod=null;
