@@ -1389,7 +1389,7 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
    and keyboard focus contained; default UI remains unchanged. */
 #profile-schedule-dialog{
  box-sizing:border-box;position:fixed;inset:auto 0 0; margin:0 auto;
- width:min(100%,740px);max-width:740px;max-height:min(82dvh,760px);
+ width:min(100%,740px);max-width:740px;max-height:min(58dvh,580px);
  padding:0 12px 14px;overflow-y:auto;overscroll-behavior:contain;
  background:#505ec5;color:#fff;border:0;border-radius:26px 26px 0 0;
  box-shadow:0 -12px 34px #1b244d40;
@@ -1417,7 +1417,7 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 }
 #profile-schedule-dialog .workflow-schedule-form>h2{display:none;}
 @media(max-width:380px){
- #profile-schedule-dialog{padding-inline:9px;max-height:86dvh;}
+ #profile-schedule-dialog{padding-inline:9px;max-height:68dvh;}
  .profile-schedule-sheet-head{gap:8px;}
 }
 
