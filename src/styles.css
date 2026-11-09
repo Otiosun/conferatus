@@ -1475,3 +1475,45 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 #profile-schedule-dialog .workflow-schedule-form :is(input,select){min-height:50px;}
 @media(max-width:380px){#profile-schedule-dialog{max-height:52dvh;}}
 @media(max-height:620px){#profile-schedule-dialog{max-height:78dvh;}}
+
+/* D3 candidate: a single principal confirmation action over the blurred
+   document. Opt-in via ?demo=1&d3=single; never changes standard review. */
+.workflow-review-panel--d3{
+ display:contents;position:static;max-height:none;overflow:visible;
+ background:transparent;box-shadow:none;padding:0;
+}
+#d3-review-dialog{
+ box-sizing:border-box;position:fixed;inset:auto 0 0;margin:0 auto;
+ width:min(100%,740px);max-width:740px;max-height:min(48dvh,440px);
+ padding:16px 13px 12px;overflow-y:auto;overscroll-behavior:contain;
+ border:0;border-radius:23px 23px 0 0;background:transparent;
+ color:#30384c;box-shadow:none;
+}
+#d3-review-dialog::backdrop{
+ background:rgba(28,36,56,.12);
+ -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+}
+#d3-review-dialog .workflow-review-form{
+ margin:0;max-width:none;padding:0;background:transparent;border:0;
+}
+#d3-review-dialog .workflow-review-sheet{
+ margin:8px 0 12px;padding:33px 16px 16px;background:#e7e9ee;
+}
+#d3-review-dialog .d3-review-close{
+ position:absolute;top:6px;right:7px;z-index:2;display:grid;place-items:center;
+ width:44px;min-width:44px;height:44px;padding:0;border:1px solid #aab0c1;
+ border-radius:12px;color:#3e4561;background:#f1f2f6;
+ font:inherit;font-size:22px;line-height:1;cursor:pointer;
+}
+#d3-review-dialog .d3-review-close:focus-visible,
+#d3-review-dialog :is(select,button):focus-visible{
+ outline:3px solid #37459e;outline-offset:2px;
+}
+#d3-review-dialog .workflow-review-buttons{display:block;}
+#d3-review-dialog .workflow-review-buttons .workflow-primary{
+ display:block;width:100%;min-height:48px;text-align:center;
+ font-size:12px;letter-spacing:.02em;
+}
+@media(max-height:620px){
+ #d3-review-dialog{max-height:78dvh;}
+}
