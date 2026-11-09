@@ -1420,3 +1420,18 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
  #profile-schedule-dialog{padding-inline:9px;max-height:86dvh;}
  .profile-schedule-sheet-head{gap:8px;}
 }
+
+/* The reference shows proposal, section, dates and type before confirmation.
+   The extra fields are genuinely required by the demo scheduling contract,
+   so keep them visible in reading/Tab order below the reference fields. */
+#profile-schedule-dialog .profile-schedule-supplemental{
+ margin:13px 0 18px;padding:16px 0 5px;
+ border-top:1px solid #c2c9ee;
+}
+#profile-schedule-dialog .profile-schedule-supplemental h3{
+ margin:0 0 12px;color:#fff;font-size:13px;line-height:1.4;
+}
+#profile-schedule-dialog .workflow-schedule-form label{min-width:0;}
+#profile-schedule-dialog .workflow-schedule-form button[type=submit]{
+ min-height:48px;
+}
