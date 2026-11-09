@@ -76,6 +76,7 @@ jobs:
             tests/browser_calendar_return_v0120.py \
             tests/browser_calendar_cancel_confirmation_v0177.py \
             tests/browser_review_sheet_portrait_v0178.py \
+            tests/browser_schedule_unsaved_guard_v0179.py \
             tests/browser_stage7_advanced_controls_v0132.py \
             tests/browser_restored_links_integrity_v0157.py \
             tests/browser_local_archive_v0158.py \
@@ -180,6 +181,7 @@ jobs:
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_socii_multiple_drafts_v0176.py
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_calendar_cancel_confirmation_v0177.py
             CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_review_sheet_portrait_v0178.py
+            CONFFRATUS_TEST_ENGINE="$engine" python tests/browser_schedule_unsaved_guard_v0179.py
           done
       - name: Upload optional multi-engine evidence
         if: always()
