@@ -54,6 +54,9 @@ with sync_playwright() as p:
   assert sheet.locator('#profile-schedule-sheet-label').evaluate('(el)=>document.activeElement===el'),width
   assert sheet.evaluate('(el)=>getComputedStyle(el).position')=='fixed',width
   assert sheet.bounding_box()['width']<=width+1,width
+  bounds=sheet.bounding_box()
+  assert bounds['y']>= (250 if width<=380 else 300),(width,'sheet obscured too much of profile',bounds)
+  assert sheet.evaluate('(e)=>e.scrollHeight>e.clientHeight'),(width,'required extra inputs must remain scrollable')
   # Tab must stay inside the modal, never reach background buttons.
   for _ in range(12):
    page.keyboard.press('Tab')
