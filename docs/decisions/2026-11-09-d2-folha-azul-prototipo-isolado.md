@@ -45,3 +45,13 @@ A execução `42561293016`, no SHA anterior à reorganização dos campos, obtev
 **Correção restrita:** a folha opt-in possui `closedby="none"`, com listener `keydown` em captura para Esc quando a folha está efetivamente aberta, chamando `preventDefault()` antes do default do navegador. Botão Fechar, tecla Esc e evento nativo `cancel` passam pela única função `dismissProfileScheduleSheet()`: se há dados pendentes e a pessoa recusa o descarte, nenhuma mudança de estado; se autoriza, a folha fecha e restaura o foco ao atalho da mesma proposição. O navegador mantém foco limitado ao modal pelo elemento `dialog`. Nenhuma mudança no fluxo padrão.
 
 A correção foi registrada em `0e519ecf98ebc0184b5cf74ed648afcf6e32b854`. É **pendente de CI exata**: não marcar a falha corrigida até o Chromium e os motores adicionais concluírem sem regressões. Registrar explicitamente o FAIL anterior.
+
+## Revisão de geometria — área do perfil visível
+
+Capturas de prova da candidata inicial no HTML CI `42561293016`, com Chromium 280/390/740 CSS px, mostraram a folha ocupando cerca de 82% da altura útil em 390 px (y=153, altura=697 em viewport de 850), ocultando quase toda a página ao fundo, em desacordo com o desenho Megalos `1001930226.jpg`.
+
+A regra opt-in foi reduzida a `max-height:min(58dvh,580px)` e, para telas até 380px, `max-height:68dvh`. Na prova CSS isolada sobre o HTML anterior, em 390px passou a ocupar altura 493px (y=357), em 280px altura 578px (y=272) e em 740px altura 493px (y=357), sem overflow horizontal. O conteúdo total era maior que a caixa (scrollHeight ~919/822), mantendo rolagem interna. **Não** é prova da última compilação nem de teclado virtual real; as capturas são comparativos isolados de CSS.
+
+Como a imagem original mostra início/encerramento lado a lado, a versão atual preserva a quebra de datas em telas compactas quando duas entradas `datetime-local` completas lado a lado reduziriam a legibilidade. Trata-se de desvio de conforto a ser avaliado com a Megalos, não de aceite da D2.
+
+O teste permanente `browser_profile_schedule_sheet_d2_v0181.py` inclui limite de cobertura visual (parte do perfil deve permanecer visível) e exigência de rolagem do painel; continua verificando os campos e a guarda de saída. A altura é exclusiva do experimento, não altera calendário nem perfil padrão.
