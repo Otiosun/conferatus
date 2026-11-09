@@ -29,3 +29,20 @@ Alternativas consideradas:
 - O laboratório usa dados sintéticos e `sessionStorage`. Sem login, autorização institucional, gravação de voto ou integração com a Academy.
 - CI do SHA exato do lote, revisão de capturas do artefato, Android físico e usabilidade assistiva ainda precisam ser verificadas antes de afirmar conclusão técnica.
 - `main`, dados reais e produção permanecem intocados. Contagens formais preservadas: Etapa 04 17/22, 06 2/5, 07 7/12.
+
+## Revisão 126 — ordem de foco no início do agendamento
+
+**Problema reproduzido, não presumido:** ao clicar `Programar deliberação sobre esta proposição`, o seletor `proposalId` recebia foco apesar de já estar preenchido. No HTML exato da CI `42553046517` (SHA `12359bd`), Chromium a 390 CSS px: foco inicial em `proposalId` e o primeiro **Tab** levava a `sectionId`, pulando título e descrição (campos anteriores na ordem visual). O cabeçalho do formulário permanecia visível nos tamanhos ensaiados; **não alegar que estava escondido**. A regressão concreta é a sequência ilógica do teclado.
+
+**Investigação (Lei 21):**
+- Home Office User-Centred Design Manual, [Keyboard for forms](https://design.homeoffice.gov.uk/accessibility/interactivity/forms/keyboard): avançar pelos campos na ordem visual, sem saltos.
+- VA.gov Design System, [Focus management](https://design.va.gov/accessibility/focus-management): SPA deve orientar foco para o título da nova rota, rolar elemento focalizado à vista e usar contexto compreensível.
+- Chrome Lighthouse, [Managed focus](https://developer.chrome.com/docs/lighthouse/accessibility/managed-focus/): após mudança de rota sem recarga, direcionar foco para o conteúdo recém-exibido.
+
+**Opções consideradas:** manter foco no seletor (mais rápido para alterar proposta, porém confunde ordem inicial); colocar foco no primeiro `input` (teclado mobile pode abrir inesperadamente e omite o título); focar o `h2` do formulário com `tabIndex=-1`, sem incluí-lo na tabulação (escolhido). Sem dependência e sem alterar permissões, validações ou valores.
+
+**Alteração delimitada:** somente quando aberto pelo atalho contextual, o `h2` `Programar deliberação` recebe foco programático e rolagem ao início. CSS `scroll-margin-top:16px` dá respiro antes do título. Primeiro **Tab** segue para o `input` de título, depois descrição e demais campos em ordem. `proposalId` continua previamente selecionado por ID. Entrada direta via calendário permanece inalterada.
+
+**Prova:** ensaio original confirmou `proposalId → sectionId`. Protótipo do JS compilado, sobre o HTML do mesmo SHA, passou em Chromium 280/320/390/740/1280px: `h2 → Tab → title`, seletor preservado, sem erros JS nem overflow; com CSS 16px, o cabeçalho ficou a aproximadamente 16px do topo em 280, 390 e 1280px. Não tratar o protótipo isolado como compilação do HEAD. A regressão permanente `tests/browser_profile_schedule_context_v0180.py` agora exige foco no `h2`, rolagem visível e primeira Tab para título. Confirmar build e Firefox/WebKit do **novo SHA** antes de marcar a implementação como tecnicamente validada.
+
+D2 **permanece aberta**: o atalho e a ordem de teclado não significam homologação da folha azul sobreposta originalmente mostrada pela Megalos. Sem alteração de `main`, produção, dados Academy ou PM2.
