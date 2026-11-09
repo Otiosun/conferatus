@@ -1098,3 +1098,9 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - [x] Corrigido `navigate()` para verificar membro e `hashchange` para proteger qualquer mudança de fragmento com folha aberta, mantendo hash, modal e campos quando o descarte é recusado. Regressão `browser_profile_schedule_sheet_d2_v0181.py` atualizada com tentativa de trocar perfil e recusa.
 - [x] Fonte única: não criado segundo formulário, validação ou banco; apenas candidata visual `?demo=1&d2=sheet`. Documentação detalhada em [D2](decisions/2026-11-09-d2-folha-azul-prototipo-isolado.md).
 - [ ] **Gate CI atual [cross-browser]** com Chromium, Firefox e WebKit, incluindo preservação com Escape, navegação entre perfis, geometria, ordem de campos e submissão; não reutilizar a aprovação do SHA anterior. Hardware Android, comparação de arte final e aceite da Megalos ainda abertos. `main` e produção intactos; 04=17/22,06=2/5,07=7/12 mantidos.
+
+## D2 — resultado visível de programação no perfil (09/11/2026)
+
+- [x] Depois de confirmar uma programação pela candidata de folha no perfil, o vínculo passava a existir, mas o texto de `workflowNotice` ficava só na região de anúncios acessíveis. Incluída `profile-schedule-result[role=status]` junto às proposições do perfil com mensagem derivada do salvamento real da sessão.
+- [x] Ao abrir o modal novo, limpar aviso residual; ao salvar, indicar se a programação foi gravada ou ficou apenas em memória. CSS pequeno na candidata, sem alterar fluxo padrão. Regresso `browser_profile_schedule_sheet_d2_v0181.py` exige confirmação visível após submit.
+- [ ] **CI exata atual [cross-browser]** incluindo geometria, diálogo nativo, Esc recusado, troca de ID de perfil, ordem de campos e feedback visível, sem enfraquecer testes históricos. D2 continua opt-in, não homologada pela Megalos. Android real e validação final ainda pendentes. Main/produção/dados reais intocados; 04=17/22,06=2/5,07=7/12.
