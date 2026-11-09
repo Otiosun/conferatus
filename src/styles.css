@@ -1458,3 +1458,20 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .profile-head .tabs .tab{
  min-height:44px;padding:9px 6px;line-height:1.35;white-space:normal;
 }
+
+/* D2 opt-in: closer to Megalos's lower sheet while preserving keyboard space.
+   Modal semantics, shared form, default profile and calendar are unchanged. */
+#profile-schedule-dialog{
+ max-height:min(44dvh,460px);
+ padding-inline:14px;
+ background:#5260c7;
+}
+#profile-schedule-dialog::backdrop{background:rgba(24,33,64,.12);}
+#profile-schedule-dialog .profile-schedule-sheet-head{background:#5260c7;}
+#profile-schedule-dialog .workflow-schedule-form :is(input,select,textarea){
+ background:rgba(255,255,255,.08);
+ border-color:rgba(234,239,255,.77);
+}
+#profile-schedule-dialog .workflow-schedule-form :is(input,select){min-height:50px;}
+@media(max-width:380px){#profile-schedule-dialog{max-height:52dvh;}}
+@media(max-height:620px){#profile-schedule-dialog{max-height:78dvh;}}
