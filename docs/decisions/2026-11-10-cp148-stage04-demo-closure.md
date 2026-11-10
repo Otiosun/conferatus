@@ -19,3 +19,13 @@ A responsabilidade desta equipe é **protótipo funcional com dados sintéticos*
 No **escopo da prévia fictícia**, subitens **04.05 (agendamento)**, **04.09 (redação/revisão/estado)** e **04.13 (colaboração e conclusão Socii)** receberam prova funcional completa e são encerrados com nota de escopo. **Os itens 04.02 e 04.19 continuam aguardando escolhas/aceite visual da Megalos**, incluindo D1–D6. O contrato de Soc ii remoto e as políticas reais da Academy não foram implementados, nem são declarados como tais. Integridade de arquivo e armazenamento/HTTP reais em hardware permanecem dependências de homologação, não falsos PASS.
 
 **Contagem histórica após o lote: 41/57 (04=20/22)**; não traduzir 71,9% em “percentual de obra” nem alegar produção. `main`, Cloudflare principal, Academy e PM2 intocados. CI GitHub pode permanecer sem runner; o fato de o deploy Cloudflare de preview funcionar não certifica a CI.
+
+## Adendo de QA — foco depois de concluir Socii (10/11/2026)
+
+**Defeito antes:** quando o botão `data-confirm-partner` desaparecia após a confirmação, o foco do navegador caía no elemento `BODY`. Reproduzido no Chromium em **320, 390, 740 e 1280 px**; o formulário do Socii era visualmente funcional, mas o usuário de teclado perdia a posição da navegação.
+
+**Pesquisa e solução nativa:** W3C/WAI, [Keyboard Interface — Persistence of Focus](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/) e [WCAG 2.2 SC 2.4.3 Focus Order](https://www.w3.org/WAI/WCAG22/Understanding/focus-order). Após o render da confirmação, reusar os controles existentes no mesmo cartão: priorizar outro participante pendente; quando todos concluírem, o botão de agendamento; se indisponível, o botão da proposição. Sem `tabindex` artificial, dependência, CSS, novo endpoint ou regra institucional.
+
+**Teste:** estendido o `tests/browser_stage04_complete_v0196.py` para confirmar com **Enter** e assegurar foco em `data-confirm-partner` e `data-schedule-draft`, respectivamente. Passou no Chromium em **320, 390, 740, 1280 px**, incluindo toda a jornada de redação/revisão/agendamento/cancelamento. Uma execução local adicional passou em **280 px**. `npm run build` aprovado com **73/73 testes Node**. SHA Git blob do código testado: `f4b8c3a65dbdda4bcb8dc057f48e4a173471fb43`; do teste: `0d9442d1bfd1b81103e71eba093b6f13cbc476c7`, ambos confirmados após envio ao GitHub.
+
+**Limites:** nenhum novo item da checklist é marcado [x]; **43/57** permanece. A correção é pontual, não substitui WCAG AA completo, TalkBack/VoiceOver, zoom nativo, hardware, CI GitHub integral ou homologação Megalos. Apenas prévia; `main`, Academy e produção preservadas.
