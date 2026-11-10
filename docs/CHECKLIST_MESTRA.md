@@ -1222,3 +1222,13 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - ZIP de provas: https://drive.google.com/file/d/1yMHAOlm9O2tKjsKaOE39rHh0U7fQi51n/view (SHA256 `079cdef4708a237ddd375fae6687b22f91b81af4de42ffb6218b9c8e0e3a0d6b`). `main`/produção/Academy/PM2 intactos; repositório privado.
 - **Nenhum marcador alterado: 33/57.** Megalos precisa aceitar escopo/visual da página de votação e D1–D6; integração institucional é responsabilidade da Academy, não representa tarefa executável da nossa equipe.
 
+
+## CHECKPOINT 144 — Build local reconstituído do HEAD exato (10/11/2026)
+
+- **Objetivo prioritário concluído nesta rodada de QA:** pela primeira vez depois da integração da página de votação à navegação normal, compilar o **código exato do GitHub**, sem alterar a aplicação e sem expor o repositório.
+- **Procedência:** 44 fontes textuais e quatro PNGs com SHA Git blob local == GitHub (`47069280fc93165edab9cd53751c0da0abfb10d3`), cada um conferido. TypeScript 5.8.3/Node 22.16, `npm run build` integral **PASS**, **73/73 testes Node PASS**, HTML de saída SHA256 `16ea03aaed5ea23f38ae6138371383dc2585756531dab3fb83c77f6b66630597`.
+- **QA no HTML compilado:** Playwright Chromium `browser_voting_normal_flow_v0190.py` PASS nas seis modalidades e calendário→votação em quatro larguras (320/390/740/1280); `browser_full_workflow_journey_v0173.py`, `browser_calendar_return_v0120.py`, `browser_smoke.py` PASS; altura curta 48/48; foco não obscurecido 192 amostras PASS. Captura 390 px revisada, sem alteração estética deliberada.
+- **Artefato privado Komekko:** [ZIP build exato e QA 144](https://drive.google.com/file/d/1mGNuYvpaQ3xoTiQZ_lHGCdkZ4eIjjoDn/view), SHA256 `af6c857fa6f5ed2df7d37914ef6403fdfd66be72f521569906c27e30e517fb8a`. Método e limitações em `docs/decisions/2026-11-10-cp144-exact-head-local-build.md`.
+- **Limites e segurança:** a navegação HTTP `localhost` foi bloqueada pelo ambiente Chromium (`ERR_BLOCKED_BY_ADMINISTRATOR`); QA navegador foi com `page.set_content`. O check Cloudflare Pages do SHA `47069280` foi `success`, mas Actions `42746530965` teve `postgres-lab` failure, `validate` e `cross-browser-lab` skipped. **Não** alegar CI remota aprovada, carregamento do endereço no Android, WCAG integral ou aceite Megalos. `main`, Academy, dados reais e produção intactos.
+- **Contagem formal sem alteração: 33/57**, Etapa 07=7/12. Próximo gate: homologação da página cobrada pela Megalos, D1–D6, revisão visual e aparelho real, separadamente das integrações externas fora de nosso escopo.
+
