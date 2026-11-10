@@ -70,6 +70,7 @@ let demoExpanded = false;
 let votingFormsOpen = false;
 let previewHomeBallot = false;
 let previewClosedScheduleNotice = '';
+let pendingCalendarReturnId: string | null = null;
 // Six modes share one local validation path; only the technical selector belongs to ?demo=1.
 let previewMode: DeliberationMethod = 'binaria';
 let previewVoteError = '';
@@ -366,7 +367,7 @@ function previewVoteLab():string {
   (advancedPreview?'<p class="preview-vote-disclaimer">Apenas em ?demo=1. Alternativas fictícias, sem voto oficial, apuração institucional, login ou envio de informações.</p>':'<p class="preview-vote-disclaimer">Prévia com dados fictícios. Sua escolha permanece nesta aba e não é enviada à Academy.</p>')+
   (advancedPreview?'<label for="preview-vote-method">Modalidade de deliberação</label><select id="preview-vote-method"'+(contextual?' disabled':'')+'>'+DELIBERATION_METHODS.map(mode=>'<option value="'+mode.id+'"'+(mode.id===previewMode?' selected':'')+'>'+escapeHTML(mode.label)+'</option>').join('')+'</select>':'<p class="preview-vote-detail">Modalidade: '+escapeHTML(method?.label??'')+'</p>')+
   (advancedPreview?'<p class="preview-vote-detail">'+escapeHTML(method?.detail??'')+'</p>':'')+ 
-  ((contextual||homeBallot)?'<button type="button" class="preview-vote-secondary" data-action="exit-preview-schedule">'+(advancedPreview?'Voltar às alternativas de teste':'Voltar às votações')+'</button>':'')+
+  ((contextual||homeBallot)?'<button type="button" class="preview-vote-secondary" data-action="exit-preview-schedule">'+(advancedPreview?'Voltar às alternativas de teste':contextual?'Voltar ao calendário':'Voltar às votações')+'</button>':'')+
   (receipt?'<div class="preview-vote-receipt" role="status"><strong>'+(advancedPreview?'Voto simulado conferido nesta aba':'Escolha confirmada nesta prévia')+'</strong>'+
    '<p>'+previewVoteReceiptText(receipt)+'</p>'+
    '<button type="button" class="preview-vote-secondary" data-action="reset-preview-vote">'+(advancedPreview?'Registrar outra amostra':'Alterar escolha')+'</button></div>':
@@ -381,16 +382,23 @@ function previewVoteLab():string {
 }
 
 function ballotPage() {
- // A cancelled or otherwise invalid program cannot fall through to generic options.
- if(!advancedPreview&&votingFormsOpen&&previewScheduleId&&!previewSelectedSchedule()){
+ // An unavailable program retains its title instead of falling through to the home ballot.
+ if(!advancedPreview&&previewScheduleId&&!previewSelectedSchedule()){
+  const unavailable=schedule.find(item=>item.id===previewScheduleId);
+  const cancelled=unavailable?.status==='cancelada';
   votingFormsOpen=false;
-  previewScheduleId=null;
   previewVoteReceipt=null;
   previewVoteDraft=null;
   previewRequestId=null;
   previewVoteError='';
   previewVoteMemberId='';
-  previewClosedScheduleNotice='Esta programação não está mais disponível. Consulte o calendário para verificar sua situação.';
+  return `<div class="main-pad">${header(undefined,undefined,false)}</div>
+   <section id="preview-vote-lab" class="preview-vote-lab" aria-labelledby="preview-vote-title">
+    <h2 id="preview-vote-title">${escapeHTML(unavailable?.title??'Programação indisponível')}</h2>
+    <p class="preview-vote-context" role="status"><strong>${cancelled?'Programação cancelada':'Programação indisponível'}</strong><span>${cancelled?'Esta programação foi cancelada. Consulte seu registro no calendário.':'As opções desta programação não estão disponíveis nesta sessão.'}</span></p>
+    <p class="preview-vote-disclaimer">Prévia com dados fictícios. Nenhuma escolha é enviada à Academy.</p>
+    <button type="button" class="preview-vote-secondary" data-action="exit-preview-schedule">Voltar ao calendário</button>
+   </section>`;
  }
  // A scheduled demo must not display unrelated sample results first.
  if(!advancedPreview && votingFormsOpen && (previewSelectedSchedule()||previewHomeBallot)){
@@ -1026,6 +1034,14 @@ window.addEventListener('hashchange',()=>{
     formHeading.focus({preventScroll:true});
     formHeading.scrollIntoView({block:'start',inline:'nearest'});
    }
+  }else if(routeFromHash()==='calendar'&&pendingCalendarReturnId){
+   const id=pendingCalendarReturnId;
+   pendingCalendarReturnId=null;
+   const source=[...document.querySelectorAll<HTMLButtonElement>('[data-schedule]')]
+    .find(button=>button.dataset.schedule===id)
+    ?? document.querySelector<HTMLButtonElement>('[data-action=toggle-cancelled-history]');
+   (source??document.querySelector<HTMLElement>('#main-content'))?.focus({preventScroll:true});
+   source?.scrollIntoView({block:'center',inline:'nearest'});
   }else if(routeFromHash()==='ballot'&&previewScheduleId){
    const title=document.querySelector<HTMLElement>('#preview-vote-title');
    if(title){title.tabIndex=-1;title.focus({preventScroll:true});title.scrollIntoView({block:'start'});}
@@ -1187,11 +1203,28 @@ document.addEventListener('click',(event)=>{
  const activityEl=target.closest<HTMLElement>('[data-activity]');
  const voteEl=target.closest<HTMLElement>('[data-vote]');
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
- if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='exit-preview-schedule'){
+ if((advancedPreview||votingFormsOpen||previewScheduleId!==null) && actionEl?.dataset.action==='exit-preview-schedule'){
+  const returnId=!advancedPreview?previewScheduleId:null;
+  const source=schedule.find(item=>item.id===returnId);
   previewHomeBallot=false;
+  previewClosedScheduleNotice='';
   if(!advancedPreview)votingFormsOpen=false;
-  previewVoteDraft=null;previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
-  document.querySelector<HTMLElement>(advancedPreview?'#preview-vote-method':'[data-action=enter-ballot]')?.focus({preventScroll:true});return;
+  previewVoteDraft=null;previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';
+  if(returnId){
+   pendingCalendarReturnId=returnId;
+   expandedSchedule=returnId;
+   selectedCalendarDay='';
+   if(source){
+    const day=new Date(source.start.slice(0,10)+'T12:00:00');
+    calendarYear=day.getFullYear();calendarMonth=day.getMonth();
+    if(source.status==='cancelada')cancelledHistoryOpen=true;
+   }
+   navigate('calendar');
+   return;
+  }
+  render();
+  document.querySelector<HTMLElement>(advancedPreview?'#preview-vote-method':'[data-action=enter-ballot]')?.focus({preventScroll:true});
+  return;
  }
  if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='clear-preview-samples'){
   const scope=previewSampleScope();
@@ -1421,7 +1454,7 @@ document.addEventListener('click',(event)=>{
    previewSampleLedger.clear(`schedule:${item.id}`);
    previewVoteDraft=null;
    if(previewScheduleId===item.id){
-    previewScheduleId=null;
+    // Retain context for the cancelled-state page on a later return.
     votingFormsOpen=false;
     previewClosedScheduleNotice='Esta programação foi cancelada. A votação não está mais disponível.';previewRequestId=null;previewVoteReceipt=null;
     previewVoteError='';previewVoteMemberId='';
