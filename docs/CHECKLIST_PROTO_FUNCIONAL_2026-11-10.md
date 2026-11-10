@@ -135,3 +135,7 @@ Avanço de PF-17 sem fechamento: quando a programação nasce de uma proposiçã
 ## CP162 — Continuidade após cancelar programação (10/11/2026)
 
 PF-18: a separação de programações ativas e canceladas já existia e não foi reimplementada. Ajustada a saída da confirmação de cancelamento: o registro sai da lista ativa, a mensagem indica o histórico e o foco dirige-se ao controle existente para consultá-lo; se a gravação local falhar, o foco dirige-se ao botão de tentar novamente. Teste `tests/browser_calendar_history_focus_v0209.py` incluído no workflow, ainda sem execução local. Decisão: `docs/decisions/2026-11-10-cp162-calendar-history-focus.md`. PF-18 [ ], 8/38 funcional, 43/57 histórica, sem mudança na main/produção.
+
+## CP163 — Agendamento pré-preenchido e participação contextual (10/11/2026)
+
+PF-19/PF-20 avançaram: corrigidos valores iniciais do guard de alterações não salvas após CP161, evitando tratar seção/tipo herdados da proposição como edição voluntária. A ação natural “Participar nesta votação” agora respeita o resultado do aviso de saída antes de atualizar a programação contextual; ao recusar, a pessoa permanece no agendamento com os campos intactos. Teste `tests/browser_contextual_schedule_guard_v0210.py` adicionado à matriz da prévia para quatro larguras e rotas de saída aceita/recusada; **não executado localmente**. Decisão em `docs/decisions/2026-11-10-cp163-contextual-schedule-guard.md`. PF-19/PF-20 permanecem [ ], contagens 8/38 funcional e 43/57 histórica. Main/produção protegidas.

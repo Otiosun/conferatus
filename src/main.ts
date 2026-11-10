@@ -135,9 +135,14 @@ function hasPendingScheduleChanges():boolean{
  if(!form)return false;
  // Hidden options are still unsaved author input until this form closes.
  if(scheduleChoicesDraft.trim()&&!form.elements.namedItem('choices'))return true;
+ // A concluded proposal supplies the initial section/type; those defaults
+ // are not edits. User changes to any of these fields still are.
+ const origin=drafts.find(d=>d.id===schedulePrefillProposalId&&d.status==='concluida');
  for(const [name,value] of new FormData(form)){
   if(typeof value!=='string')continue;
-  const initial=name==='sectionId'?'integridade':name==='type'?'PDR':name==='proposalId'?(schedulePrefillProposalId??''):'';
+  const initial=name==='sectionId'?(origin?.sectionId??'integridade')
+   :name==='type'?(origin?.type??'PDR')
+   :name==='proposalId'?(schedulePrefillProposalId??''):'';
   if(value.trim()!==initial)return true;
  }
  return false;
@@ -1161,10 +1166,13 @@ document.addEventListener('click',(event)=>{
  if(contextualVote?.dataset.previewSchedule){
   const item=schedule.find(s=>s.id===contextualVote.dataset.previewSchedule&&s.status==='programada');
   if(item?.method && (item.method==='binaria'||isValidPreviewChoices(item.choices))){
+   // Respect the existing unsaved-schedule departure dialog before changing
+   // any participation context. Hash navigation rerenders afterward.
+   navigate('ballot');
+   if(routeFromHash()!=='ballot')return;
    previewHomeBallot=false;
    previewClosedScheduleNotice='';
    previewScheduleId=item.id;previewMode=item.method;previewRequestId=null;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';previewVoteDraft=null;votingFormsOpen=true;
-   navigate('ballot');document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
   }return;
  }
  // Links inside the editor remain editable text; never navigate by clicking them.
