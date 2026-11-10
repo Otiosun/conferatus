@@ -22,9 +22,9 @@ Legenda: **C** = critério já atendido e revalidado nesta rodada no escopo expl
 | 03.03 | Revisar métricas Votos/PDR/PR/Ofício/Socii conforme modelos | M | Cinco métricas existem; falta revisão/aceite visual de D6 |
 | 03.05 | Integrar listas de proposições/deliberações aos perfis | C | **Concluído na fixture local CP147:** duas propostas e seus agendamentos no perfil da autoria, calendário/revisão/retorno e filtragem de cancelados/terceiros; testado em quatro larguras |
 | 04.02 | Finalizar calendário e programações com fidelidade | M | Depende D1/D1b, confirmar disposição com Megalos |
-| 04.05 | Finalizar agendamento, campos e integridade | P | A UI e validações de sessão já existem; fechar como protótipo, explicitar pendências das regras reais |
-| 04.09 | Finalizar redação, revisão, confirmação e estados | P | Construção ampla já testada; verificar transições completas e rascunho, decidir variantes D3 com Megalos separadamente |
-| 04.13 | Consolidar Socii e estados de conclusão | P | Progresso 0/2→2/2, guardas e autoria demonstrativos; validar versão, associação, retorno e mensagens, sem convite remoto |
+| 04.05 | Finalizar agendamento, campos e integridade | C | **Concluído no protótipo CP148**: no draft bloqueado, campos válidos, período inválido, alternativas duplicadas, associação, cancelamento e histórico; Academy mantém as regras oficiais |
+| 04.09 | Finalizar redação, revisão, confirmação e estados | C | **Concluído no protótipo CP148**: rascunho, revisão, autoria, edição com reset de confirmações, conclusão e retorno. Variante D3 continua aguardando Megalos |
+| 04.13 | Consolidar Socii e estados de conclusão | C | **Concluído no protótipo CP148**: duas pessoas fictícias, 0/3→3/3, reset após edição; conclusão demonstrativa acessível sem ?demo=1; nenhum convite remoto |
 | 04.19 | Comparar telas com seis imagens e vídeo | M | Comparações e PDF existem, mas o aceite final dos desvios requer Megalos |
 | 05.03 | Deixar login para equipe Academy conforme acordado | C | Delegação acordada explicitamente; `AGENTS.md` define fronteira, `academy-identity.test.mjs` prova adaptador sem credencial |
 | 05.04 | Validar fluxos integrados quando Academy fornecer interface | A | Espera API e ambiente da equipe externa; não confundir simulação com integração |
@@ -69,3 +69,7 @@ Mais um critério histórico comprovado: **02.02**. O teste `tests/browser_votin
 Dois itens históricos da fila de protótipo concluídos com teste exato do repositório: **02.01** (matriz de escolha inválida → validação → recibo → nova amostra → confirmação/limpeza isolada) e **03.05** (perfil da autoria local → duas proposições com programações independentes, excluindo canceladas e outros membros). Scripts `browser_vote_states_v0194.py` e `browser_vote_profile_links_v0193.py`, reobtidos do GitHub e conferidos por blob, passaram em 320/390/740/1280px sobre o build local. Contrato e exceções em `docs/decisions/2026-11-10-cp147-vote-profile-contract.md`.
 
 **Contagem atual: 38/57, 19 pendentes**. A lista de 24 linhas acima continua sendo o histórico inicial da auditoria; agora **C=5, P=9, M=6, A=2, H=2**. Prioridade seguinte = 04.05, 04.09, 04.13, sem fingir dados/contratos institucionais da Academy ou aprovação visual Megalos.
+
+## Atualização CP148 — Etapa 04 fechada no escopo demonstrativo (10/11/2026)
+
+O cenário `tests/browser_stage04_normal_socii_v0195.py` inicialmente reproduziu uma falha: não havia conclusão do participante Socii sem `?demo=1`. A ação de simulação existente foi exposta também na prévia normal, com alvo 44px e aviso `role=status`, preservando a ficção. `tests/browser_stage04_complete_v0196.py` confirmou em 320/390/740/1280px **dois Socii, edição que reinicia as confirmações, agendamento inválido/válido e cancelamento com histórico**, com 73/73 Node PASS e regressões selecionadas. Sem conta/autenticação Academy e sem decisão visual D1–D6. Itens originais **04.05/04.09/04.13 agora C**, total original C=8, P=6, M=6, A=2, H=2; contagem oficial atual **41/57 (restam 16)**. A tabela acima preserva as 24 pendências originais de 33/57, mas suas classes foram atualizadas por evidência.
