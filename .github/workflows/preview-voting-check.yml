@@ -87,6 +87,7 @@ jobs:
             tests/browser_stage7_focus_not_obscured_v0188.py \
             tests/browser_voting_normal_flow_v0190.py \
             tests/browser_demoted_history_v0191.py \
+            tests/browser_voting_section_links_v0192.py \
             tests/browser_stage7_advanced_controls_v0132.py \
             tests/browser_restored_links_integrity_v0157.py \
             tests/browser_local_archive_v0158.py \
