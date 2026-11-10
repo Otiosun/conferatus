@@ -26,11 +26,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 
 ## 03 — Perfis e históricos
 - [ ] Consolidar históricos pessoais e institucionais com os dados da aplicação.
-- [ ] Preservar registros antigos após mudança de cargo ou rebaixamento.
+- [x] Preservar registros antigos após mudança de cargo ou rebaixamento **na prévia fictícia** (retestado 10/11/2026: contadores e atividades de votação não desaparecem, em quatro larguras; registros institucionais permanecem fora do escopo).
 - [ ] Revisar os indicadores Votos, PDR, PR, Ofício e Socii conforme novos modelos.
 - [x] Exibir proposições locais no perfil do autor, separadas do histórico demonstrativo (v0.10.3; testado localmente).
 - [ ] Integrar as listas de proposições e deliberações aos respectivos perfis.
-**Estado:** parcialmente implementado em demonstração.
+**Estado:** 2/5 critérios concluídos no escopo da prévia fictícia; o histórico real pertence à integração externa. Outros três subitens ainda estão abertos.
 
 **Ajuste v0.10.3:** o editor e o perfil do autor compartilham a lista de proposições da sessão. Mensagens de salvamento distinguem armazenamento efetivo de dados apenas em memória.
 
@@ -67,9 +67,9 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 ## 05 — Integração posterior à Academy
 - [x] Definir interface de identidade da Academy sem criar login próprio (v0.10.49; contrato tipado, adaptador sem sessão e testes locais).
 - [x] Usar o ACDM ID como referência de cadastro de demonstração, com links diretos para perfis e resolução única (v0.10.50; sem criar cadastro nem autenticar).
-- [ ] Deixar a integração do login para o responsável da Academy, conforme acordado.
+- [x] Deixar a integração do login para o responsável da Academy, conforme acordado **e documentado em `AGENTS.md`** (fronteira e testes sem autenticação real; não implica login implementado).
 - [ ] Validar os fluxos integrados quando a equipe fornecer a interface correspondente.
-**Estado:** responsabilidade definida; integração externa pendente.
+**Estado:** 3/4 critérios concluídos quanto aos contratos e responsabilidades; 05.04 (testes da integração real pela equipe Academy) permanece pendente. Nenhum login real existe aqui.
 
 ## 06 — Acabamento, validação e entrega
 - [ ] Comparar o visual com os modelos originais e recentes.
@@ -1241,3 +1241,12 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - **Rastreabilidade:** código commit `66bd1ba6`/blob `638cebf67`, teste commit `bf3dba5c`/blob `34b1c22a`; os blobs locais de arquivos testados **são idênticos** aos do GitHub. [Decisão CP145](docs/decisions/2026-11-10-cp145-voting-draft-preservation.md), fonte técnica MDN `innerHTML`.
 - **Evidências Komekko:** [ZIP QA CP145](https://drive.google.com/file/d/1PJrEdMI5SFA586C-Kpin4XR_wYbUuWiT/view), SHA256 `4855a3420bd8c5a9de3036ed5bec248c9be5ad4cc8789ff6a291329f0237879c`. Inclui HTML compilado, diff, teste, logs e screenshot.
 - **Gates:** protótipo demonstrativo com dados fictícios; não é voto real, CI remota integral ou aceite Megalos. D1–D6, página de votação, aparelhos reais e aspectos fora de nosso escopo Academy separados. `main`/produção intocados. **Contagem canônica 33/57 inalterada**.
+
+## CHECKPOINT 146 — Redefinição de escopo e fechamento comprovado (10/11/2026)
+
+- **Motivo:** o responsável confirmou que nossa entrega é **protótipo completo com dados fictícios**; implementar login, transações/votos oficiais ou backend central Academy seria expansão indevida. Auditoria da lista anterior de 24 pendências e classificação integral em `docs/PLANO_ESCOPO_PROTO_2026-11-10.md`: 12 dependências de QA/fluxo do protótipo, 6 decisões/aceites Megalos, 2 responsabilidades externas Academy, 2 híbridas, e 2 já atendidas que estavam sem marcação.
+- **03.02 concluído NO PROTÓTIPO:** `demoteToCommonMember`, `hasPersonalVoteHistory`, `restoreDemoMembers` e o painel de histórico preservam fatos de exemplo sem atribuir novas permissões; `tests/rules.test.mjs` e teste novo `tests/browser_demoted_history_v0191.py` (320, 390, 740, 1280px) comprovaram preservação das métricas e registros após o rebaixamento. Não se afirma auditoria/registro real Academy.
+- **05.03 concluído por fronteira contratual:** AGENTS.md estabelece responsabilidade do login na equipe Academy; `tests/academy-identity.test.mjs` e `tests/member-reference.test.mjs` passam, garantindo ausência de sessão real, token e privilégios pelo ACDM ID. **05.04 segue aberto.**
+- **Execução local:** 33/33 testes Node do subconjunto regras/identidade/referência PASS; browser de preservação após rebaixamento PASS 4/4. Nova regressão adicionada ao workflow da prévia, sem alterar o código funcional.
+- **Contagem HISTÓRICA atualizada de 33/57 para 35/57:** 01=4/5, 02=0/4, 03=2/5, 04=17/22, 05=3/4, 06=2/5, 07=7/12; **22 critérios pendentes**. Estes números não são percentual de prontidão de produto, pois incluem decisões de terceiros e itens institucionais. Não marcar outros critérios de forma automática.
+- **Próximos lotes:** (1) fechar 02.01/02.02 e 03.05 no escopo fictício com uma jornada de votação/vínculos; (2) fechar 04.05/04.09/04.13 com QA de proposição/Socii/agendamento; (3) acessibilidade e dispositivos; (4) D1–D6/Megalos em paralelo; integrações externas separadas. Nada de merge em `main` sem aprovação. Documentação e provas sincronizadas no Drive Komekko.
