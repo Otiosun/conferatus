@@ -713,6 +713,30 @@ function sociiEditorBar(d:Draft|undefined){
  <div class="workflow-socii-editor-status"><strong>${escapeHTML(participantText)} em Socii</strong><small>Concluíram ${finished} de ${d.partners.length+1}</small></div>
  <span class="workflow-socii-editor-label" aria-hidden="true">Socii</span></aside>`;
 }
+
+// The review summarizes the same local record displayed in the proposal list.
+// It never represents remote signatures, invitations or institutional approval.
+function reviewParticipation(d:Draft, completed:boolean):string {
+ const authorName=members[0]?.name??'Autoria';
+ const socii=d.partners.length
+  ?d.partners.map(partner=>{
+    const name=members.find(member=>member.id===partner.id)?.name??'Participante';
+    return escapeHTML(name)+' ('+(partner.complete?'concluiu':'pendente')+')';
+   }).join(', ')
+  :'Nenhum participante vinculado';
+ const waiting=d.partners.some(partner=>!partner.complete);
+ const next=completed
+  ?'A proposição pode ser vinculada a uma programação nesta prévia.'
+  :waiting
+   ?'Confirme a etapa de autoria. A proposição continuará aguardando as etapas pendentes do Socii.'
+   :'Confirme a revisão para concluir a proposição nesta prévia.';
+ return `<section class="workflow-review-guidance" aria-label="Participação e próximo passo">
+   <h2>Participação e próximos passos</h2>
+   <p><strong>Autoria:</strong> ${escapeHTML(authorName)} (${d.authorComplete?'concluída':'pendente'})</p>
+   <p><strong>Socii:</strong> ${socii}</p>
+   <p class="workflow-review-next"><strong>Próximo passo:</strong> ${next}</p>
+  </section>`;
+}
 function composePage(){
  const layout=draftForm.bodyLayout??DEFAULT_RICH_LAYOUT;
  const alignChoices: [RichBodyLayout['align'],string][]=[
@@ -768,7 +792,7 @@ function composePage(){
 }
 function reviewPage(){
  const d=drafts.find(x=>x.id===currentDraftId);if(!d)return proposalsPage();
- if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${linkedScheduleButtons(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar às proposições'}</button></div></div>`;
+ if(d.status==='concluida')return `<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div><div class="workflow-review-body"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div><div class="workflow-review-panel"><div class="workflow-finished"><strong>Proposição concluída</strong><p>Seção: ${escapeHTML(sections.find(s=>s.id===d.sectionId)?.name??'Não definida')} · ${escapeHTML(d.type)}</p>${reviewParticipation(d,true)}${linkedScheduleButtons(d)}${contextualScheduleButton(d)}<button type="button" class="workflow-primary" data-route="${finishedProposalReturnTo}">${finishedProposalReturnTo==='calendar'?'Voltar à programação':finishedProposalReturnTo==='overview'?'Voltar ao histórico':finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar às proposições'}</button></div></div>`;
  const d3Start=d3SingleExperiment?'<dialog id="d3-review-dialog" closedby="none" aria-labelledby="d3-review-title">':'';
  const d3End=d3SingleExperiment?'</dialog>':'';
  const d3Close=d3SingleExperiment?'<button type="button" class="d3-review-close" data-dismiss-d3-review aria-label="Voltar à redação sem confirmar">×</button>':'';
@@ -780,6 +804,7 @@ function reviewPage(){
   : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body${d3SingleExperiment?' workflow-review-body--d3':''}"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div>
+ ${d3SingleExperiment?'':reviewParticipation(d,false)}
  <div class="workflow-review-panel workflow-review-panel--pending${d3SingleExperiment?' workflow-review-panel--d3':''}">${d3Start}<form id="confirm-proposal-form" class="workflow-form workflow-review-form" data-review-draft="${escapeHTML(d.id)}">
  <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38">${d3SingleExperiment?'<h2 id="d3-review-title" class="sr-only">Confirmar proposição</h2>':`<p>${reviewMessage}</p>`}${d3Close}
  <label>Seção responsável<select name="sectionId" required>${selectOptions(d.sectionId,sections.filter(s=>s.category==='deliberativa'))}</select></label>

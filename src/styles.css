@@ -1525,3 +1525,37 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 @media(max-height:620px){
  #d3-review-dialog{max-height:78dvh;}
 }
+
+
+/* Review guidance belongs to the normal proposal flow, not the opt-in D3 modal. */
+.workflow-review-guidance{
+ padding:12px 20px;
+ min-width:0;
+ background:#e7e9ee;
+ color:#42495c;
+}
+.workflow-review-guidance h2{
+ margin:0 0 8px;
+ font-size:13px;
+ font-weight:700;
+ color:#353e61;
+}
+.workflow-review-guidance p{
+ margin:5px 0;
+ font-size:12px;
+ line-height:1.5;
+ overflow-wrap:anywhere;
+}
+.workflow-review-guidance strong{font-weight:700;}
+.workflow-review-guidance .workflow-review-next{
+ border-top:1px solid #d2d5df;
+ padding-top:9px;
+ margin-top:9px;
+}
+.workflow-finished .workflow-review-guidance{
+ background:#fff;
+ border:1px solid #d8dbea;
+ border-radius:10px;
+ margin:12px 0 16px;
+ padding:12px;
+}
