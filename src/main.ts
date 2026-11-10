@@ -69,6 +69,7 @@ let demoVoteId: string | null = null;
 let demoExpanded = false;
 let votingFormsOpen = false;
 let previewHomeBallot = false;
+let previewClosedScheduleNotice = '';
 // Six modes share one local validation path; only the technical selector belongs to ?demo=1.
 let previewMode: DeliberationMethod = 'binaria';
 let previewVoteError = '';
@@ -380,6 +381,17 @@ function previewVoteLab():string {
 }
 
 function ballotPage() {
+ // A cancelled or otherwise invalid program cannot fall through to generic options.
+ if(!advancedPreview&&votingFormsOpen&&previewScheduleId&&!previewSelectedSchedule()){
+  votingFormsOpen=false;
+  previewScheduleId=null;
+  previewVoteReceipt=null;
+  previewVoteDraft=null;
+  previewRequestId=null;
+  previewVoteError='';
+  previewVoteMemberId='';
+  previewClosedScheduleNotice='Esta programação não está mais disponível. Consulte o calendário para verificar sua situação.';
+ }
  // A scheduled demo must not display unrelated sample results first.
  if(!advancedPreview && votingFormsOpen && (previewSelectedSchedule()||previewHomeBallot)){
   return `<div class="main-pad">${header(undefined,undefined,false)}</div>${previewVoteLab()}`;
@@ -390,7 +402,7 @@ function ballotPage() {
  return `<div class="main-pad">${header(undefined,undefined,true)}<div class="results">
  ${demoOptions.map(o=>`<div class="result-row ${advancedPreview&&demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${advancedPreview&&demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
  </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="${advancedPreview?'toggle-demo':'enter-ballot'}" aria-expanded="${advancedPreview?demoExpanded:false}" ${advancedPreview&&demoExpanded?'aria-controls="demo-vote-panel"':''} ${!advancedPreview&&!canRecordVote(ballot)?'disabled aria-disabled="true"':''}>${advancedPreview&&demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':advancedPreview?'Ver situação':'Encerrada'}</button></div>
- <p class="ballot-description">${escapeHTML(ballot.description)}</p>${advancedPreview&&demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Selecione uma opção para testar a votação.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
+ <p class="ballot-description">${escapeHTML(ballot.description)}</p>${!advancedPreview&&previewClosedScheduleNotice?`<p class="vote-feedback" role="status">${escapeHTML(previewClosedScheduleNotice)}</p>`:''}${advancedPreview&&demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Selecione uma opção para testar a votação.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
  ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
  <p class="vote-feedback" role="status">${demoVoteId?'Opção selecionada. Você pode alterá-la.':'Selecione uma opção.'}</p>
  ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}${false?`<div class="voting-preview-entry"><button type="button" data-action="toggle-voting-forms" aria-expanded="${votingFormsOpen}" aria-controls="preview-vote-lab">${votingFormsOpen?'Fechar formulário':'Abrir formulário de votação'}</button><p>Seis modalidades disponíveis para demonstração com dados fictícios.</p></div>`:''}</section>${advancedPreview||votingFormsOpen?previewVoteLab():'<div id="preview-vote-lab" hidden></div>'}`;
@@ -1101,6 +1113,7 @@ document.addEventListener('click',(event)=>{
   const item=schedule.find(s=>s.id===contextualVote.dataset.previewSchedule&&s.status==='programada');
   if(item?.method && (item.method==='binaria'||isValidPreviewChoices(item.choices))){
    previewHomeBallot=false;
+   previewClosedScheduleNotice='';
    previewScheduleId=item.id;previewMode=item.method;previewRequestId=null;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';previewVoteDraft=null;votingFormsOpen=true;
    navigate('ballot');document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
   }return;
@@ -1236,7 +1249,7 @@ document.addEventListener('click',(event)=>{
   return;
  }
  if(actionEl?.dataset.action==='enter-ballot'&&!advancedPreview&&demoBallot&&canRecordVote(demoBallot)){
-  previewHomeBallot=true;previewScheduleId=null;previewMode='nominal';
+  previewHomeBallot=true;previewClosedScheduleNotice='';previewScheduleId=null;previewMode='nominal';
   previewVoteDraft=null;previewVoteReceipt=null;previewVoteError='';previewRequestId=null;
   votingFormsOpen=true;render();
   document.querySelector<HTMLInputElement>('#preview-vote-form input:not(:disabled)')?.focus({preventScroll:true});
@@ -1408,7 +1421,9 @@ document.addEventListener('click',(event)=>{
    previewSampleLedger.clear(`schedule:${item.id}`);
    previewVoteDraft=null;
    if(previewScheduleId===item.id){
-    previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;
+    previewScheduleId=null;
+    votingFormsOpen=false;
+    previewClosedScheduleNotice='Esta programação foi cancelada. A votação não está mais disponível.';previewRequestId=null;previewVoteReceipt=null;
     previewVoteError='';previewVoteMemberId='';
    }
    const saved=saveWorkflows();cancellationSaveFailed=!saved;
