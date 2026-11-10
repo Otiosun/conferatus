@@ -1060,7 +1060,12 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 .local-archive .local-archive-message {margin-top:10px;font-weight:600;color:#3543a0;}
 
 
-/* Isolated six-mode voting lab, opt-in via ?demo=1. The normal Megalos layout is unchanged. */
+/* Six voting forms are available from the normal ballot, opened on request. */
+.voting-preview-entry{margin:20px 0 0;max-width:560px;padding:16px 0;border-top:1px solid #c5cad6;}
+.voting-preview-entry button{min-height:44px;max-width:100%;padding:10px 15px;border-radius:8px;border:1px solid #4958af;background:#515dc7;color:#fff;font-weight:700;cursor:pointer;}
+.voting-preview-entry button:focus-visible{outline:3px solid #1b286b;outline-offset:3px;}
+.voting-preview-entry p{margin:9px 0 0;font-size:12px;color:#434b68;}
+/* Existing six-mode laboratory styles below are reused unchanged. */
 .preview-vote-lab{width:min(100%,780px);box-sizing:border-box;margin:25px auto 36px;padding:20px;background:#f7f8fc;border:1px solid #d3d9eb;border-radius:12px;color:#232c49;font-size:13px;line-height:1.5;overflow-wrap:anywhere;}
 .preview-vote-lab h2{font-size:18px;line-height:1.3;color:#3745a1;margin:0 0 10px;}
 .preview-vote-lab .preview-vote-disclaimer{margin:0 0 16px;color:#4d5878;}
