@@ -13,14 +13,14 @@ Legenda: **C** = critério já atendido e revalidado nesta rodada no escopo expl
 | ID | Critério histórico aberto em 33/57 | Faixa | Situação concreta / saída para fechar |
 |---|---|:---:|---|
 | 01.05 | Confirmar grafia CONFERATUS/CONFFRATUS | M | Perguntar à Megalos, preservar ambas as fontes e grafia de prévia até resposta |
-| 02.01 | Consolidar modelo de votação e estados | P | Seis modalidades já funcionam; consolidar estados e fluxos de demonstração numa especificação e testar transições/erros, sem regras institucionais |
+| 02.01 | Consolidar modelo de votação e estados | C | **Concluído na prévia fictícia CP147:** seis modalidades, estados válido/inválido, recibo, reset, limpeza isolada e programação ativa/cancelada testados em quatro larguras; não é política Academy |
 | 02.02 | Associar deliberações, seções e proposições | C | **Concluído apenas na prévia fictícia:** 24/24 combinações de 4 seções × 6 modalidades, método, opções, proposição e calendário corretos; contratos reais Academy fora do escopo |
 | 02.03 | Implementar registro institucional quando regras confirmadas | A | Backend/eleição real é da Academy, não declarar implementado nem bloquear protótipo |
 | 02.04 | Verificar fluxo fictício e depois integrado oficial | H | Dividir evidência: jornada fictícia já passou, teste de integração não é responsabilidade direta nem pode ser simulado como aprovado |
 | 03.01 | Consolidar históricos pessoais e institucionais | P | Validar separação dos registros fictícios históricos e dos novos registros locais, inclusive vínculos e rotas |
 | 03.02 | Preservar registros após mudança de cargo/rebaixamento | C | JS preserva dados; testes de regra e navegador em 320/390/740/1280 mostram histórico/contadores mantidos; não é banco oficial |
 | 03.03 | Revisar métricas Votos/PDR/PR/Ofício/Socii conforme modelos | M | Cinco métricas existem; falta revisão/aceite visual de D6 |
-| 03.05 | Integrar listas de proposições/deliberações aos perfis | P | Existe parte do cruzamento local; provar todos os destinos, estados e retorno sem vínculos inertes |
+| 03.05 | Integrar listas de proposições/deliberações aos perfis | C | **Concluído na fixture local CP147:** duas propostas e seus agendamentos no perfil da autoria, calendário/revisão/retorno e filtragem de cancelados/terceiros; testado em quatro larguras |
 | 04.02 | Finalizar calendário e programações com fidelidade | M | Depende D1/D1b, confirmar disposição com Megalos |
 | 04.05 | Finalizar agendamento, campos e integridade | P | A UI e validações de sessão já existem; fechar como protótipo, explicitar pendências das regras reais |
 | 04.09 | Finalizar redação, revisão, confirmação e estados | P | Construção ampla já testada; verificar transições completas e rascunho, decidir variantes D3 com Megalos separadamente |
@@ -63,3 +63,9 @@ Legenda: **C** = critério já atendido e revalidado nesta rodada no escopo expl
 ## Auditoria incremental 146-B (10/11/2026)
 
 Mais um critério histórico comprovado: **02.02**. O teste `tests/browser_voting_section_links_v0192.py` foi executado em Chromium 390px e cobre 24/24 combinações de modalidade e seção, sem cruzamento indevido de resultados. **Classificação atual da fila:** C=3, P=11, M=6, A=2, H=2; 21 pendências formais após 36/57. A tabela preserva as **24 pendências originais** do momento 33/57 para auditoria histórica.
+
+## Auditoria incremental 147 — Estados de votação e perfis (10/11/2026)
+
+Dois itens históricos da fila de protótipo concluídos com teste exato do repositório: **02.01** (matriz de escolha inválida → validação → recibo → nova amostra → confirmação/limpeza isolada) e **03.05** (perfil da autoria local → duas proposições com programações independentes, excluindo canceladas e outros membros). Scripts `browser_vote_states_v0194.py` e `browser_vote_profile_links_v0193.py`, reobtidos do GitHub e conferidos por blob, passaram em 320/390/740/1280px sobre o build local. Contrato e exceções em `docs/decisions/2026-11-10-cp147-vote-profile-contract.md`.
+
+**Contagem atual: 38/57, 19 pendentes**. A lista de 24 linhas acima continua sendo o histórico inicial da auditoria; agora **C=5, P=9, M=6, A=2, H=2**. Prioridade seguinte = 04.05, 04.09, 04.13, sem fingir dados/contratos institucionais da Academy ou aprovação visual Megalos.
