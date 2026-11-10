@@ -52,7 +52,9 @@ with sync_playwright() as pw:
   progress('Concluíram 1 de 3')
   first=record().locator('[data-confirm-partner]').first
   assert first.evaluate('(el)=>el.getBoundingClientRect().height')>=44,width
-  first.click()
+  first.focus()
+  first.press('Enter')
+  assert page.evaluate('document.activeElement.hasAttribute("data-confirm-partner")'),(width,'focus lost instead of next Socii')
   progress('Concluíram 2 de 3')
   assert record().locator('[data-schedule-draft]').count()==0,width
   # Editing the text invalidates both the author's and the Socii confirmation.
@@ -70,7 +72,9 @@ with sync_playwright() as pw:
   progress('Concluíram 1 de 3')
   record().locator('[data-confirm-partner]').first.click()
   progress('Concluíram 2 de 3')
-  record().locator('[data-confirm-partner]').first.click()
+  record().locator('[data-confirm-partner]').first.focus()
+  record().locator('[data-confirm-partner]').first.press('Enter')
+  assert page.evaluate('document.activeElement.hasAttribute("data-schedule-draft")'),(width,'focus lost instead of schedule')
   progress('Concluíram 3 de 3')
   expect(record()).to_contain_text('Concluída')
   expect(record().locator('[data-schedule-draft]')).to_be_visible()
