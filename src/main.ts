@@ -593,6 +593,7 @@ let currentDraftId='';
 let finishedProposalReturnTo:'proposals'|'calendar'|'overview'|'profile'='proposals';
 let workflowNotice='';
 let composeError='';
+let composeErrorField: 'title' | 'body' = 'title';
 let scheduleFormOpen=false;
 let schedulePrefillProposalId:string|null=null;
 // Temporary draft only: not a saved option set and never shared across sessions.
@@ -721,7 +722,7 @@ function composePage(){
  const lineChoices=[1.4,1.7,2] as const;
  const editing=drafts.find(d=>d.id===currentDraftId);
  return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
- <form id="compose-proposal-form" class="workflow-editor"><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" maxlength="140" required ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Título" value="${escapeHTML(draftForm.title)}">
+ <form id="compose-proposal-form" class="workflow-editor" novalidate><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" minlength="3" maxlength="140" required ${composeErrorField==='title'&&composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Título" value="${escapeHTML(draftForm.title)}">
  <label for="draft-body">Redação</label>${richEditorOpen?`<div class="workflow-rich-toolbar" role="group" aria-label="Formatação da redação">
  <button type="button" data-rich-command="bold" aria-label="Negrito"><strong>B</strong></button>
  <button type="button" data-rich-command="italic" aria-label="Itálico"><em>I</em></button>
@@ -759,8 +760,8 @@ function composePage(){
  ${indentChoices.map(value=>`<option value="${value}" ${layout.right===value?'selected':''}>${value===0?'Sem recuo':value+' px'}</option>`).join('')}
  </select></label>
  </div>
- <div id="draft-rich-body" class="workflow-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Redação" data-placeholder="Escreva..." style="${richLayoutStyle(draftForm.bodyLayout,true)}" ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''}>${renderRichText(draftForm.body,draftForm.bodyRuns)}</div>
- <textarea id="draft-body" name="body" hidden>${escapeHTML(draftForm.body)}</textarea>`:`<textarea id="draft-body" name="body" required minlength="20" ${composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
+ <div id="draft-rich-body" class="workflow-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Redação" data-placeholder="Escreva..." style="${richLayoutStyle(draftForm.bodyLayout,true)}" ${composeErrorField==='body'&&composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''}>${renderRichText(draftForm.body,draftForm.bodyRuns)}</div>
+ <textarea id="draft-body" name="body" hidden>${escapeHTML(draftForm.body)}</textarea>`:`<textarea id="draft-body" name="body" required minlength="20" ${composeErrorField==='body'&&composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
  <button type="button" class="workflow-enable-rich" data-action="enable-rich-editor">Formatar texto</button>`}
  ${composeError?`<p id="compose-save-error" class="workflow-form-error" role="alert">${escapeHTML(composeError)}</p>`:''}
  <div class="workflow-editor-actions"><button class="workflow-primary" type="submit" name="intent" value="conclude">Concluir redação</button><button class="workflow-outline" type="submit" name="intent" value="save" formnovalidate>Salvar rascunho</button><button class="workflow-outline" type="button" data-route="${finishedProposalReturnTo==='profile'?'profile':'proposals'}">${finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar'}</button></div></form>`;
@@ -1600,24 +1601,26 @@ document.addEventListener('submit',(event)=>{
  const submitter=(event as SubmitEvent).submitter;
  const saveOnly=id==='compose-proposal-form' && submitter instanceof HTMLButtonElement && submitter.value==='save';
  if(id==='compose-proposal-form'&&richEditorOpen)syncRichEditor();
- if(!saveOnly && !form.reportValidity())return;
+ if(!saveOnly && id!=='compose-proposal-form' && !form.reportValidity())return;
  const data=new FormData(form);
  if(id==='compose-proposal-form'){
   const title=String(data.get('title')??'').trim(),body=String(data.get('body')??'').trim();
   const bodyRuns=richEditorOpen&&hasFormatting(draftForm.bodyRuns)?draftForm.bodyRuns:undefined;
   const bodyLayout=richEditorOpen&&isRichLayout(draftForm.bodyLayout)?draftForm.bodyLayout:undefined;
-  if(richEditorOpen&&!saveOnly&&body.length<20){
-   composeError='Escreva pelo menos 20 caracteres na redação.';
-   draftForm={title,body,bodyRuns,bodyLayout};render();
-   document.querySelector<HTMLElement>('#draft-rich-body')?.focus({preventScroll:true});
-   return;
-  }
-  if(saveOnly ? (!title && !body) : (title.length<3||body.length<20)){
-   if(saveOnly){
-    composeError='Escreva um título ou algum texto antes de salvar.';
-    render();
-    document.querySelector<HTMLInputElement>('#draft-title')?.focus({preventScroll:true});
-   }
+  // A short trimmed title previously failed silently. Validate both editor
+  // modes consistently, while still allowing incomplete drafts to be saved.
+  const titleInvalid=!saveOnly&&title.length<3;
+  const bodyInvalid=!saveOnly&&body.length<20;
+  if((saveOnly&&!title&&!body)||titleInvalid||bodyInvalid){
+   composeError=saveOnly?'Escreva um título ou algum texto antes de salvar.'
+    :titleInvalid?'Informe um título com pelo menos 3 caracteres.'
+    :'Escreva pelo menos 20 caracteres na redação.';
+   composeErrorField=bodyInvalid&&!titleInvalid?'body':'title';
+   draftForm={title,body,bodyRuns,bodyLayout};
+   render();
+   const selector=composeErrorField==='title'?'#draft-title'
+    :richEditorOpen?'#draft-rich-body':'#draft-body';
+   document.querySelector<HTMLElement>(selector)?.focus({preventScroll:true});
    return;
   }
   composeError='';
@@ -1642,7 +1645,7 @@ document.addEventListener('submit',(event)=>{
   }
   const stored=saveWorkflows();
   if(saveOnly){
-   workflowNotice=stored?'Rascunho salvo.':'Rascunho mantido somente enquanto a página estiver aberta.';
+   workflowNotice=stored?'Rascunho salvo. Disponível somente nesta aba do navegador.':'Rascunho mantido somente enquanto a página estiver aberta.';
    if(confirmationsReset)workflowNotice+=' O texto mudou; as confirmações anteriores foram reiniciadas.';
    navigate('proposals');
   }
