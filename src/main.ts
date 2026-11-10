@@ -357,7 +357,8 @@ function previewVoteLab():string {
   '<select id="preview-vote-method"'+(contextual?' disabled':'')+'>'+DELIBERATION_METHODS.map(mode=>
    '<option value="'+mode.id+'"'+(mode.id===previewMode?' selected':'')+'>'+escapeHTML(mode.label)+'</option>').join('')+'</select>'+
   '<p class="preview-vote-detail">'+escapeHTML(method?.detail??'')+'</p>'+ 
-  (contextual?'<button type="button" class="preview-vote-secondary" data-action="exit-preview-schedule">Voltar às alternativas de teste</button>':'')+
+  (contextual?'<button type="button" class="preview-vote-secondary" data-action="exit-preview-schedule">'+
+   (advancedPreview?'Voltar às alternativas de teste':'Ver outras modalidades')+'</button>':'')+
   (receipt?'<div class="preview-vote-receipt" role="status"><strong>Voto simulado conferido nesta aba</strong>'+
    '<p>'+previewVoteReceiptText(receipt)+'</p>'+
    '<button type="button" class="preview-vote-secondary" data-action="reset-preview-vote">Registrar outra amostra</button></div>':
