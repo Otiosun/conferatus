@@ -15,9 +15,9 @@ Fonte confirmada no código: src/main.ts tem dois fluxos de votação distintos:
 - [x] PF-04 Mover seleção global de modalidades e controles Nova amostra/Limpar amostras para ferramentas técnicas isoladas; nada de opção técnica na navegação comum.
 - [x] PF-05 Unificar votos do exemplo inicial e votações programadas na mesma estrutura de UI; não manter dois produtos concorrentes com estados conflitantes.
 - [ ] PF-06 Estados de interface: aberta, encerrada, cancelada, indisponível, preenchimento inválido, confirmação e retorno; nenhum botão que pareça acionável mas não opere.
-- [ ] PF-07 Comprovante local corresponde exatamente à escolha, sem alegar voto oficial, vencedor, quórum, dupla participação institucional ou gravação remota.
-- [ ] PF-08 Totais históricos de exemplo não mudam silenciosamente com escolhas locais nem se confundem com amostras anônimas.
-- [ ] PF-09 Rascunho de voto preservado enquanto navegável; reset, troca contextual, cancelamento e reentrada não vazam escolhas para outra deliberação.
+- [x] PF-07 Comprovante local corresponde exatamente à escolha, sem alegar voto oficial, vencedor, quórum, dupla participação institucional ou gravação remota.
+- [x] PF-08 Totais históricos de exemplo não mudam silenciosamente com escolhas locais nem se confundem com amostras anônimas.
+- [x] PF-09 Rascunho de voto preservado enquanto navegável; reset, troca contextual, cancelamento e reentrada não vazam escolhas para outra deliberação.
 - [ ] PF-10 Percurso completo de cada método validado com casos inválidos e recibo, teclado, celular e abertura do deploy real; manter os testes já existentes, reduzindo duplicação.
 Critério de aceite A: pessoa consegue entrar, votar, entender o que aconteceu e voltar, sem saber que seis modalidades ou um laboratório existem por baixo.
 
@@ -87,3 +87,13 @@ Esta checklist não afirma aprovação desses órgãos nem certificação WCAG.
 **Permanecem ABERTOS no lote de votação:** PF-06 estado completo, PF-07 comprovação aprofundada, PF-08 não mistura em todos os caminhos, PF-09 drafts em navegação e troca de contexto, PF-10 aceite visual/hardware Android e engines. A ação de alterar escolha limpa a única participação temporária do respectivo escopo antes de nova confirmação. Nenhuma escolha vai à Academy. O painel azul do cabeçalho não foi redesenhado; esse assunto permanece PF-26 e depende de análise/ref. Megalos.
 
 **Métrica independente:** checklist funcional **5/38** (somente entregas de UX testadas em ambiente local). Checklist histórica de engenharia **43/57** inalterada. PF-06 a PF-38 que não foram listados como concluídos continuam pendentes. Não marcar homologação Megalos nem integração Academy.
+
+## Lote seguinte — comprovantes, históricos e isolamento (10/11/2026)
+
+**Falha real de PF-06 reproduzida antes da correção em quatro larguras:** cancelar uma programação com rascunho de voto aberto removia `previewScheduleId`, mas mantinha `votingFormsOpen=true`. Ao retornar à votação, a página apresentava **três alternativas genéricas** que não pertenciam à programação cancelada. Havia risco de registrar uma amostra no contexto errado. Correção em `src/main.ts`: fechamento do formulário ativo na confirmação de cancelamento, limpeza de recibo/draft/identificador e aviso acessível `role="status"`; barreira adicional quando o contexto agendado se torna inválido por outros motivos. O usuário pode iniciar a votação inicial normalmente, com formulário próprio e sem escolhas herdadas.
+
+**Regressão publicada:** `tests/browser_cancelled_vote_context_v0201.py` cobre o bug (4/4 larguras) e `tests/browser_product_vote_isolation_v0202.py` cobre preservação ao navegar dentro do mesmo contexto, isolamento ao trocar de programação, recibos da alternativa nominal, rejeição de escolha vazia, reinício e totais históricos imutáveis (4/4). Ambos adicionados ao workflow da prévia. Suítes anteriores das 6 modalidades (`v0194`) e 24 combinações de seções (`v0192`) continuam protegendo os modos e vínculos. Investigação de status dinâmico: W3C WAI SC 4.1.3 e ARIA22 recomendam mensagem com papel programaticamente determinável, sem mover foco só para notificá-la.
+
+**Aprovação delimitada:** PF-07, PF-08 e PF-09 [x] **no comportamento fictício local** demonstrado, agora **8/38**. Não equivale a recibo oficial, login, apuração real, persistência remota ou proteção de uma votação institucional. **PF-06 permanece [ ]** até inspecionar também encerramento/indisponibilidade por todos os caminhos e **PF-10 permanece [ ]** até teste do deploy em dispositivo físico e aceitação de UX.
+
+**Precisão da execução:** as reproduções e asserções locais foram feitas num HTML compilado anterior com transformação JavaScript equivalente ao novo TypeScript, não em build local compilado do HEAD. Cloudflare Pages compilou a branch; a CI GitHub `validate` e `cross-browser-lab` continuam `skipped`, `postgres-lab` continua `failure`. Não considerar a CI integral aprovada. Cópia de testes/artefato local no Komekko: https://drive.google.com/file/d/1LF7Adb1pGtqkniUvOuVEsHhUuoQCoc1f/view (SHA256 c5605e1f89053ec35d1ca148fa557ad18ec75c261008bee14cc5edbb6c5cd09a). Branch de prévia privada, main e produção intocadas. Histórico 43/57 ainda separado.
