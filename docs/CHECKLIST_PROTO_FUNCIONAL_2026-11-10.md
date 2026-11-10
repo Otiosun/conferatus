@@ -9,11 +9,11 @@ Esta checklist é a NOVA fila de consolidação de UX/produto e não altera retr
 Fonte confirmada no código: src/main.ts tem dois fluxos de votação distintos: o botão Participar na descrição da votação inicial (data-action toggle-demo) e o botão Abrir formulário de votação (data-action toggle-voting-forms) com escolha entre seis modalidades. Programações locais já possuem método, opções e vínculo com proposição (data-preview-schedule), mas exibem Simular voto nesta programação. Socii tem ação Simular conclusão de participante na navegação normal. As seis modalidades e os vínculos da sessão já passaram testes; o problema prioritário é consolidar a experiência, sem reescrever a lógica.
 
 ## P0 — A. Votação integrada ao produto (PRIMEIRO LOTE)
-- [ ] PF-01 Entrada única: clicar Participar em uma deliberação aberta leva diretamente ao formulário dessa deliberação; nenhuma etapa de laboratório obrigatória.
-- [ ] PF-02 Contexto inequívoco: título, seção, proposição, modalidade e opções reais da deliberação fictícia são exibidos e correspondem à programação selecionada.
-- [ ] PF-03 Modalidade definida pela deliberação, não escolhida pelo eleitor: binária, nominal, ordenada, aprovação, escalar e cumulativa mantêm suas particularidades e guardas existentes.
-- [ ] PF-04 Mover seleção global de modalidades e controles Nova amostra/Limpar amostras para ferramentas técnicas isoladas; nada de opção técnica na navegação comum.
-- [ ] PF-05 Unificar votos do exemplo inicial e votações programadas na mesma estrutura de UI; não manter dois produtos concorrentes com estados conflitantes.
+- [x] PF-01 Entrada única: clicar Participar em uma deliberação aberta leva diretamente ao formulário dessa deliberação; nenhuma etapa de laboratório obrigatória.
+- [x] PF-02 Contexto inequívoco: título, seção, proposição, modalidade e opções reais da deliberação fictícia são exibidos e correspondem à programação selecionada.
+- [x] PF-03 Modalidade definida pela deliberação, não escolhida pelo eleitor: binária, nominal, ordenada, aprovação, escalar e cumulativa mantêm suas particularidades e guardas existentes.
+- [x] PF-04 Mover seleção global de modalidades e controles Nova amostra/Limpar amostras para ferramentas técnicas isoladas; nada de opção técnica na navegação comum.
+- [x] PF-05 Unificar votos do exemplo inicial e votações programadas na mesma estrutura de UI; não manter dois produtos concorrentes com estados conflitantes.
 - [ ] PF-06 Estados de interface: aberta, encerrada, cancelada, indisponível, preenchimento inválido, confirmação e retorno; nenhum botão que pareça acionável mas não opere.
 - [ ] PF-07 Comprovante local corresponde exatamente à escolha, sem alegar voto oficial, vencedor, quórum, dupla participação institucional ou gravação remota.
 - [ ] PF-08 Totais históricos de exemplo não mudam silenciosamente com escolhas locais nem se confundem com amostras anônimas.
@@ -78,3 +78,12 @@ GitHub privado: Otiosun/conferatus, AGENTS.md (21 regras), docs/CHECKLIST_MESTRA
 W3C WCAG 2.2: https://www.w3.org/TR/WCAG22/ ; APG modal focus: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
 GOV.UK phase-banner (exemplo de identificação honesta de ambiente): https://design-system.service.gov.uk/components/phase-banner/
 Esta checklist não afirma aprovação desses órgãos nem certificação WCAG.
+## Lote inicial implementado — votação contextual (10/11/2026)
+
+**Fonte:** branch preview/v0.10.60-six-vote-forms, aplicação TypeScript original, sem framework e sem tocar main/produção. **PF-01 a PF-05 [x] no escopo da prévia fictícia**: Participar abre diretamente o mesmo formulário que a agenda; a votação inicial usa suas opções mensais/quinzenais, tratadas como escolha única nominal; o formulário agendado mostra título/seção/proposição e método fixado pela programação; seleção global, resumo de amostras e botões de laboratório saíram da interface principal. O antigo laboratório de seis modos sobrevive em ?demo=1 para regressões. O botão de programações agora diz Participar nesta votação. O caminho legado por escolha simples fica restrito ao modo técnico; a interface normal não mistura os totais históricos fictícios com as escolhas feitas nesta aba.
+
+**Verificações executadas no bundle JavaScript offline equivalente, antes de publicar TypeScript:** testes de entrada do voto inicial com escolha inválida, escolha nominal, recibo correto, alterar escolha e voltar em 320/390/740/1280px (4/4 PASS); seis métodos de programação com recusa de voto inválido e comprovante (24/24 combinações) PASS; vínculos entre quatro seções e seis modalidades (24/24) PASS; jornada completa de Socii→calendário→voto (4/4 larguras) PASS; smoke técnico do laboratório avançado (4/4 larguras) PASS; matriz de foco de 95 transições (5 larguras) PASS. Arquivos de regressão da branch adaptados para o comportamento novo: v0190, v0192, v0194, v0195, v0196, v0200. **Estas provas locais utilizaram o HTML do commit anterior com transformação equivalente à alteração TypeScript; a CI remota do HEAD ainda não foi executada com sucesso. Não descrever como build local do HEAD.** Cloudflare Pages compila e publica a branch; confirmação final por check SHA.
+
+**Permanecem ABERTOS no lote de votação:** PF-06 estado completo, PF-07 comprovação aprofundada, PF-08 não mistura em todos os caminhos, PF-09 drafts em navegação e troca de contexto, PF-10 aceite visual/hardware Android e engines. A ação de alterar escolha limpa a única participação temporária do respectivo escopo antes de nova confirmação. Nenhuma escolha vai à Academy. O painel azul do cabeçalho não foi redesenhado; esse assunto permanece PF-26 e depende de análise/ref. Megalos.
+
+**Métrica independente:** checklist funcional **5/38** (somente entregas de UX testadas em ambiente local). Checklist histórica de engenharia **43/57** inalterada. PF-06 a PF-38 que não foram listados como concluídos continuam pendentes. Não marcar homologação Megalos nem integração Academy.
