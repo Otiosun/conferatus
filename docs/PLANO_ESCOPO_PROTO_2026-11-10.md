@@ -17,7 +17,7 @@ Legenda: **C** = critério já atendido e revalidado nesta rodada no escopo expl
 | 02.02 | Associar deliberações, seções e proposições | C | **Concluído apenas na prévia fictícia:** 24/24 combinações de 4 seções × 6 modalidades, método, opções, proposição e calendário corretos; contratos reais Academy fora do escopo |
 | 02.03 | Implementar registro institucional quando regras confirmadas | A | Backend/eleição real é da Academy, não declarar implementado nem bloquear protótipo |
 | 02.04 | Verificar fluxo fictício e depois integrado oficial | H | Dividir evidência: jornada fictícia já passou, teste de integração não é responsabilidade direta nem pode ser simulado como aprovado |
-| 03.01 | Consolidar históricos pessoais e institucionais | P | Validar separação dos registros fictícios históricos e dos novos registros locais, inclusive vínculos e rotas |
+| 03.01 | Consolidar históricos pessoais e institucionais | C | **Concluído no protótipo CP149**: atividades pessoais/institucionais de exemplo, propostas locais e amostras anônimas isoladas; não representa histórico real Academy |
 | 03.02 | Preservar registros após mudança de cargo/rebaixamento | C | JS preserva dados; testes de regra e navegador em 320/390/740/1280 mostram histórico/contadores mantidos; não é banco oficial |
 | 03.03 | Revisar métricas Votos/PDR/PR/Ofício/Socii conforme modelos | M | Cinco métricas existem; falta revisão/aceite visual de D6 |
 | 03.05 | Integrar listas de proposições/deliberações aos perfis | C | **Concluído na fixture local CP147:** duas propostas e seus agendamentos no perfil da autoria, calendário/revisão/retorno e filtragem de cancelados/terceiros; testado em quatro larguras |
@@ -29,7 +29,7 @@ Legenda: **C** = critério já atendido e revalidado nesta rodada no escopo expl
 | 05.03 | Deixar login para equipe Academy conforme acordado | C | Delegação acordada explicitamente; `AGENTS.md` define fronteira, `academy-identity.test.mjs` prova adaptador sem credencial |
 | 05.04 | Validar fluxos integrados quando Academy fornecer interface | A | Espera API e ambiente da equipe externa; não confundir simulação com integração |
 | 06.01 | Comparação visual final original/recente | M | Aceite Megalos D1–D6 e página de votação |
-| 06.02 | Revisar responsividade, textos, navegação e fluidez | P | Regressões grandes existem; falta QA final conjunta por jornada e relatório de falhas remanescentes |
+| 06.02 | Revisar responsividade, textos, navegação e fluidez | C | **Concluído apenas na prévia Chromium CP149**: 11 suítes, 73/73 Node, 48 verificações compactas e 192 focos; hardware/zoom/leitor de tela seguem na Etapa 07 |
 | 06.04 | Testar e publicar preview, depois main | H | Preview publicado e build exato passou local; promoção a main depende aprovação explícita e não é condição para revisar protótipo |
 | 07.05 | Zoom 200%/400%, reflow | P | Testes sintéticos existentes, falta ensaio nativo/limites com evidência válida |
 | 07.06 | Compactos, rotação, IME, safe-area | P | Altura curta e compactos examinados; teclado móvel/safe-area em hardware pendentes |
@@ -73,3 +73,7 @@ Dois itens históricos da fila de protótipo concluídos com teste exato do repo
 ## Atualização CP148 — Etapa 04 fechada no escopo demonstrativo (10/11/2026)
 
 O cenário `tests/browser_stage04_normal_socii_v0195.py` inicialmente reproduziu uma falha: não havia conclusão do participante Socii sem `?demo=1`. A ação de simulação existente foi exposta também na prévia normal, com alvo 44px e aviso `role=status`, preservando a ficção. `tests/browser_stage04_complete_v0196.py` confirmou em 320/390/740/1280px **dois Socii, edição que reinicia as confirmações, agendamento inválido/válido e cancelamento com histórico**, com 73/73 Node PASS e regressões selecionadas. Sem conta/autenticação Academy e sem decisão visual D1–D6. Itens originais **04.05/04.09/04.13 agora C**, total original C=8, P=6, M=6, A=2, H=2; contagem oficial atual **41/57 (restam 16)**. A tabela acima preserva as 24 pendências originais de 33/57, mas suas classes foram atualizadas por evidência.
+
+## Atualização CP149 (10/11/2026)
+
+Os critérios **03.01 e 06.02** passaram à classe C apenas no escopo demonstrativo validado. A matriz mantém as 24 pendências originais como histórico; classificação atual: **C=10, P=4, M=6, A=2, H=2**. Contagem formal **43/57**, 14 abertos; os quatro P são exclusivamente 07.05, 07.06, 07.10 e 07.12. D1–D6/Megalos, integrações Academy e liberação `main` preservadas como gates separados. Evidências detalhadas na checklist CP149, sem manipular contagens de testes ou prometer certificação WCAG.
