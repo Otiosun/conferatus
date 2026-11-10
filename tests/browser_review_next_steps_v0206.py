@@ -12,6 +12,12 @@ WAITING={
  'partners':[{'id':'m02','complete':True},{'id':'m03','complete':False}],
  'status':'revisao'
 }
+SOLO={
+ 'id':'draft-review-solo','title':'Revisão individual',
+ 'body':'Proposição individual fictícia para conferir a revisão sem participantes associados.',
+ 'sectionId':'integridade','type':'PDR','authorComplete':False,
+ 'partners':[], 'status':'revisao'
+}
 DONE={
  'id':'draft-review-finished','title':'Revisão já concluída',
  'body':'Proposição fictícia concluída e pronta para criar uma programação local.',
@@ -34,7 +40,7 @@ with sync_playwright() as pw:
     setItem:(k,v)=>records.set(k,String(v)),
     removeItem:k=>records.delete(k)
    }});
-  }""",[WAITING,DONE])
+  }""",[WAITING,SOLO,DONE])
   page.set_content(HTML)
   page.evaluate("location.hash='#/proposals'")
   waiting=page.locator('.workflow-record').filter(has_text='Revisão com Socii')
@@ -55,6 +61,17 @@ with sync_playwright() as pw:
   page.locator('#confirm-proposal-form button[type=submit]').click()
   expect(waiting).to_contain_text('Aguardando Socii')
   assert waiting.locator('[data-schedule-draft]').count()==0,width
+
+  solo=page.locator('.workflow-record').filter(has_text='Revisão individual')
+  solo.locator('[data-draft]').click()
+  expect(page.locator('.workflow-editor-head h1')).to_contain_text('Revisão individual')
+  assert page.locator('.workflow-socii-editor-bar').count()==0,width
+  soloGuide=page.locator('.workflow-review-guidance')
+  expect(soloGuide).to_contain_text('Nenhum participante vinculado')
+  expect(soloGuide).to_contain_text('Confirme a revisão para concluir')
+  expect(page.locator('#confirm-proposal-form [name=type]')).to_have_value('PDR')
+  page.locator('#confirm-proposal-form button[type=submit]').click()
+  expect(solo).to_contain_text('Concluída')
 
   finished=page.locator('.workflow-record').filter(has_text='Revisão já concluída')
   finished.locator('[data-draft]').click()

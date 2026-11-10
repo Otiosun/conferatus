@@ -16,3 +16,6 @@ Fontes oficiais revisadas em 10/11/2026: W3C WAI SC 3.3.2 (instruções claras e
 `src/main.ts`, `src/styles.css`, `tests/browser_review_next_steps_v0206.py`, `.github/workflows/preview-voting-check.yml`. Roteiro v0206 prepara duas proposições inteiramente fictícias (uma esperando Socii e outra concluída) e verifica, em 320/390/740/1280px, título, corpo, seleção, nomes/estados, próximo passo, ausência de agendamento em pendência, agendamento da concluída e ausência de erro/overflow.
 
 **Execução local dos testes e screenshot de Android ainda não efetuados.** Verificar check Cloudflare no SHA exato; não equivaler publicação de prévia à validação PF-13. D1–D6 continuam dependentes da Megalos; PF-13 permanece aberto até evidência de navegador. Contagens funcional 8/38 e histórica 43/57 preservadas. Main e produção intocadas.
+
+## Caso adicional — revisão individual
+O roteiro v0206 foi estendido com uma proposição sem participantes do Socii. Verifica a ausência de barra de colaboradores, a indicação de que ninguém está vinculado, a próxima ação de confirmação e a conclusão individual. A prova está pronta e versionada, ainda sem execução no navegador real.
