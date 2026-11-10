@@ -68,6 +68,7 @@ try {
 let demoVoteId: string | null = null;
 let demoExpanded = false;
 let votingFormsOpen = false;
+let previewHomeBallot = false;
 // All six new ballot modes run in memory only, behind ?demo=1.
 let previewMode: DeliberationMethod = 'binaria';
 let previewVoteError = '';
@@ -87,7 +88,7 @@ let previewRequestSequence=0;
 let previewRequestId:string|null=null;
 function previewSampleScope():string {
  const scheduled=previewSelectedSchedule();
- return scheduled?`schedule:${scheduled.id}`:`fixture:${previewMode}`;
+ return scheduled?`schedule:${scheduled.id}`:previewHomeBallot?`fixture:home-${ballots[0]?.id??'none'}`:`fixture:${previewMode}`;
 }
 let previewScheduleId: string | null = null;
 let scheduleMethod: DeliberationMethod | null = null;
@@ -270,7 +271,7 @@ function previewSelectedSchedule():Deliberation|undefined {
   (previewMode==='binaria'||isValidPreviewChoices(item.choices)));
 }
 function previewVoteChoices(): readonly {id:string;label:string}[] {
- return previewMode==='binaria'?PREVIEW_BINARY_OPTIONS:(previewSelectedSchedule()?.choices??PREVIEW_LIST_OPTIONS);
+ return previewHomeBallot&&previewMode==='nominal'?(ballots[0]?.options.map(o=>({id:o.id,label:o.label}))??[]):previewMode==='binaria'?PREVIEW_BINARY_OPTIONS:(previewSelectedSchedule()?.choices??PREVIEW_LIST_OPTIONS);
 }
 function previewVoteFieldset():string {
  const options=previewVoteChoices();
@@ -355,46 +356,44 @@ function previewVoteSummary():string {
 function previewVoteLab():string {
  const method=DELIBERATION_METHODS.find(entry=>entry.id===previewMode);
  const contextual=previewSelectedSchedule();
+ const homeBallot=previewHomeBallot?ballots[0]:undefined;
  const receipt=previewVoteReceipt?.method===previewMode?previewVoteReceipt:null;
  return '<section id="preview-vote-lab" class="preview-vote-lab" aria-labelledby="preview-vote-title">'+
-  (advancedPreview?'<h2 id="preview-vote-title">Laboratório das seis modalidades</h2>':'<h2 id="preview-vote-title">Votação de demonstração</h2>')+ 
+  (advancedPreview?'<h2 id="preview-vote-title">Laboratório das seis modalidades</h2>':'<h2 id="preview-vote-title">'+escapeHTML(contextual?.title??homeBallot?.title??'Votação')+'</h2>')+ 
   (contextual?'<p class="preview-vote-context"><strong>Deliberação programada:</strong> '+escapeHTML(contextual.title)+
-   '<span>Proposição: '+escapeHTML(drafts.find(d=>d.id===contextual.proposalId)?.title??'Indisponível')+'</span></p>':'')+
-  (advancedPreview?'<p class="preview-vote-disclaimer">Apenas em ?demo=1. Alternativas fictícias, sem voto oficial, apuração institucional, login ou envio de informações.</p>':'<p class="preview-vote-disclaimer">Escolha a modalidade e registre uma participação fictícia. Nenhum voto é enviado à Academy e nenhum resultado é institucional.</p>')+
-  '<label for="preview-vote-method">Modalidade de deliberação</label>'+
-  '<select id="preview-vote-method"'+(contextual?' disabled':'')+'>'+DELIBERATION_METHODS.map(mode=>
-   '<option value="'+mode.id+'"'+(mode.id===previewMode?' selected':'')+'>'+escapeHTML(mode.label)+'</option>').join('')+'</select>'+
+   '<span>Seção: '+escapeHTML(sections.find(s=>s.id===contextual.sectionId)?.name??contextual.sectionId)+'</span>'+(contextual.proposalId?'<span>Proposição: '+escapeHTML(drafts.find(d=>d.id===contextual.proposalId)?.title??'Indisponível')+'</span>':'')+'</p>':homeBallot?'<p class="preview-vote-context">'+escapeHTML(homeBallot.description)+'<span>Seção: '+escapeHTML(homeBallot.section)+'</span></p>':'')+
+  (advancedPreview?'<p class="preview-vote-disclaimer">Apenas em ?demo=1. Alternativas fictícias, sem voto oficial, apuração institucional, login ou envio de informações.</p>':'<p class="preview-vote-disclaimer">Prévia com dados fictícios. Sua escolha permanece nesta aba e não é enviada à Academy.</p>')+
+  (advancedPreview?'<label for="preview-vote-method">Modalidade de deliberação</label><select id="preview-vote-method"'+(contextual?' disabled':'')+'>'+DELIBERATION_METHODS.map(mode=>'<option value="'+mode.id+'"'+(mode.id===previewMode?' selected':'')+'>'+escapeHTML(mode.label)+'</option>').join('')+'</select>':'<p class="preview-vote-detail">Modalidade: '+escapeHTML(method?.label??'')+'</p>')+
   '<p class="preview-vote-detail">'+escapeHTML(method?.detail??'')+'</p>'+ 
-  (contextual?'<button type="button" class="preview-vote-secondary" data-action="exit-preview-schedule">'+
-   (advancedPreview?'Voltar às alternativas de teste':'Ver outras modalidades')+'</button>':'')+
+  ((contextual||homeBallot)?'<button type="button" class="preview-vote-secondary" data-action="exit-preview-schedule">'+(advancedPreview?'Voltar às alternativas de teste':'Voltar às votações')+'</button>':'')+
   (receipt?'<div class="preview-vote-receipt" role="status"><strong>Voto simulado conferido nesta aba</strong>'+
    '<p>'+previewVoteReceiptText(receipt)+'</p>'+
-   '<button type="button" class="preview-vote-secondary" data-action="reset-preview-vote">Registrar outra amostra</button></div>':
+   '<button type="button" class="preview-vote-secondary" data-action="reset-preview-vote">'+(advancedPreview?'Registrar outra amostra':'Alterar escolha')+'</button></div>':
    '<form id="preview-vote-form" data-mode="'+previewMode+'" data-preview-member="'+previewVoteMemberId+'" novalidate>'+previewVoteFieldset()+
    (previewVoteError?'<p class="preview-vote-error" role="alert" id="preview-vote-error" tabindex="-1">'+escapeHTML(previewVoteError)+'</p>':'')+
    '<button type="submit" class="preview-vote-submit"'+
     (previewMode==='cumulativa' && advancedPreview && !members.some(m=>isDeliberativeMember(m,sections)&&
      isPositiveCumulativeVoteWeight(m.cumulativeVoteWeight))?' disabled':'')+
-   '>Conferir voto fictício</button></form>')+
-  previewVoteSummary()+
+   '>'+(advancedPreview?'Conferir voto fictício':'Confirmar escolha')+'</button></form>')+
+  (advancedPreview?previewVoteSummary():'')+
   '</section>';
 }
 
 function ballotPage() {
  // A scheduled demo must not display unrelated sample results first.
- if(!advancedPreview && votingFormsOpen && previewSelectedSchedule()){
+ if(!advancedPreview && votingFormsOpen && (previewSelectedSchedule()||previewHomeBallot)){
   return `<div class="main-pad">${header(undefined,undefined,false)}</div>${previewVoteLab()}`;
  }
  const ballot=ballots[0]; if(!ballot) return '<p>Nenhuma votação disponível.</p>';
- const demoOptions = ballot.options.map(o => ({...o, votes:o.votes + (canRecordVote(ballot) && demoVoteId===o.id?1:0)}));
+ const demoOptions = ballot.options.map(o => ({...o, votes:o.votes + (advancedPreview&&canRecordVote(ballot)&&demoVoteId===o.id?1:0)}));
  const sum=totalVotes(demoOptions);
  return `<div class="main-pad">${header(undefined,undefined,true)}<div class="results">
- ${demoOptions.map(o=>`<div class="result-row ${demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
- </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="toggle-demo" aria-expanded="${demoExpanded}" ${demoExpanded?'aria-controls="demo-vote-panel"':''}>${demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':'Ver situação'}</button></div>
- <p class="ballot-description">${escapeHTML(ballot.description)}</p>${demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Selecione uma opção para testar a votação.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
+ ${demoOptions.map(o=>`<div class="result-row ${advancedPreview&&demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${advancedPreview&&demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
+ </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="${advancedPreview?'toggle-demo':'enter-ballot'}" aria-expanded="${advancedPreview?demoExpanded:false}" ${advancedPreview&&demoExpanded?'aria-controls="demo-vote-panel"':''}>${advancedPreview&&demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':'Ver situação'}</button></div>
+ <p class="ballot-description">${escapeHTML(ballot.description)}</p>${advancedPreview&&demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Selecione uma opção para testar a votação.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
  ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
  <p class="vote-feedback" role="status">${demoVoteId?'Opção selecionada. Você pode alterá-la.':'Selecione uma opção.'}</p>
- ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}${!advancedPreview?`<div class="voting-preview-entry"><button type="button" data-action="toggle-voting-forms" aria-expanded="${votingFormsOpen}" aria-controls="preview-vote-lab">${votingFormsOpen?'Fechar formulário':'Abrir formulário de votação'}</button><p>Seis modalidades disponíveis para demonstração com dados fictícios.</p></div>`:''}</section>${advancedPreview||votingFormsOpen?previewVoteLab():'<div id="preview-vote-lab" hidden></div>'}`;
+ ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}${false?`<div class="voting-preview-entry"><button type="button" data-action="toggle-voting-forms" aria-expanded="${votingFormsOpen}" aria-controls="preview-vote-lab">${votingFormsOpen?'Fechar formulário':'Abrir formulário de votação'}</button><p>Seis modalidades disponíveis para demonstração com dados fictícios.</p></div>`:''}</section>${advancedPreview||votingFormsOpen?previewVoteLab():'<div id="preview-vote-lab" hidden></div>'}`;
 }
 function matchingMembers() {
  const candidates = searchExpanded && filter.trim() ? members : members.slice(1);
@@ -822,7 +821,7 @@ function calendarPage(){
  ${cancellationSaveFailed||workflowNotice?`<p class="workflow-status">${escapeHTML(cancellationSaveFailed?cancellationSaveWarning:workflowNotice)}</p>`:''}
  ${cancellationSaveFailed?'<button type="button" class="calendar-save-retry" data-action="retry-cancellation-save">Tentar salvar cancelamento nesta sessão</button>':''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
- ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.id==='sample-1'&&!item.method?'':`<p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(mode=>mode.id===item.method)?.label??'Não informada (registro anterior)')}</p>`}${item.choices?`<p>Alternativas: ${item.choices.map(option=>escapeHTML(option.label)).join(' · ')}</p>`:''}${item.id!=='sample-1'&&item.method&&(item.method==='binaria'||isValidPreviewChoices(item.choices))?`<button type="button" data-preview-schedule="${escapeHTML(item.id)}" class="preview-schedule-open">Simular voto nesta programação</button>`:''}${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" aria-expanded="${pendingScheduleCancellation===item.id}" ${pendingScheduleCancellation===item.id?`aria-controls="schedule-cancel-confirm-${escapeHTML(item.id)}"`:''} ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button>${pendingScheduleCancellation===item.id?`<div id="schedule-cancel-confirm-${escapeHTML(item.id)}" class="calendar-cancel-confirm" role="group" tabindex="-1" aria-label="Confirmar cancelamento de programação"><p>Cancelar a programação “${escapeHTML(item.title)}”? Ela sairá da lista ativa, mas permanecerá no histórico desta sessão.</p><div class="calendar-cancel-confirm-actions"><button type="button" data-keep-schedule="${escapeHTML(item.id)}">Manter programação</button><button type="button" data-confirm-cancel-schedule="${escapeHTML(item.id)}">Confirmar cancelamento</button></div></div>`:''}</div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
+ ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.id==='sample-1'&&!item.method?'':`<p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(mode=>mode.id===item.method)?.label??'Não informada (registro anterior)')}</p>`}${item.choices?`<p>Alternativas: ${item.choices.map(option=>escapeHTML(option.label)).join(' · ')}</p>`:''}${item.id!=='sample-1'&&item.method&&(item.method==='binaria'||isValidPreviewChoices(item.choices))?`<button type="button" data-preview-schedule="${escapeHTML(item.id)}" class="preview-schedule-open">Participar nesta votação</button>`:''}${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" aria-expanded="${pendingScheduleCancellation===item.id}" ${pendingScheduleCancellation===item.id?`aria-controls="schedule-cancel-confirm-${escapeHTML(item.id)}"`:''} ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button>${pendingScheduleCancellation===item.id?`<div id="schedule-cancel-confirm-${escapeHTML(item.id)}" class="calendar-cancel-confirm" role="group" tabindex="-1" aria-label="Confirmar cancelamento de programação"><p>Cancelar a programação “${escapeHTML(item.title)}”? Ela sairá da lista ativa, mas permanecerá no histórico desta sessão.</p><div class="calendar-cancel-confirm-actions"><button type="button" data-keep-schedule="${escapeHTML(item.id)}">Manter programação</button><button type="button" data-confirm-cancel-schedule="${escapeHTML(item.id)}">Confirmar cancelamento</button></div></div>`:''}</div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -1101,6 +1100,7 @@ document.addEventListener('click',(event)=>{
  if(contextualVote?.dataset.previewSchedule){
   const item=schedule.find(s=>s.id===contextualVote.dataset.previewSchedule&&s.status==='programada');
   if(item?.method && (item.method==='binaria'||isValidPreviewChoices(item.choices))){
+   previewHomeBallot=false;
    previewScheduleId=item.id;previewMode=item.method;previewRequestId=null;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';previewVoteDraft=null;votingFormsOpen=true;
    navigate('ballot');document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
   }return;
@@ -1175,8 +1175,10 @@ document.addEventListener('click',(event)=>{
  const voteEl=target.closest<HTMLElement>('[data-vote]');
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
  if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='exit-preview-schedule'){
+  previewHomeBallot=false;
+  if(!advancedPreview)votingFormsOpen=false;
   previewVoteDraft=null;previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
-  document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
+  document.querySelector<HTMLElement>(advancedPreview?'#preview-vote-method':'[data-action=enter-ballot]')?.focus({preventScroll:true});return;
  }
  if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='clear-preview-samples'){
   const scope=previewSampleScope();
@@ -1186,6 +1188,7 @@ document.addEventListener('click',(event)=>{
   document.querySelector<HTMLElement>('#preview-vote-form')?.querySelector<HTMLElement>('input,select')?.focus({preventScroll:true});return;
  }
  if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='reset-preview-vote'){
+  if(!advancedPreview)previewSampleLedger.clear(previewSampleScope());
   previewVoteDraft=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
   const method=document.querySelector<HTMLSelectElement>('#preview-vote-method');
   const firstChoice=document.querySelector<HTMLElement>('#preview-vote-form input:not(:disabled), #preview-vote-form select:not(:disabled)');
@@ -1230,6 +1233,14 @@ document.addEventListener('click',(event)=>{
   const focusTarget=document.querySelector<HTMLElement>(votingFormsOpen?'#preview-vote-method':'[data-action="toggle-voting-forms"]');
   focusTarget?.focus({preventScroll:true});
   if(votingFormsOpen)focusTarget?.scrollIntoView({block:'center'});
+  return;
+ }
+ if(actionEl?.dataset.action==='enter-ballot'&&!advancedPreview&&demoBallot&&canRecordVote(demoBallot)){
+  previewHomeBallot=true;previewScheduleId=null;previewMode='nominal';
+  previewVoteDraft=null;previewVoteReceipt=null;previewVoteError='';previewRequestId=null;
+  votingFormsOpen=true;render();
+  document.querySelector<HTMLInputElement>('#preview-vote-form input:not(:disabled)')?.focus({preventScroll:true});
+  document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
   return;
  }
  if(actionEl?.dataset.action==='toggle-demo'){demoExpanded=!demoExpanded;render();return;}
