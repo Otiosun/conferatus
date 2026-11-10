@@ -1,0 +1,68 @@
+"""State contract for six fictitious ballot variants, errors and local-only receipts.
+No Academy authorization, legal counting, eligibility, real voting or persistence.
+"""
+from pathlib import Path
+from playwright.sync_api import sync_playwright, expect
+HTML=(Path(__file__).resolve().parents[1]/'dist/CONFFRATUS_demo_offline.html').read_text(encoding='utf-8')
+with sync_playwright() as pw:
+ browser=pw.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ for width in (320,390,740,1280):
+  page=browser.new_page(viewport={'width':width,'height':850});page.set_default_timeout(5000)
+  errors=[];page.on('pageerror',lambda err:errors.append(str(err)))
+  page.goto('about:blank');page.set_content(HTML)
+  page.locator('[data-action=toggle-voting-forms]').click()
+  method=page.locator('#preview-vote-method')
+  method.select_option('nominal')
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('#preview-vote-error')).to_be_visible()
+  assert page.locator('.preview-vote-receipt').count()==0
+  page.locator('#preview-vote-form [name=selected]').first.check()
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('.preview-vote-receipt')).to_be_visible()
+  expect(page.locator('#preview-vote-summary-title')).to_contain_text('(1)')
+  assert page.locator('.result-row').count()>0
+  page.locator('[data-action=reset-preview-vote]').click()
+  assert page.locator('#preview-vote-form [name=selected]:checked').count()==0
+  expect(page.locator('#preview-vote-summary-title')).to_contain_text('(1)')
+  method.select_option('ordenada')
+  ranks=page.locator('#preview-vote-form select[name^="rank-"]').all()
+  for f in ranks:f.select_option(index=1)
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('#preview-vote-error')).to_be_visible()
+  for index,f in enumerate(page.locator('#preview-vote-form select[name^="rank-"]').all()):f.select_option(index=index+1)
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('.preview-vote-receipt')).to_be_visible()
+  page.locator('[data-action=reset-preview-vote]').click()
+  method.select_option('aprovacao')
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('#preview-vote-error')).to_be_visible()
+  page.locator('#preview-vote-form [name=approved]').first.check()
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('.preview-vote-receipt')).to_be_visible()
+  page.locator('[data-action=reset-preview-vote]').click()
+  method.select_option('escalar')
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('#preview-vote-error')).to_be_visible()
+  for f in page.locator('#preview-vote-form select[name^="score-"]').all():f.select_option('7')
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('.preview-vote-receipt')).to_be_visible()
+  page.locator('[data-action=reset-preview-vote]').click()
+  method.select_option('cumulativa')
+  page.locator('#preview-vote-form [name^=alloc-]').first.fill('6')
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('#preview-vote-error')).to_be_visible()
+  page.locator('#preview-vote-form [name^=alloc-]').first.fill('2')
+  page.locator('.preview-vote-submit').click()
+  expect(page.locator('.preview-vote-receipt')).to_contain_text('distribuídos 2 de 5')
+  page.once('dialog',lambda d:d.dismiss())
+  page.locator('[data-action=clear-preview-samples]').click()
+  expect(page.locator('#preview-vote-summary-title')).to_contain_text('(1)')
+  page.once('dialog',lambda d:d.accept())
+  page.locator('[data-action=clear-preview-samples]').click()
+  assert page.locator('.preview-vote-summary').count()==0
+  method.select_option('nominal')
+  expect(page.locator('#preview-vote-summary-title')).to_contain_text('(1)')
+  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
+  assert not errors,(width,errors)
+  page.close();print('PASS fictitious ballot states (error/receipt/reset/cancel/isolated clear)',width)
+ browser.close()
