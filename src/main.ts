@@ -822,6 +822,11 @@ function calendarSociiLine(proposalId:string){
 }
 // Share a single form, validation and persistence path with the D2 prototype.
 function scheduleFormMarkup(profileSheet=false){
+ // Carry the selected proposal's existing metadata into the initial form.
+ // These remain editable; no institutional matching rule is inferred.
+ const selectedProposal=drafts.find(d=>d.id===schedulePrefillProposalId&&d.status==='concluida');
+ const initialSection=selectedProposal?.sectionId??'integridade';
+ const initialType=selectedProposal?.type??'PDR';
  const heading=`<form id="schedule-deliberation-form" class="workflow-form workflow-schedule-form"><h2>Programar deliberação</h2>
  ${!drafts.some(d=>d.status==='concluida')?'<p class="workflow-help">Para agendar, conclua uma proposição primeiro. <button type="button" data-route="proposals">Ir às proposições</button></p>':''}
  `;
@@ -831,11 +836,11 @@ function scheduleFormMarkup(profileSheet=false){
  `;
  const proposalField=`<label>Selecione a proposição<select name="proposalId" required ${!drafts.some(d=>d.status==='concluida')?'disabled':''}><option value="" ${schedulePrefillProposalId?'':'selected'}>Selecione</option>${drafts.filter(d=>d.status==='concluida').map(d=>`<option value="${escapeHTML(d.id)}" ${d.id===schedulePrefillProposalId?'selected':''}>${escapeHTML(d.title)}</option>`).join('')}</select></label>
  `;
- const sectionField=`<label>Seção deliberativa<select name="sectionId" required>${selectOptions('integridade',sections.filter(s=>s.category==='deliberativa'))}</select></label>
+ const sectionField=`<label>Seção deliberativa<select name="sectionId" required>${selectOptions(initialSection,sections.filter(s=>s.category==='deliberativa'))}</select></label>
  `;
  const datesField=`<div class="workflow-grid-two"><label>Data e hora de início<input type="datetime-local" name="start" required></label><label>Data e hora de encerramento<input type="datetime-local" name="end" required></label></div>
  `;
- const typeField=`<label>Tipo de proposição<select name="type" required><option value="PDR">PDR</option><option value="PR">PR</option><option value="Ofício">Ofício</option></select></label>
+ const typeField=`<label>Tipo de proposição<select name="type" required><option value="PDR" ${initialType==='PDR'?'selected':''}>PDR</option><option value="PR" ${initialType==='PR'?'selected':''}>PR</option><option value="Ofício" ${initialType==='Ofício'?'selected':''}>Ofício</option></select></label>
   `;
  const methodField=`<label>Modalidade de votação<select name="method" id="schedule-method" required><option value="">Selecione a modalidade</option>${DELIBERATION_METHODS.map(mode=>`<option value="${mode.id}">${escapeHTML(mode.label)} — ${escapeHTML(mode.detail)}</option>`).join('')}</select></label>
 `;

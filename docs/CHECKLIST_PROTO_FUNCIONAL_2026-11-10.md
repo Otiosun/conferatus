@@ -127,3 +127,7 @@ Implementação em `src/main.ts` e `src/styles.css`; roteiro `tests/browser_revi
 ## CP160 — Nota de revisão após edição (10/11/2026)
 
 PF-16 avançou sem fechamento: reuso da reinicialização existente de etapas fictícias da proposição e novo aviso na revisão quando o texto alterado exigiu retomar as confirmações anteriores. Salvar rascunho mantém a mensagem antiga; revisão inalterada não exibe nota. Novo `tests/browser_socii_revision_feedback_v0207.py` foi incluído na suíte da prévia, ainda sem execução local. Regra máxima de UX com dados fictícios preservada. Arquivos e decisão em `docs/decisions/2026-11-10-cp160-socii-revision-feedback.md`. PF-16 [ ]; 8/38 funcional, 43/57 histórica. Main/produção intactas.
+
+## CP161 — Pré-seleção de seção e tipo no agendamento (10/11/2026)
+
+Avanço de PF-17 sem fechamento: quando a programação nasce de uma proposição concluída, o formulário passa a iniciar com a seção e o tipo daquela proposição (além do vínculo já existente), mantendo os campos editáveis. Na entrada independente pelo calendário, continuam os valores padrão antigos; não há regra institucional nova. Roteiro `tests/browser_schedule_proposal_defaults_v0208.py` criado e incluído no workflow, mas **ainda não executado**. Decisão em `docs/decisions/2026-11-10-cp161-schedule-proposal-defaults.md`. PF-17 aberto, funcional 8/38 e histórico 43/57. Main e produção preservadas.
