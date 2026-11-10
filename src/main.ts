@@ -372,6 +372,10 @@ function previewVoteLab():string {
 }
 
 function ballotPage() {
+ // A scheduled demo must not display unrelated sample results first.
+ if(!advancedPreview && votingFormsOpen && previewSelectedSchedule()){
+  return `<div class="main-pad">${header(undefined,undefined,false)}</div>${previewVoteLab()}`;
+ }
  const ballot=ballots[0]; if(!ballot) return '<p>Nenhuma votação disponível.</p>';
  const demoOptions = ballot.options.map(o => ({...o, votes:o.votes + (canRecordVote(ballot) && demoVoteId===o.id?1:0)}));
  const sum=totalVotes(demoOptions);
