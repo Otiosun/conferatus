@@ -104,6 +104,8 @@ with sync_playwright() as pw:
   expect(scheduled.locator('#preview-vote-lab')).to_be_visible()
   expect(scheduled.locator('#preview-vote-method')).to_have_value('nominal')
   expect(scheduled.locator('.preview-vote-context')).to_contain_text('Votação fictícia programada')
+  assert scheduled.locator('.results').count()==0,(width,'unrelated sample results on scheduled ballot')
+  assert scheduled.locator('.description-panel').count()==0,width
   scheduled.locator('#preview-vote-form [name=selected]').first.check()
   scheduled.locator('#preview-vote-form .preview-vote-submit').click()
   expect(scheduled.locator('.preview-vote-receipt')).to_be_visible()
