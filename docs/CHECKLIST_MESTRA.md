@@ -1213,3 +1213,12 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - **QA local reproduzível:** HTML offline `bb14e32a` com patch funcional equivalente passou em Chromium **4 viewports × 6 métodos = 24 jornadas**, validação negativa do cumulativo, **4 jornadas contextuais** calendário → votação, recibos, e preservação do laboratório avançado; sem erro JS ou overflow nos cenários testados. Teste permanente `tests/browser_voting_normal_flow_v0190.py` registrado no workflow `validate`. O HTML local é um **ensaio instrumentado**, não resultado da compilação do último SHA.
 - **Pesquisa/decisão:** `docs/decisions/2026-11-09-voting-normal-prototype-v0190.md` cita W3C/WAI e Playwright; `docs/DEMO_GUIDE.md` atualizado. Não afirmar CI integral aprovada, nem aceite Megalos. Pendência fundamental: conferir página de votação requerida por ela (tela para votar ou criação/administração) e ajustar fidelidade após confirmação.
 - **Marcadores oficiais:** **33/57 inalterados**, incluindo Etapa 02 0/4, Etapa 04 17/22 e Etapa 07 7/12. Atividade de protótipo verificada não equivale ao fechamento de registro institucional nem à promoção para `main`.
+
+## CHECKPOINT 143 — Correção de contexto da votação (09/11/2026)
+
+- Corrigida a referência ARIA quebrada do botão de abertura dos seis formulários: ao fechar, `#preview-vote-lab` permanece como alvo oculto e único; ao abrir, o mesmo ID identifica o painel real. Enter, Espaço, foco e `aria-expanded` exercitados em quatro larguras.
+- Votação selecionada pelo calendário agora apresenta **somente a deliberação contextual**, sem os resultados não relacionados da fixture geral. Ao clicar **Ver outras modalidades**, desvincula o contexto e a tela comum retorna. O laboratório avançado `?demo=1` permanece.
+- `tests/browser_voting_normal_flow_v0190.py` atualizado; blob exato GitHub/teste local `696004a0d61eb226e3a360d292b07507f6bca0a2`. PASS local: 320/390/740/1280 CSS px, seis modalidades e quatro fluxos contextuais; HTML de ensaio é **instrumentado**, não bundle recompilado do último HEAD. Ver `docs/decisions/2026-11-09-voting-contextual-clarity-v0191.md`.
+- ZIP de provas: https://drive.google.com/file/d/1yMHAOlm9O2tKjsKaOE39rHh0U7fQi51n/view (SHA256 `079cdef4708a237ddd375fae6687b22f91b81af4de42ffb6218b9c8e0e3a0d6b`). `main`/produção/Academy/PM2 intactos; repositório privado.
+- **Nenhum marcador alterado: 33/57.** Megalos precisa aceitar escopo/visual da página de votação e D1–D6; integração institucional é responsabilidade da Academy, não representa tarefa executável da nossa equipe.
+
