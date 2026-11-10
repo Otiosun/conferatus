@@ -1245,7 +1245,16 @@ document.addEventListener('click',(event)=>{
   if(partnerEl?.dataset.confirmPartner){const [draftId,partnerId]=partnerEl.dataset.confirmPartner.split(':');const d=drafts.find(d=>d.id===draftId);const partner=d?.partners.find(p=>p.id===partnerId);if(d&&partner){partner.complete=true;d.status=draftReady(d)?'concluida':'revisao';
    const saved=saveWorkflows();
    workflowNotice=saved?(d.status==='concluida'?'Todas as partes concluíram. Proposição concluída.':'Participação registrada nesta simulação.'):'Conclusão aplicada somente nesta aba: não foi possível salvar.';
-   render();}return;}}
+   render();
+   // The confirmation button disappears on completion. Keep keyboard focus
+   // within this proposal: next pending participant, then scheduling/review.
+   const updatedRecord=[...document.querySelectorAll<HTMLElement>('.workflow-record')]
+    .find(record=>record.querySelector<HTMLButtonElement>('[data-draft]')?.dataset.draft===draftId);
+   const nextAction=updatedRecord?.querySelector<HTMLButtonElement>('[data-confirm-partner]')
+    ?? updatedRecord?.querySelector<HTMLButtonElement>('[data-schedule-draft]')
+    ?? updatedRecord?.querySelector<HTMLButtonElement>('[data-draft]');
+   nextAction?.focus({preventScroll:true});
+  }return;}}
  if(advancedPreview && actionEl?.dataset.action==='export-local-archive'){
   try{
    const data=exportWorkflowArchive(drafts.map(cleanDraftRecord),schedule.map(cleanScheduleRecord));
