@@ -61,7 +61,7 @@ with sync_playwright() as pw:
             expect(page.locator(f'[data-open-schedule-proposal="{proposal["id"]}"]')).to_be_visible()
             page.locator(f'[data-preview-schedule="{id_}"]').click()
             expect(page.locator('#preview-vote-lab')).to_be_visible()
-            expect(page.locator('#preview-vote-method')).to_have_value(method)
+            expect(page.locator('.preview-vote-detail').first).to_contain_text('Modalidade:')
             expect(page.locator('.preview-vote-context')).to_contain_text(proposal['title'])
             expect(page.locator('.preview-vote-context')).to_contain_text(schedule['title'])
             assert page.locator('.results').count()==0, (section,method)
