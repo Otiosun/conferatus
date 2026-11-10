@@ -20,6 +20,10 @@ Este roteiro apresenta **o produto que nossa equipe entrega**, sem sugerir auten
 6. **Navegação e cancelamento:** no calendário, expanda a programação, abra a proposta ou o perfil do autor e volte pelo vínculo contextual. Cancele uma programação fictícia e mostre que sai da lista ativa, permanecendo no histórico local de cancelamentos.
 7. **Histórico geral:** em **Menu → Histórico de Votações e Proposições**, abra a guia Proposições. Os documentos criados nesta sessão aparecem em bloco próprio, separados dos indicadores e registros fictícios antigos. Abra um deles e use **Voltar ao histórico**.
 
+## Kit congelado para revisão offline (checkpoint 141)
+
+O [ZIP privado de revisão no Drive Komekko](https://drive.google.com/file/d/1gJpV7_kUhWackSB2eishb2c-w9iHanZ7/view) reúne o HTML offline, instruções e manifesto de procedência (SHA-256 do ZIP: `3049c11b3171a993f4ba24aa779eb70463427da3de95ba2359bbf8e90025db89`). O arquivo HTML dentro dele foi produzido pelo commit `bb14e32`; sua integridade foi verificada, e o diff até `fafae4a` não alterou a aplicação. **Não é bundle compilado nem CI integral aprovada do HEAD documental atual.** Para avaliação no Android, prefira a URL da branch e confirme sua abertura antes de enviá-la.
+
 ## Modo de testes avançados (`?demo=1`)
 
 - O laboratório apresenta **seis modalidades demonstrativas**: binária, nominal, ordenada, por aprovação, escalar e cumulativa. Não declara quórum, vencedores, elegibilidade ou voto institucional.
