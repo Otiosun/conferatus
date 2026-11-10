@@ -592,6 +592,7 @@ function syncRichEditor(){
 let currentDraftId='';
 let finishedProposalReturnTo:'proposals'|'calendar'|'overview'|'profile'='proposals';
 let workflowNotice='';
+let reviewRevisionNotice='';
 let composeError='';
 let composeErrorField: 'title' | 'body' = 'title';
 let scheduleFormOpen=false;
@@ -804,6 +805,7 @@ function reviewPage(){
   : 'Confira os dados e a redação antes de confirmar a conclusão.';
  return `${sociiEditorBar(d)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(d.title)}</h1></div>
  <div class="workflow-review-body${d3SingleExperiment?' workflow-review-body--d3':''}"><p style="${richLayoutStyle(d.bodyLayout)}">${renderRichText(d.body,d.bodyRuns)}</p></div>
+ ${!d3SingleExperiment&&reviewRevisionNotice?`<p class="workflow-revision-feedback" role="note">${escapeHTML(reviewRevisionNotice)}</p>`:''}
  ${d3SingleExperiment?'':reviewParticipation(d,false)}
  <div class="workflow-review-panel workflow-review-panel--pending${d3SingleExperiment?' workflow-review-panel--d3':''}">${d3Start}<form id="confirm-proposal-form" class="workflow-form workflow-review-form" data-review-draft="${escapeHTML(d.id)}">
  <div class="workflow-review-sheet"><img class="workflow-review-crest" src="./assets/crest.png" alt="" width="38" height="38">${d3SingleExperiment?'<h2 id="d3-review-title" class="sr-only">Confirmar proposição</h2>':`<p>${reviewMessage}</p>`}${d3Close}
@@ -1366,7 +1368,7 @@ document.addEventListener('click',(event)=>{
   return;
  }
  if(actionEl?.dataset.action==='invite-socii-from-profile'){inviteOpen=true;navigate('proposals');return;}
- if(actionEl?.dataset.action==='new-proposal'){finishedProposalReturnTo=routeFromHash()==='profile'?'profile':'proposals';currentDraftId='';draftForm=blankDraft();richEditorOpen=false;lastRichSelection=null;workflowNotice='';composeError='';navigate('compose');return;}
+ if(actionEl?.dataset.action==='new-proposal'){reviewRevisionNotice='';finishedProposalReturnTo=routeFromHash()==='profile'?'profile':'proposals';currentDraftId='';draftForm=blankDraft();richEditorOpen=false;lastRichSelection=null;workflowNotice='';composeError='';navigate('compose');return;}
  if(actionEl?.dataset.action==='invite-socii'){inviteOpen=!inviteOpen;render();return;}
  const fromProposal=target.closest<HTMLElement>('[data-schedule-draft]');
  if(fromProposal?.dataset.scheduleDraft){
@@ -1437,7 +1439,7 @@ document.addEventListener('click',(event)=>{
   return;
  }
  const draftEl=target.closest<HTMLElement>('[data-draft]');
- if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){currentDraftId=d.id;finishedProposalReturnTo=routeFromHash()==='overview'?'overview':routeFromHash()==='profile'?'profile':'proposals';draftForm={title:d.title,body:d.body,bodyRuns:d.bodyRuns,bodyLayout:d.bodyLayout};richEditorOpen=hasFormatting(d.bodyRuns)||Boolean(d.bodyLayout);lastRichSelection=null;composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
+ if(draftEl?.dataset.draft){const d=drafts.find(x=>x.id===draftEl.dataset.draft);if(d){reviewRevisionNotice='';currentDraftId=d.id;finishedProposalReturnTo=routeFromHash()==='overview'?'overview':routeFromHash()==='profile'?'profile':'proposals';draftForm={title:d.title,body:d.body,bodyRuns:d.bodyRuns,bodyLayout:d.bodyLayout};richEditorOpen=hasFormatting(d.bodyRuns)||Boolean(d.bodyLayout);lastRichSelection=null;composeError='';navigate(d.status==='redacao'?'compose':'review');}return;}
  const scheduleEl=target.closest<HTMLElement>('[data-schedule]');
  if(scheduleEl?.dataset.schedule){pendingScheduleCancellation=null;expandedSchedule=expandedSchedule===scheduleEl.dataset.schedule?'':scheduleEl.dataset.schedule;render();return;}
  const proposalEl=target.closest<HTMLElement>('[data-open-schedule-proposal]');
@@ -1670,11 +1672,16 @@ document.addEventListener('submit',(event)=>{
   }
   const stored=saveWorkflows();
   if(saveOnly){
+   reviewRevisionNotice='';
    workflowNotice=stored?'Rascunho salvo. Disponível somente nesta aba do navegador.':'Rascunho mantido somente enquanto a página estiver aberta.';
    if(confirmationsReset)workflowNotice+=' O texto mudou; as confirmações anteriores foram reiniciadas.';
    navigate('proposals');
+  }else{
+   reviewRevisionNotice=confirmationsReset
+    ?d.partners.length?'A redação mudou. As etapas de autoria e Socii precisam ser confirmadas novamente.':'A redação mudou. A etapa de autoria precisa ser confirmada novamente.'
+    :'';
+   navigate('review');
   }
-  else navigate('review');
   return;
  }
  if(id==='confirm-proposal-form'){
