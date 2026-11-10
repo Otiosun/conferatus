@@ -9,3 +9,6 @@ Na interface comum, “Simular conclusão de participante” foi substituído po
 Critérios de prova: apenas revisão estática de origem e testes gravados; `npm run build` / Playwright locais / Android físico / Firefox / WebKit NÃO executados neste ambiente. Acompanhar build Cloudflare do SHA após escrita, sem equiparar a CI integral. PF-06, PF-10 e PF-11–21 seguem abertos, contagens 8/38 funcional e 43/57 histórica.
 
 Reuso da aplicação TS/HTML/CSS sem dependências; D1–D6 Megalos e Academy intocados. Pesquisa de roteamento: https://developer.mozilla.org/en-US/docs/Glossary/Hash_routing e https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22.html .
+
+## Ajuste final da rodada — aviso único
+O aviso de que as etapas Socii não acessam outras contas foi retirado de cada cartão e concentrado uma vez na área de proposições, somente quando houver pendências. Assim, a prévia continua inequívoca sem repetir linguagem técnica para cada participante. O roteiro v0204 também verifica a nota única e ausência de repetição no cartão. Não altera o contrato de conclusão.
