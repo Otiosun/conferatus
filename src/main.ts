@@ -67,6 +67,7 @@ try {
 } catch { /* Ignore damaged or blocked session data. */ }
 let demoVoteId: string | null = null;
 let demoExpanded = false;
+let votingFormsOpen = false;
 // All six new ballot modes run in memory only, behind ?demo=1.
 let previewMode: DeliberationMethod = 'binaria';
 let previewVoteError = '';
@@ -287,6 +288,13 @@ function previewVoteFieldset():string {
     Array.from({length:10},(_,index)=>'<option value="'+String(index+1)+'">'+String(index+1)+'</option>').join('')+
     '</select></label>').join('')+'</fieldset>';
  }
+ if(!advancedPreview){
+  return '<fieldset class="preview-vote-fieldset"><legend>Distribua até 5 unidades fictícias</legend>'+
+   '<p>Esta cota é apenas um exemplo, não representa regra ou participante da Academy.</p>'+
+   options.map(option=>'<label>'+escapeHTML(option.label)+
+    '<input type="number" min="0" max="5" step="1" inputmode="numeric" name="alloc-'+option.id+'" value="0" required></label>').join('')+
+   '</fieldset>';
+ }
  const qualified=members.filter(member=>isDeliberativeMember(member,sections)&&
   isPositiveCumulativeVoteWeight(member.cumulativeVoteWeight));
  const selected=qualified.find(member=>member.id===previewVoteMemberId);
@@ -340,11 +348,11 @@ function previewVoteLab():string {
  const method=DELIBERATION_METHODS.find(entry=>entry.id===previewMode);
  const contextual=previewSelectedSchedule();
  const receipt=previewVoteReceipt?.method===previewMode?previewVoteReceipt:null;
- return '<section class="preview-vote-lab" aria-labelledby="preview-vote-title">'+
-  '<h2 id="preview-vote-title">Laboratório das seis modalidades</h2>'+ 
+ return '<section id="preview-vote-lab" class="preview-vote-lab" aria-labelledby="preview-vote-title">'+
+  (advancedPreview?'<h2 id="preview-vote-title">Laboratório das seis modalidades</h2>':'<h2 id="preview-vote-title">Votação de demonstração</h2>')+ 
   (contextual?'<p class="preview-vote-context"><strong>Deliberação programada:</strong> '+escapeHTML(contextual.title)+
    '<span>Proposição: '+escapeHTML(drafts.find(d=>d.id===contextual.proposalId)?.title??'Indisponível')+'</span></p>':'')+
-  '<p class="preview-vote-disclaimer">Apenas em ?demo=1. Alternativas fictícias, sem voto oficial, apuração institucional, login ou envio de informações.</p>'+
+  (advancedPreview?'<p class="preview-vote-disclaimer">Apenas em ?demo=1. Alternativas fictícias, sem voto oficial, apuração institucional, login ou envio de informações.</p>':'<p class="preview-vote-disclaimer">Escolha a modalidade e registre uma participação fictícia. Nenhum voto é enviado à Academy e nenhum resultado é institucional.</p>')+
   '<label for="preview-vote-method">Modalidade de deliberação</label>'+
   '<select id="preview-vote-method"'+(contextual?' disabled':'')+'>'+DELIBERATION_METHODS.map(mode=>
    '<option value="'+mode.id+'"'+(mode.id===previewMode?' selected':'')+'>'+escapeHTML(mode.label)+'</option>').join('')+'</select>'+
@@ -356,7 +364,7 @@ function previewVoteLab():string {
    '<form id="preview-vote-form" data-mode="'+previewMode+'" data-preview-member="'+previewVoteMemberId+'" novalidate>'+previewVoteFieldset()+
    (previewVoteError?'<p class="preview-vote-error" role="alert" id="preview-vote-error" tabindex="-1">'+escapeHTML(previewVoteError)+'</p>':'')+
    '<button type="submit" class="preview-vote-submit"'+
-    (previewMode==='cumulativa' && !members.some(m=>isDeliberativeMember(m,sections)&&
+    (previewMode==='cumulativa' && advancedPreview && !members.some(m=>isDeliberativeMember(m,sections)&&
      isPositiveCumulativeVoteWeight(m.cumulativeVoteWeight))?' disabled':'')+
    '>Conferir voto fictício</button></form>')+
   previewVoteSummary()+
@@ -373,7 +381,7 @@ function ballotPage() {
  <p class="ballot-description">${escapeHTML(ballot.description)}</p>${demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Selecione uma opção para testar a votação.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
  ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
  <p class="vote-feedback" role="status">${demoVoteId?'Opção selecionada. Você pode alterá-la.':'Selecione uma opção.'}</p>
- ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}</section>${advancedPreview?previewVoteLab():''}`;
+ ${demoVoteId?'<button class="reset-vote" type="button" data-action="reset-vote">Alterar escolha</button>':''}`:''}</div>`:''}${!advancedPreview?`<div class="voting-preview-entry"><button type="button" data-action="toggle-voting-forms" aria-expanded="${votingFormsOpen}" aria-controls="preview-vote-lab">${votingFormsOpen?'Fechar formulário':'Abrir formulário de votação'}</button><p>Seis modalidades disponíveis para demonstração com dados fictícios.</p></div>`:''}</section>${advancedPreview||votingFormsOpen?previewVoteLab():''}`;
 }
 function matchingMembers() {
  const candidates = searchExpanded && filter.trim() ? members : members.slice(1);
@@ -801,7 +809,7 @@ function calendarPage(){
  ${cancellationSaveFailed||workflowNotice?`<p class="workflow-status">${escapeHTML(cancellationSaveFailed?cancellationSaveWarning:workflowNotice)}</p>`:''}
  ${cancellationSaveFailed?'<button type="button" class="calendar-save-retry" data-action="retry-cancellation-save">Tentar salvar cancelamento nesta sessão</button>':''}
  <div class="calendar-list"><div class="calendar-list-head"><h2>${selectedCalendarDay?`Programações em ${new Date(`${selectedCalendarDay}T12:00`).toLocaleDateString('pt-BR')}`:'Programações'}</h2>${selectedCalendarDay?'<button type="button" data-action="calendar-all">Ver todas</button>':''}</div>${visible.length===0?'<p class="calendar-empty-message">Nenhuma programação nesta data.</p>':''}${visible.map(item=>`<article class="calendar-item${expandedSchedule===item.id?' calendar-item--expanded':''}"><button type="button" data-schedule="${escapeHTML(item.id)}" aria-expanded="${expandedSchedule===item.id}" ${expandedSchedule===item.id?`aria-controls="schedule-details-${escapeHTML(item.id)}"`: ''}><strong>${escapeHTML(item.title)}</strong><small>${friendlyStamp(item.start)} até ${friendlyStamp(item.end)}</small><span>Seção: ${escapeHTML(sections.find(s=>s.id===item.sectionId)?.name??'')}</span>${calendarSociiLine(item.proposalId)}</button>
- ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.id==='sample-1'&&!item.method?'':`<p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(mode=>mode.id===item.method)?.label??'Não informada (registro anterior)')}</p>`}${item.choices?`<p>Alternativas: ${item.choices.map(option=>escapeHTML(option.label)).join(' · ')}</p>`:''}${advancedPreview&&item.id!=='sample-1'&&item.method&&(item.method==='binaria'||isValidPreviewChoices(item.choices))?`<button type="button" data-preview-schedule="${escapeHTML(item.id)}" class="preview-schedule-open">Simular voto nesta programação</button>`:''}${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" aria-expanded="${pendingScheduleCancellation===item.id}" ${pendingScheduleCancellation===item.id?`aria-controls="schedule-cancel-confirm-${escapeHTML(item.id)}"`:''} ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button>${pendingScheduleCancellation===item.id?`<div id="schedule-cancel-confirm-${escapeHTML(item.id)}" class="calendar-cancel-confirm" role="group" tabindex="-1" aria-label="Confirmar cancelamento de programação"><p>Cancelar a programação “${escapeHTML(item.title)}”? Ela sairá da lista ativa, mas permanecerá no histórico desta sessão.</p><div class="calendar-cancel-confirm-actions"><button type="button" data-keep-schedule="${escapeHTML(item.id)}">Manter programação</button><button type="button" data-confirm-cancel-schedule="${escapeHTML(item.id)}">Confirmar cancelamento</button></div></div>`:''}</div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
+ ${expandedSchedule===item.id?`<div id="schedule-details-${escapeHTML(item.id)}" class="calendar-expanded"><div class="calendar-status"><span class="calendar-status-type">${escapeHTML(item.type)}</span><strong>PROPOSIÇÃO EM DELIBERAÇÃO</strong></div><p>${escapeHTML(item.objective)}</p>${item.id==='sample-1'&&!item.method?'':`<p>Modalidade: ${escapeHTML(DELIBERATION_METHODS.find(mode=>mode.id===item.method)?.label??'Não informada (registro anterior)')}</p>`}${item.choices?`<p>Alternativas: ${item.choices.map(option=>escapeHTML(option.label)).join(' · ')}</p>`:''}${item.id!=='sample-1'&&item.method&&(item.method==='binaria'||isValidPreviewChoices(item.choices))?`<button type="button" data-preview-schedule="${escapeHTML(item.id)}" class="preview-schedule-open">Simular voto nesta programação</button>`:''}${item.proposalId?(drafts.some(d=>d.id===item.proposalId)?`<button type="button" class="calendar-proposal-link" data-open-schedule-proposal="${escapeHTML(item.proposalId)}">Ver proposição associada</button>`:'<p class="calendar-link-missing" role="status">Proposição vinculada indisponível nesta sessão.</p>'):''}${item.proposalId&&drafts.some(d=>d.id===item.proposalId)&&members[0]?'<button type="button" data-open-proposal-author>Ver perfil da autoria</button>':''}<button type="button" data-cancel-schedule="${escapeHTML(item.id)}" aria-expanded="${pendingScheduleCancellation===item.id}" ${pendingScheduleCancellation===item.id?`aria-controls="schedule-cancel-confirm-${escapeHTML(item.id)}"`:''} ${item.id==='sample-1'?'disabled title="Exemplo fixo"':''}>Cancelar programação deliberativa</button>${pendingScheduleCancellation===item.id?`<div id="schedule-cancel-confirm-${escapeHTML(item.id)}" class="calendar-cancel-confirm" role="group" tabindex="-1" aria-label="Confirmar cancelamento de programação"><p>Cancelar a programação “${escapeHTML(item.title)}”? Ela sairá da lista ativa, mas permanecerá no histórico desta sessão.</p><div class="calendar-cancel-confirm-actions"><button type="button" data-keep-schedule="${escapeHTML(item.id)}">Manter programação</button><button type="button" data-confirm-cancel-schedule="${escapeHTML(item.id)}">Confirmar cancelamento</button></div></div>`:''}</div>`:''}</article>`).join('')}</div>${cancelledHistory}</div>`;
 }
 
 let lastRenderedHash = location.hash;
@@ -1067,11 +1075,11 @@ document.addEventListener('click',(event)=>{
  if(d3Dismiss&&d3SingleExperiment){dismissD3Review();return;}
  const skip=target.closest<HTMLAnchorElement>('.skip-link');
  if(skip){event.preventDefault();document.querySelector<HTMLElement>('#main-content')?.focus({preventScroll:true});return;}
- const contextualVote=advancedPreview?target.closest<HTMLElement>('[data-preview-schedule]'):null;
+ const contextualVote=target.closest<HTMLElement>('[data-preview-schedule]');
  if(contextualVote?.dataset.previewSchedule){
   const item=schedule.find(s=>s.id===contextualVote.dataset.previewSchedule&&s.status==='programada');
   if(item?.method && (item.method==='binaria'||isValidPreviewChoices(item.choices))){
-   previewScheduleId=item.id;previewMode=item.method;previewRequestId=null;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';
+   previewScheduleId=item.id;previewMode=item.method;previewRequestId=null;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';votingFormsOpen=true;
    navigate('ballot');document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
   }return;
  }
@@ -1144,18 +1152,18 @@ document.addEventListener('click',(event)=>{
  const activityEl=target.closest<HTMLElement>('[data-activity]');
  const voteEl=target.closest<HTMLElement>('[data-vote]');
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
- if(advancedPreview && actionEl?.dataset.action==='exit-preview-schedule'){
+ if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='exit-preview-schedule'){
   previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
   document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
  }
- if(advancedPreview && actionEl?.dataset.action==='clear-preview-samples'){
+ if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='clear-preview-samples'){
   const scope=previewSampleScope();
   if(!window.confirm('Limpar apenas as amostras desta simulação?'))return;
   previewSampleLedger.clear(scope);
   previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
   document.querySelector<HTMLElement>('#preview-vote-form')?.querySelector<HTMLElement>('input,select')?.focus({preventScroll:true});return;
  }
- if(advancedPreview && actionEl?.dataset.action==='reset-preview-vote'){
+ if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='reset-preview-vote'){
   previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
   const method=document.querySelector<HTMLSelectElement>('#preview-vote-method');
   const firstChoice=document.querySelector<HTMLElement>('#preview-vote-form input:not(:disabled), #preview-vote-form select:not(:disabled)');
@@ -1194,6 +1202,14 @@ document.addEventListener('click',(event)=>{
  }
  if(actionEl?.dataset.action==='search'){searchExpanded=!searchExpanded;if(!searchExpanded)filter='';render();if(searchExpanded)document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
  if(actionEl?.dataset.action==='clear-search'){filter='';render();document.querySelector<HTMLInputElement>('#search-members')?.focus();return;}
+ if(actionEl?.dataset.action==='toggle-voting-forms'&&!advancedPreview){
+  votingFormsOpen=!votingFormsOpen;
+  render();
+  const focusTarget=document.querySelector<HTMLElement>(votingFormsOpen?'#preview-vote-method':'[data-action="toggle-voting-forms"]');
+  focusTarget?.focus({preventScroll:true});
+  if(votingFormsOpen)focusTarget?.scrollIntoView({block:'center'});
+  return;
+ }
  if(actionEl?.dataset.action==='toggle-demo'){demoExpanded=!demoExpanded;render();return;}
  if(actionEl?.dataset.action==='reset-vote'){
   demoVoteId=null;try{sessionStorage.removeItem('conferatus:demo-vote');}catch{}
@@ -1606,7 +1622,7 @@ document.addEventListener('submit',(event)=>{
 });
 document.addEventListener('submit',(event)=>{
  const form=event.target;
- if(!(form instanceof HTMLFormElement)||form.id!=='preview-vote-form'||!advancedPreview)return;
+ if(!(form instanceof HTMLFormElement)||form.id!=='preview-vote-form'||!(advancedPreview||votingFormsOpen))return;
  event.preventDefault();
  const data=new FormData(form);
  const integer=(value:FormDataEntryValue|null):number=>typeof value==='string'&&/^(0|[1-9][0-9]*)$/.test(value)?Number(value):NaN;
@@ -1617,7 +1633,7 @@ document.addEventListener('submit',(event)=>{
  else if(previewMode==='escalar')payload={scores:Object.fromEntries(previewVoteChoices().map(option=>[option.id,integer(data.get('score-'+option.id))]))};
  else payload={allocation:Object.fromEntries(previewVoteChoices().map(option=>[option.id,integer(data.get('alloc-'+option.id))]))};
  const selectedMember=members.find(member=>member.id===previewVoteMemberId&&isDeliberativeMember(member,sections));
- const result=validatePreviewVote(previewMode,payload,selectedMember?.cumulativeVoteWeight,previewVoteChoices().map(option=>option.id));
+ const result=validatePreviewVote(previewMode,payload,(advancedPreview?selectedMember?.cumulativeVoteWeight:5),previewVoteChoices().map(option=>option.id));
  if(!result.ok){previewVoteError=result.error;render();document.querySelector<HTMLElement>('#preview-vote-error')?.focus({preventScroll:true});return;}
  const scope=previewSampleScope();
  if(previewRequestId===null)previewRequestId='sample-'+String(++previewRequestSequence);
@@ -1792,13 +1808,13 @@ document.addEventListener('change',(event)=>{
   scheduleMethod=isDeliberationMethod(target.value)?target.value:null;render();
   document.querySelector<HTMLSelectElement>('#schedule-method')?.focus({preventScroll:true});return;
  }
- if(advancedPreview && target instanceof HTMLSelectElement && target.id==='preview-vote-method'){
+ if((advancedPreview||votingFormsOpen) && target instanceof HTMLSelectElement && target.id==='preview-vote-method'){
   if(isDeliberationMethod(target.value)){
    previewMode=target.value;previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
    document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});
   }return;
  }
- if(advancedPreview && target instanceof HTMLSelectElement && target.id==='preview-vote-member'){
+ if((advancedPreview||votingFormsOpen) && target instanceof HTMLSelectElement && target.id==='preview-vote-member'){
   previewVoteMemberId=target.value;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
   document.querySelector<HTMLSelectElement>('#preview-vote-member')?.focus({preventScroll:true});return;
  }
