@@ -93,6 +93,7 @@ jobs:
             tests/browser_cancelled_vote_context_v0201.py \
             tests/browser_product_vote_isolation_v0202.py \
             tests/browser_schedule_return_v0203.py \
+            tests/browser_socii_product_journey_v0204.py \
             tests/browser_stage04_normal_socii_v0195.py \
             tests/browser_stage04_complete_v0196.py \
             tests/browser_history_isolation_v0197.py \

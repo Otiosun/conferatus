@@ -23,6 +23,9 @@ with sync_playwright() as pw:
   expect(p.locator('.preview-vote-receipt')).to_contain_text('Alternativa A')
   p.locator('[data-action=exit-preview-schedule]').click()
   expect(p.locator('[data-schedule="sched-return"]')).to_be_focused()
+  # Reopen and navigate without leaving the session context.
+  p.locator('[data-preview-schedule="sched-return"]').click()
+  p.evaluate("location.hash='#/calendar'")
   p.locator('[data-cancel-schedule="sched-return"]').click()
   p.locator('[data-confirm-cancel-schedule="sched-return"]').click()
   p.evaluate("location.hash='#/ballot'")
