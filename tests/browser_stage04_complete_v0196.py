@@ -103,7 +103,7 @@ with sync_playwright() as pw:
   assert linked.locator('.calendar-socii').count()>0,width
   expect(linked.locator('[data-preview-schedule]')).to_be_visible()
   linked.locator('[data-preview-schedule]').click()
-  expect(page.locator('#preview-vote-method')).to_have_value('nominal')
+  expect(page.locator('.preview-vote-detail').first).to_contain_text('Modalidade: Nominal')
   expect(page.locator('.preview-vote-context')).to_contain_text('Proposta Socii de teste')
   nav('calendar')
   linked=page.locator('.calendar-item').filter(has_text='Votação Socii vinculada')
