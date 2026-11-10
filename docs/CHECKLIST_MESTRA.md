@@ -25,12 +25,12 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 **Dependências:** participação por seção, peso por participante, visibilidade do registro, alteração de escolha e responsáveis pelos procedimentos.
 
 ## 03 — Perfis e históricos
-- [ ] Consolidar históricos pessoais e institucionais com os dados da aplicação.
+- [x] Consolidar históricos pessoais e institucionais **fictícios**: atividades históricas por membro e painel geral permanecem separadas das proposições e programações locais e das amostras de voto da aba; quatro larguras com métricas estáveis, autoria isolada e sem imputação pessoal de votos sem identidade (CP149). Dados reais continuam a cargo da Academy.
 - [x] Preservar registros antigos após mudança de cargo ou rebaixamento **na prévia fictícia** (retestado 10/11/2026: contadores e atividades de votação não desaparecem, em quatro larguras; registros institucionais permanecem fora do escopo).
 - [ ] Revisar os indicadores Votos, PDR, PR, Ofício e Socii conforme novos modelos.
 - [x] Exibir proposições locais no perfil do autor, separadas do histórico demonstrativo (v0.10.3; testado localmente).
 - [x] Integrar no **protótipo fictício** as listas de proposições da autoria local e suas programações ativas ao respectivo perfil, calendário, revisão e retorno; registros cancelados não aparecem como ativos, e outros perfis não herdam autoria da sessão (contrato CP147; 4 larguras).
-**Estado:** 3/5 critérios concluídos no escopo da prévia fictícia; históricos institucionais reais continuam externos, e 03.01/03.03 aguardam fechamento apropriado.
+**Estado:** 4/5 critérios concluídos no escopo da prévia fictícia; históricos reais continuam externos. O critério 03.03 depende de decisão visual Megalos D6.
 
 **Ajuste v0.10.3:** o editor e o perfil do autor compartilham a lista de proposições da sessão. Mensagens de salvamento distinguem armazenamento efetivo de dados apenas em memória.
 
@@ -73,11 +73,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 
 ## 06 — Acabamento, validação e entrega
 - [ ] Comparar o visual com os modelos originais e recentes.
-- [ ] Revisar responsividade, textos, navegação e fluidez dos fluxos.
+- [x] Revisar responsividade, textos, navegação e fluidez **da prévia em Chromium offline** (CP149): build 73/73 Node; testes gerais e jornadas de votação, perfis, Socii e calendário em 320–1280 px; 48 verificações de altura curta e 192 amostras de foco por teclado. Não certifica aparelhos físicos, zoom nativo, WCAG AA, Firefox/WebKit atuais ou aceite visual Megalos (07.05, 07.06, 07.10–12 ainda abertos).
 - [x] Separar da experiência normal os controles desnecessários de teste: sem `?demo=1`, não exibir laboratório avançado de voto, painel técnico de identidade/ferramentas nem botões de exportar/restaurar JSON. Manter somente os fluxos fictícios necessários à demonstração e avisos explícitos de que não são funções Academy. Regressão em quatro larguras na CI e inspeção independente em seis telas × quatro larguras; **não** equivale a aprovar a fidelidade visual da Megalos.
 - [ ] Consolidar testes e publicar novos builds primeiro em preview, depois no `main`.
 - [x] Atualizar documentação e preparar a demonstração à Megalos, distinguindo recursos reais dos simulados (`docs/DEMO_GUIDE.md`, revisado em 03/11/2026; não equivale a aceite Megalos).
-**Estado:** 2/5 critérios cumpridos para a prévia demonstrativa (separação dos controles avançados e guia de apresentação). A comparação visual final, o acabamento integral e a promoção autorizada à `main` permanecem pendentes.
+**Estado:** 3/5 critérios cumpridos para a prévia demonstrativa (fluxos e responsividade Chromium, separação dos controles avançados e guia). A comparação visual/aceite Megalos e a promoção autorizada à `main` permanecem pendentes; QA de dispositivos, zoom e acessibilidade continua na Etapa 07.
 
 ## 07 — Perfeccionismo visual, front-end e responsividade absoluta verificável
 
@@ -1275,3 +1275,11 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - **Rastreabilidade exata:** Git blobs `src/main.ts` = `678889f3b3d1d61f2f74443244bdbc95b4b42e4a`, CSS = `c82df4a7000e6e0215fa0b17df6aabb47f5d3834`; testes v0195 = `6f3ac24f8ac858ccd7ce8188ad846a77c9196fd6`, v0196 = `a4a714c03e14df1ff1bc70914e00d53249ff8685`. Fontes técnicas W3C WAI 4.1.3 status messages e ARIA22 citadas em `docs/decisions/2026-11-10-cp148-stage04-demo-closure.md`.
 - **Resultado de checklist (somente protótipo):** 04.05, 04.09, 04.13 **[x]**. Agora `01=4/5`, `02=2/4`, `03=3/5`, `04=20/22`, `05=3/4`, `06=2/5`, `07=7/12` — **41/57**, 16 critérios formais ainda abertos. Não interpreta os critérios de integração oficial como implementados.
 - **Permanece aberto:** 04.02/04.19 (fidelidade/aceite Megalos); grafia; outras decisões D1–D6; testes Android/hardware; CI completa do HEAD; integração real da Academy fora de escopo. Sem merge em `main` nem alteração de produção.
+
+## CHECKPOINT 149 — Histórico fictício e revisão de fluxo em Chromium (10/11/2026)
+
+- **03.01 fechado apenas na demonstração:** `tests/browser_history_isolation_v0197.py` novo, reproduzível sobre o bundle já compilado do commit funcional CP148, executado **4/4 larguras** (320/390/740/1280). Distingue atividades fictícias pessoais e totais de exemplo no overview, duas proposições locais somente da autoria de teste, programação ativa ligada versus cancelada, perfil de outro membro e amostra de voto sem identidade; nenhum voto é atribuído à pessoa ao ser apenas testado. Indicadores históricos permanecem constantes. Este resultado não equivale a histórico oficial Academy. Git blob do teste `3a70182fe9a656be3300cb2d4efe7e07f72cb16e`, igual ao arquivo executado.
+- **06.02 fechado restrito à revisão técnica da prévia offline:** TypeScript e `npm run build` **73/73 Node PASS**, bundle SHA256 `3f54cd21a4e0e541715870a01cd9a873b0f52d24123ef3fd388c6dc649ca03fd`. Em Chromium, **11 suítes** relevantes passaram: histórico v0197, perfis v0193, voto v0194, 24 pares seção×modalidade v0192, retorno calendário v0120, Socii v0195, Etapa04 completa v0196, tela curta v0187 (48 casos), foco v0188 (192 amostras), smoke e jornada geral v0173. Em execução sequencial, v0195 foi interrompido pelo timeout do lote maior; uma execução isolada do mesmo arquivo passou com saída validada. Nenhum defeito funcional novo foi encontrado ou exigiu modificação do código nesta rodada.
+- **Precisão:** 06.02 é uma revisão de funcionamento, textos já verificados em 07.04 e responsividade Chromium, **não** a auditoria de zoom nativo (07.05), IME/safe areas real (07.06), leitor de tela/WCAG (07.10), fidelidade Megalos (07.11), matriz física e Firefox/WebKit finais (07.12). Não alegar certificação ou encerramento destas pendências.
+- **Contagem histórica 43/57**: 01=4/5; 02=2/4; 03=4/5; 04=20/22; 05=3/4; 06=3/5; 07=7/12. **Restam 14 critérios**: 4 de QA especializado do protótipo, 6 aceites/decisões Megalos, 2 de Academy e 2 híbridos. O percentual histórico não representa horas de trabalho restantes.
+- **Segurança:** nenhuma mudança em `src`, `public`, `main`, Cloudflare principal, Academy, cadastros ou PM2. O teste novo entra no workflow da prévia. CI completa remota não foi assumida como aprovada.
