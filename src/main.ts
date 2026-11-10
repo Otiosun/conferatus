@@ -69,7 +69,7 @@ let demoVoteId: string | null = null;
 let demoExpanded = false;
 let votingFormsOpen = false;
 let previewHomeBallot = false;
-// All six new ballot modes run in memory only, behind ?demo=1.
+// Six modes share one local validation path; only the technical selector belongs to ?demo=1.
 let previewMode: DeliberationMethod = 'binaria';
 let previewVoteError = '';
 let previewVoteReceipt: PreviewVote | null = null;
@@ -364,9 +364,9 @@ function previewVoteLab():string {
    '<span>Seção: '+escapeHTML(sections.find(s=>s.id===contextual.sectionId)?.name??contextual.sectionId)+'</span>'+(contextual.proposalId?'<span>Proposição: '+escapeHTML(drafts.find(d=>d.id===contextual.proposalId)?.title??'Indisponível')+'</span>':'')+'</p>':homeBallot?'<p class="preview-vote-context">'+escapeHTML(homeBallot.description)+'<span>Seção: '+escapeHTML(homeBallot.section)+'</span></p>':'')+
   (advancedPreview?'<p class="preview-vote-disclaimer">Apenas em ?demo=1. Alternativas fictícias, sem voto oficial, apuração institucional, login ou envio de informações.</p>':'<p class="preview-vote-disclaimer">Prévia com dados fictícios. Sua escolha permanece nesta aba e não é enviada à Academy.</p>')+
   (advancedPreview?'<label for="preview-vote-method">Modalidade de deliberação</label><select id="preview-vote-method"'+(contextual?' disabled':'')+'>'+DELIBERATION_METHODS.map(mode=>'<option value="'+mode.id+'"'+(mode.id===previewMode?' selected':'')+'>'+escapeHTML(mode.label)+'</option>').join('')+'</select>':'<p class="preview-vote-detail">Modalidade: '+escapeHTML(method?.label??'')+'</p>')+
-  '<p class="preview-vote-detail">'+escapeHTML(method?.detail??'')+'</p>'+ 
+  (advancedPreview?'<p class="preview-vote-detail">'+escapeHTML(method?.detail??'')+'</p>':'')+ 
   ((contextual||homeBallot)?'<button type="button" class="preview-vote-secondary" data-action="exit-preview-schedule">'+(advancedPreview?'Voltar às alternativas de teste':'Voltar às votações')+'</button>':'')+
-  (receipt?'<div class="preview-vote-receipt" role="status"><strong>Voto simulado conferido nesta aba</strong>'+
+  (receipt?'<div class="preview-vote-receipt" role="status"><strong>'+(advancedPreview?'Voto simulado conferido nesta aba':'Escolha confirmada nesta prévia')+'</strong>'+
    '<p>'+previewVoteReceiptText(receipt)+'</p>'+
    '<button type="button" class="preview-vote-secondary" data-action="reset-preview-vote">'+(advancedPreview?'Registrar outra amostra':'Alterar escolha')+'</button></div>':
    '<form id="preview-vote-form" data-mode="'+previewMode+'" data-preview-member="'+previewVoteMemberId+'" novalidate>'+previewVoteFieldset()+
@@ -389,7 +389,7 @@ function ballotPage() {
  const sum=totalVotes(demoOptions);
  return `<div class="main-pad">${header(undefined,undefined,true)}<div class="results">
  ${demoOptions.map(o=>`<div class="result-row ${advancedPreview&&demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${advancedPreview&&demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
- </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="${advancedPreview?'toggle-demo':'enter-ballot'}" aria-expanded="${advancedPreview?demoExpanded:false}" ${advancedPreview&&demoExpanded?'aria-controls="demo-vote-panel"':''}>${advancedPreview&&demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':'Ver situação'}</button></div>
+ </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="${advancedPreview?'toggle-demo':'enter-ballot'}" aria-expanded="${advancedPreview?demoExpanded:false}" ${advancedPreview&&demoExpanded?'aria-controls="demo-vote-panel"':''}>${advancedPreview&&demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':advancedPreview?'Ver situação':'Encerrada'}</button></div>
  <p class="ballot-description">${escapeHTML(ballot.description)}</p>${advancedPreview&&demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Selecione uma opção para testar a votação.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
  ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
  <p class="vote-feedback" role="status">${demoVoteId?'Opção selecionada. Você pode alterá-la.':'Selecione uma opção.'}</p>
