@@ -94,6 +94,7 @@ jobs:
             tests/browser_stage04_complete_v0196.py \
             tests/browser_history_isolation_v0197.py \
             tests/browser_stage7_integrated_v0198.py \
+            tests/browser_stage7_dynamic_focus_v0200.py \
             tests/browser_stage7_advanced_controls_v0132.py \
             tests/browser_restored_links_integrity_v0157.py \
             tests/browser_local_archive_v0158.py \
