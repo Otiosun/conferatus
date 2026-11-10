@@ -70,12 +70,27 @@ with sync_playwright() as pw:
   if width==390:
    page.locator('#preview-vote-method').select_option('nominal')
    page.screenshot(path=str(ROOT/'dist/voting_normal_390_v0190.png'),full_page=True)
+  # A choice that has not been submitted must survive a temporary collapse.
+  page.locator('#preview-vote-method').select_option('cumulativa')
+  page.locator('#preview-vote-form [name^=alloc-]').first.fill('4')
   trigger.press('Space')
   expect(region).to_be_hidden()
   expect(trigger).to_have_attribute('aria-expanded','false')
   assert region.count()==1,width
   trigger.press('Enter')
   expect(region).to_be_visible()
+  expect(page.locator('#preview-vote-form [name^=alloc-]').first).to_have_value('4')
+  # Rerendering the footer must also preserve the user's unsubmitted fields.
+  page.locator('.footer-nav').click()
+  page.keyboard.press('Escape')
+  expect(page.locator('#preview-vote-form [name^=alloc-]').first).to_have_value('4')
+  page.locator('#preview-vote-method').select_option('nominal')
+  assert page.locator('#preview-vote-form [name=selected]:checked').count()==0,width
+  page.locator('#preview-vote-form [name=selected]').first.check()
+  trigger.click()
+  expect(region).to_be_hidden()
+  trigger.click()
+  expect(page.locator('#preview-vote-form [name=selected]').first).to_be_checked()
   trigger.click()
   expect(region).to_be_hidden()
   assert page.locator('.preview-vote-lab').count()==0,width
@@ -96,6 +111,9 @@ with sync_playwright() as pw:
     }});
   }''',[DRAFT,SCHEDULE])
   scheduled.set_content(HTML)
+  scheduled.locator('[data-action=toggle-voting-forms]').click()
+  scheduled.locator('#preview-vote-method').select_option('nominal')
+  scheduled.locator('#preview-vote-form [name=selected]').first.check()
   scheduled.locator('.footer-nav').click()
   scheduled.locator('.menu-item[data-route="calendar"]').click()
   scheduled.locator('[data-schedule="sched-demo-2026"]').click()
@@ -104,6 +122,7 @@ with sync_playwright() as pw:
   expect(scheduled.locator('#preview-vote-lab')).to_be_visible()
   expect(scheduled.locator('#preview-vote-method')).to_have_value('nominal')
   expect(scheduled.locator('.preview-vote-context')).to_contain_text('Votação fictícia programada')
+  assert scheduled.locator('#preview-vote-form [name=selected]:checked').count()==0,(width,'vote from unrelated context leaked')
   assert scheduled.locator('.results').count()==0,(width,'unrelated sample results on scheduled ballot')
   assert scheduled.locator('.description-panel').count()==0,width
   scheduled.locator('#preview-vote-form [name=selected]').first.check()
