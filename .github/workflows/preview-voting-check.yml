@@ -90,6 +90,8 @@ jobs:
             tests/browser_voting_section_links_v0192.py \
             tests/browser_vote_profile_links_v0193.py \
             tests/browser_vote_states_v0194.py \
+            tests/browser_stage04_normal_socii_v0195.py \
+            tests/browser_stage04_complete_v0196.py \
             tests/browser_stage7_advanced_controls_v0132.py \
             tests/browser_restored_links_integrity_v0157.py \
             tests/browser_local_archive_v0158.py \
