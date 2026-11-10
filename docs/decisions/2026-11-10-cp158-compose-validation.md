@@ -14,3 +14,6 @@ Fontes técnicas consultadas em 10/11/2026: https://developer.mozilla.org/en-US/
 
 ## Gates
 **Novo teste ainda não executado localmente.** Conferir Cloudflare no SHA exato, mas não confundir build remoto com provas Playwright/Android físico. PF-11/PF-12 permanecem abertos enquanto não houver evidências de navegador e feedback de persistência. Histórico 43/57 e funcional 8/38 inalterados; aprovação Megalos D1–D6 intacta.
+
+## Complemento de regressão
+O roteiro `v0205` foi estendido para cobrir também o editor de texto formatado, verificando foco, mensagem e preservação do corpo ao rejeitar título curto. É evidência preparada e versionada, **não execução comprovada**.

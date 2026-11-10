@@ -69,4 +69,22 @@ with sync_playwright() as pw:
   assert resumed.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
   print('PASS short-title feedback and partial-draft resume',width)
   resumed.close()
+
+  # Formatted text uses the same inline title validation and retains the editor body.
+  rich=boot(browser,width)
+  rich.on('pageerror',lambda e:errors.append(str(e)))
+  rich.locator('[data-action=new-proposal]').click()
+  rich.locator('#draft-title').fill(' B ')
+  rich.locator('#draft-body').fill(original)
+  rich.locator('[data-action=enable-rich-editor]').click()
+  rich.locator('#compose-proposal-form button[value=conclude]').click()
+  expect(rich.locator('#compose-save-error')).to_contain_text('título com pelo menos 3 caracteres')
+  expect(rich.locator('#draft-title')).to_be_focused()
+  expect(rich.locator('#draft-rich-body')).to_contain_text('Uma redação suficientemente longa')
+  assert rich.locator('#draft-rich-body').get_attribute('aria-invalid') is None,width
+  rich.locator('#draft-title').fill('Proposição formatada')
+  rich.locator('#compose-proposal-form button[value=conclude]').click()
+  expect(rich.locator('#confirm-proposal-form')).to_be_visible()
+  assert not errors,(width,errors)
+  rich.close()
  browser.close()
