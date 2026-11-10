@@ -97,9 +97,9 @@ with sync_playwright() as p:
   linked=page.locator('.calendar-item').filter(has_text='Programação mensal')
   linked.wait_for(state='visible')
   linked.locator('[data-preview-schedule]').click()
-  page.locator('#preview-vote-method').wait_for(state='visible')
+  page.locator('.preview-vote-detail').first.wait_for(state='visible')
   assert page.evaluate('location.hash')=='#/ballot',width
-  assert page.locator('#preview-vote-method').input_value()=='nominal',width
+  assert 'Modalidade: Nominal' in page.locator('.preview-vote-detail').first.inner_text(),width
   assert not errors,(width,errors)
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
   page.close()
