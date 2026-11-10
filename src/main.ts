@@ -73,6 +73,14 @@ let previewMode: DeliberationMethod = 'binaria';
 let previewVoteError = '';
 let previewVoteReceipt: PreviewVote | null = null;
 let previewVoteMemberId = '';
+// Keep an unfinished local vote draft when the disclosure is collapsed or the
+// user visits another page. Never store it outside this browser tab.
+type PreviewVoteDraft = {
+ scope: string;
+ memberId: string;
+ fields: {name: string; value: string; checked?: boolean}[];
+};
+let previewVoteDraft: PreviewVoteDraft | null = null;
 // Deliberately memory-only; never part of the session archive or legacy ballot totals.
 const previewSampleLedger=createPreviewSampleLedger(100);
 let previewRequestSequence=0;
@@ -850,6 +858,15 @@ function render() {
  const priorVoteForm=root.querySelector<HTMLFormElement>('#preview-vote-form');
  const voteFields=priorVoteForm?.dataset.mode===previewMode&&priorVoteForm?.dataset.previewMember===previewVoteMemberId
   ? Array.from(priorVoteForm.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input,select')).map(field=>({name:field.name,value:field.value,checked:field instanceof HTMLInputElement?field.checked:undefined})) : null;
+ // A new context must never inherit an unfinished choice from another ballot.
+ const voteDraftScope=previewSampleScope();
+ if(voteFields && !previewVoteReceipt){
+  previewVoteDraft={scope:voteDraftScope,memberId:previewVoteMemberId,fields:voteFields};
+ }
+ const fieldsToRestore=voteFields??(
+  previewVoteDraft?.scope===voteDraftScope && previewVoteDraft.memberId===previewVoteMemberId
+   ? previewVoteDraft.fields : null
+ );
  const preserveScroll = location.hash === lastRenderedHash;
  lastRenderedHash = location.hash;
  // Keep keyboard focus on the same action after updating the preview DOM.
@@ -913,10 +930,10 @@ function render() {
   if(nextType && previousReviewType && [...nextType.options].some(o=>o.value===previousReviewType))
    nextType.value=previousReviewType;
  }
- if(voteFields){
+ if(fieldsToRestore){
   const fields=root.querySelector<HTMLFormElement>('#preview-vote-form')?.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input,select');
-  if(fields?.length===voteFields.length)fields.forEach((field,index)=>{
-   const previous=voteFields[index];
+  if(fields?.length===fieldsToRestore.length)fields.forEach((field,index)=>{
+   const previous=fieldsToRestore[index];
    if(previous&&field.name===previous.name){field.value=previous.value;if(field instanceof HTMLInputElement&&previous.checked!==undefined)field.checked=previous.checked;}
   });
  }
@@ -1084,7 +1101,7 @@ document.addEventListener('click',(event)=>{
  if(contextualVote?.dataset.previewSchedule){
   const item=schedule.find(s=>s.id===contextualVote.dataset.previewSchedule&&s.status==='programada');
   if(item?.method && (item.method==='binaria'||isValidPreviewChoices(item.choices))){
-   previewScheduleId=item.id;previewMode=item.method;previewRequestId=null;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';votingFormsOpen=true;
+   previewScheduleId=item.id;previewMode=item.method;previewRequestId=null;previewVoteReceipt=null;previewVoteMemberId='';previewVoteError='';previewVoteDraft=null;votingFormsOpen=true;
    navigate('ballot');document.querySelector<HTMLElement>('#preview-vote-title')?.scrollIntoView({block:'center'});
   }return;
  }
@@ -1158,18 +1175,18 @@ document.addEventListener('click',(event)=>{
  const voteEl=target.closest<HTMLElement>('[data-vote]');
  if(voteEl?.dataset.vote && demoBallot && canRecordVote(demoBallot) && demoBallot.options.some(o=>o.id===voteEl.dataset.vote)){demoVoteId=voteEl.dataset.vote;try{sessionStorage.setItem('conferatus:demo-vote',demoVoteId);}catch{}render();return;}
  if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='exit-preview-schedule'){
-  previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
+  previewVoteDraft=null;previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
   document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});return;
  }
  if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='clear-preview-samples'){
   const scope=previewSampleScope();
   if(!window.confirm('Limpar apenas as amostras desta simulação?'))return;
   previewSampleLedger.clear(scope);
-  previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
+  previewVoteDraft=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
   document.querySelector<HTMLElement>('#preview-vote-form')?.querySelector<HTMLElement>('input,select')?.focus({preventScroll:true});return;
  }
  if((advancedPreview||votingFormsOpen) && actionEl?.dataset.action==='reset-preview-vote'){
-  previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
+  previewVoteDraft=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
   const method=document.querySelector<HTMLSelectElement>('#preview-vote-method');
   const firstChoice=document.querySelector<HTMLElement>('#preview-vote-form input:not(:disabled), #preview-vote-form select:not(:disabled)');
   (method&&!method.disabled?method:firstChoice)?.focus({preventScroll:true});
@@ -1369,6 +1386,7 @@ document.addEventListener('click',(event)=>{
    item.status='cancelada';
    // A cancelled schedule must not leave a vote sandbox bound to its old alternatives.
    previewSampleLedger.clear(`schedule:${item.id}`);
+   previewVoteDraft=null;
    if(previewScheduleId===item.id){
     previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;
     previewVoteError='';previewVoteMemberId='';
@@ -1478,7 +1496,7 @@ document.addEventListener('change',async event=>{
  }
  // Imported workflows replace the old sandbox contexts. Never reuse stale receipts or samples.
  previewSampleLedger.clearAll();
- previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;
+ previewVoteDraft=null;previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;
  previewVoteError='';previewVoteMemberId='';
  currentDraftId='';draftForm=blankDraft();richEditorOpen=false;lastRichSelection=null;inviteOpen=false;expandedSchedule='';
  archiveMessage=`Cópia restaurada nesta sessão: ${drafts.length} proposição(ões) e ${schedule.length} programação(ões).`;
@@ -1815,12 +1833,12 @@ document.addEventListener('change',(event)=>{
  }
  if((advancedPreview||votingFormsOpen) && target instanceof HTMLSelectElement && target.id==='preview-vote-method'){
   if(isDeliberationMethod(target.value)){
-   previewMode=target.value;previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
+   previewVoteDraft=null;previewMode=target.value;previewScheduleId=null;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';previewVoteMemberId='';render();
    document.querySelector<HTMLSelectElement>('#preview-vote-method')?.focus({preventScroll:true});
   }return;
  }
  if((advancedPreview||votingFormsOpen) && target instanceof HTMLSelectElement && target.id==='preview-vote-member'){
-  previewVoteMemberId=target.value;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
+  previewVoteDraft=null;previewVoteMemberId=target.value;previewRequestId=null;previewVoteReceipt=null;previewVoteError='';render();
   document.querySelector<HTMLSelectElement>('#preview-vote-member')?.focus({preventScroll:true});return;
  }
  if(target instanceof HTMLSelectElement && target.name==='proposalId' && target.closest('#schedule-deliberation-form') && target.getAttribute('aria-invalid')==='true'){
