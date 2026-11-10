@@ -98,6 +98,7 @@ jobs:
             tests/browser_review_next_steps_v0206.py \
             tests/browser_socii_revision_feedback_v0207.py \
             tests/browser_schedule_proposal_defaults_v0208.py \
+            tests/browser_calendar_history_focus_v0209.py \
             tests/browser_stage04_normal_socii_v0195.py \
             tests/browser_stage04_complete_v0196.py \
             tests/browser_history_isolation_v0197.py \

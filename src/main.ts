@@ -1493,10 +1493,15 @@ document.addEventListener('click',(event)=>{
     previewVoteError='';previewVoteMemberId='';
    }
    const saved=saveWorkflows();cancellationSaveFailed=!saved;
-   workflowNotice=saved?'Programação cancelada e salva nesta sessão.':cancellationSaveWarning;
+   workflowNotice=saved?'Programação cancelada e salva nesta sessão. Consulte o histórico de cancelamentos.':cancellationSaveWarning;
    render();
-   const heading=document.querySelector<HTMLElement>('.calendar-list-head h2');
-   if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+   // When the active row disappears, restore focus to its discoverable history,
+   // or to the existing retry action if local persistence was unavailable.
+   const next=saved
+    ?document.querySelector<HTMLButtonElement>('[data-action="toggle-cancelled-history"]')
+    :document.querySelector<HTMLButtonElement>('[data-action="retry-cancellation-save"]');
+   next?.focus({preventScroll:true});
+   next?.scrollIntoView({block:'center',inline:'nearest'});
   }
   return;
  }

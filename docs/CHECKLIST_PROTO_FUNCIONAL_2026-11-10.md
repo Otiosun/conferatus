@@ -131,3 +131,7 @@ PF-16 avançou sem fechamento: reuso da reinicialização existente de etapas fi
 ## CP161 — Pré-seleção de seção e tipo no agendamento (10/11/2026)
 
 Avanço de PF-17 sem fechamento: quando a programação nasce de uma proposição concluída, o formulário passa a iniciar com a seção e o tipo daquela proposição (além do vínculo já existente), mantendo os campos editáveis. Na entrada independente pelo calendário, continuam os valores padrão antigos; não há regra institucional nova. Roteiro `tests/browser_schedule_proposal_defaults_v0208.py` criado e incluído no workflow, mas **ainda não executado**. Decisão em `docs/decisions/2026-11-10-cp161-schedule-proposal-defaults.md`. PF-17 aberto, funcional 8/38 e histórico 43/57. Main e produção preservadas.
+
+## CP162 — Continuidade após cancelar programação (10/11/2026)
+
+PF-18: a separação de programações ativas e canceladas já existia e não foi reimplementada. Ajustada a saída da confirmação de cancelamento: o registro sai da lista ativa, a mensagem indica o histórico e o foco dirige-se ao controle existente para consultá-lo; se a gravação local falhar, o foco dirige-se ao botão de tentar novamente. Teste `tests/browser_calendar_history_focus_v0209.py` incluído no workflow, ainda sem execução local. Decisão: `docs/decisions/2026-11-10-cp162-calendar-history-focus.md`. PF-18 [ ], 8/38 funcional, 43/57 histórica, sem mudança na main/produção.
