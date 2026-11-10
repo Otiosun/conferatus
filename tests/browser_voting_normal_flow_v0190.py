@@ -109,6 +109,11 @@ with sync_playwright() as pw:
   scheduled.locator('#preview-vote-form [name=selected]').first.check()
   scheduled.locator('#preview-vote-form .preview-vote-submit').click()
   expect(scheduled.locator('.preview-vote-receipt')).to_be_visible()
+  expect(scheduled.locator('[data-action=exit-preview-schedule]')).to_have_text('Ver outras modalidades')
+  scheduled.locator('[data-action=exit-preview-schedule]').click()
+  assert scheduled.locator('.preview-vote-context').count()==0,width
+  assert scheduled.locator('.results').count()==1,width
+  expect(scheduled.locator('#preview-vote-method')).to_be_enabled()
   assert scheduled.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
   scheduled.close()
   print('PASS normal ballot six modes and scheduled navigation',width)
