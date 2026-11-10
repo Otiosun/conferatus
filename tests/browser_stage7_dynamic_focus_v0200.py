@@ -46,16 +46,13 @@ with sync_playwright() as pw:
             page.evaluate('(route)=>{location.hash="#/"+route}',route)
             return page
         page=scene('ballot')
-        for selector,expected in (
-         ('[data-action=toggle-demo]','[data-action=toggle-demo]'),
-         ('[data-vote]','[data-vote]'),
-         ('[data-action=reset-vote]','[data-vote]'),
-         ('[data-action=toggle-voting-forms]','#preview-vote-method')
-        ):
-            focus_then_enter(page,selector,expected);checks+=1
-        page.locator('#preview-vote-form [name=selected]').first.check()
+        focus_then_enter(page,'[data-action=enter-ballot]','input[name=selected]');checks+=1
+        # An empty attempt must focus the inline validation message.
+        focus_then_enter(page,'.preview-vote-submit','#preview-vote-error');checks+=1
+        page.locator('input[name=selected]').first.check()
         focus_then_enter(page,'.preview-vote-submit','.preview-vote-receipt');checks+=1
-        focus_then_enter(page,'[data-action=reset-preview-vote]','#preview-vote-method');checks+=1
+        focus_then_enter(page,'[data-action=reset-preview-vote]','input[name=selected]');checks+=1
+        focus_then_enter(page,'[data-action=exit-preview-schedule]','[data-action=enter-ballot]');checks+=1
         page.close()
         page=scene('overview')
         focus_then_enter(page,'[data-overview-tab=proposicoes]','[data-overview-tab=proposicoes]');checks+=1
@@ -92,7 +89,7 @@ with sync_playwright() as pw:
         focus_then_enter(page,'[data-action=toggle-cancelled-history]','[data-action=toggle-cancelled-history]');checks+=1
         expect(page.locator('.calendar-cancelled-record')).to_contain_text('Programação de foco')
         page.close()
-        print('PASS dynamic keyboard focus after 20 actions:',width)
+        print('PASS dynamic keyboard focus after 19 actions:',width)
     browser.close()
-    assert checks==len(WIDTHS)*20,checks
+    assert checks==len(WIDTHS)*19,checks
 print('PASS',checks,'focus transitions (Chromium, five viewport widths)')
