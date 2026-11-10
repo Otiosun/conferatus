@@ -18,7 +18,7 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 
 ## 02 — Votação e registro
 - [ ] Consolidar o modelo de votação e seus estados.
-- [ ] Associar deliberações, seções e proposições conforme a especificação.
+- [x] Associar deliberações, seções e proposições **na prévia fictícia**, vinculando método e opções locais, preservando dados de seção e referência à proposição concluída (testado 10/11/2026 em 4 seções × 6 modalidades; especificação institucional real segue pendente da Academy).
 - [ ] Implementar o registro institucional quando as regras forem confirmadas.
 - [ ] Verificar o funcionamento do fluxo completo com dados fictícios e depois com a integração oficial.
 **Estado:** simulação existente; comportamento institucional definitivo ainda não aprovado.
@@ -1250,3 +1250,10 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - **Execução local:** 33/33 testes Node do subconjunto regras/identidade/referência PASS; browser de preservação após rebaixamento PASS 4/4. Nova regressão adicionada ao workflow da prévia, sem alterar o código funcional.
 - **Contagem HISTÓRICA atualizada de 33/57 para 35/57:** 01=4/5, 02=0/4, 03=2/5, 04=17/22, 05=3/4, 06=2/5, 07=7/12; **22 critérios pendentes**. Estes números não são percentual de prontidão de produto, pois incluem decisões de terceiros e itens institucionais. Não marcar outros critérios de forma automática.
 - **Próximos lotes:** (1) fechar 02.01/02.02 e 03.05 no escopo fictício com uma jornada de votação/vínculos; (2) fechar 04.05/04.09/04.13 com QA de proposição/Socii/agendamento; (3) acessibilidade e dispositivos; (4) D1–D6/Megalos em paralelo; integrações externas separadas. Nada de merge em `main` sem aprovação. Documentação e provas sincronizadas no Drive Komekko.
+
+### Checkpoint 146-B — Vínculos locais de votação por seção (10/11/2026)
+
+- Após 03.02 e 05.03, revalidamos o critério **02.02** sem presumir regras institucionais: `tests/browser_voting_section_links_v0192.py` executado sobre o HTML TypeScript compilado da prévia, **24/24 combinações** (4 seções deliberativas × 6 modalidades); cada programação abriu calendário com seção, proposição e opções corretas, formulário com método contextual, sem misturar resultados de outra votação, sem JS pageerror ou overflow horizontal a 390px.
+- Teste com hash Git blob `4dd1ae7a6e5930af8fb44bcbc8826e2a5c32bb7d` verificado idêntico no GitHub; integrado ao workflow `validate`. Resultados de fluxos anteriores `browser_voting_normal_flow_v0190.py` e `browser_full_workflow_journey_v0173.py` continuam fornecendo testes de ações de voto e associação real de sessão. Testes em outras larguras no 02.02 usam matrizes anteriores, não alegar 24×quatro larguras nesta prova.
+- **Escopo explícito:** o fechamento vale SOMENTE para o protótipo e seus dados fictícios. Não decide elegibilidade, autorizações, peso de voto, autenticação ou contratos oficiais da Academy; 02.01/02.03/02.04 permanecem abertos.
+- **Contagem histórica atualizada: 36/57, restam 21.** 01=4/5; 02=1/4; 03=2/5; 04=17/22; 05=3/4; 06=2/5; 07=7/12. Nenhum código de aplicação, main ou produção foi modificado.
