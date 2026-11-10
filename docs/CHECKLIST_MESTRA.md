@@ -17,11 +17,11 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 **Estado:** quatro de cinco tarefas concluídas. Falta confirmar a grafia oficial com a Megalos.
 
 ## 02 — Votação e registro
-- [ ] Consolidar o modelo de votação e seus estados.
+- [x] Consolidar o modelo de votação **da prévia fictícia**: seis modalidades com validação, rascunho em memória, erro, recibo, nova amostra, resumo segregado por escopo e limpeza confirmada; programação ativa/cancelada não implica regra eleitoral real (contrato CP147; testes 320/390/740/1280px).
 - [x] Associar deliberações, seções e proposições **na prévia fictícia**, vinculando método e opções locais, preservando dados de seção e referência à proposição concluída (testado 10/11/2026 em 4 seções × 6 modalidades; especificação institucional real segue pendente da Academy).
 - [ ] Implementar o registro institucional quando as regras forem confirmadas.
 - [ ] Verificar o funcionamento do fluxo completo com dados fictícios e depois com a integração oficial.
-**Estado:** simulação existente; comportamento institucional definitivo ainda não aprovado.
+**Estado:** 2/4 critérios concluídos exclusivamente no protótipo de votação. Os itens de registro/integração institucional 02.03 e 02.04 continuam abertos, sem voto real nem decisão de regra da Academy.
 **Dependências:** participação por seção, peso por participante, visibilidade do registro, alteração de escolha e responsáveis pelos procedimentos.
 
 ## 03 — Perfis e históricos
@@ -29,8 +29,8 @@ Status de retomada (01/11/2026): `main` permanece em v0.10.5 (`4b24459`) sem alt
 - [x] Preservar registros antigos após mudança de cargo ou rebaixamento **na prévia fictícia** (retestado 10/11/2026: contadores e atividades de votação não desaparecem, em quatro larguras; registros institucionais permanecem fora do escopo).
 - [ ] Revisar os indicadores Votos, PDR, PR, Ofício e Socii conforme novos modelos.
 - [x] Exibir proposições locais no perfil do autor, separadas do histórico demonstrativo (v0.10.3; testado localmente).
-- [ ] Integrar as listas de proposições e deliberações aos respectivos perfis.
-**Estado:** 2/5 critérios concluídos no escopo da prévia fictícia; o histórico real pertence à integração externa. Outros três subitens ainda estão abertos.
+- [x] Integrar no **protótipo fictício** as listas de proposições da autoria local e suas programações ativas ao respectivo perfil, calendário, revisão e retorno; registros cancelados não aparecem como ativos, e outros perfis não herdam autoria da sessão (contrato CP147; 4 larguras).
+**Estado:** 3/5 critérios concluídos no escopo da prévia fictícia; históricos institucionais reais continuam externos, e 03.01/03.03 aguardam fechamento apropriado.
 
 **Ajuste v0.10.3:** o editor e o perfil do autor compartilham a lista de proposições da sessão. Mensagens de salvamento distinguem armazenamento efetivo de dados apenas em memória.
 
@@ -1257,3 +1257,12 @@ Etapa 02 0/4 permanece inalterada, sem conexão Academy nem alteração da branc
 - Teste com hash Git blob `4dd1ae7a6e5930af8fb44bcbc8826e2a5c32bb7d` verificado idêntico no GitHub; integrado ao workflow `validate`. Resultados de fluxos anteriores `browser_voting_normal_flow_v0190.py` e `browser_full_workflow_journey_v0173.py` continuam fornecendo testes de ações de voto e associação real de sessão. Testes em outras larguras no 02.02 usam matrizes anteriores, não alegar 24×quatro larguras nesta prova.
 - **Escopo explícito:** o fechamento vale SOMENTE para o protótipo e seus dados fictícios. Não decide elegibilidade, autorizações, peso de voto, autenticação ou contratos oficiais da Academy; 02.01/02.03/02.04 permanecem abertos.
 - **Contagem histórica atualizada: 36/57, restam 21.** 01=4/5; 02=1/4; 03=2/5; 04=17/22; 05=3/4; 06=2/5; 07=7/12. Nenhum código de aplicação, main ou produção foi modificado.
+
+## CHECKPOINT 147 — Lote P0: estados de votação e vínculos de perfis (10/11/2026)
+
+- **02.01 [x] — contrato demonstrativo concluído:** seis modalidades, validações positivas/negativas, escolha em memória, aviso de entrada inválida, recibo local, novo registro de amostra, resumo descritivo e limpeza por escopo com confirmação; `programada` versus `cancelada` não confere autorização institucional. Teste `tests/browser_vote_states_v0194.py` executado em 320/390/740/1280px; reforçado por `v0190` (seis modalidades) e `v0192` (4 seções × 6 modalidades), além de testes Node de validação/ledger. Não inventar regras Academy.
+- **03.05 [x] — perfis integrados dentro da fixture da sessão:** testes `tests/browser_vote_profile_links_v0193.py` percorreram perfil da autora→duas proposições→duas programações ativas independentes→revisão→calendário→perfil, além de programação cancelada excluída dos links ativos e ausência de associação indevida ao perfil de terceiro. PASS nas quatro larguras. Sem identidade Academy.
+- **Procedência:** os dois arquivos `v0193/v0194` foram reobtidos do GitHub e conferidos por Git blob `ea6ede9b84e9eb7e21f64379918d73ee5bf003db` e `f9c8fe589965f30fbf5dfb4d70d8bdef083941d1` antes da execução. Workflow `validate` recebeu ambos; **CI remota ainda não foi declarada aprovada**. Build local TypeScript e **73/73 Node PASS**. Sem alterações de código de aplicação; apenas testes, workflow e documentação.
+- **Contrato rastreável:** `docs/decisions/2026-11-10-cp147-vote-profile-contract.md`, matriz `docs/PLANO_ESCOPO_PROTO_2026-11-10.md` e provas privadas Komekko. D1–D6 e aceitação da Megalos aguardam manifestação; autenticação, banco e voto real pertencem à Academy.
+- **Contagem histórica auditada:** **38/57 concluídos, 19 abertos**. 01=4/5; 02=2/4; 03=3/5; 04=17/22; 05=3/4; 06=2/5; 07=7/12. Não é estimativa de porcentagem de trabalho restante; decisões externas não foram marcadas.
+- **Próximo lote P0:** completar QA abrangente dos estados de agendamento/proposição/Socii (04.05, 04.09, 04.13) sem criar políticas/temporizadores não aprovados, e preparar o comparativo da votação para homologação da Megalos. Não mesclar `main` sem autorização.
