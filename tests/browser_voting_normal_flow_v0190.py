@@ -53,9 +53,15 @@ with sync_playwright() as pw:
   page.set_content(HTML)
   assert page.locator('.preview-vote-lab').count()==0,width
   trigger=page.locator('[data-action=toggle-voting-forms]')
+  region=page.locator('#preview-vote-lab')
   expect(trigger).to_be_visible()
-  trigger.click()
-  expect(page.locator('#preview-vote-lab')).to_be_visible()
+  assert trigger.get_attribute('aria-controls')=='preview-vote-lab',width
+  assert region.count()==1,width
+  expect(region).to_be_hidden()
+  expect(trigger).to_have_attribute('aria-expanded','false')
+  trigger.press('Enter')
+  expect(region).to_be_visible()
+  expect(trigger).to_have_attribute('aria-expanded','true')
   assert page.locator('#preview-vote-method option').count()==6,width
   for method in ('binaria','nominal','ordenada','aprovacao','escalar','cumulativa'):
    vote(page,method)
@@ -64,7 +70,14 @@ with sync_playwright() as pw:
   if width==390:
    page.locator('#preview-vote-method').select_option('nominal')
    page.screenshot(path=str(ROOT/'dist/voting_normal_390_v0190.png'),full_page=True)
+  trigger.press('Space')
+  expect(region).to_be_hidden()
+  expect(trigger).to_have_attribute('aria-expanded','false')
+  assert region.count()==1,width
+  trigger.press('Enter')
+  expect(region).to_be_visible()
   trigger.click()
+  expect(region).to_be_hidden()
   assert page.locator('.preview-vote-lab').count()==0,width
   page.close()
 
