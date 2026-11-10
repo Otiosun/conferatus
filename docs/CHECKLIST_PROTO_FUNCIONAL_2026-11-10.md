@@ -1,0 +1,80 @@
+# CONFFRATUS — Checklist de conversão para protótipo funcional
+10/11/2026 · Posição inicial: branch preview/v0.10.60-six-vote-forms · HEAD 5e9786c27cfce56b1a03bceed961253de18d2c5d
+
+## Objetivo e regra de leitura
+Entregar a EXPERIÊNCIA FUNCIONAL do Conffratus: site utilizável como produto em desenvolvimento, com dados inteiramente fictícios, sem laboratório ou tutoriais técnicos na navegação comum. Não equivale a votação, autenticação, convite Socii, assinatura ou histórico oficial da Academy.
+
+Esta checklist é a NOVA fila de consolidação de UX/produto e não altera retroativamente 43/57 critérios históricos de engenharia. Um mecanismo tecnicamente testado pode continuar com [ ] aqui se sua EXPERIÊNCIA de produto ainda não foi aceita. Todos os [ ] abaixo são pendentes de aceite, não alegação de que o código inexiste.
+
+Fonte confirmada no código: src/main.ts tem dois fluxos de votação distintos: o botão Participar na descrição da votação inicial (data-action toggle-demo) e o botão Abrir formulário de votação (data-action toggle-voting-forms) com escolha entre seis modalidades. Programações locais já possuem método, opções e vínculo com proposição (data-preview-schedule), mas exibem Simular voto nesta programação. Socii tem ação Simular conclusão de participante na navegação normal. As seis modalidades e os vínculos da sessão já passaram testes; o problema prioritário é consolidar a experiência, sem reescrever a lógica.
+
+## P0 — A. Votação integrada ao produto (PRIMEIRO LOTE)
+- [ ] PF-01 Entrada única: clicar Participar em uma deliberação aberta leva diretamente ao formulário dessa deliberação; nenhuma etapa de laboratório obrigatória.
+- [ ] PF-02 Contexto inequívoco: título, seção, proposição, modalidade e opções reais da deliberação fictícia são exibidos e correspondem à programação selecionada.
+- [ ] PF-03 Modalidade definida pela deliberação, não escolhida pelo eleitor: binária, nominal, ordenada, aprovação, escalar e cumulativa mantêm suas particularidades e guardas existentes.
+- [ ] PF-04 Mover seleção global de modalidades e controles Nova amostra/Limpar amostras para ferramentas técnicas isoladas; nada de opção técnica na navegação comum.
+- [ ] PF-05 Unificar votos do exemplo inicial e votações programadas na mesma estrutura de UI; não manter dois produtos concorrentes com estados conflitantes.
+- [ ] PF-06 Estados de interface: aberta, encerrada, cancelada, indisponível, preenchimento inválido, confirmação e retorno; nenhum botão que pareça acionável mas não opere.
+- [ ] PF-07 Comprovante local corresponde exatamente à escolha, sem alegar voto oficial, vencedor, quórum, dupla participação institucional ou gravação remota.
+- [ ] PF-08 Totais históricos de exemplo não mudam silenciosamente com escolhas locais nem se confundem com amostras anônimas.
+- [ ] PF-09 Rascunho de voto preservado enquanto navegável; reset, troca contextual, cancelamento e reentrada não vazam escolhas para outra deliberação.
+- [ ] PF-10 Percurso completo de cada método validado com casos inválidos e recibo, teclado, celular e abertura do deploy real; manter os testes já existentes, reduzindo duplicação.
+Critério de aceite A: pessoa consegue entrar, votar, entender o que aconteceu e voltar, sem saber que seis modalidades ou um laboratório existem por baixo.
+
+## P0 — B. Proposição, revisão e Socii naturais (SEGUNDO LOTE)
+- [ ] PF-11 Redigir, salvar, retomar e revisar em um percurso contínuo; nenhuma perda de dados na navegação, nos erros ou no retorno.
+- [ ] PF-12 Mensagens de conclusão e persistência verdadeiras: local apenas = local apenas; falha de armazenamento sinalizada com recuperação possível.
+- [ ] PF-13 Revisão apresenta título, texto, seção, tipo (PDR/PR/Ofício), participantes e próximos passos, sem controles internos de teste.
+- [ ] PF-14 Colaboração Socii: convite e progresso demonstrativos integrados à proposição; evitar a expressão Simular conclusão repetida como ação do usuário final. Não fingir convite remoto ou autorização de outra pessoa.
+- [ ] PF-15 Se for preciso demonstrar como outro ator fictício concluiria, oferecer contexto de revisão/representação de membro claramente identificado como PRÉVIA, separado de autenticação. Sem qualquer capacidade real de assumir identidade.
+- [ ] PF-16 Edição material da proposição invalida confirmações anteriores; 0/N→N/N, estados pendentes e foco após atualização continuam corretos.
+Critério de aceite B: autor consegue ir de rascunho a proposição pronta e vê Socii coerentemente, sem receber uma ferramenta de QA no lugar do produto.
+
+## P0 — C. Calendário, deliberações e vínculos (TERCEIRO LOTE)
+- [ ] PF-17 Programação nasce de proposição elegível, tem seção, título, descrição objetiva, datas, tipo, modalidade e alternativas corretas, reaproveitando as validações atuais.
+- [ ] PF-18 Calendário mostra somente programações ativas nas consultas pertinentes; canceladas ficam no histórico e não aparecem como ativas.
+- [ ] PF-19 A programação abre a votação contextual pela ação natural Participar, em lugar de Simular voto nesta programação.
+- [ ] PF-20 Proposição → programação → votação → retorno contextual funcionam em celular sem perder estado nem permitir vínculos quebrados.
+- [ ] PF-21 Não inventar permissões, procedimentos de início/encerramento ou quórum; estados com regras indefinidas ficam sob contrato demonstrativo explícito.
+Critério de aceite C: a agenda parece um calendário deliberativo completo, não um configurador de demonstrações.
+
+## P1 — D. Perfis, navegação e históricos
+- [ ] PF-22 Perfil único: indicadores Votos/PDR/PR/Ofício/Socii, histórico, proposições e atalhos consistentes, sem registro fictício ser apresentado como fato oficial.
+- [ ] PF-23 Fluxos de autoria e referências funcionam entre perfil, histórico, editor e calendário sem links mortos; outros perfis não recebem autoria da sessão.
+- [ ] PF-24 Menu, Voltar, fechar, cancelar e reabrir têm nomes e comportamentos coerentes. Controles técnicos invisíveis na interface principal.
+- [ ] PF-25 Estado vazio, dado corrompido, nome/texto extenso e sessão indisponível são legíveis e recuperáveis; preservar o trabalho feito.
+Critério de aceite D: alguém navega todas as seções sem instruções técnicas nem diferença de linguagem entre as telas.
+
+## P1 — E. Fidelidade e acabamento sem reinvenção
+- [ ] PF-26 Revisar o painel azul grande e aparentemente vazio observado no Android real do responsável; identificar conteúdo/propósito no código e comparar com referências antes de redesenhar.
+- [ ] PF-27 Alinhar composição, densidade, hierarquia, tipografia, espaço e estados à referência Megalos. Não adotar paleta/estilo pessoal.
+- [ ] PF-28 Deliberações D1/D1b (calendário e rótulo de iniciar), D2 (local do agendamento), D3 (variante de confirmar), D4 (barra Socii e 127 horas), D5 (salvar rascunho), D6 (perfil). Aguardar respostas explícitas para decisões não inferíveis do material.
+- [ ] PF-29 Corrigir a linguagem de laboratório nos fluxos comuns mantendo UM aviso claro e discreto no nível do ambiente: Prévia com dados fictícios; nenhuma operação enviada à Academy. Não esconder nem falsear a limitação.
+- [ ] PF-30 Manter CONFFRATUS na prévia até decisão formal de grafia com Megalos; preserve imagens originais com CONFERATUS sem reescrever fontes históricas.
+Critério de aceite E: aparência comparável às seis imagens/vídeo e UX profissional; onde existe ambiguidade, decisão registrada, não inventada.
+
+## P1 — F. Qualidade, entrega e regras máximas
+- [ ] PF-31 Investigar soluções oficiais e código existente ANTES de mudança material (regra 21): preferir HTML/TS/CSS nativos, evitar dependências, frameworks e infraestrutura nova; registrar por que a solução é a menor segura.
+- [ ] PF-32 Acessibilidade: foco, ordem, rótulos, mensagens, estados dinâmicos e controles substituídos; regressão de teclado e leitor de tela real quando disponível.
+- [ ] PF-33 Responsividade: 280/320/390/740/1280, texto 200%, reflow equivalente a 400%, aparelho Android físico, zoom nativo, teclado/safe-area e outras engines quando possíveis; documentar limites em vez de certificar sem teste.
+- [ ] PF-34 Integridade e privacidade: dados sintéticos, nenhuma credencial no bundle, nada que simule autorização real; não misturar recibos locais com históricos fictícios.
+- [ ] PF-35 Build e regressão: TypeScript strict, Node, Playwright por jornada, inspeção visual e prova do deploy efetivamente aberto em celular; verificar resultados do HEAD exato, sem contar CI skipped como sucesso.
+- [ ] PF-36 Diagnosticar GitHub Actions (runner sem steps e checks skipped) sem aumentar cobranças, tornar repo público ou disparar reruns descontrolados; Cloudflare SUCCESS não substitui CI.
+- [ ] PF-37 Gate de homologação: demonstrar jornada completa a Megalos; registrar resposta D1–D6 e aprovação de interface separadamente do contrato Academy.
+- [ ] PF-38 Publicação: branch de prévia isolada, diff revisado, instruções e rollback; não alterar main/domínio principal/Academy/PM2 sem autorização expressa.
+
+## Sequência de execução disciplinada
+1. Primeiro implementar e TESTAR PF-01 a PF-10, com foco em transformar Participar no único caminho de votação e preservar as seis regras de UI existentes.
+2. Em seguida PF-11 a PF-21, unificar redação/Socii/calendário.
+3. Depois PF-22 a PF-30, navegação, cópia e fidelidade Megalos.
+4. Em paralelo, PF-31 a PF-36 como gates de cada alteração; no final PF-37/PF-38.
+5. Não abrir checkpoints cosméticos. Encerrar um lote apenas com comportamento comprovado, testes do código executado e lista de regressões. Registrar FEITO / TESTADO / PUBLICADO / PENDENTE.
+
+## O que NÃO faremos
+Não refazer em React, adicionar login próprio, backend ou base de votos oficiais, inventar peso/quórum/resultado de eleições, aprovar escolhas da Megalos unilateralmente, tornar repo público, alterar main/produção, PM2 ou Academy, ou apagar histórico sob pretexto de UX. Nunca ocultar que a prévia não grava votos reais.
+
+## Referências e rastreabilidade
+GitHub privado: Otiosun/conferatus, AGENTS.md (21 regras), docs/CHECKLIST_MESTRA.md, docs/KIT_DECISOES_MEGALOS_V0123_2026-11-01.md, docs/DEMO_GUIDE.md, src/main.ts.
+W3C WCAG 2.2: https://www.w3.org/TR/WCAG22/ ; APG modal focus: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
+GOV.UK phase-banner (exemplo de identificação honesta de ambiente): https://design-system.service.gov.uk/components/phase-banner/
+Esta checklist não afirma aprovação desses órgãos nem certificação WCAG.
