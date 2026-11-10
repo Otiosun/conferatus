@@ -90,6 +90,7 @@ jobs:
             tests/browser_voting_section_links_v0192.py \
             tests/browser_vote_profile_links_v0193.py \
             tests/browser_vote_states_v0194.py \
+            tests/browser_cancelled_vote_context_v0201.py \
             tests/browser_stage04_normal_socii_v0195.py \
             tests/browser_stage04_complete_v0196.py \
             tests/browser_history_isolation_v0197.py \
