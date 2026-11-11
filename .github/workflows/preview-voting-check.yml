@@ -48,7 +48,8 @@ jobs:
       - name: "Closure versus new vote - transaction serialization"
         run: bash tests/postgres/close-race.sh
   validate:
-    needs: postgres-lab
+    # Browser/UI checks do not consume output from the separate lab job.
+    # Run independently so neither result hides the other; preserve both results.
     runs-on: ubuntu-24.04
     timeout-minutes: 18
     steps:
