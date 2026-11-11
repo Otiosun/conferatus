@@ -1562,3 +1562,17 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
 
 /* Local editorial revision feedback; shown only after a changed text. */
 .workflow-revision-feedback{margin:0;padding:10px 20px;font-size:12px;line-height:1.5;color:#353e61;background:#e7e9ee;border-top:1px solid #d2d5df;overflow-wrap:anywhere}
+
+/* CP169 — guidance beside real actions; no additional page or flow. */
+.home-results-context{margin:2px 0 9px;font-size:12px;font-weight:700;color:#4e5890}
+.home-create-path{margin:13px 0 5px;padding:12px 0 0;border-top:1px solid #d7daea;color:#3f4662;font-size:13px;line-height:1.5}
+.home-create-path p{margin:0 0 10px}
+.home-create-links{display:flex;gap:8px;flex-wrap:wrap}
+.home-create-links button,.calendar-journey-guidance button{min-height:44px;padding:9px 12px;border:1px solid #cbd0e8;border-radius:10px;background:#f4f5fb;color:#4652a4;font:inherit;font-weight:700;cursor:pointer}
+.home-create-links button:first-child{background:#515dc7;color:#fff;border-color:#515dc7}
+.workflow-start-guidance{margin:12px 20px 8px;padding:12px;border:1px solid #d8dced;border-radius:10px;background:#f6f7fc;color:#3b456c;font-size:13px;line-height:1.55}
+.calendar-journey-guidance{margin:13px 0 8px;padding:12px 13px;border:1px solid #d8dced;border-radius:10px;background:#f6f7fc;color:#3b456c;font-size:13px;line-height:1.5}
+.calendar-journey-guidance p{margin:0 0 10px}
+.workflow-form-intro{margin:-2px 0 3px;color:#434b6b;font-size:12px;line-height:1.5}
+.calendar-item>button .calendar-example-label{display:inline-block;margin-top:3px;font-size:11px;font-weight:700;color:#687187}
+.calendar-expanded .calendar-vote-guidance{font-size:12px;line-height:1.45}

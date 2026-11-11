@@ -1314,3 +1314,8 @@ Checklist funcional PF-07, PF-08, PF-09 [x], **8/38** no escopo fictício. **PF-
 ### CP164 — Desbloqueio de verificação de experiência (10/11/2026)
 
 O build/publicação Cloudflare da prévia vinha sendo verificado, mas as regressões TypeScript/Node/Playwright do job `validate` eram `skipped` devido a uma dependência em outro job que não fornece insumos ao build de interface. Removemos essa dependência para obter resultado próprio da UI sem ocultar conclusões de outros jobs. Documento: `docs/decisions/2026-11-10-cp164-independent-ui-ci.md`. Não afirmar sucesso de execução enquanto o novo workflow do SHA não tiver resultado. Preservada branch de prévia, sem merge/main/produção, D1–D6 e Academy sem alterações. Contagens funcional 8/38, histórica 43/57 sem incremento por configuração.
+
+
+### CP169 — Primeira jornada de votação guiada para pré-entrega (11/11/2026)
+
+A interface da prévia explica caminho de redação, conclusão e programação; separa números de exemplo das programações locais, identifica programação fixa e esclarece comprovante/contexto temporal sem inventar regras de votação. Novo v0211 na matriz Chromium; o resultado deve ser conferido no SHA exato. Registro detalhado em docs/decisions/2026-11-11-cp169-first-time-voting-journey.md. Sem alteração em main/produção, aceite Megalos e Android real pendentes.

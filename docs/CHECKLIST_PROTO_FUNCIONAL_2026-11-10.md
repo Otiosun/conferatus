@@ -151,3 +151,7 @@ O runner GitHub passou a executar a suíte inteira no CP166: 76 scripts, sete fa
 ## CP168 — Último defeito da suíte de teclado (11/11/2026)
 
 No CP167, o job real compilou e o laboratório PostgreSQL passou; sete falhas de scripts foram reduzidas a uma. A única regressão restante v0139 (4/76 verificações de foco) detectou que o erro de rascunho completamente vazio, corretamente associado a ambos os campos, focava a redação em vez do título. Ajustado destino de foco para título nos estados `title`/`both` e corpo só para `body`. v0139/v0141/v0205 permanecem na matriz sem serem suprimidos. Decisão: `docs/decisions/2026-11-11-cp168-blank-draft-focus.md`. Aguardar CI do SHA final antes de reivindicar zero falhas. Contagem formal 8/38 e 43/57 mantida; main/produção preservadas.
+
+## CP169 — Pré-entrega: primeira votação compreensível (11/11/2026)
+
+Lote de orientação de navegação: início separa resultados de exemplo e criação; proposições explicam a necessidade de conclusão e Socii opcional; calendário renomeia ação para “Programar votação”, indica pré-requisito, identifica exemplo fixo, explica datas como referência e onde aparece o comprovante. Nenhuma regra, apuração, autenticação ou serviço novo. Teste `tests/browser_first_time_voting_journey_v0211.py` preparado na CI para sessão nova e quatro larguras, **ainda sem execução atestada neste SHA**. Decisão `docs/decisions/2026-11-11-cp169-first-time-voting-journey.md`. Main/produção intocadas; PF formal 8/38, histórico 43/57 e avaliação Megalos pendentes.

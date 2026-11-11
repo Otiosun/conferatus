@@ -56,3 +56,9 @@ Consultar `docs/KIT_DECISOES_MEGALOS_V0123_2026-11-01.md` e `docs/AUDITORIA_VIDE
 ## Atualização da página de votação — checkpoint 142 (09/11/2026)
 
 Na branch de prévia, os formulários das seis modalidades deixaram de ficar exclusivos de `?demo=1`. Foi acrescentado o botão de abertura na navegação normal, e os registros locais de calendário podem conduzir ao formulário da modalidade programada. O modo avançado original é preservado. O ensaio local com HTML instrumentado passou nos quatro viewports 320/390/740/1280, nos seis métodos e nas quatro jornadas contextuais; o código TypeScript da branch foi versionado, mas **essa evidência não é CI compilada do novo HEAD**. Não dizer à Megalos que a página atende integralmente à solicitação antes de comparar a variante final com a referência dela; o pedido exato (votar versus criar/administrar) ainda não foi formalmente delimitado. Nenhuma integração Academy nem produção alterada.
+
+## CP169 — Caminho da primeira votação (11/11/2026)
+
+A página inicial passou a marcar o placar como **Resultados de exemplo** e oferecer atalhos para criar proposição e consultar programações. Para criar uma votação demonstrativa: abrir Proposições, redigir, concluir, opcionalmente adicionar Socii antes da conclusão, programar a proposição concluída no calendário, escolher modalidade/datas/alternativas e abrir a programação para participar. Ao confirmar a escolha, o comprovante aparece ali; ao sair, não há histórico acumulado de escolhas próprias. Os números iniciais não mudam. O período organiza o calendário, mas não inicia/encerra automaticamente a participação. A programação fixa no calendário está identificada como exemplo. 
+
+Nova regressão `tests/browser_first_time_voting_journey_v0211.py` incluída em CI Chromium (320/390/740/1280). Não são criadas regras, apuração, wizard, servidor ou dados reais. Validação Android físico e aprovação visual Megalos continuam pendentes.
