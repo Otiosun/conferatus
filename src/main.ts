@@ -1663,7 +1663,7 @@ document.addEventListener('submit',(event)=>{
    composeErrorField=saveOnly&&!title&&!body?'both':bodyInvalid&&!titleInvalid?'body':'title';
    draftForm={title,body,bodyRuns,bodyLayout};
    render();
-   const selector=composeErrorField==='title'?'#draft-title'
+   const selector=composeErrorField!=='body'?'#draft-title'
     :richEditorOpen?'#draft-rich-body':'#draft-body';
    document.querySelector<HTMLElement>(selector)?.focus({preventScroll:true});
    return;
