@@ -20,6 +20,12 @@ with sync_playwright() as pw:
   expect(p.locator('.home-results-context')).to_contain_text('Resultados de exemplo')
   baseline=p.locator('.results').inner_text()
   expect(p.locator('.home-create-path')).to_contain_text('primeiro redija')
+  # The main shortcut must immediately expose the editor, not a button below the fold.
+  p.locator('.home-create-links [data-action=new-proposal]').click()
+  expect(p.locator('#compose-proposal-form')).to_be_visible()
+  expect(p.locator('#draft-title')).to_be_empty()
+  p.locator('.footer-home').click()
+  expect(p.locator('.home-create-path')).to_be_visible()
   p.locator('.home-create-links [data-route=calendar]').click()
   expect(p.locator('.calendar-journey-guidance')).to_contain_text('Socii é opcional')
   expect(p.locator('.calendar-item').filter(has_text='Revisão do calendário de reuniões')).to_contain_text('Exemplo de programação')

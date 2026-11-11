@@ -159,3 +159,8 @@ Lote de orientação de navegação: início separa resultados de exemplo e cria
 ## CP170 — Regressões reconciliadas após orientar primeira votação (11/11/2026)
 
 CP169 adicionou atalhos de home e renomeou o botão do calendário sem alterar funcionalidade. A primeira CI no SHA 43c252232228a7cd8933a05af070916c8e69aeaf compilou TypeScript/Node, PostgreSQL e Cloudflare com sucesso, executou 77 scripts Chromium; seis testes antigos falharam por procurar seletor genérico onde agora existem novos atalhos, ou por esperar texto anterior. CP170 restringiu os cliques aos elementos reais do menu e ajustou a verificação da orientação/rotulagem sem remover cenários. Decisão em `docs/decisions/2026-11-11-cp170-first-time-navigation-regressions.md`. **Aguardar resultado real do SHA CP170**; Android físico e avaliação visual Megalos permanecem abertos. Main e produção intocadas, formal 8/38 e 43/57.
+
+
+## CP171 — Atalho inicial acessível sem rolagem (11/11/2026)
+
+Auditoria fria do CP170 encontrou o botão `Redigir proposição` abaixo da área visível após clicar `Criar uma votação` em celulares. Mudança mínima: botão da home usa a ação existente `new-proposal`, que abre imediatamente o editor em branco, preservando a lista normal, Socii, cancelamento e rotas anteriores. A regressão v0211 agora verifica o editor acessível diretamente, volta à home e executa a jornada completa em 320/390/740/1280. Guia de demonstração atualizado; nenhuma alteração de layout original Megalos ou regras. Decisão `docs/decisions/2026-11-11-cp171-direct-compose-cta.md`. **Aguardar CI do novo SHA**; Android físico e decisões D1–D6 seguem pendentes. Main/produção intocadas; contagens 8/38 e 43/57 preservadas.
