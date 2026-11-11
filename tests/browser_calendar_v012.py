@@ -12,7 +12,7 @@ with sync_playwright() as p:
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.set_content(html)
         page.locator('.footer-nav').click()
-        page.locator('[data-route="calendar"]').first.click()
+        page.locator('.menu-item[data-route="calendar"]').click()
         page.locator('.calendar-grid').wait_for()
         for _ in range(18):
             if 'novembro de 2026' in page.locator('.calendar-month-nav h2').inner_text().lower():

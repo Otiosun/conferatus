@@ -139,7 +139,7 @@ with sync_playwright() as p:
         assert 'Alteração desfeita' in page.locator('main').inner_text(), width
 
         open_menu(page, 'calendar')
-        assert 'Defina a data e a modalidade da deliberação.' in page.locator('.calendar-preview-disclosure').inner_text(), width
+        assert 'A programação ficará disponível após concluir uma proposição.' in page.locator('.calendar-preview-disclosure').inner_text(), width
         page.locator('[data-action="open-schedule"]').click()
         page.locator('#schedule-deliberation-form').wait_for()
         page.locator('[data-action="open-schedule"]').click()

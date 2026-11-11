@@ -1319,3 +1319,8 @@ O build/publicação Cloudflare da prévia vinha sendo verificado, mas as regres
 ### CP169 — Primeira jornada de votação guiada para pré-entrega (11/11/2026)
 
 A interface da prévia explica caminho de redação, conclusão e programação; separa números de exemplo das programações locais, identifica programação fixa e esclarece comprovante/contexto temporal sem inventar regras de votação. Novo v0211 na matriz Chromium; o resultado deve ser conferido no SHA exato. Registro detalhado em docs/decisions/2026-11-11-cp169-first-time-voting-journey.md. Sem alteração em main/produção, aceite Megalos e Android real pendentes.
+
+
+### CP170 — Testes do fluxo de primeira utilização (11/11/2026)
+
+A primeira CI CP169 percorreu 77 scripts, mas seis scripts antigos estavam ligados aos seletores globais e textos da navegação anterior. No CP170, os testes foram atualizados para abrir o item correto do menu e comparar a orientação atual da tela, sem esconder falhas ou substituir os fluxos de produto. Documento: docs/decisions/2026-11-11-cp170-first-time-navigation-regressions.md. Novo SHA requer validação CI para aceite técnico; nada foi alterado em main/produção.

@@ -53,7 +53,7 @@ with sync_playwright() as p:
         assert warning.inner_text().strip() == 'Alterações nesta página não afetam cadastros oficiais.',width
         assert page.locator('[data-action="toggle-tools"]').count()==0,width
         page.locator('.footer-nav').click()
-        page.locator('[data-route="calendar"]').first.click()
+        page.locator('.menu-item[data-route="calendar"]').click()
         # The fixed sample predates per-deliberation methods: do not present
         # its missing field as a real legacy record or invent a voting mode.
         sample = page.locator('[data-schedule="sample-1"]')
@@ -63,11 +63,11 @@ with sync_playwright() as p:
         assert 'Modalidade:' not in sample_details, (width, sample_details)
         assert 'Não informada (registro anterior)' not in sample_details, width
         action=page.locator('[data-action="open-schedule"]')
-        assert action.inner_text()=='Iniciar uma Votação',width  # Megalos' prototype wording stays intact
+        assert action.inner_text()=='Programar votação',width  # The action schedules a consultation; it does not start one immediately
         note=page.locator('.calendar-preview-disclosure[role="note"]')
         assert note.count()==1,width
         assert note.is_visible(),width
-        assert note.inner_text().strip() == 'Defina a data e a modalidade da deliberação.',width
+        assert note.inner_text().strip() == 'A programação ficará disponível após concluir uma proposição.',width
         assert action.get_attribute('aria-expanded')=='false',width
         if width in (390,740):
             page.screenshot(path=f'/mnt/data/conferatus_v0117_disclosure_{width}.png',full_page=True)
@@ -75,8 +75,8 @@ with sync_playwright() as p:
         assert action.get_attribute('aria-expanded')=='true',width
         assert page.locator('#schedule-deliberation-form').is_visible(),width
         assert page.locator('.calendar-preview-disclosure').is_visible(),width
-        assert page.locator('#schedule-deliberation-form').get_by_text('Programar deliberação').count()==1,width
-        assert 'data e a modalidade' in page.locator('.calendar-preview-disclosure').inner_text(),width
+        assert page.locator('#schedule-deliberation-form').get_by_text('Programar votação').count()==1,width
+        assert 'A programação ficará disponível após concluir uma proposição.' in page.locator('.calendar-preview-disclosure').inner_text(),width
         action.click()
         assert action.get_attribute('aria-expanded')=='false',width
         assert page.locator('#schedule-deliberation-form').count()==0,width

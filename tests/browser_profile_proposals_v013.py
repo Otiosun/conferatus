@@ -8,7 +8,7 @@ with sync_playwright() as p:
   page=browser.new_page(viewport={'width':width,'height':844})
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.set_content(html)
-  page.locator('.footer-nav').click();page.locator('[data-route=proposals]').first.click()
+  page.locator('.footer-nav').click();page.locator('.menu-item[data-route=proposals]').click()
   page.locator('[data-action=new-proposal]').click()
   page.locator('#draft-title').fill('Rascunho de comunicação')
   page.locator('#draft-body').fill('Primeiro parágrafo ainda incompleto.')
@@ -46,7 +46,7 @@ with sync_playwright() as p:
   assert page.locator('.session-proposal-link').count()==1,width
   page.locator('.footer-nav').click();page.locator('[data-route=members]').first.click()
   page.locator('.member-item[data-member="m04"]').click()
-  page.locator('.footer-nav').click();page.locator('[data-route=proposals]').first.click()
+  page.locator('.footer-nav').click();page.locator('.menu-item[data-route=proposals]').click()
   page.locator('.workflow-tabs button[data-route=profile]').click()
   assert page.evaluate('location.hash')=='#/profile/m01',(width,'wrong member selected for author history')
   # Original Megalos profile composition: two real actions on the author's
@@ -75,7 +75,7 @@ with sync_playwright() as p:
   page.locator('[data-tab=proposicoes]').click()
   assert page.locator('.profile-workflow-actions').count()==0,width
   # Calendar day targets gain an ergonomic 44px footprint on 320px+ screens.
-  page.locator('.footer-nav').click();page.locator('[data-route=calendar]').first.click()
+  page.locator('.footer-nav').click();page.locator('.menu-item[data-route=calendar]').click()
   day=page.locator('.calendar-day').first
   day.wait_for(state='visible')
   rect=day.bounding_box()

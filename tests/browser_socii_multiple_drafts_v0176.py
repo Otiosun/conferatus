@@ -19,7 +19,7 @@ with sync_playwright() as p:
   errors=[]
   page.on('pageerror',lambda error:errors.append(str(error)))
   page.set_content(html)
-  page.locator('.footer-nav').click();page.locator('[data-route=proposals]').click()
+  page.locator('.footer-nav').click();page.locator('.menu-item[data-route=proposals]').click()
   def draft(title):
    page.locator('[data-action=new-proposal]').click()
    page.locator('#draft-title').fill(title)

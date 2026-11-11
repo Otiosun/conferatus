@@ -143,7 +143,7 @@ with sync_playwright() as pw:
  normal=browser.new_page()
  normal.goto('about:blank')
  normal.set_content(HTML)
- normal.locator('.footer-nav').click();normal.locator('[data-route="proposals"]').click()
+ normal.locator('.footer-nav').click();normal.locator('.menu-item[data-route="proposals"]').click()
  normal.locator('.workflow-proposals-layout').wait_for()
  assert normal.locator('.local-archive').count()==0
  browser.close()
