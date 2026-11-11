@@ -84,7 +84,7 @@ with sync_playwright() as pw:
         focus_then_enter(page,'[data-cancel-schedule="schedule-focus-01"]','.calendar-cancel-confirm');checks+=1
         focus_then_enter(page,'[data-keep-schedule="schedule-focus-01"]','[data-cancel-schedule="schedule-focus-01"]');checks+=1
         focus_then_enter(page,'[data-cancel-schedule="schedule-focus-01"]','.calendar-cancel-confirm');checks+=1
-        focus_then_enter(page,'[data-confirm-cancel-schedule="schedule-focus-01"]','.calendar-list-head h2');checks+=1
+        focus_then_enter(page,'[data-confirm-cancel-schedule="schedule-focus-01"]','[data-action=toggle-cancelled-history]');checks+=1
         expect(page.locator('[data-action=toggle-cancelled-history]')).to_be_visible()
         focus_then_enter(page,'[data-action=toggle-cancelled-history]','[data-action=toggle-cancelled-history]');checks+=1
         expect(page.locator('.calendar-cancelled-record')).to_contain_text('Programação de foco')

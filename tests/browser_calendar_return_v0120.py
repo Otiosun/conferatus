@@ -49,7 +49,7 @@ with sync_playwright() as p:
         assert page.locator('.overview-local-history .session-proposals-heading').inner_text()=='Proposições desta sessão',width
         assert page.locator('.overview-local-disclosure').count()==0,width
         local.locator('[data-draft]').click()
-        assert page.locator('.workflow-finished strong').inner_text()=='Proposição concluída',width
+        assert page.locator('.workflow-finished > strong').inner_text()=='Proposição concluída',width
         back_to_history=page.locator('.workflow-finished [data-route=overview]')
         assert back_to_history.inner_text()=='Voltar ao histórico',width
         back_to_history.click()
@@ -78,7 +78,7 @@ with sync_playwright() as p:
         item=page.locator('.calendar-item').filter(has_text='Programação ligada à proposição')
         if not item.locator('[data-open-schedule-proposal]').is_visible(): item.locator('[data-schedule]').click()
         item.locator('[data-open-schedule-proposal]').click()
-        assert page.locator('.workflow-finished strong').inner_text() == 'Proposição concluída', width
+        assert page.locator('.workflow-finished > strong').inner_text() == 'Proposição concluída', width
         back = page.locator('.workflow-finished [data-route=calendar]')
         assert back.inner_text() == 'Voltar à programação', (width, 'contextual return missing')
         back.click()

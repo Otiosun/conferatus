@@ -599,7 +599,7 @@ let finishedProposalReturnTo:'proposals'|'calendar'|'overview'|'profile'='propos
 let workflowNotice='';
 let reviewRevisionNotice='';
 let composeError='';
-let composeErrorField: 'title' | 'body' = 'title';
+let composeErrorField: 'title' | 'body' | 'both' = 'title';
 let scheduleFormOpen=false;
 let schedulePrefillProposalId:string|null=null;
 // Temporary draft only: not a saved option set and never shared across sessions.
@@ -706,7 +706,7 @@ function proposalsPage(){
  ${advancedPreview?`<section class="local-archive" aria-label="Cópia de segurança dos registros da prévia"><h2>Cópia local da prévia</h2><p>Exporta apenas proposições, Socii e programações desta aba. O arquivo pode conter o texto que você escreveu. Não inclui login, votos, permissões ou dados da Academy.</p><div class="local-archive-actions"><button type="button" data-action="export-local-archive">Baixar cópia JSON</button><button type="button" data-action="import-local-archive">Restaurar cópia JSON</button><input id="archive-file-input" type="file" accept=".json,application/json" hidden></div>${archiveMessage?`<p class="local-archive-message" role="${archiveIsError?'alert':'status'}">${escapeHTML(archiveMessage)}</p>`:''}</section>`:''}
  </div><div class="workflow-actions"><button type="button" class="workflow-outline" data-action="invite-socii" aria-expanded="${inviteOpen}" ${inviteOpen?'aria-controls="invite-socii-form"':''}>Adicionar ao Socii</button>${inviteOpen?`<form id="invite-socii-form" class="workflow-inline" aria-label="Adicionar participante ao Socii">${!drafts.some(d=>d.status!=='concluida')?'<p class="workflow-socii-help" role="status">Para adicionar participantes, primeiro redija e salve uma proposição.</p>':''}<p class="workflow-socii-help">Esta lista representa participantes fictícios. Nenhum convite é enviado à Academy.</p><label>Proposição<select name="draftId" required>${drafts.filter(d=>d.status!=='concluida').length>1?'<option value="" disabled selected>Selecione a proposição</option>':''}${drafts.filter(d=>d.status!=='concluida').map(d=>`<option value="${escapeHTML(d.id)}">${escapeHTML(d.title)}</option>`).join('')}</select></label><label>Participante<select name="memberId" required><option value="" selected disabled>Selecione uma pessoa</option>${selectOptions('',members.slice(1))}</select></label><button class="workflow-primary" ${!drafts.some(d=>d.status!=='concluida')?'disabled':''}>Adicionar participante</button></form>`:''}
  <button type="button" class="workflow-primary" data-action="new-proposal">Redigir proposição</button></div>
- ${workflowNotice?`<p class="workflow-status" role="status">${escapeHTML(workflowNotice)}</p>`:''}`;
+ ${workflowNotice?`<p class="workflow-status">${escapeHTML(workflowNotice)}</p>`:''}`;
 }
 // Show only participants linked to this proposal; a local preview has no valid elapsed time.
 function sociiEditorBar(d:Draft|undefined){
@@ -752,7 +752,7 @@ function composePage(){
  const lineChoices=[1.4,1.7,2] as const;
  const editing=drafts.find(d=>d.id===currentDraftId);
  return `${sociiEditorBar(editing)}<div class="workflow-editor-head"><span>CONFFRATUS</span><h1>${escapeHTML(draftForm.title||'Título')}</h1></div>
- <form id="compose-proposal-form" class="workflow-editor" novalidate><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" minlength="3" maxlength="140" required ${composeErrorField==='title'&&composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Título" value="${escapeHTML(draftForm.title)}">
+ <form id="compose-proposal-form" class="workflow-editor" novalidate><label for="draft-title">Título da proposição</label><input id="draft-title" name="title" minlength="3" maxlength="140" required ${(composeErrorField==='title'||composeErrorField==='both')&&composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Título" value="${escapeHTML(draftForm.title)}">
  <label for="draft-body">Redação</label>${richEditorOpen?`<div class="workflow-rich-toolbar" role="group" aria-label="Formatação da redação">
  <button type="button" data-rich-command="bold" aria-label="Negrito"><strong>B</strong></button>
  <button type="button" data-rich-command="italic" aria-label="Itálico"><em>I</em></button>
@@ -790,8 +790,8 @@ function composePage(){
  ${indentChoices.map(value=>`<option value="${value}" ${layout.right===value?'selected':''}>${value===0?'Sem recuo':value+' px'}</option>`).join('')}
  </select></label>
  </div>
- <div id="draft-rich-body" class="workflow-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Redação" data-placeholder="Escreva..." style="${richLayoutStyle(draftForm.bodyLayout,true)}" ${composeErrorField==='body'&&composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''}>${renderRichText(draftForm.body,draftForm.bodyRuns)}</div>
- <textarea id="draft-body" name="body" hidden>${escapeHTML(draftForm.body)}</textarea>`:`<textarea id="draft-body" name="body" required minlength="20" ${composeErrorField==='body'&&composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
+ <div id="draft-rich-body" class="workflow-rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Redação" data-placeholder="Escreva..." style="${richLayoutStyle(draftForm.bodyLayout,true)}" ${(composeErrorField==='body'||composeErrorField==='both')&&composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''}>${renderRichText(draftForm.body,draftForm.bodyRuns)}</div>
+ <textarea id="draft-body" name="body" hidden>${escapeHTML(draftForm.body)}</textarea>`:`<textarea id="draft-body" name="body" required minlength="20" ${(composeErrorField==='body'||composeErrorField==='both')&&composeError?'aria-invalid="true" aria-describedby="compose-save-error"':''} placeholder="Escreva...">${escapeHTML(draftForm.body)}</textarea>
  <button type="button" class="workflow-enable-rich" data-action="enable-rich-editor">Formatar texto</button>`}
  ${composeError?`<p id="compose-save-error" class="workflow-form-error" role="alert">${escapeHTML(composeError)}</p>`:''}
  <div class="workflow-editor-actions"><button class="workflow-primary" type="submit" name="intent" value="conclude">Concluir redação</button><button class="workflow-outline" type="submit" name="intent" value="save" formnovalidate>Salvar rascunho</button><button class="workflow-outline" type="button" data-route="${finishedProposalReturnTo==='profile'?'profile':'proposals'}">${finishedProposalReturnTo==='profile'?'Voltar ao perfil':'Voltar'}</button></div></form>`;
@@ -1660,7 +1660,7 @@ document.addEventListener('submit',(event)=>{
    composeError=saveOnly?'Escreva um título ou algum texto antes de salvar.'
     :titleInvalid?'Informe um título com pelo menos 3 caracteres.'
     :'Escreva pelo menos 20 caracteres na redação.';
-   composeErrorField=bodyInvalid&&!titleInvalid?'body':'title';
+   composeErrorField=saveOnly&&!title&&!body?'both':bodyInvalid&&!titleInvalid?'body':'title';
    draftForm={title,body,bodyRuns,bodyLayout};
    render();
    const selector=composeErrorField==='title'?'#draft-title'

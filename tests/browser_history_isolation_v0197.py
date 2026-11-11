@@ -60,8 +60,9 @@ with sync_playwright() as pw:
   assert page.locator('.activity-proposal').count()>0,width
   assert 'Proposta da sessão do autor' not in page.locator('.section-body').inner_text(),width
   page.evaluate("location.hash='#/ballot'")
-  page.locator('[data-action=toggle-voting-forms]').click()
-  page.locator('#preview-vote-method').select_option('nominal')
+  # The normal participant path is now direct; choosing a mode is technical-only.
+  page.locator('[data-action=enter-ballot]').click()
+  expect(page.locator('#preview-vote-form')).to_be_visible()
   page.locator('#preview-vote-form [name=selected]').first.check()
   page.locator('#preview-vote-form .preview-vote-submit').click()
   expect(page.locator('.preview-vote-receipt')).to_be_visible()

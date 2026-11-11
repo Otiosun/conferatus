@@ -1,6 +1,6 @@
 """A scheduling-only preview must never imply that clicking launches a real vote."""
 from pathlib import Path
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 html=(Path(__file__).resolve().parents[1]/'dist/CONFERATUS_demo_offline.html').read_text()
 with sync_playwright() as p:
@@ -29,16 +29,21 @@ with sync_playwright() as p:
         footer = page.locator('.footer-demo')
         assert footer.is_visible(), width
         assert 'DADOS FICTÍCIOS' in footer.inner_text().upper(), width
+        # Normal participation now opens one contextual form, not the old
+        # demo-option buttons. Keep fixture totals immutable and choices local.
+        baseline = page.locator('.results').inner_text()
         before = page.evaluate("window.__previewStorageWrites.length")
-        page.locator('[data-action="toggle-demo"]').click()
-        assert 'Selecione uma opção para testar a votação.' in page.locator('.demo-ballot').inner_text(), width
-        page.locator('[data-vote]').first.click()
-        assert 'Opção selecionada' in page.locator('.vote-feedback').inner_text(), width
-        assert 'Sua escolha' in page.locator('.result-row--chosen').inner_text(), width
-        writes = page.evaluate("window.__previewStorageWrites.slice()")
-        assert writes[before:] == ["conferatus:demo-vote"], (width, "vote should only write the local demo key", writes)
-        page.locator('[data-action="reset-vote"]').click()
+        assert page.locator('[data-action=toggle-demo]').count() == 0, width
+        page.locator('[data-action=enter-ballot]').click()
+        expect(page.locator('#preview-vote-form')).to_be_visible()
+        page.locator('#preview-vote-form [name=selected]').nth(1).check()
+        page.locator('.preview-vote-submit').click()
+        expect(page.locator('.preview-vote-receipt')).to_contain_text('Calendário quinzenal')
         assert page.locator('.result-row--chosen').count() == 0, width
+        assert page.evaluate("window.__previewStorageWrites.length") == before, width
+        page.locator('[data-action=exit-preview-schedule]').click()
+        expect(page.locator('.results')).to_be_visible()
+        assert page.locator('.results').inner_text() == baseline, width
         page.locator('.footer-nav').click()
         page.locator('[data-route="overview"]').first.click()
         page.locator('[data-route="governance"]').first.click()

@@ -26,9 +26,11 @@ with sync_playwright() as pw:
   p.locator('.preview-vote-submit').click()
   expect(p.locator('.preview-vote-receipt')).to_contain_text('Calendário quinzenal')
   p.locator('[data-action=exit-preview-schedule]').click()
+  expect(p.locator('.results')).to_be_visible()
   assert p.locator('.results').inner_text()==baseline,(width,'historical fixture total changed')
   def enter(id):
    p.evaluate("location.hash='#/calendar'")
+   p.locator('.calendar-list').wait_for(state='visible')
    if p.locator(f'[data-preview-schedule="{id}"]').count()==0:
     p.locator(f'[data-schedule="{id}"]').click()
    p.locator(f'[data-preview-schedule="{id}"]').click()
@@ -50,6 +52,9 @@ with sync_playwright() as pw:
   p.locator('[data-action=reset-preview-vote]').click()
   assert p.locator('[name=selected]:checked').count()==0,width
   p.locator('[data-action=exit-preview-schedule]').click()
+  expect(p.locator('.calendar-list')).to_be_visible()
+  p.locator('.footer-home').click()
+  expect(p.locator('.results')).to_be_visible()
   assert p.locator('.results').inner_text()==baseline,width
   assert not errors,(width,errors)
   assert p.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
