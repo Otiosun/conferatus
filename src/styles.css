@@ -443,7 +443,7 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
  .profile-summary>.metrics small {font-size:7px;}
  .overview-stats {display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:5px;padding:10px 11px 6px;overflow:visible;}
  .overview-stats .stat-chip {grid-column:span 6;justify-content:center;min-width:0;font-size:11px;padding:6px 4px;white-space:normal;text-align:center;}
- .overview-stats .stat-figure {grid-column:span 3;min-width:0;padding:4px 0;text-align:center;font-size:11px;white-space:normal;}
+ .overview-stats .stat-figure {grid-column:span 3;min-width:0;overflow-wrap:anywhere;padding:4px 0;text-align:center;font-size:11px;white-space:normal;}
  .result-row {padding:4px 7px;gap:4px;}
  .result-count,.result-percentage {font-size:9px;}
  .result-label {font-size:10px;}
