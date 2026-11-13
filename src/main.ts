@@ -498,6 +498,8 @@ function overviewPage() {
  const votes=activities.filter(a=>a.type==='voto');
  const proposals=activities.filter(a=>a.type==='proposicao');
  const accepted=proposals.filter(a=>a.approved).length;
+ // Synthetic member totals; never claim these are official institutional records.
+ const officialLetters=members.reduce((total,member)=>total+(member.officialLetters??0),0);
  const relevant=overviewTab==='votos'?votes:proposals;
  const visible=overviewExpanded?relevant:relevant.slice(0,6);
  const remaining=relevant.length-visible.length;
@@ -507,7 +509,7 @@ function overviewPage() {
  return `${header(undefined,undefined,false)}<div class="overview-stats" role="group" aria-label="Indicadores institucionais">
   <span class="stat-chip">${accepted} Aprovados</span><span class="stat-chip">${proposals.length-accepted} Arquivados</span>
   <span class="stat-figure">${votes.reduce((n,a)=>n+a.votes,0)} Votos</span>
-  <span class="stat-figure">${proposals.length} PDR</span><span class="stat-figure">${String(accepted).padStart(2,'0')} PR</span>
+  <span class="stat-figure">${proposals.length} PDR</span><span class="stat-figure">${String(accepted).padStart(2,'0')} PR</span><span class="stat-figure">${officialLetters} Ofícios</span>
   </div><div class="tabs overview-tabs" role="group" aria-label="Histórico institucional"><button class="tab" data-overview-tab="votos" aria-pressed="${overviewTab==='votos'}">Histórico de votações</button><button class="tab" data-overview-tab="proposicoes" aria-pressed="${overviewTab==='proposicoes'}">Proposições</button></div>
   <section class="section-body overview-content">${localHistory}${visible.length?visible.map(activityItem).join(''):localHistory?'':'<p class="status-line">Nenhum registro encontrado.</p>'}
    ${remaining>0?`<button class="overview-more" type="button" data-action="show-more-history">Ver mais ${remaining} ${overviewTab==='votos'?'votações':'proposições'}</button>`:''}

@@ -379,8 +379,8 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
   .member-list {padding-top:51px;}
 }
 
-/* Institutional overview: follow the five-number hierarchy of the approved mockup.
-   The initial list is intentionally short; the full synthetic archive stays available. */
+/* Institutional overview: extend reference figures with synthetic Ofícios,
+   keeping both existing status chips and the synthetic archive accessible. */
 .overview-stats {display:flex;align-items:center;gap:9px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:14px 24px 5px;}
 .overview-stats::-webkit-scrollbar {display:none;}
 .overview-stats .stat-chip {white-space:nowrap;border-radius:5px;background:#5f82d7;min-height:46px;display:flex;align-items:center;padding:0 12px;font-size:16px;box-shadow:0 1px 3px #0002;}
@@ -441,9 +441,9 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
  .member-item .metrics .metric-cell {justify-content:flex-start;}
  .profile-summary>.metrics {grid-template-columns:repeat(4,minmax(0,1fr));font-size:8px;}
  .profile-summary>.metrics small {font-size:7px;}
- .overview-stats {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:10px 11px 6px;overflow:visible;}
- .overview-stats .stat-chip {grid-column:span 3;justify-content:center;min-width:0;font-size:11px;padding:6px 4px;white-space:normal;text-align:center;}
- .overview-stats .stat-figure {grid-column:span 2;min-width:0;padding:4px 0;text-align:center;font-size:12px;white-space:normal;}
+ .overview-stats {display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:5px;padding:10px 11px 6px;overflow:visible;}
+ .overview-stats .stat-chip {grid-column:span 6;justify-content:center;min-width:0;font-size:11px;padding:6px 4px;white-space:normal;text-align:center;}
+ .overview-stats .stat-figure {grid-column:span 3;min-width:0;padding:4px 0;text-align:center;font-size:11px;white-space:normal;}
  .result-row {padding:4px 7px;gap:4px;}
  .result-count,.result-percentage {font-size:9px;}
  .result-label {font-size:10px;}

@@ -19,6 +19,14 @@ with sync_playwright() as pw:
   p.set_content(HTML)
   expect(p.locator('.home-results-context')).to_contain_text('Resultados de exemplo')
   baseline=p.locator('.results').inner_text()
+  # Megalos explicitly requested an Ofícios quantity beside Votos/PDR/PR in overview.
+  p.locator('.footer-nav').click()
+  p.locator('.menu-item[data-route=overview]').click()
+  figures=p.locator('.overview-stats .stat-figure').all_inner_texts()
+  assert len(figures)==4,(width,figures)
+  assert figures[-1]=='23 Ofícios',(width,figures)
+  assert p.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
+  p.locator('.footer-home').click()
   expect(p.locator('.home-create-path')).to_contain_text('primeiro redija')
   # The main shortcut must immediately expose the editor, not a button below the fold.
   p.locator('.home-create-links [data-action=new-proposal]').click()
