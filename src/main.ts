@@ -399,28 +399,37 @@ function sampleParticipationPanel(examplePercent: number | undefined): string {
       examplePercent < 0 || examplePercent > 100) {
     return header(undefined, undefined, true);
   }
-  const arcs = [
-    {radius: 232, count: 31},
-    {radius: 198, count: 27},
-    {radius: 164, count: 23},
-    {radius: 129, count: 19},
+  // Coordinates traced from Megalos's 710px reference. Decorative, not voter IDs.
+  // Keep the 76 reference marks independent of the example participation rate.
+  const referenceDots: ReadonlyArray<readonly [number, number]> = [
+
+    [351,45], [307,48], [399,48], [264,58], [443,58], [224,70],
+    [480,70], [352,76], [396,79], [312,80], [274,86], [433,86],
+    [188,88], [517,88], [238,99], [467,99], [156,109], [551,109],
+    [208,114], [500,114], [180,133], [526,133], [578,133], [131,134],
+    [335,140], [374,140], [297,147], [412,147], [156,158], [551,158],
+    [261,162], [447,162], [102,163], [600,163], [229,182], [480,182],
+    [136,183], [571,183], [84,194], [622,194], [332,198], [379,198],
+    [202,207], [507,207], [121,210], [588,210], [292,212], [418,212],
+    [70,226], [636,226], [450,232], [260,233], [180,238], [530,238],
+    [599,238], [104,240], [61,258], [648,258], [237,261], [473,261],
+    [95,268], [608,268], [166,270], [542,270], [54,290], [655,290],
+    [223,295], [487,295], [91,296], [612,296], [159,301], [295,301],
+    [415,301], [550,301], [332,318], [378,318],
   ];
-  const dots = arcs.flatMap(arc => Array.from({length: arc.count}, (_, index) => {
-    const angle = Math.PI + index * Math.PI / (arc.count - 1);
-    const x = (300 + arc.radius * Math.cos(angle)).toFixed(2);
-    const y = (291 + arc.radius * Math.sin(angle)).toFixed(2);
-    return `<circle cx="${x}" cy="${y}" r="7.3"></circle>`;
-  })).join('');
+  const dots = referenceDots.map(([x, y]) =>
+    `<ellipse cx="${x}" cy="${y}" rx="14" ry="11.5"></ellipse>`
+  ).join('');
   const value = String(examplePercent);
   return `<section class="hero ballot-participation" aria-label="Grupo Votante: taxa de participação de exemplo">
     <div class="ballot-participation-top"><strong>Grupo Votante</strong><span>Dados fictícios</span></div>
     <div class="ballot-participation-scene">
-      <svg viewBox="0 0 600 315" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+      <svg viewBox="0 0 710 363" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
         <g class="ballot-participation-dots">${dots}</g>
       </svg>
       <div class="ballot-participation-rate">
         <strong class="ballot-participation-value">${value}%</strong>
-        <span class="ballot-participation-caption">Taxa de participação</span>
+        <span class="sr-only ballot-participation-caption">Taxa de participação</span>
       </div>
     </div>
     <p class="sr-only">A quantidade de pessoas que votaram e a quantidade de aptos a votar não estão disponíveis nesta prévia.
@@ -454,9 +463,9 @@ function ballotPage() {
  const ballot=ballots[0]; if(!ballot) return '<p>Nenhuma votação disponível.</p>';
  const demoOptions = ballot.options.map(o => ({...o, votes:o.votes + (advancedPreview&&canRecordVote(ballot)&&demoVoteId===o.id?1:0)}));
  const sum=totalVotes(demoOptions);
- return `<div class="main-pad ${advancedPreview?'':'ballot-page'}">${advancedPreview?header(undefined,undefined,true):sampleParticipationPanel(ballot.exampleParticipationPercent)}${!advancedPreview?'<p class="home-results-context">Resultados de exemplo · percentuais por alternativa</p>':''}<div class="results">
+ return `<div class="main-pad ${advancedPreview?'':'ballot-page'}">${advancedPreview?header(undefined,undefined,true):sampleParticipationPanel(ballot.exampleParticipationPercent)}${!advancedPreview?'<p class="home-results-context sr-only">Resultados de exemplo · percentuais por alternativa</p>':''}<div class="results">
  ${demoOptions.map(o=>{const percent=advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum);const bar=Number(percent);return `<div class="result-row ${advancedPreview&&demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${percent} por cento"><div class="ballot-result-main"><span class="result-label">${escapeHTML(o.label)}${advancedPreview&&demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${percent}%</span></div>${!advancedPreview?`<div class="ballot-result-track" aria-hidden="true"><span class="ballot-result-fill" style="width:${Number.isFinite(bar)?Math.max(0,Math.min(100,bar)):0}%"></span></div>`:''}</div>`}).join('')}
- </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="${advancedPreview?'toggle-demo':'enter-ballot'}" aria-expanded="${advancedPreview?demoExpanded:false}" ${advancedPreview&&demoExpanded?'aria-controls="demo-vote-panel"':''} ${!advancedPreview&&!canRecordVote(ballot)?'disabled aria-disabled="true"':''}>${advancedPreview&&demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':advancedPreview?'Ver situação':'Encerrada'}</button></div>
+ </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação e dos objetos</span><button class="demo-toggle" type="button" data-action="${advancedPreview?'toggle-demo':'enter-ballot'}" aria-expanded="${advancedPreview?demoExpanded:false}" ${advancedPreview&&demoExpanded?'aria-controls="demo-vote-panel"':''} ${!advancedPreview&&!canRecordVote(ballot)?'disabled aria-disabled="true"':''}>${advancedPreview&&demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':advancedPreview?'Ver situação':'Encerrada'}</button></div>
  <p class="ballot-description">${escapeHTML(ballot.description)}</p>${!advancedPreview?`<div class="home-create-path"><p>Para criar sua votação, primeiro redija e conclua uma proposição. Depois, programe-a no calendário.</p><div class="home-create-links"><button type="button" data-action="new-proposal">Criar uma votação</button><button type="button" data-route="calendar">Ver programações</button></div></div>`:''}${!advancedPreview&&previewClosedScheduleNotice?`<p class="vote-feedback" role="status">${escapeHTML(previewClosedScheduleNotice)}</p>`:''}${advancedPreview&&demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Selecione uma opção para testar a votação.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
  ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>
  <p class="vote-feedback" role="status">${demoVoteId?'Opção selecionada. Você pode alterá-la.':'Selecione uma opção.'}</p>

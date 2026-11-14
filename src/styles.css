@@ -1629,3 +1629,29 @@ main { flex:1; display:flex; flex-direction:column; min-height:0; }
   .ballot-page .result-label {flex-basis:100%;font-size:12px;}
   .ballot-page .result-count,.ballot-page .result-percentage {font-size:11px;}
 }
+
+
+/* Reference calibration: 76 source ellipses and the original 390px proportions.
+   Keep operational demo controls accessible; neither dots nor 76% count voters. */
+@media (max-width:540px) {
+  .hero.ballot-participation .ballot-participation-top {min-height:26px;padding:5px 13px;font-size:12px;}
+  .hero.ballot-participation .ballot-participation-top span {font-size:10px;}
+  .ballot-page .results {margin:7px 0 10px;gap:8px;}
+  .ballot-page .result-row {min-height:42px;padding:5px 11px;gap:4px;}
+  .ballot-page .ballot-result-main {gap:5px;}
+  .ballot-page .ballot-result-track {height:5px;}
+  .ballot-page + .description-panel {min-height:460px;display:flex;flex-direction:column;}
+  .ballot-page + .description-panel .home-create-path {margin-top:auto;}
+}
+.ballot-participation-rate {background:transparent;padding:0;}
+.ballot-participation-rate strong {font-size:clamp(17px,4vw,26px);}
+@media (max-width:320px) {
+  /* At enlarged text sizes, prioritize reading the 76% over decorative dots. */
+  .ballot-participation-rate {background:#1c234e;padding:2px 8px;border-radius:5px;}
+}
+@media (min-width:361px) and (max-width:540px) {
+  /* Six indicators must be completely visible; never hide Ofícios in a scroll rail. */
+  .overview-stats {display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:5px;overflow:visible;}
+  .overview-stats .stat-chip {grid-column:span 6;min-width:0;white-space:normal;text-align:center;justify-content:center;}
+  .overview-stats .stat-figure {grid-column:span 3;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:center;font-size:11px;}
+}

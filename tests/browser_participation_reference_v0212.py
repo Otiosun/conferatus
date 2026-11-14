@@ -20,7 +20,7 @@ with sync_playwright() as pw:
   expect(page.locator('.ballot-participation-caption')).to_have_text('Taxa de participação')
   assert page.locator('.ballot-participation .sr-only').inner_text().find('não estão disponíveis')>=0,width
   # All decorative dots are inaccessible and their count never encodes voter totals.
-  assert page.locator('.ballot-participation svg[aria-hidden=true] circle').count()>60,width
+  assert page.locator('.ballot-participation svg[aria-hidden=true] ellipse').count()==76,width
   expect(page.locator('.results .result-row')).to_have_count(2)
   assert page.locator('.ballot-result-fill').count()==2,width
   assert page.locator('.ballot-result-fill').first.get_attribute('style')=='width:80%',width
@@ -57,7 +57,8 @@ with sync_playwright() as pw:
     width:document.documentElement.scrollWidth};
   }""")
   assert box['width']<=width+1,(width,'document overflow',box)
-  assert box['value']['bottom']<=box['label']['top']+1,(width,'overlapping rate label',box)
+  assert box['value']['top']>=box['scene']['top']-1,(width,'rate value above scene',box)
+  assert page.locator('.ballot-participation-caption').get_attribute('class').find('sr-only')>=0,width
   assert box['rate']['top']>=box['scene']['top']-1,(width,'rate above graphic',box)
   assert box['rate']['bottom']<=box['scene']['bottom']+1,(width,'rate below graphic',box)
   page.close()
