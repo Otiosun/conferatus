@@ -417,12 +417,13 @@ function sampleParticipationPanel(examplePercent: number | undefined): string {
     <div class="ballot-participation-scene">
       <svg viewBox="0 0 600 315" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
         <g class="ballot-participation-dots">${dots}</g>
-        <text class="ballot-participation-value" x="300" y="229" text-anchor="middle">${value}%</text>
-        <text class="ballot-participation-caption" x="300" y="252" text-anchor="middle">Taxa de participação</text>
       </svg>
+      <div class="ballot-participation-rate">
+        <strong class="ballot-participation-value">${value}%</strong>
+        <span class="ballot-participation-caption">Taxa de participação</span>
+      </div>
     </div>
-    <p class="sr-only">A taxa de participação ilustrativa é de ${value} por cento.
-      A quantidade de pessoas que votaram e a quantidade de aptos a votar não estão disponíveis nesta prévia.
+    <p class="sr-only">A quantidade de pessoas que votaram e a quantidade de aptos a votar não estão disponíveis nesta prévia.
       Os pontos do gráfico são decorativos.</p>
   </section>`;
 }

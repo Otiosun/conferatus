@@ -1,0 +1,7 @@
+# CP175 — Percentual e legenda legíveis em texto 200% (13/11/2026)
+
+CP174 SHA 5745e5c41820bb3b88503ac94b890ea4886d36f3 terminou 78/78 Chromium, TypeScript/Node, PostgreSQL e Cloudflare SUCCESS (https://github.com/Otiosun/conferatus/actions/runs/43546442963). A inspeção visual do HTML compilado confirmou fidelidade estrutural em 280/320/390/740/1280 sem scroll horizontal. **Achado manual adicional:** ao ampliar texto 200% em 280px, o valor 76% e a legenda do SVG se sobrepunham, apesar da CI verde.
+
+Mudança restrita: deixar SVG somente com pontos decorativos; mover o valor e a legenda para HTML `strong`/`span` em `flex-direction:column` com posição proporcional e pequena cobertura da mesma cor azul-escura. Em até 360px, ajustar top para 59%; layout normal mantém faixa dourada, semicírculo, 76% e barras amarelas. O percentual é exemplo ilustrativo conforme resposta de Megalos, não dado real. Parágrafo de leitura acessível passa a acrescentar somente limitação dos dados, sem repetir o valor.
+
+Teste v0212 ampliado com 200% de texto em 280/320/390 medindo caixas de valor e legenda, contenção no painel e scroll. Protótipo local sobre HTML compilado CP174 com transformação equivalente passou em normal e texto200 sem colisão. Rerun integral do SHA final obrigatório. Não criar regras ou quotas, não mover outras telas. Main/produção não alteradas. Fontes: MDN SVG viewBox e W3C sobre imagens decorativas.
