@@ -18,7 +18,7 @@ with sync_playwright() as pw:
   expect(page.locator('.ballot-participation-top')).to_contain_text('Grupo Votante')
   expect(page.locator('.ballot-participation-value')).to_have_text('76%')
   expect(page.locator('.ballot-participation-caption')).to_have_text('Taxa de participação')
-  assert page.locator('.ballot-participation .sr-only').inner_text().find('não estão disponíveis')>=0,width
+  assert page.locator('.ballot-participation > p.sr-only').inner_text().find('não estão disponíveis')>=0,width
   # All decorative dots are inaccessible and their count never encodes voter totals.
   assert page.locator('.ballot-participation svg[aria-hidden=true] ellipse').count()==76,width
   expect(page.locator('.results .result-row')).to_have_count(2)
