@@ -26,7 +26,7 @@ export const members: Member[] = [
   {id:'m16',acdmId:'DEMO-0016',name:'Ana Ferreira',subtitle:'Membro institucional',totalVotes:42,proposals:7,approved:4,collaborations:17,sectionIds:['membros'],role:'membro'},
 ];
 export const ballots: Ballot[] = [
-  {id:'b1',title:'Revisão do calendário de reuniões',section:'Conselho de Integridade',description:'Escolha do modelo de calendário para os próximos encontros.',status:'aberta',options:[{id:'o1',label:'Calendário mensal',votes:80},{id:'o2',label:'Calendário quinzenal',votes:20}]},
+  {id:'b1',title:'Revisão do calendário de reuniões',section:'Conselho de Integridade',description:'Escolha do modelo de calendário para os próximos encontros.',status:'aberta',exampleParticipationPercent:76,options:[{id:'o1',label:'Calendário mensal',votes:80},{id:'o2',label:'Calendário quinzenal',votes:20}]},
 ];
 const proposalSummary = 'Organização das datas de reunião, com antecedência para convocação e registro das decisões.';
 export const activities: Activity[] = [

@@ -386,6 +386,47 @@ function previewVoteLab():string {
   '</section>';
 }
 
+
+/**
+ * Megalos clarified that the central percentage represents participation:
+ * the share of people who voted, NOT the share choosing an option.
+ * The 76% shown here is an illustrative value from her screenshot.
+ * There is no eligible-voter denominator in this local prototype.
+ * Dots are a visual motif; never assign each dot to a voter or seat.
+ */
+function sampleParticipationPanel(examplePercent: number | undefined): string {
+  if (typeof examplePercent !== 'number' || !Number.isFinite(examplePercent) ||
+      examplePercent < 0 || examplePercent > 100) {
+    return header(undefined, undefined, true);
+  }
+  const arcs = [
+    {radius: 232, count: 31},
+    {radius: 198, count: 27},
+    {radius: 164, count: 23},
+    {radius: 129, count: 19},
+  ];
+  const dots = arcs.flatMap(arc => Array.from({length: arc.count}, (_, index) => {
+    const angle = Math.PI + index * Math.PI / (arc.count - 1);
+    const x = (300 + arc.radius * Math.cos(angle)).toFixed(2);
+    const y = (291 + arc.radius * Math.sin(angle)).toFixed(2);
+    return `<circle cx="${x}" cy="${y}" r="7.3"></circle>`;
+  })).join('');
+  const value = String(examplePercent);
+  return `<section class="hero ballot-participation" aria-label="Grupo Votante: taxa de participação de exemplo">
+    <div class="ballot-participation-top"><strong>Grupo Votante</strong><span>Dados fictícios</span></div>
+    <div class="ballot-participation-scene">
+      <svg viewBox="0 0 600 315" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+        <g class="ballot-participation-dots">${dots}</g>
+        <text class="ballot-participation-value" x="300" y="229" text-anchor="middle">${value}%</text>
+        <text class="ballot-participation-caption" x="300" y="252" text-anchor="middle">Taxa de participação</text>
+      </svg>
+    </div>
+    <p class="sr-only">A taxa de participação ilustrativa é de ${value} por cento.
+      A quantidade de pessoas que votaram e a quantidade de aptos a votar não estão disponíveis nesta prévia.
+      Os pontos do gráfico são decorativos.</p>
+  </section>`;
+}
+
 function ballotPage() {
  // An unavailable program retains its title instead of falling through to the home ballot.
  if(!advancedPreview&&previewScheduleId&&!previewSelectedSchedule()){
@@ -412,8 +453,8 @@ function ballotPage() {
  const ballot=ballots[0]; if(!ballot) return '<p>Nenhuma votação disponível.</p>';
  const demoOptions = ballot.options.map(o => ({...o, votes:o.votes + (advancedPreview&&canRecordVote(ballot)&&demoVoteId===o.id?1:0)}));
  const sum=totalVotes(demoOptions);
- return `<div class="main-pad">${header(undefined,undefined,true)}${!advancedPreview?'<p class="home-results-context">Resultados de exemplo</p>':''}<div class="results">
- ${demoOptions.map(o=>`<div class="result-row ${advancedPreview&&demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)} por cento"><span class="result-label">${escapeHTML(o.label)}${advancedPreview&&demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum)}%</span></div>`).join('')}
+ return `<div class="main-pad ${advancedPreview?'':'ballot-page'}">${advancedPreview?header(undefined,undefined,true):sampleParticipationPanel(ballot.exampleParticipationPercent)}${!advancedPreview?'<p class="home-results-context">Resultados de exemplo · percentuais por alternativa</p>':''}<div class="results">
+ ${demoOptions.map(o=>{const percent=advancedPreview&&demoVoteId?(100*o.votes/sum).toFixed(1):resultPercentage(o.votes,sum);const bar=Number(percent);return `<div class="result-row ${advancedPreview&&demoVoteId===o.id?'result-row--chosen':''}" aria-label="${escapeHTML(o.label)}: ${o.votes} votos, ${percent} por cento"><div class="ballot-result-main"><span class="result-label">${escapeHTML(o.label)}${advancedPreview&&demoVoteId===o.id?'<small class="your-vote">Sua escolha</small>':''}</span><span class="result-count">${o.votes} Votos</span><span class="result-percentage">${percent}%</span></div>${!advancedPreview?`<div class="ballot-result-track" aria-hidden="true"><span class="ballot-result-fill" style="width:${Number.isFinite(bar)?Math.max(0,Math.min(100,bar)):0}%"></span></div>`:''}</div>`}).join('')}
  </div><hr class="hairline"></div><section class="description-panel"><div class="description-heading"><span>Descrição da votação</span><button class="demo-toggle" type="button" data-action="${advancedPreview?'toggle-demo':'enter-ballot'}" aria-expanded="${advancedPreview?demoExpanded:false}" ${advancedPreview&&demoExpanded?'aria-controls="demo-vote-panel"':''} ${!advancedPreview&&!canRecordVote(ballot)?'disabled aria-disabled="true"':''}>${advancedPreview&&demoExpanded?'Fechar':canRecordVote(ballot)?'Participar':advancedPreview?'Ver situação':'Encerrada'}</button></div>
  <p class="ballot-description">${escapeHTML(ballot.description)}</p>${!advancedPreview?`<div class="home-create-path"><p>Para criar sua votação, primeiro redija e conclua uma proposição. Depois, programe-a no calendário.</p><div class="home-create-links"><button type="button" data-action="new-proposal">Criar uma votação</button><button type="button" data-route="calendar">Ver programações</button></div></div>`:''}${!advancedPreview&&previewClosedScheduleNotice?`<p class="vote-feedback" role="status">${escapeHTML(previewClosedScheduleNotice)}</p>`:''}${advancedPreview&&demoExpanded?`<div id="demo-vote-panel" class="demo-ballot"><h2>${escapeHTML(ballot.title)}</h2><p>${canRecordVote(ballot)?'Selecione uma opção para testar a votação.':'Esta votação está encerrada. Os resultados permanecem disponíveis para consulta.'}</p>
  ${canRecordVote(ballot)?`<div class="vote-actions">${ballot.options.map(o=>`<button type="button" data-vote="${o.id}" class="vote-button" aria-pressed="${demoVoteId===o.id}">${escapeHTML(o.label)}</button>`).join('')}</div>

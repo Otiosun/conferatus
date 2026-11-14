@@ -102,6 +102,7 @@ jobs:
             tests/browser_calendar_history_focus_v0209.py \
             tests/browser_contextual_schedule_guard_v0210.py \
             tests/browser_first_time_voting_journey_v0211.py \
+            tests/browser_participation_reference_v0212.py \
             tests/browser_stage04_normal_socii_v0195.py \
             tests/browser_stage04_complete_v0196.py \
             tests/browser_history_isolation_v0197.py \

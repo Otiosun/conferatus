@@ -1324,3 +1324,8 @@ A interface da prévia explica caminho de redação, conclusão e programação;
 ### CP170 — Testes do fluxo de primeira utilização (11/11/2026)
 
 A primeira CI CP169 percorreu 77 scripts, mas seis scripts antigos estavam ligados aos seletores globais e textos da navegação anterior. No CP170, os testes foram atualizados para abrir o item correto do menu e comparar a orientação atual da tela, sem esconder falhas ou substituir os fluxos de produto. Documento: docs/decisions/2026-11-11-cp170-first-time-navigation-regressions.md. Novo SHA requer validação CI para aceite técnico; nada foi alterado em main/produção.
+
+
+### CP174 — Apresentação de taxa de participação baseada na resposta da Megalos (13/11/2026)
+
+Resposta literal de Megalos sobre os 76% da imagem Grupo Votante: "A taxa de participação"; "Porcentagem de quantos votaram". Na prévia, associar o 76% apenas à taxa de participação **ilustrativa**, não à votação por objeto; renderizar semicírculo decorativo e barras amarelas sobre valores da fixture, sem numerador/denominador inventados, sem cronômetro falso e sem dados oficiais. Referência visual original preservada fora do Git. Criada regressão browser_participation_reference_v0212.py, adicionada à CI sem remoção das anteriores. D1–D6 ainda requerem Megalos, assim como significado individual dos pontos e percentuais de cada objeto no screenshot. Decisão docs/decisions/2026-11-13-cp174-participation-reference.md. Verificar CI do SHA antes do gate. Main e produção intocadas.

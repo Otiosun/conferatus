@@ -38,6 +38,8 @@ export interface Ballot {
   section: string;
   description: string;
   status: BallotStatus;
+  /** Visual reference value only; not derived from options or a real voter register. */
+  exampleParticipationPercent?: number;
   options: OptionResult[];
 }
 export interface Activity {
